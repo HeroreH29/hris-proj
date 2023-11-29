@@ -1,0 +1,41 @@
+[
+  {
+    "username": "HeroreH29",
+    "password": "myadmin",
+    "firstName": "Hezekiah Ruiz",
+    "lastName": "Legaspi",
+    "userLevel": "Admin",
+    "branch": "006 - Head Office",
+    "userGroup": "IT",
+    "employeeId": "2300593",
+    "userStatus": "true",
+    "accountStatus": "1",
+    "id": "1"
+  },
+  {
+    "username": "HeroLegaspi",
+    "password": "admin",
+    "firstName": "Hero",
+    "lastName": "Legaspi",
+    "userLevel": "Admin",
+    "branch": "006 - Head Office",
+    "userGroup": "IT",
+    "employeeId": "2300593",
+    "userStatus": "true",
+    "accountStatus": "1",
+    "id": "2"
+  },
+  {
+    "username": "resty",
+    "password": "password",
+    "firstName": "resty",
+    "lastName": "tria",
+    "userLevel": "Admin",
+    "branch": "006 - Head Office",
+    "userGroup": "IT",
+    "employeeId": "01",
+    "userStatus": "true",
+    "accountStatus": "1",
+    "id": "3"
+  }
+]

@@ -14,7 +14,7 @@ function App() {
         <Route index element={<Public />} />
         <Route path="login" element={<Login />} />
 
-        <Route path="dash" element={<DashLayout />}>
+        <Route path="dashboard" element={<DashLayout />}>
           <Route index element={<Welcome />} />
           <Route path="announcements">
             <Route index element={<AnnouncementList />} />

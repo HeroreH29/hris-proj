@@ -2,9 +2,10 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Public from "./components/Public";
 import Login from "./features/auth/Login";
-import DashLayout from "./components/DashLayout";
+import DashLayout from "./components/Dashboard/DashLayout";
 import Welcome from "./features/auth/Welcome";
-import AnnouncementList from "./features/announcements/AnnouncementList";
+import AnnouncementsList from "./features/announcements/AnnouncementsList";
+import CelebrantsList from "./features/celebrants/CelebrantsList";
 import UsersList from "./features/users/UsersList";
 
 function App() {
@@ -17,7 +18,10 @@ function App() {
         <Route path="dashboard" element={<DashLayout />}>
           <Route index element={<Welcome />} />
           <Route path="announcements">
-            <Route index element={<AnnouncementList />} />
+            <Route index element={<AnnouncementsList />} />
+          </Route>
+          <Route path="celebrants">
+            <Route index element={<CelebrantsList />} />
           </Route>
           <Route path="users">
             <Route index element={<UsersList />} />

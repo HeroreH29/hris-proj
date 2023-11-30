@@ -1,61 +1,41 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { Container, Row, Col, Button, ListGroup } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { Container, Row, Col, Button } from "react-bootstrap";
 
 const Welcome = () => {
   const date = new Date();
-  const currentMonth = date.getMonth();
+  const currentMonth = date.toLocaleString("default", { month: "long" });
+  const navigate = useNavigate();
 
   const content = (
-    <Container className="p-4">
+    <Container>
       <h3>Dashboard</h3>
       <Row className="p-3">
         {/* Announcements */}
         <Col>
           <Row>
             <Col md={"auto"}>
-              <h4>HR Memo/Announcements</h4>
-              <small>{`(Click on any announcement to view)`}</small>
-            </Col>
-            <Col>
               <Button
-                variant="outline-primary"
-                type="button"
-                /* onClick={() => navigate("/addAnnouncement")} */
+                className="p-3"
+                variant="light"
+                onClick={() => navigate("/dashboard/announcements")}
               >
-                Add
+                <h4>View HR Memo/Announcements</h4>
               </Button>
             </Col>
-          </Row>
-          <Row className="p-2">
-            <ListGroup>
-              <ListGroup.Item
-                className="d-flex justify-content-center"
-                action
-                onClick={() => console.log("first")}
-              >
-                <h5>Memo/Announcement #1</h5>
-              </ListGroup.Item>
-            </ListGroup>
           </Row>
         </Col>
         <Col>
           <Row>
             <Col md={"auto"}>
-              <h4>Birthday Celebrants for {currentMonth}</h4>
-              <small>{`Greet them a happy birthday!`}</small>
-            </Col>
-          </Row>
-          <Row className="p-2">
-            <ListGroup>
-              <ListGroup.Item
-                className="d-flex justify-content-center"
-                action
-                onClick={() => console.log("first")}
+              <Button
+                className="p-3"
+                variant="light"
+                onClick={() => navigate("/dashboard/celebrants")}
               >
-                <h5>Celebrant #1</h5>
-              </ListGroup.Item>
-            </ListGroup>
+                <h4>View Birthday Celebrants for {currentMonth}</h4>
+              </Button>
+            </Col>
           </Row>
         </Col>
       </Row>

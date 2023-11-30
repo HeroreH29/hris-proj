@@ -1,5 +1,8 @@
 import React from "react";
-import { useGetPersonalinfosQuery } from "./celebrantsApiSlice";
+import {
+  useGetPersonalinfosQuery,
+  useGetGeninfosQuery,
+} from "./celebrantsApiSlice";
 import Celebrant from "./Celebrant";
 import { Table, Container } from "react-bootstrap";
 
@@ -11,6 +14,8 @@ const CelebrantsList = () => {
     isError,
     error,
   } = useGetPersonalinfosQuery();
+
+  const { data: generalinfos } = useGetGeninfosQuery();
 
   let content;
 
@@ -32,9 +37,22 @@ const CelebrantsList = () => {
           const birthmonth = birthday.getMonth() + 1;
 
           if (currentMonth === birthmonth) {
-            return (
-              <Celebrant key={personalInfoId} personalInfoId={personalInfoId} />
-            );
+            if (generalinfos) {
+              const matchingRecords = generalinfos.ids.filter((genInfoId) => {
+                return (
+                  generalinfos.entities[genInfoId].EmployeeID ===
+                    entities[personalInfoId].EmployeeID &&
+                  currentMonth === birthmonth
+                );
+              });
+              return (
+                <Celebrant
+                  key={personalInfoId}
+                  personalInfoId={personalInfoId}
+                  genInfoId={matchingRecords}
+                />
+              );
+            }
           }
         })
       : null;

@@ -4,14 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 import { useSelector } from "react-redux";
 import { selectPersonalinfoById } from "./celebrantsApiSlice";
+import { selectGeninfoById } from "./celebrantsApiSlice";
 
 import React from "react";
 import { Button } from "react-bootstrap";
 
-const Celebrant = ({ personalInfoId }) => {
+const Celebrant = ({ personalInfoId, genInfoId }) => {
   const personalinfo = useSelector((state) =>
     selectPersonalinfoById(state, personalInfoId)
   );
+
+  const geninfo = useSelector((state) => selectGeninfoById(state, genInfoId));
 
   const navigate = useNavigate();
 
@@ -21,7 +24,9 @@ const Celebrant = ({ personalInfoId }) => {
 
     return (
       <tr>
-        <td>{personalinfo.EmployeeID}</td>
+        <td>{`${geninfo ? geninfo.FirstName : ""} ${
+          geninfo ? geninfo.LastName : ""
+        }`}</td>
         <td>{personalinfo.Birthday}</td>
       </tr>
     );

@@ -31,31 +31,49 @@ const CelebrantsList = () => {
     const currentMonth = date.getMonth() + 1;
     const monthName = date.toLocaleString("default", { month: "long" });
 
-    const tableContent = ids?.length
-      ? ids.map((personalInfoId) => {
+    const celebrants = ids?.length
+      ? ids.filter((personalInfoId) => {
           const birthday = new Date(entities[personalInfoId].Birthday);
           const birthmonth = birthday.getMonth() + 1;
 
-          if (currentMonth === birthmonth) {
-            if (generalinfos) {
-              const matchingRecords = generalinfos.ids.filter((genInfoId) => {
-                return (
-                  generalinfos.entities[genInfoId].EmployeeID ===
-                    entities[personalInfoId].EmployeeID &&
-                  currentMonth === birthmonth
-                );
-              });
-              return (
-                <Celebrant
-                  key={personalInfoId}
-                  personalInfoId={personalInfoId}
-                  genInfoId={matchingRecords}
-                />
-              );
-            }
-          }
+          return currentMonth === birthmonth;
         })
-      : null;
+      : [];
+
+    // Convert generalinfos to array so it can be iterated
+    const generalinfosArray = Object.values(
+      generalinfos ? generalinfos.entities : {}
+    );
+
+    const activeWithNames = celebrants.length
+      ? celebrants.map((celebrant) => {
+          const matchingRecord = generalinfosArray.find((g) => {
+            return (
+              g.EmployeeID === entities[celebrant].EmployeeID &&
+              g.EmpStatus === "Y"
+            );
+          });
+
+          return matchingRecord
+            ? {
+                celebrantId: celebrant,
+                name: `${matchingRecord.FirstName} ${matchingRecord.LastName}`,
+              }
+            : null;
+        })
+      : [];
+
+    const tableContent = activeWithNames
+      .filter((celebrant) => celebrant !== null)
+      .map((celebrant) => {
+        return (
+          <Celebrant
+            key={celebrant.celebrantId}
+            personalInfoId={celebrant.celebrantId}
+            name={celebrant.name}
+          />
+        );
+      });
 
     content = (
       <Container>

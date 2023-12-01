@@ -9,12 +9,10 @@ import { selectGeninfoById } from "./celebrantsApiSlice";
 import React from "react";
 import { Button } from "react-bootstrap";
 
-const Celebrant = ({ personalInfoId, genInfoId }) => {
+const Celebrant = ({ personalInfoId, name }) => {
   const personalinfo = useSelector((state) =>
     selectPersonalinfoById(state, personalInfoId)
   );
-
-  const geninfo = useSelector((state) => selectGeninfoById(state, genInfoId));
 
   const navigate = useNavigate();
 
@@ -24,9 +22,7 @@ const Celebrant = ({ personalInfoId, genInfoId }) => {
 
     return (
       <tr>
-        <td>{`${geninfo ? geninfo.FirstName : ""} ${
-          geninfo ? geninfo.LastName : ""
-        }`}</td>
+        <td>{name}</td>
         <td>{personalinfo.Birthday}</td>
       </tr>
     );

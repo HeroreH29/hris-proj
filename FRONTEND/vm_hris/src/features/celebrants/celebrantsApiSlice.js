@@ -99,5 +99,5 @@ export const {
   selectIds: selectGeninfoIds,
   // Pass in a selector that returns the geninfos slice of state
 } = geninfosAdapter.getSelectors(
-  (state) => selectGeninfosData(state) ?? geninfosAdapter
+  (state) => selectGeninfosData(state) ?? genInitialState
 );

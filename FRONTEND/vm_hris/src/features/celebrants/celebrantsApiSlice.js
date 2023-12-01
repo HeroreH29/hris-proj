@@ -3,7 +3,24 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 // Birthday celebrants will be fetched from personal infos collection
 
-const personalinfosAdapter = createEntityAdapter({});
+const personalinfosAdapter = createEntityAdapter({
+  sortComparer: (a, b) => {
+    const dateSplitter = (dateString) => {
+      const [month, day, year] = dateString.split("/");
+
+      return `${year}-${month - 1}-${day}`;
+    };
+
+    const dateStringA = a.Birthday;
+    const dateStringB = b.Birthday;
+    const birthdayA = new Date(dateSplitter(dateStringA).split("-"));
+    const birthdayB = new Date(b.Birthday);
+
+    if (birthdayA < birthdayB) {
+      return -1;
+    }
+  },
+});
 const geninfosAdapter = createEntityAdapter({});
 
 const personalInitialState = personalinfosAdapter.getInitialState();
@@ -16,7 +33,6 @@ export const personalinfosApiSlice = apiSlice.injectEndpoints({
       validateStatus: (response, result) => {
         return response.status === 200 && !result.isError;
       },
-      keepUnusedDataFor: 5,
       transformResponse: (responseData) => {
         const loadedPersonalinfos = responseData.map((personalinfo) => {
           personalinfo.id = personalinfo._id;
@@ -45,7 +61,6 @@ export const geninfosApiSlice = apiSlice.injectEndpoints({
       validateStatus: (response, result) => {
         return response.status === 200 && !result.isError;
       },
-      keepUnusedDataFor: 5,
       transformResponse: (responseData) => {
         const loadedGeninfos = responseData.map((geninfo) => {
           geninfo.id = geninfo._id;

@@ -7,6 +7,10 @@ import Welcome from "./features/auth/Welcome";
 import AnnouncementsList from "./features/announcements/AnnouncementsList";
 import CelebrantsList from "./features/celebrants/CelebrantsList";
 import UsersList from "./features/users/UsersList";
+import EditUser from "./features/users/EditUser";
+import NewUserForm from "./features/users/NewUserForm";
+import EditAnnouncement from "./features/announcements/EditAnnouncement";
+import NewAnnouncement from "./features/announcements/NewAnnouncement";
 
 function App() {
   return (
@@ -17,14 +21,18 @@ function App() {
 
         <Route path="dashboard" element={<DashLayout />}>
           <Route index element={<Welcome />} />
+          <Route path="users">
+            <Route index element={<UsersList />} />
+            <Route path=":id" element={<EditUser />} />
+            <Route path="new" element={<NewUserForm />} />
+          </Route>
           <Route path="announcements">
             <Route index element={<AnnouncementsList />} />
+            <Route path=":id" element={<EditAnnouncement />} />
+            <Route path="new" element={<NewAnnouncement />} />
           </Route>
           <Route path="celebrants">
             <Route index element={<CelebrantsList />} />
-          </Route>
-          <Route path="users">
-            <Route index element={<UsersList />} />
           </Route>
           {/* End Dash */}
         </Route>

@@ -26,15 +26,18 @@ const createNewUser = asyncHandler(async (req, res) => {
     userGroup,
     employeeId,
     userLevel,
-    accountStatus,
   } = req.body;
 
   // Confirm data
   if (
     !username ||
     !password ||
-    !Array.isArray(userLevel) ||
-    !userLevel.length
+    !firstName ||
+    !lastName ||
+    !branch ||
+    !userGroup ||
+    !employeeId ||
+    !userLevel
   ) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -57,7 +60,6 @@ const createNewUser = asyncHandler(async (req, res) => {
     userGroup,
     employeeId,
     userLevel,
-    accountStatus,
   };
 
   // Create and store new user
@@ -74,16 +76,21 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-  const { id, username, userLevel, active, password } = req.body;
+  const {
+    id,
+    username,
+    password,
+    firstName,
+    lastName,
+    branch,
+    userGroup,
+    employeeId,
+    userLevel,
+    active,
+  } = req.body;
 
   // Confirm data
-  if (
-    !id ||
-    !username ||
-    !Array.isArray(userLevel) ||
-    !userLevel.length ||
-    typeof active !== "boolean"
-  ) {
+  if (!id || !username || !userLevel) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -102,6 +109,11 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   user.username = username;
+  user.firstName = firstName;
+  user.lastName = lastName;
+  user.branch = branch;
+  user.userGroup = userGroup;
+  user.employeeId = employeeId;
   user.userLevel = userLevel;
   user.active = active;
 
@@ -140,7 +152,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
   const result = await user.deleteOne();
 
-  const reply = `Username ${user.username} with ID ${user._id} is deleted`;
+  const reply = `Username "${result.username}" with ID "${result._id}" is deleted`;
 
   res.json(reply);
 });

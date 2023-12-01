@@ -12,7 +12,6 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
       validateStatus: (response, result) => {
         return response.status === 200 && !result.isError;
       },
-      keepUnusedDataFor: 5,
       transformResponse: (responseData) => {
         const loadedAnnouncements = responseData.map((announcement) => {
           announcement.id = announcement._id;
@@ -29,10 +28,50 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
         } else return [{ type: "Announcement", id: "LIST" }];
       },
     }),
+    addNewAnnouncement: builder.mutation({
+      query: (initialAnnouncement) => ({
+        url: "/announcements",
+        method: "POST",
+        body: {
+          ...initialAnnouncement,
+        },
+      }),
+      invalidatesTags: [{ type: "Announcement", id: "LIST" }],
+    }),
+    updateAnnouncement: builder.mutation({
+      query: (initialAnnouncement) => ({
+        url: "/announcements",
+        method: "PATCH",
+        body: {
+          ...initialAnnouncement,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Announcement", id: arg.id },
+      ],
+    }),
+    deleteAnnouncement: builder.mutation({
+      query: ({ id }) => ({
+        url: "/announcements",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Announcement",
+          id: arg.id,
+        },
+      ],
+    }),
   }),
 });
 
-export const { useGetAnnouncementsQuery } = announcementsApiSlice;
+export const {
+  useGetAnnouncementsQuery,
+  useAddNewAnnouncementMutation,
+  useUpdateAnnouncementMutation,
+  useDeleteAnnouncementMutation,
+} = announcementsApiSlice;
 
 // returns the query result object
 export const selectAnnouncementsResult =

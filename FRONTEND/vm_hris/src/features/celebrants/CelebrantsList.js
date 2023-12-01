@@ -15,25 +15,31 @@ const CelebrantsList = () => {
     error,
   } = useGetPersonalinfosQuery();
 
-  const { data: generalinfos } = useGetGeninfosQuery();
+  const {
+    data: generalinfos,
+    isLoading: isGenLoading,
+    isSuccess: isGenSuccess,
+    isError: isGenErr,
+    error: generr,
+  } = useGetGeninfosQuery();
 
   let content;
 
-  if (isLoading) content = <p>Loading...</p>;
+  if (isLoading || isGenLoading) content = <p>Loading...</p>;
 
   if (isError) {
     content = <p className="text-danger">{error?.data?.message}</p>;
   }
 
-  if (isSuccess) {
-    const { ids, entities } = personalinfos;
+  if (isSuccess || isGenSuccess) {
+    const { ids: pIds, entities: pEntities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
     const monthName = date.toLocaleString("default", { month: "long" });
 
-    const celebrants = ids?.length
-      ? ids.filter((personalInfoId) => {
-          const birthday = new Date(entities[personalInfoId].Birthday);
+    const celebrants = pIds?.length
+      ? pIds.filter((personalInfoId) => {
+          const birthday = new Date(pEntities[personalInfoId].Birthday);
           const birthmonth = birthday.getMonth() + 1;
 
           return currentMonth === birthmonth;
@@ -49,7 +55,7 @@ const CelebrantsList = () => {
       ? celebrants.map((celebrant) => {
           const matchingRecord = generalinfosArray.find((g) => {
             return (
-              g.EmployeeID === entities[celebrant].EmployeeID &&
+              g.EmployeeID === pEntities[celebrant].EmployeeID &&
               g.EmpStatus === "Y"
             );
           });

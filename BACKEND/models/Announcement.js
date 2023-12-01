@@ -35,9 +35,7 @@ const announcementSchema = new mongoose.Schema(
 
 // Uncomment if ever needed
 /* announcementSchema.plugin(AutoIncrement, {
-  inc_field: "announcement",
-  id: "announceNums",
-  start_seq: 1,
+  inc_field: "id",
 }); */
 
 module.exports = mongoose.model("Announcement", announcementSchema);

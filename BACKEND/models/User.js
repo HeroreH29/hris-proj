@@ -11,30 +11,23 @@ const userSchema = new mongoose.Schema({
   },
   firstName: {
     type: String,
-    required: false,
   },
   lastName: {
     type: String,
-    required: false,
   },
   branch: {
     type: String,
-    required: false,
   },
   userGroup: {
     type: String,
-    required: false,
   },
   employeeId: {
     type: String,
-    required: false,
   },
-  userLevel: [
-    {
-      type: String,
-      default: "Employee",
-    },
-  ],
+  userLevel: {
+    type: String,
+    default: "User",
+  },
   active: {
     type: Boolean,
     default: true,

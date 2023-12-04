@@ -1,6 +1,6 @@
 {
   "name": "hris",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "via mare hris web application",
   "main": "server.js",
   "scripts": {

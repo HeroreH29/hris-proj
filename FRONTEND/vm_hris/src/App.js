@@ -17,26 +17,27 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Public />} />
-        <Route path="login" element={<Login />} />
-
+        {/* <Route index element={<Public />} /> */}
+        <Route index element={<Login />} />
         <Route element={<Prefetch />}>
-          <Route path="dashboard" element={<DashLayout />}>
-            <Route index element={<Welcome />} />
+          <Route element={<DashLayout />}>
+            <Route path="dashboard">
+              <Route index element={<Welcome />} />
+              <Route path="announcements">
+                <Route index element={<AnnouncementsList />} />
+                <Route path=":id" element={<EditAnnouncement />} />
+                <Route path="new" element={<NewAnnouncement />} />
+              </Route>
+              <Route path="celebrants">
+                <Route index element={<CelebrantsList />} />
+              </Route>
+              {/* End Dash */}
+            </Route>
             <Route path="users">
               <Route index element={<UsersList />} />
               <Route path=":id" element={<EditUser />} />
               <Route path="new" element={<NewUserForm />} />
             </Route>
-            <Route path="announcements">
-              <Route index element={<AnnouncementsList />} />
-              <Route path=":id" element={<EditAnnouncement />} />
-              <Route path="new" element={<NewAnnouncement />} />
-            </Route>
-            <Route path="celebrants">
-              <Route index element={<CelebrantsList />} />
-            </Route>
-            {/* End Dash */}
           </Route>
         </Route>
       </Route>

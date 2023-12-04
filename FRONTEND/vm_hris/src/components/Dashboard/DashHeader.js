@@ -45,11 +45,10 @@ const DashHeader = () => {
                   Leave Tracker
                 </a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" href="/settings">
-                  Settings
-                </a>
-              </li>
+              <Link to="/users" className="nav-link">
+                {" "}
+                User Settings
+              </Link>
               <li className="nav-item">
                 <a
                   className="nav-link"

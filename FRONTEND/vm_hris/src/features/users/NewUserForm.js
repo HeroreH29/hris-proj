@@ -35,7 +35,7 @@ const NewUserForm = () => {
       setEmployeeId("");
       setUserLevel("");
 
-      navigate("/dashboard/users");
+      navigate("/users");
     }
   }, [isSuccess, navigate]);
 
@@ -50,6 +50,7 @@ const NewUserForm = () => {
   const onUserGroupChanged = (e) => setUserGroup(e.target.value);
   const onBranchChanged = (e) => setBranch(e.target.value);
 
+  /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
     e.preventDefault();
 

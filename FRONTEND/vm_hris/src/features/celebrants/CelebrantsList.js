@@ -4,9 +4,14 @@ import {
   useGetGeninfosQuery,
 } from "./celebrantsApiSlice";
 import Celebrant from "./Celebrant";
-import { Table, Container } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { Table, Container, Row, Col, Button } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 const CelebrantsList = () => {
+  const navigate = useNavigate();
+
   const {
     data: personalinfos,
     isLoading,
@@ -83,10 +88,22 @@ const CelebrantsList = () => {
 
     content = (
       <Container>
-        <h3>Birthday Celebrants for {monthName}</h3>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/dashboard")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col md="auto">
+            <h3>Birthday Celebrants for {monthName}</h3>
+          </Col>
+        </Row>
         <Table
-          responsive
           bordered
+          responsive
           striped
           hover
           className="align-middle m-3 caption-top"

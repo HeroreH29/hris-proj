@@ -1,16 +1,26 @@
 import React from "react";
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
-import { Table, Container } from "react-bootstrap";
+import { Table, Container, Button } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+import { Row, Col } from "react-bootstrap";
 
 const AnnouncementsList = () => {
+  const navigate = useNavigate();
+
   const {
     data: announcements,
     isLoading,
     isSuccess,
     isError,
     error,
-  } = useGetAnnouncementsQuery();
+  } = useGetAnnouncementsQuery(undefined, {
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   let content;
 
@@ -30,21 +40,52 @@ const AnnouncementsList = () => {
       : null;
 
     content = (
-      <Container>
-        <h3>HR Memos/Announcements</h3>
-        <Table responsive bordered striped hover className="align-middle m-3">
-          <thead>
-            <tr>
-              <th scope="col">Title</th>
-              <th scope="col">Message</th>
-              <th scope="col">Date</th>
-              <th scope="col">Author</th>
-              <th scope="col">Edit</th>
-            </tr>
-          </thead>
-          <tbody>{tableContent}</tbody>
-        </Table>
-      </Container>
+      <>
+        <Container>
+          <Row>
+            <Col md="auto">
+              <Button
+                variant="outline-secondary"
+                onClick={() => navigate("/dashboard")}
+              >
+                <FontAwesomeIcon icon={faLeftLong} />
+              </Button>
+            </Col>
+            <Col md="auto">
+              <h3>HR Memos/Announcements</h3>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <Button
+                variant="outline-primary"
+                onClick={() => navigate("/dashboard/announcements/new")}
+                className="float-end"
+              >
+                <FontAwesomeIcon icon={faAdd} />
+              </Button>
+            </Col>
+          </Row>
+          <Table
+            responsive
+            bordered
+            striped
+            hover
+            className="align-middle ms-3 mt-3 mb-3"
+          >
+            <thead>
+              <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Message</th>
+                <th scope="col">Date</th>
+                <th scope="col">Author</th>
+                <th scope="col">Edit</th>
+              </tr>
+            </thead>
+            <tbody>{tableContent}</tbody>
+          </Table>
+        </Container>
+      </>
     );
 
     return content;

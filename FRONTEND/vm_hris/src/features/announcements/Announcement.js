@@ -19,8 +19,6 @@ const Announcement = ({ announcementId }) => {
     const handleEdit = () =>
       navigate(`/dashboard/announcements/${announcementId}`);
 
-    //const userLevelString = String(announcement.userLevel).replaceAll(",", ",", ",");
-
     return (
       <tr>
         <td>{announcement.title}</td>

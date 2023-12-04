@@ -3,6 +3,8 @@ import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
 import { USERLEVELS, USERGROUPS, BRANCHES } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 const USER_REGEX = "[A-z0-9]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
@@ -41,7 +43,7 @@ const EditUserForm = ({ user }) => {
       setEmployeeId("");
       setUserLevel("");
 
-      navigate("/dashboard/users");
+      navigate("/users");
     }
   }, [isSuccess, isDelSuccess, navigate]);
 
@@ -57,6 +59,7 @@ const EditUserForm = ({ user }) => {
   const onBranchChanged = (e) => setBranch(e.target.value);
   const onActiveChanged = () => setActive((prev) => !prev);
 
+  /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
     e.preventDefault();
 
@@ -98,12 +101,18 @@ const EditUserForm = ({ user }) => {
     setValidated(true);
   };
 
+  /* DELETE FUNCTION */
   const onDeleteUserClicked = async (e) => {
-    console.log(user.id);
-    const isConfirmed = window.confirm(`Proceed deletion of "${username}"?`);
-    isConfirmed
-      ? await deleteUser({ id: user.id })
-      : console.log("Deletion cancelled");
+    if (!active) {
+      const isConfirmed = window.confirm(`Proceed deletion of "${username}"?`);
+      if (isConfirmed) {
+        await deleteUser({ id: user.id, active: active });
+      } else {
+        console.log("Deletion cancelled");
+      }
+    } else {
+      alert("User is still active. Deactivate user before deleting.");
+    }
   };
 
   /* DROPDOWN OPTIONS */
@@ -136,7 +145,19 @@ const EditUserForm = ({ user }) => {
   const content = (
     <>
       <Container>
-        <h3>Edit User</h3>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/users")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col md="auto">
+            <h3>Edit User</h3>
+          </Col>
+        </Row>
         <Form
           className="p-3"
           noValidate
@@ -272,7 +293,7 @@ const EditUserForm = ({ user }) => {
           <Row className="mb-3">
             <Col md={"auto"}>
               <Button variant="outline-success" type="submit">
-                Add User
+                Save Changes
               </Button>
             </Col>
             <Col md={"auto"}>

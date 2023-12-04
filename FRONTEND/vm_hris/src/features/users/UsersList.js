@@ -10,7 +10,11 @@ const UsersList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetUsersQuery();
+  } = useGetUsersQuery(undefined, {
+    pollingInterval: 60000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   let content;
 
@@ -30,11 +34,12 @@ const UsersList = () => {
     content = (
       <Container>
         <h2>User List</h2>
-        <Table bordered striped hover className="align-middle">
+        <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
             <tr>
               <th scope="col">Username</th>
               <th scope="col">User level</th>
+              <th scope="col">Status</th>
               <th scope="col">Edit</th>
             </tr>
           </thead>

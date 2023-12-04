@@ -1,5 +1,6 @@
 const Announcement = require("../models/Announcement");
-const User = require("../models/User");
+//const User = require("../models/User");
+const format = require("date-fns/format");
 const asyncHandler = require("express-async-handler");
 
 // @desc Get all announcements
@@ -18,10 +19,10 @@ const getAllAnnouncements = asyncHandler(async (req, res) => {
 // @route POST /announcements
 // @access Private
 const createAnnouncement = asyncHandler(async (req, res) => {
-  const { user, title, date, message, expiryDate } = req.body;
+  const { title, date, message } = req.body;
 
   // Confirm data
-  if (!user || !title || !date || !message) {
+  if (!title || !date || !message) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -34,13 +35,16 @@ const createAnnouncement = asyncHandler(async (req, res) => {
       .json({ message: "Announcement title already exists" });
   }
 
+  // Auto generate an expiry date for every new announcement created
+  const expiryDate = new Date();
+  expiryDate.setMonth(new Date(date).getMonth() + 1);
+
   // Create and store new announcement
   const announcement = await Announcement.create({
-    user,
     title,
     date,
     message,
-    expiryDate,
+    expiryDate: format(expiryDate, "yyyy-MM-dd"),
   });
 
   if (announcement) {
@@ -58,10 +62,10 @@ const createAnnouncement = asyncHandler(async (req, res) => {
 // @route PATCH /announcements
 // @access Private
 const updateAnnouncement = asyncHandler(async (req, res) => {
-  const { id, user, title, message, active } = req.body;
+  const { id, title, date, message } = req.body;
 
   // Confirm data
-  if (!id || !user || !title || !message || typeof active !== "boolean") {
+  if (!id || !title || !message) {
     return res.status(400).json({ messsage: "All fields are required" });
   }
 
@@ -82,10 +86,14 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
       .json({ messsage: "Announcement title already exists" });
   }
 
-  announcement.user = user;
+  // Generate expiry date regardless if date changed or unchanged
+  const expiryDate = new Date();
+  expiryDate.setMonth(new Date(date).getMonth() + 1);
+
   announcement.title = title;
   announcement.message = message;
-  announcement.active = active;
+  announcement.date = date;
+  announcement.expiryDate = format(expiryDate, "yyyy-MM-dd");
 
   const updatedAnnouncement = await announcement.save();
 

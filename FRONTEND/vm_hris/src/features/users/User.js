@@ -14,14 +14,19 @@ const User = ({ userId }) => {
   const navigate = useNavigate();
 
   if (user) {
-    const handleEdit = () => navigate(`/dashboard/users/${userId}`);
+    const handleEdit = () => navigate(`/users/${userId}`);
 
-    const userLevelString = String(user.userLevel).replaceAll(",", ",", ",");
+    const userLevelString = String(user.userLevel);
+    const userActiveString = user.active ? "Active" : "Inactive";
+    const activeStringClr = user.active
+      ? "fw-semibold text-success"
+      : "fw-semibold text-danger";
 
     return (
       <tr>
         <td>{user.username}</td>
         <td>{userLevelString}</td>
+        <td className={activeStringClr}>{userActiveString}</td>
         <td>
           <Button variant="outline-primary" onClick={handleEdit}>
             <FontAwesomeIcon icon={faPenToSquare} />

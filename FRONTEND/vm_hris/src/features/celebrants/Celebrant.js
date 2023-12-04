@@ -15,6 +15,17 @@ const Celebrant = ({ personalInfoId, name }) => {
   );
 
   const navigate = useNavigate();
+  const currentDay = new Date().getDate();
+
+  const checkCurrentCelebrant = () => {
+    const celebrantDay = new Date(personalinfo.Birthday).getDate();
+
+    if (currentDay === celebrantDay) {
+      return "fw-semibold";
+    } else {
+      return "fst-normal";
+    }
+  };
 
   if (personalinfo) {
     const handleEdit = () =>
@@ -22,8 +33,8 @@ const Celebrant = ({ personalInfoId, name }) => {
 
     return (
       <tr>
-        <td>{name}</td>
-        <td>{personalinfo.Birthday}</td>
+        <td className={checkCurrentCelebrant()}>{name}</td>
+        <td className={checkCurrentCelebrant()}>{personalinfo.Birthday}</td>
       </tr>
     );
   } else return null;

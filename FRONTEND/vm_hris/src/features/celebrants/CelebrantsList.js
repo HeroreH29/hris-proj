@@ -32,14 +32,14 @@ const CelebrantsList = () => {
   }
 
   if (isSuccess || isGenSuccess) {
-    const { ids: pIds, entities: pEntities } = personalinfos;
+    const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
     const monthName = date.toLocaleString("default", { month: "long" });
 
-    const celebrants = pIds?.length
-      ? pIds.filter((personalInfoId) => {
-          const birthday = new Date(pEntities[personalInfoId].Birthday);
+    const celebrants = ids?.length
+      ? ids.filter((personalInfoId) => {
+          const birthday = new Date(entities[personalInfoId].Birthday);
           const birthmonth = birthday.getMonth() + 1;
 
           return currentMonth === birthmonth;
@@ -55,7 +55,7 @@ const CelebrantsList = () => {
       ? celebrants.map((celebrant) => {
           const matchingRecord = generalinfosArray.find((g) => {
             return (
-              g.EmployeeID === pEntities[celebrant].EmployeeID &&
+              g.EmployeeID === entities[celebrant].EmployeeID &&
               g.EmpStatus === "Y"
             );
           });
@@ -84,7 +84,14 @@ const CelebrantsList = () => {
     content = (
       <Container>
         <h3>Birthday Celebrants for {monthName}</h3>
-        <Table responsive bordered striped hover className="align-middle m-3">
+        <Table
+          responsive
+          bordered
+          striped
+          hover
+          className="align-middle m-3 caption-top"
+        >
+          <caption>Today's celebrant/s is/are highlighted</caption>
           <thead>
             <tr>
               <th scope="col">Celebrant</th>

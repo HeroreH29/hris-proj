@@ -5,19 +5,21 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 const personalinfosAdapter = createEntityAdapter({
   sortComparer: (a, b) => {
-    const dateSplitter = (dateString) => {
-      const [month, day, year] = dateString.split("/");
-
-      return `${year}-${month - 1}-${day}`;
-    };
-
-    const dateStringA = a.Birthday;
-    const dateStringB = b.Birthday;
-    const birthdayA = new Date(dateSplitter(dateStringA).split("-"));
+    // Extract the 'Birthday' values
+    const birthdayA = new Date(a.Birthday);
     const birthdayB = new Date(b.Birthday);
 
-    if (birthdayA < birthdayB) {
+    // Extract day values
+    const dayA = birthdayA.getDate();
+    const dayB = birthdayB.getDate();
+
+    // Compare the 'Birthday' values by day (earlier days are on top)
+    if (dayA < dayB) {
       return -1;
+    } else if (dayA > dayB) {
+      return 1;
+    } else {
+      return 0;
     }
   },
 });

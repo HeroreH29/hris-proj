@@ -99,7 +99,11 @@ const EditUserForm = ({ user }) => {
   };
 
   const onDeleteUserClicked = async (e) => {
-    await deleteUser({ id: user.id });
+    console.log(user.id);
+    const isConfirmed = window.confirm(`Proceed deletion of "${username}"?`);
+    isConfirmed
+      ? await deleteUser({ id: user.id })
+      : console.log("Deletion cancelled");
   };
 
   /* DROPDOWN OPTIONS */
@@ -159,6 +163,7 @@ const EditUserForm = ({ user }) => {
             </Form.Group>
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Password</Form.Label>
+              <small>{` [empty field = no change]`}</small>
               <Form.Control
                 type="password"
                 autoComplete="off"

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
-import { Button } from "react-bootstrap";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+// import { Button } from "react-bootstrap";
 
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 

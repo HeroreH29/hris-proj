@@ -61,7 +61,7 @@ const Login = () => {
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Row className="d-flex justify-content-center mb-3">
-          <Form.Group as={Col} md={7} className="mb-3">
+          <Form.Group as={Col} md={"auto"} className="mb-3">
             <Form.Label className="fw-semibold">Username</Form.Label>
             <Form.Control
               type="text"
@@ -77,7 +77,7 @@ const Login = () => {
           </Form.Group>
         </Row>
         <Row className="d-flex justify-content-center mb-3">
-          <Form.Group as={Col} md={7} className="mb-3">
+          <Form.Group as={Col} md={"auto"} className="mb-3">
             <Form.Label className="fw-semibold">Password</Form.Label>
             <InputGroup>
               <Form.Control
@@ -96,7 +96,11 @@ const Login = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
-        <Row className="d-flex justify-content-center mb-3" as={Col} md={5}>
+        <Row
+          className="d-flex justify-content-center mb-3"
+          as={Col}
+          md={"auto"}
+        >
           <Button type="submit" variant="success">
             Login
           </Button>

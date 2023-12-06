@@ -17,7 +17,7 @@ code {
   src: url(PlayfairDisplay-Bold.ttf);
 }
 
-#logo {
+#logo, #loginTitle {
   font-family: Playfair Display-Bold;
   color: #007CC8;
 }

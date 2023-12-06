@@ -6,11 +6,9 @@ import NewAnnouncementForm from "./NewAnnouncementForm";
 const NewAnnouncement = () => {
   const users = useSelector(selectAllUsers);
 
-  const content = users ? (
-    <NewAnnouncementForm users={users} />
-  ) : (
-    <p>Loading...</p>
-  );
+  if (!users?.length) return <p>Not Currently Available</p>;
+
+  const content = <NewAnnouncementForm users={users} />;
 
   return content;
 };

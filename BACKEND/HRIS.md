@@ -1,11 +1,8 @@
 # HRIS for Via Mare
 
-1. [ ] Add a landing page for user login
-2. [ ] Add a register page for user registration
-3. [ ] There must be different types of users (Admin, HR, and Employee for now)
-4. [ ] Provide logout for all user types
-5. [ ] Dashboard page after user login
-6. [ ] HR Announcements and Birthday Celebrants must be shown for all users
-7. [ ] ONLY Admin & HR users are allowed to create, read, update, and delete employee records & HR announcements
-8. [ ] Automate employee regularization
-9. [ ] The system can generate PDF of detailed employee records (Can only be accessed by HR & Admin)
+1. [x] CRUD for all types of json data
+2. [x] Must have authentication and authorization before CRUD-ing
+3. [x] Passwords must be decrypted before uploading to database
+4. [x] API must be RESTful
+5. [x] Endpoints should be protected
+6. [ ]

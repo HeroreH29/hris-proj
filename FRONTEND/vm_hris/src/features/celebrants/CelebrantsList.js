@@ -36,7 +36,8 @@ const CelebrantsList = () => {
     content = <p className="text-danger">{error?.data?.message}</p>;
   }
 
-  if (isSuccess || isGenSuccess) {
+  if (isSuccess && isGenSuccess) {
+    console.log(personalinfos);
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;

@@ -8,7 +8,11 @@ import { selectAnnouncementById } from "./announcementsApiSlice";
 import React from "react";
 import { Button } from "react-bootstrap";
 
+import useAuth from "../../hooks/useAuth";
+
 const Announcement = ({ announcementId }) => {
+  const { isHR, isAdmin } = useAuth();
+
   const announcement = useSelector((state) =>
     selectAnnouncementById(state, announcementId)
   );
@@ -25,11 +29,13 @@ const Announcement = ({ announcementId }) => {
         <td>{announcement.message}</td>
         <td>{announcement.date}</td>
         <td>{announcement.user}</td>
-        <td>
-          <Button variant="outline-primary" onClick={handleEdit}>
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </Button>
-        </td>
+        {(isHR || isAdmin) && (
+          <td>
+            <Button variant="outline-primary" onClick={handleEdit}>
+              <FontAwesomeIcon icon={faPenToSquare} />
+            </Button>
+          </td>
+        )}
       </tr>
     );
   } else return null;

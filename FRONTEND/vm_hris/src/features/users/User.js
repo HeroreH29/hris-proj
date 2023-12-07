@@ -8,7 +8,11 @@ import { selectUserById } from "./usersApiSlice";
 import React from "react";
 import { Button } from "react-bootstrap";
 
+import useAuth from "../../hooks/useAuth";
+
 const User = ({ userId }) => {
+  const { isHR, isAdmin } = useAuth();
+
   const user = useSelector((state) => selectUserById(state, userId));
 
   const navigate = useNavigate();
@@ -27,11 +31,13 @@ const User = ({ userId }) => {
         <td>{user.username}</td>
         <td>{userLevelString}</td>
         <td className={activeStringClr}>{userActiveString}</td>
-        <td>
-          <Button variant="outline-primary" onClick={handleEdit}>
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </Button>
-        </td>
+        {(isHR || isAdmin) && (
+          <td>
+            <Button variant="outline-primary" onClick={handleEdit}>
+              <FontAwesomeIcon icon={faPenToSquare} />
+            </Button>
+          </td>
+        )}
       </tr>
     );
   } else return null;

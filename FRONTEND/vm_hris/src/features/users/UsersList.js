@@ -5,9 +5,11 @@ import { Table, Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const UsersList = () => {
   const navigate = useNavigate();
+  const { isHR, isAdmin } = useAuth();
 
   const {
     data: users,
@@ -42,15 +44,17 @@ const UsersList = () => {
           <Col>
             <h3>User List</h3>
           </Col>
-          <Col md="auto">
-            <Button
-              variant="outline-primary"
-              onClick={() => navigate("/users/new")}
-            >
-              <FontAwesomeIcon icon={faAdd} />
-              {` Add new user`}
-            </Button>
-          </Col>
+          {(isHR || isAdmin) && (
+            <Col md="auto">
+              <Button
+                variant="outline-primary"
+                onClick={() => navigate("/users/new")}
+              >
+                <FontAwesomeIcon icon={faAdd} />
+                {` Add new user`}
+              </Button>
+            </Col>
+          )}
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
@@ -58,7 +62,7 @@ const UsersList = () => {
               <th scope="col">Username</th>
               <th scope="col">User level</th>
               <th scope="col">Status</th>
-              <th scope="col">Edit</th>
+              {(isHR || isAdmin) && <th scope="col">Edit</th>}
             </tr>
           </thead>
           <tbody>{tableContent}</tbody>

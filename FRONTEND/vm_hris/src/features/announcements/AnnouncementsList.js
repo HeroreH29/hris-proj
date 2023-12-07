@@ -6,8 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "react-bootstrap";
+import useAuth from "../../hooks/useAuth";
 
 const AnnouncementsList = () => {
+  const { isHR, isAdmin } = useAuth();
+
   const navigate = useNavigate();
 
   const {
@@ -54,17 +57,19 @@ const AnnouncementsList = () => {
             <Col md="auto">
               <h3>HR Memos/Announcements</h3>
             </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Button
-                variant="outline-primary"
-                onClick={() => navigate("/dashboard/announcements/new")}
-                className="float-end"
-              >
-                <FontAwesomeIcon icon={faAdd} />
-              </Button>
-            </Col>
+            {(isHR || isAdmin) && (
+              <Col>
+                <Button
+                  variant="outline-primary"
+                  onClick={() => navigate("/dashboard/announcements/new")}
+                  className="float-end"
+                  md="auto"
+                >
+                  <FontAwesomeIcon icon={faAdd} />
+                  {` Add new`}
+                </Button>
+              </Col>
+            )}
           </Row>
           <Table
             responsive
@@ -79,7 +84,7 @@ const AnnouncementsList = () => {
                 <th scope="col">Message</th>
                 <th scope="col">Date</th>
                 <th scope="col">Author</th>
-                <th scope="col">Edit</th>
+                {(isHR || isAdmin) && <th scope="col">Edit</th>}
               </tr>
             </thead>
             <tbody>{tableContent}</tbody>

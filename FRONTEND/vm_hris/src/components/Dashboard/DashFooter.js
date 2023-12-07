@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import useAuth from "../../hooks/useAuth";
 
 const DashFooter = () => {
+  const { username, status } = useAuth();
+
   const date = new Date();
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -24,17 +27,20 @@ const DashFooter = () => {
   const ampm = hours >= 12 ? "PM" : "AM";
   const twelveHourFormat = hours % 12 || 12;
 
-  return (
+  const content = (
     <div className="fixed-sm-bottom">
       <footer className="footer bg-body-secondary">
         <div className="container">
           <strong>DATE:</strong> {`${month} ${day}, ${year}`} |
           <strong> TIME:</strong>
-          {` ${twelveHourFormat}:${minutes}:${seconds}`} {ampm}
+          {` ${twelveHourFormat}:${minutes}:${seconds}`} {ampm} |
+          <strong> CURRENT USER:</strong> {username} |<strong> STATUS:</strong>{" "}
+          {status}
         </div>
       </footer>
     </div>
   );
+  return content;
 };
 
 export default DashFooter;

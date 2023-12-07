@@ -31,7 +31,9 @@ const DashHeader = () => {
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Nav>
-            <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+            <Nav.Link onClick={() => navigate("/dashboard")}>
+              Dashboard
+            </Nav.Link>
             <Nav.Link onClick={() => console.log("/erecords")}>
               Employee Records
             </Nav.Link>
@@ -41,7 +43,9 @@ const DashHeader = () => {
             <Nav.Link onClick={() => console.log("/leaves")}>
               Leave Tracker
             </Nav.Link>
-            <Nav.Link href="/users">User Settings</Nav.Link>
+            <Nav.Link onClick={() => navigate("/users")}>
+              User Settings
+            </Nav.Link>
             <Nav.Link onClick={onLogoutClicked} className="text-danger">
               Logout
             </Nav.Link>

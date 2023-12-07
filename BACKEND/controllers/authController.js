@@ -28,10 +28,14 @@ const login = asyncHandler(async (req, res) => {
 
   const foundUser = await User.findOne({ username }).exec();
 
-  const match = bcrypt.compare(password, foundUser.password);
+  if (!foundUser || !foundUser.active) {
+    return res.status(404).json({ message: "User does not exist" });
+  }
 
-  if (!foundUser || (!foundUser.active && !match)) {
-    return res.status(401).json({ message: "Unauthorized" });
+  const match = await bcrypt.compare(password, foundUser.password);
+
+  if (!match) {
+    return res.status(401).json({ message: "Wrong password" });
   }
 
   const accessToken = jwt.sign(
@@ -42,7 +46,7 @@ const login = asyncHandler(async (req, res) => {
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "10s" }
+    { expiresIn: "15m" }
   );
 
   const refreshToken = jwt.sign(
@@ -50,7 +54,7 @@ const login = asyncHandler(async (req, res) => {
       username: foundUser.username,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "20s" }
+    { expiresIn: "7d" }
   );
 
   res.cookie("jwt", refreshToken, loginCookie);
@@ -88,7 +92,7 @@ const refresh = async (req, res) => {
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "10s" }
+        { expiresIn: "15m" }
       );
       res.json({ accessToken });
     })

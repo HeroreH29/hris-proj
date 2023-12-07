@@ -12,6 +12,7 @@ import NewUserForm from "./features/users/NewUserForm";
 import EditAnnouncement from "./features/announcements/EditAnnouncement";
 import NewAnnouncement from "./features/announcements/NewAnnouncement";
 import Prefetch from "./features/auth/Prefetch";
+import PersistLogin from "./features/auth/PersistLogin";
 
 function App() {
   return (
@@ -19,24 +20,26 @@ function App() {
       <Route path="/" element={<Layout />}>
         {/* <Route index element={<Public />} /> */}
         <Route index element={<Login />} />
-        <Route element={<Prefetch />}>
-          <Route element={<DashLayout />}>
-            <Route path="dashboard">
-              <Route index element={<Welcome />} />
-              <Route path="announcements">
-                <Route index element={<AnnouncementsList />} />
-                <Route path=":id" element={<EditAnnouncement />} />
-                <Route path="new" element={<NewAnnouncement />} />
+        <Route element={<PersistLogin />}>
+          <Route element={<Prefetch />}>
+            <Route element={<DashLayout />}>
+              <Route path="dashboard">
+                <Route index element={<Welcome />} />
+                <Route path="announcements">
+                  <Route index element={<AnnouncementsList />} />
+                  <Route path=":id" element={<EditAnnouncement />} />
+                  <Route path="new" element={<NewAnnouncement />} />
+                </Route>
+                <Route path="celebrants">
+                  <Route index element={<CelebrantsList />} />
+                </Route>
+                {/* End Dash */}
               </Route>
-              <Route path="celebrants">
-                <Route index element={<CelebrantsList />} />
+              <Route path="users">
+                <Route index element={<UsersList />} />
+                <Route path=":id" element={<EditUser />} />
+                <Route path="new" element={<NewUserForm />} />
               </Route>
-              {/* End Dash */}
-            </Route>
-            <Route path="users">
-              <Route index element={<UsersList />} />
-              <Route path=":id" element={<EditUser />} />
-              <Route path="new" element={<NewUserForm />} />
             </Route>
           </Route>
         </Route>

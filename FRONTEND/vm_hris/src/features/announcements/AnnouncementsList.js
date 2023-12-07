@@ -16,7 +16,7 @@ const AnnouncementsList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetAnnouncementsQuery(undefined, {
+  } = useGetAnnouncementsQuery("announcementsList", {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,

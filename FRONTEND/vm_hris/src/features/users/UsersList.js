@@ -1,16 +1,21 @@
 import React from "react";
 import { useGetUsersQuery } from "./usersApiSlice";
 import User from "./User";
-import { Table, Container } from "react-bootstrap";
+import { Table, Container, Row, Col, Button } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAdd } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const UsersList = () => {
+  const navigate = useNavigate();
+
   const {
     data: users,
     isLoading,
     isSuccess,
     isError,
     error,
-  } = useGetUsersQuery(undefined, {
+  } = useGetUsersQuery("usersList", {
     pollingInterval: 60000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
@@ -33,7 +38,20 @@ const UsersList = () => {
 
     content = (
       <Container>
-        <h2>User List</h2>
+        <Row>
+          <Col>
+            <h3>User List</h3>
+          </Col>
+          <Col md="auto">
+            <Button
+              variant="outline-primary"
+              onClick={() => navigate("/users/new")}
+            >
+              <FontAwesomeIcon icon={faAdd} />
+              {` Add new user`}
+            </Button>
+          </Col>
+        </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
             <tr>

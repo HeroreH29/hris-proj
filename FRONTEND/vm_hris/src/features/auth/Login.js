@@ -8,16 +8,21 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
 import { useLoginMutation } from "./authApiSlice";
 
+import usePersist from "../../hooks/usePersist";
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [persist, setPersist] = usePersist();
   //const [errMsg, setErrMsg] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [validated, setValidated] = useState(false);
+  const [passInvalid, setPassInvalid] = useState(false);
+  const [userInvalid, setUserInvalid] = useState(false);
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -29,6 +34,7 @@ const Login = () => {
 
   const handleUserInput = (e) => setUsername(e.target.value);
   const handlePassInput = (e) => setPassword(e.target.value);
+  const handleToggle = () => setPersist((prev) => !prev);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,12 +44,22 @@ const Login = () => {
     } else {
       try {
         const { accessToken } = await login({ username, password }).unwrap();
-        dispatch(setCredentials({ accessToken }));
-        setUsername("");
-        setPassword("");
-        navigate("/dashboard");
+        if (accessToken) {
+          dispatch(setCredentials({ accessToken }));
+          setUsername("");
+          setPassword("");
+          setPassInvalid(false);
+          setUserInvalid(false);
+          navigate("/dashboard");
+        }
       } catch (error) {
-        console.error(error);
+        if (error.status === 401 || error.status === 404) {
+          alert("Username or password incorrect");
+          setPassInvalid(true);
+          setUserInvalid(true);
+          setUsername("");
+          setPassword("");
+        }
       }
     }
 
@@ -68,12 +84,10 @@ const Login = () => {
               placeholder="Enter Username"
               value={username}
               onChange={handleUserInput}
+              isInvalid={userInvalid}
               autoFocus
               required
             />
-            <Form.Control.Feedback type="invalid">
-              Username field is required
-            </Form.Control.Feedback>
           </Form.Group>
         </Row>
         <Row className="d-flex justify-content-center mb-3">
@@ -86,15 +100,25 @@ const Login = () => {
                 value={password}
                 onChange={handlePassInput}
                 required
+                isInvalid={passInvalid}
               />
               <Button variant="secondary" onClick={() => handleShowPass()}>
                 <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
               </Button>
             </InputGroup>
-            <Form.Control.Feedback type="invalid">
-              Password field is required
-            </Form.Control.Feedback>
           </Form.Group>
+        </Row>
+        <Row
+          className="d-flex justify-content-center mb-3"
+          as={Col}
+          md={"auto"}
+        >
+          <Form.Check
+            type="checkbox"
+            label="Trust this device"
+            checked={persist}
+            onChange={handleToggle}
+          />
         </Row>
         <Row
           className="d-flex justify-content-center mb-3"

@@ -1,7 +1,20 @@
 import { createSelector, createEntityAdapter } from "@reduxjs/toolkit";
 import { apiSlice } from "../../app/api/apiSlice";
 
-const announcementsAdapter = createEntityAdapter({});
+const announcementsAdapter = createEntityAdapter({
+  sortComparer: (a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+
+    if (dateA.getMilliseconds() < dateB.getMilliseconds()) {
+      return -1;
+    } else if (dateA.getMilliseconds() > dateB.getMilliseconds()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  },
+});
 
 const initialState = announcementsAdapter.getInitialState();
 

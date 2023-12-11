@@ -5,6 +5,8 @@ import {
 } from "./announcementsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
 
 const EditAnnouncementForm = ({ users, announcement }) => {
   const [updateAnnouncement, { isLoading, isSuccess, isError, error }] =
@@ -73,7 +75,19 @@ const EditAnnouncementForm = ({ users, announcement }) => {
   const content = (
     <>
       <Container>
-        <h3>Update Announcement</h3>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/dashboard/announcements")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col>
+            <h3>Update Announcement</h3>
+          </Col>
+        </Row>
         <Form
           className="p-3"
           noValidate

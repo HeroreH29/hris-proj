@@ -2,10 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useAddNewAnnouncementMutation } from "./announcementsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import useAuth from "../../hooks/useAuth";
 
 const NewAnnouncementForm = ({ users }) => {
   const [addNewAnnouncement, { isLoading, isSuccess, isError, error }] =
     useAddNewAnnouncementMutation();
+
+  const { username } = useAuth();
 
   const navigate = useNavigate();
 
@@ -13,6 +18,7 @@ const NewAnnouncementForm = ({ users }) => {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     if (isSuccess) {
@@ -37,6 +43,7 @@ const NewAnnouncementForm = ({ users }) => {
 
     if (form.checkValidity() === true && !isLoading) {
       await addNewAnnouncement({
+        user: username,
         title,
         date,
         message,
@@ -54,7 +61,19 @@ const NewAnnouncementForm = ({ users }) => {
   const content = (
     <>
       <Container>
-        <h3>Create New Announcement</h3>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/dashboard/announcements")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col>
+            <h3>Create New Announcement</h3>
+          </Col>
+        </Row>
         <Form
           className="p-3"
           noValidate

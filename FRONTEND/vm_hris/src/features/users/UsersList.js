@@ -3,7 +3,7 @@ import { useGetUsersQuery } from "./usersApiSlice";
 import User from "./User";
 import { Table, Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
@@ -50,8 +50,7 @@ const UsersList = () => {
                 variant="outline-primary"
                 onClick={() => navigate("/users/new")}
               >
-                <FontAwesomeIcon icon={faAdd} />
-                {` Add new user`}
+                <FontAwesomeIcon icon={faUserPlus} />
               </Button>
             </Col>
           )}

@@ -3,6 +3,8 @@ import { useAddNewUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
 import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 const USER_REGEX = "[A-z0-9]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
@@ -105,7 +107,19 @@ const NewUserForm = () => {
   const content = (
     <>
       <Container>
-        <h3>Create New User</h3>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/users")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col>
+            <h3>Create New User</h3>
+          </Col>
+        </Row>
         <Form
           className="p-3"
           noValidate

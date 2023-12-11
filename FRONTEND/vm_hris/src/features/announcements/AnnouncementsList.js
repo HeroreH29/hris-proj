@@ -3,7 +3,11 @@ import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
 import { Table, Container, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLeftLong,
+  faAdd,
+  faFileCirclePlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
@@ -56,6 +60,7 @@ const AnnouncementsList = () => {
             </Col>
             <Col md="auto">
               <h3>HR Memos/Announcements</h3>
+              <small>{`(Click to view full message)`}</small>
             </Col>
             {(isHR || isAdmin) && (
               <Col>
@@ -65,8 +70,7 @@ const AnnouncementsList = () => {
                   className="float-end"
                   md="auto"
                 >
-                  <FontAwesomeIcon icon={faAdd} />
-                  {` Add new`}
+                  <FontAwesomeIcon icon={faFileCirclePlus} />
                 </Button>
               </Col>
             )}

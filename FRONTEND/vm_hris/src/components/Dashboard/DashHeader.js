@@ -22,7 +22,7 @@ const DashHeader = () => {
 
   if (isLoading) return <p>Logging out...</p>;
 
-  if (isError) return <p>Error: {error.data?.message}</p>;
+  if (isError) return <p>Error: {error?.data?.message}</p>;
 
   const content = (
     <Navbar expand="lg" className="border-bottom border-dark-subtle">

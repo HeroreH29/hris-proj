@@ -34,8 +34,8 @@ const DashFooter = () => {
           <strong>DATE:</strong> {`${month} ${day}, ${year}`} |
           <strong> TIME:</strong>
           {` ${twelveHourFormat}:${minutes}:${seconds}`} {ampm} |
-          <strong> CURRENT USER:</strong> {username} |<strong> STATUS:</strong>{" "}
-          {status}
+          <strong> CURRENT USER:</strong> {username} |
+          <strong> USER LEVEL:</strong> {status}
         </div>
       </footer>
     </div>

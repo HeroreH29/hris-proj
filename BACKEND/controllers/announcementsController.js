@@ -19,7 +19,7 @@ const getAllAnnouncements = asyncHandler(async (req, res) => {
 // @route POST /announcements
 // @access Private
 const createAnnouncement = asyncHandler(async (req, res) => {
-  const { title, date, message } = req.body;
+  const { title, date, message, user } = req.body;
 
   // Confirm data
   if (!title || !date || !message) {
@@ -41,6 +41,7 @@ const createAnnouncement = asyncHandler(async (req, res) => {
 
   // Create and store new announcement
   const announcement = await Announcement.create({
+    user,
     title,
     date,
     message,

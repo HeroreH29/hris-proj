@@ -37,7 +37,7 @@ const CelebrantsList = () => {
   }
 
   if (isSuccess && isGenSuccess) {
-    console.log(personalinfos);
+    //console.log(personalinfos);
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;

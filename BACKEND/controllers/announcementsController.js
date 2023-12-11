@@ -1,24 +1,23 @@
 const Announcement = require("../models/Announcement");
 //const User = require("../models/User");
 const format = require("date-fns/format");
-const asyncHandler = require("express-async-handler");
 
 // @desc Get all announcements
 // @route GET /announcements
 // @access Private
-const getAllAnnouncements = asyncHandler(async (req, res) => {
+const getAllAnnouncements = async (req, res) => {
   const announcements = await Announcement.find().lean();
   if (!announcements?.length) {
     return res.status(400).json({ message: "No announcements found" });
   }
 
   res.json(announcements);
-});
+};
 
 // @desc Create announcement
 // @route POST /announcements
 // @access Private
-const createAnnouncement = asyncHandler(async (req, res) => {
+const createAnnouncement = async (req, res) => {
   const { title, date, message, user } = req.body;
 
   // Confirm data
@@ -27,7 +26,10 @@ const createAnnouncement = asyncHandler(async (req, res) => {
   }
 
   // Check for duplicate title
-  const duplicate = await Announcement.findOne({ title }).lean().exec();
+  const duplicate = await Announcement.findOne({ title })
+    .collation({ locale: "en", strength: 2 })
+    .lean()
+    .exec();
 
   if (duplicate) {
     return res
@@ -57,12 +59,12 @@ const createAnnouncement = asyncHandler(async (req, res) => {
       .status(400)
       .json({ message: "Invalid announcement data received" });
   }
-});
+};
 
 // @desc Update announcement
 // @route PATCH /announcements
 // @access Private
-const updateAnnouncement = asyncHandler(async (req, res) => {
+const updateAnnouncement = async (req, res) => {
   const { id, title, date, message } = req.body;
 
   // Confirm data
@@ -78,7 +80,9 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
   }
 
   // Check for duplicate title
-  const duplicate = await Announcement.findOne({ title }).lean();
+  const duplicate = await Announcement.findOne({ title })
+    .collation({ locale: "en", strength: 2 })
+    .lean();
 
   // Allow renaming original title if not same as others
   if (duplicate && String(duplicate._id) !== String(id)) {
@@ -99,12 +103,12 @@ const updateAnnouncement = asyncHandler(async (req, res) => {
   const updatedAnnouncement = await announcement.save();
 
   res.json(`${updatedAnnouncement.title} has been updated`);
-});
+};
 
 // @desc Delete announcement
 // @route DELETE /announcements
 // @access Private
-const deleteAnnouncement = asyncHandler(async (req, res) => {
+const deleteAnnouncement = async (req, res) => {
   const { id } = req.body;
 
   // Confirm data
@@ -124,7 +128,7 @@ const deleteAnnouncement = asyncHandler(async (req, res) => {
   const reply = `Announcement '${result.title}' with ID ${result._id} deleted`;
 
   res.json(reply);
-});
+};
 
 module.exports = {
   getAllAnnouncements,

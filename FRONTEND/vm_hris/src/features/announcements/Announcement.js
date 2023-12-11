@@ -2,10 +2,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 
-import { useSelector } from "react-redux";
-import { selectAnnouncementById } from "./announcementsApiSlice";
+import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 import useAuth from "../../hooks/useAuth";
@@ -13,9 +12,14 @@ import useAuth from "../../hooks/useAuth";
 const Announcement = ({ announcementId }) => {
   const { isHR, isAdmin } = useAuth();
 
-  const announcement = useSelector((state) =>
-    selectAnnouncementById(state, announcementId)
-  );
+  // const announcement = useSelector((state) =>
+  //   selectAnnouncementById(state, announcementId)
+  // );
+  const { announcement } = useGetAnnouncementsQuery("announcementsList", {
+    selectFromResult: ({ data }) => ({
+      announcement: data?.entities[announcementId],
+    }),
+  });
 
   const navigate = useNavigate();
 
@@ -68,4 +72,6 @@ const Announcement = ({ announcementId }) => {
   } else return null;
 };
 
-export default Announcement;
+const memoizedAnnouncement = memo(Announcement);
+
+export default memoizedAnnouncement;

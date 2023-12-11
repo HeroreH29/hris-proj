@@ -21,10 +21,12 @@ const initialState = announcementsAdapter.getInitialState();
 export const announcementsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAnnouncements: builder.query({
-      query: () => "/announcements",
-      validateStatus: (response, result) => {
-        return response.status === 200 && !result.isError;
-      },
+      query: () => ({
+        url: "/announcements",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
       transformResponse: (responseData) => {
         const loadedAnnouncements = responseData.map((announcement) => {
           announcement.id = announcement._id;

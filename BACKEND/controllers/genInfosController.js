@@ -1,22 +1,20 @@
 const GenInfo = require("../models/GenInfo");
-const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcrypt");
 
 // @desc Get all users
 // @route GET /users
 // @access Private
-const getAllGenInfo = asyncHandler(async (req, res) => {
+const getAllGenInfo = async (req, res) => {
   const geninfos = await GenInfo.find().lean();
   if (!geninfos?.length) {
     return res.status(400).json({ message: "No general infos found" });
   }
   res.json(geninfos);
-});
+};
 
 // @desc Create new user
 // @route POST /users
 // @access Private
-const createGenInfo = asyncHandler(async (req, res) => {
+const createGenInfo = async (req, res) => {
   const {
     EmployeeID,
     BioID,
@@ -103,12 +101,12 @@ const createGenInfo = asyncHandler(async (req, res) => {
   } else {
     res.status(500).json({ message: "Invalid general info data received" });
   }
-});
+};
 
 // @desc Update user
 // @route PATCH /users
 // @access Private
-const updateGenInfo = asyncHandler(async (req, res) => {
+const updateGenInfo = async (req, res) => {
   const {
     id,
     EmployeeID,
@@ -178,12 +176,12 @@ const updateGenInfo = asyncHandler(async (req, res) => {
   const updatedGenInfo = await geninfo.save();
 
   res.json({ message: `General info of ${updatedGenInfo.EmployeeID} updated` });
-});
+};
 
 // @desc Delete user
 // @route DELETE /users
 // @access Private
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
@@ -208,6 +206,6 @@ const deleteUser = asyncHandler(async (req, res) => {
   const reply = `Username ${user.username} with ID ${user._id} is deleted`;
 
   res.json(reply);
-});
+};
 
 module.exports = { getAllGenInfo, createGenInfo, updateGenInfo };

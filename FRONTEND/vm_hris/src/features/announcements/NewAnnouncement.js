@@ -1,12 +1,17 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { selectAllUsers } from "../users/usersApiSlice";
 import NewAnnouncementForm from "./NewAnnouncementForm";
 
-const NewAnnouncement = () => {
-  const users = useSelector(selectAllUsers);
+import { useGetAnnouncementsQuery } from "../announcements/announcementsApiSlice";
+import PulseLoader from "react-spinners/PulseLoader";
 
-  if (!users?.length) return <p>Not Currently Available</p>;
+const NewAnnouncement = () => {
+  const { users } = useGetAnnouncementsQuery("usersList", {
+    selectFromResult: ({ data }) => ({
+      users: data?.ids.map((id) => data?.entities[id]),
+    }),
+  });
+
+  if (!users?.length) return <PulseLoader color="#FFF" />;
 
   const content = <NewAnnouncementForm users={users} />;
 

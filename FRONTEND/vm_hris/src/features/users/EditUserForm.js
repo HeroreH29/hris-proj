@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
-import { USERLEVELS, USERGROUPS, BRANCHES } from "../../config/userOptions";
+import { USERLEVELS, BRANCHES } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
@@ -28,7 +28,6 @@ const EditUserForm = ({ user }) => {
   const [employeeId, setEmployeeId] = useState(user.employeeId);
 
   const [userLevel, setUserLevel] = useState(user.userLevel);
-  const [userGroup, setUserGroup] = useState(user.userGroup);
   const [branch, setBranch] = useState(user.branch);
   const [active, setActive] = useState(user.active);
 
@@ -39,7 +38,6 @@ const EditUserForm = ({ user }) => {
       setFirstName("");
       setLastname("");
       setBranch("");
-      setUserGroup("");
       setEmployeeId("");
       setUserLevel("");
 
@@ -55,7 +53,6 @@ const EditUserForm = ({ user }) => {
   const onEmployeeIdChanged = (e) => setEmployeeId(e.target.value);
 
   const onUserLevelChanged = (e) => setUserLevel(e.target.value);
-  const onUserGroupChanged = (e) => setUserGroup(e.target.value);
   const onBranchChanged = (e) => setBranch(e.target.value);
   const onActiveChanged = () => setActive((prev) => !prev);
 
@@ -75,7 +72,6 @@ const EditUserForm = ({ user }) => {
           firstName,
           lastName,
           branch,
-          userGroup,
           employeeId,
           userLevel,
           active,
@@ -87,7 +83,6 @@ const EditUserForm = ({ user }) => {
           firstName,
           lastName,
           branch,
-          userGroup,
           employeeId,
           userLevel,
           active,
@@ -125,14 +120,6 @@ const EditUserForm = ({ user }) => {
   });
 
   const branchOptions = Object.entries(BRANCHES).map(([key, value]) => {
-    return (
-      <option key={value} value={value}>
-        {key}
-      </option>
-    );
-  });
-
-  const userGroupOptions = Object.entries(USERGROUPS).map(([key, value]) => {
     return (
       <option key={value} value={value}>
         {key}
@@ -231,19 +218,6 @@ const EditUserForm = ({ user }) => {
               <Form.Label className="fw-semibold">Branch</Form.Label>
               <Form.Select required value={branch} onChange={onBranchChanged}>
                 {branchOptions}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Select an option
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">User Group</Form.Label>
-              <Form.Select
-                required
-                value={userGroup}
-                onChange={onUserGroupChanged}
-              >
-                {userGroupOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">
                 Select an option

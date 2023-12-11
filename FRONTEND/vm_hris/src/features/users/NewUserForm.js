@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAddNewUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
-import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
+import { USERLEVELS, BRANCHES } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
@@ -23,7 +23,6 @@ const NewUserForm = () => {
   const [employeeId, setEmployeeId] = useState("");
 
   const [userLevel, setUserLevel] = useState("User");
-  const [userGroup, setUserGroup] = useState("");
   const [branch, setBranch] = useState("");
 
   useEffect(() => {
@@ -33,7 +32,6 @@ const NewUserForm = () => {
       setFirstName("");
       setLastname("");
       setBranch("");
-      setUserGroup("");
       setEmployeeId("");
       setUserLevel("");
 
@@ -49,7 +47,6 @@ const NewUserForm = () => {
   const onEmployeeIdChanged = (e) => setEmployeeId(e.target.value);
 
   const onUserLevelChanged = (e) => setUserLevel(e.target.value);
-  const onUserGroupChanged = (e) => setUserGroup(e.target.value);
   const onBranchChanged = (e) => setBranch(e.target.value);
 
   /* SUBMIT FUNCTION */
@@ -65,7 +62,6 @@ const NewUserForm = () => {
         firstName,
         lastName,
         branch,
-        userGroup,
         employeeId,
         userLevel,
       });
@@ -94,14 +90,6 @@ const NewUserForm = () => {
     );
   });
 
-  const userGroupOptions = Object.entries(USERGROUPS).map(([key, value]) => {
-    return (
-      <option key={value} value={value}>
-        {key}
-      </option>
-    );
-  });
-
   const [validated, setValidated] = useState(false);
 
   const content = (
@@ -118,6 +106,7 @@ const NewUserForm = () => {
           </Col>
           <Col>
             <h3>Create New User</h3>
+            {isError && <p className="text-danger">{error?.data?.message}</p>}
           </Col>
         </Row>
         <Form
@@ -190,15 +179,6 @@ const NewUserForm = () => {
               <Form.Label className="fw-semibold">Branch</Form.Label>
               <Form.Select required onChange={onBranchChanged}>
                 {branchOptions}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                Select an option
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">User Group</Form.Label>
-              <Form.Select required onChange={onUserGroupChanged}>
-                {userGroupOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">
                 Select an option

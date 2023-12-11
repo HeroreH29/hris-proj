@@ -1,22 +1,20 @@
 const PersonalInfo = require("../models/PersonalInfo");
-const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcrypt");
 
 // @desc Get all users
 // @route GET /users
 // @access Private
-const getAllPersonalInfo = asyncHandler(async (req, res) => {
+const getAllPersonalInfo = async (req, res) => {
   const personalInfos = await PersonalInfo.find().lean();
   if (!personalInfos?.length) {
     return res.status(400).json({ message: "No personal infos found" });
   }
   res.json(personalInfos);
-});
+};
 
 // @desc Create new user
 // @route POST /users
 // @access Private
-const createPersonalInfo = asyncHandler(async (req, res) => {
+const createPersonalInfo = async (req, res) => {
   const {
     EmployeeID,
     Birthday,
@@ -85,12 +83,12 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
   } else {
     res.status(500).json({ message: "Invalid personal info data received" });
   }
-});
+};
 
 // @desc Update user
 // @route PATCH /users
 // @access Private
-const updatePersonalInfo = asyncHandler(async (req, res) => {
+const updatePersonalInfo = async (req, res) => {
   const {
     id,
     EmployeeID,
@@ -152,12 +150,12 @@ const updatePersonalInfo = asyncHandler(async (req, res) => {
   res.json({
     message: `Personal info of ${updatedPersonalInfo.EmployeeID} updated`,
   });
-});
+};
 
 // @desc Delete user
 // @route DELETE /users
 // @access Private
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
@@ -182,6 +180,6 @@ const deleteUser = asyncHandler(async (req, res) => {
   const reply = `Username ${user.username} with ID ${user._id} is deleted`;
 
   res.json(reply);
-});
+};
 
 module.exports = { getAllPersonalInfo, createPersonalInfo, updatePersonalInfo };

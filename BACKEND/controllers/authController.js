@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
 
 const loginCookie = {
   httpOnly: true, // accessible only by web server
@@ -19,7 +18,7 @@ const logoutCookie = {
 // @desc Login
 // @route POST /auth
 // @access Public
-const login = asyncHandler(async (req, res) => {
+const login = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -61,7 +60,7 @@ const login = asyncHandler(async (req, res) => {
 
   // Send accessToken containing username and user level
   res.json({ accessToken });
-});
+};
 
 // @desc Refresh
 // @route GET /auth/refresh

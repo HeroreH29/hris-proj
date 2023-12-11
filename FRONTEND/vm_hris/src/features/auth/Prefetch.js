@@ -8,17 +8,18 @@ import React from "react";
 
 const Prefetch = () => {
   useEffect(() => {
-    console.log("subscribing");
-    const announcements = store.dispatch(
-      announcementsApiSlice.endpoints.getAnnouncements.initiate()
+    store.dispatch(
+      announcementsApiSlice.util.prefetch(
+        "getAnnouncements",
+        "announcementsList",
+        { force: true }
+      )
     );
-    const users = store.dispatch(usersApiSlice.endpoints.getUsers.initiate());
-
-    return () => {
-      console.log("unsubscribing");
-      announcements.unsubscribe();
-      users.unsubscribe();
-    };
+    store.dispatch(
+      announcementsApiSlice.util.prefetch("getUsers", "usersList", {
+        force: true,
+      })
+    );
   }, []);
 
   return <Outlet />;

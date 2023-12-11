@@ -13,36 +13,65 @@ import EditAnnouncement from "./features/announcements/EditAnnouncement";
 import NewAnnouncement from "./features/announcements/NewAnnouncement";
 import Prefetch from "./features/auth/Prefetch";
 import PersistLogin from "./features/auth/PersistLogin";
+import { USERLEVELS } from "./config/userOptions";
+import RequireAuth from "./features/auth/RequireAuth";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        {/* <Route index element={<Public />} /> */}
+        {/* public routes */}
         <Route index element={<Login />} />
+
+        {/* protected routes */}
         <Route element={<PersistLogin />}>
-          <Route element={<Prefetch />}>
-            <Route element={<DashLayout />}>
-              <Route path="dashboard">
-                <Route index element={<Welcome />} />
-                <Route path="announcements">
-                  <Route index element={<AnnouncementsList />} />
-                  <Route path=":id" element={<EditAnnouncement />} />
-                  <Route path="new" element={<NewAnnouncement />} />
+          <Route
+            element={
+              <RequireAuth allowedUserLevels={[...Object.values(USERLEVELS)]} />
+            }
+          >
+            <Route element={<Prefetch />}>
+              <Route element={<DashLayout />}>
+                <Route path="dashboard">
+                  <Route index element={<Welcome />} />
+
+                  <Route path="announcements">
+                    <Route index element={<AnnouncementsList />} />
+                    <Route
+                      element={
+                        <RequireAuth
+                          allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                        />
+                      }
+                    >
+                      <Route path=":id" element={<EditAnnouncement />} />
+                      <Route path="new" element={<NewAnnouncement />} />
+                    </Route>
+                  </Route>
+
+                  <Route path="celebrants">
+                    <Route index element={<CelebrantsList />} />
+                  </Route>
+                  {/* End Dash */}
                 </Route>
-                <Route path="celebrants">
-                  <Route index element={<CelebrantsList />} />
+                <Route
+                  element={
+                    <RequireAuth
+                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                    />
+                  }
+                >
+                  <Route path="users">
+                    <Route index element={<UsersList />} />
+                    <Route path=":id" element={<EditUser />} />
+                    <Route path="new" element={<NewUserForm />} />
+                  </Route>
                 </Route>
-                {/* End Dash */}
-              </Route>
-              <Route path="users">
-                <Route index element={<UsersList />} />
-                <Route path=":id" element={<EditUser />} />
-                <Route path="new" element={<NewUserForm />} />
               </Route>
             </Route>
           </Route>
         </Route>
+        {/* end protected routes */}
       </Route>
     </Routes>
   );

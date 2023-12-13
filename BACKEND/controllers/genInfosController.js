@@ -181,31 +181,31 @@ const updateGenInfo = async (req, res) => {
 // @desc Delete user
 // @route DELETE /users
 // @access Private
-const deleteUser = async (req, res) => {
-  const { id } = req.body;
+// const deleteUser = async (req, res) => {
+//   const { id } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ message: "User ID required" });
-  }
+//   if (!id) {
+//     return res.status(400).json({ message: "User ID required" });
+//   }
 
-  // Check if user exists to delete
-  const user = await User.findById(id).exec();
+//   // Check if user exists to delete
+//   const user = await User.findById(id).exec();
 
-  if (!user) {
-    return res.status(400).json({ message: "User not found" });
-  }
+//   if (!user) {
+//     return res.status(400).json({ message: "User not found" });
+//   }
 
-  if (user.active) {
-    return res.status(400).json({
-      message: "User is still active. Deactivate user before deleting.",
-    });
-  }
+//   if (user.active) {
+//     return res.status(400).json({
+//       message: "User is still active. Deactivate user before deleting.",
+//     });
+//   }
 
-  const result = await user.deleteOne();
+//   const result = await user.deleteOne();
 
-  const reply = `Username ${user.username} with ID ${user._id} is deleted`;
+//   const reply = `Username ${user.username} with ID ${user._id} is deleted`;
 
-  res.json(reply);
-};
+//   res.json(reply);
+// };
 
 module.exports = { getAllGenInfo, createGenInfo, updateGenInfo };

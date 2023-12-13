@@ -12,9 +12,6 @@ import useAuth from "../../hooks/useAuth";
 const Announcement = ({ announcementId }) => {
   const { isHR, isAdmin } = useAuth();
 
-  // const announcement = useSelector((state) =>
-  //   selectAnnouncementById(state, announcementId)
-  // );
   const { announcement } = useGetAnnouncementsQuery("announcementsList", {
     selectFromResult: ({ data }) => ({
       announcement: data?.entities[announcementId],

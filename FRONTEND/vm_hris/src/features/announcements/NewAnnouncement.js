@@ -1,21 +1,21 @@
 import React from "react";
 import NewAnnouncementForm from "./NewAnnouncementForm";
 
-import { useGetAnnouncementsQuery } from "../announcements/announcementsApiSlice";
+import { useGetUsersQuery } from "../users/usersApiSlice";
 import PulseLoader from "react-spinners/PulseLoader";
 
 const NewAnnouncement = () => {
-  const { users } = useGetAnnouncementsQuery("usersList", {
+  const { users } = useGetUsersQuery("usersList", {
     selectFromResult: ({ data }) => ({
       users: data?.ids.map((id) => data?.entities[id]),
     }),
   });
 
-  if (!users?.length) return <PulseLoader color="#FFF" />;
-
-  const content = <NewAnnouncementForm users={users} />;
-
-  return content;
+  if (users) {
+    return <NewAnnouncementForm users={users} />;
+  } else {
+    return <PulseLoader color="#808080" />;
+  }
 };
 
 export default NewAnnouncement;

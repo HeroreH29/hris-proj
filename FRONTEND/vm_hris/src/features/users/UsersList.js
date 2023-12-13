@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const UsersList = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const UsersList = () => {
 
   let content;
 
-  if (isLoading) content = <p>Loading...</p>;
+  if (isLoading) content = <PulseLoader color="#808080" />;
 
   if (isError) {
     content = <p className="text-danger">{error?.data?.message}</p>;

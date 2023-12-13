@@ -1,16 +1,13 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
-
-import { useSelector } from "react-redux";
-import { selectPersonalinfoById } from "./celebrantsApiSlice";
+import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 
 import React from "react";
 
 const Celebrant = ({ personalInfoId, name }) => {
-  const personalinfo = useSelector((state) =>
-    selectPersonalinfoById(state, personalInfoId)
-  );
+  const { personalinfo } = useGetPersonalinfosQuery("celebrantsList", {
+    selectFromResult: ({ data }) => ({
+      personalinfo: data?.entities[personalInfoId],
+    }),
+  });
 
   const currentDay = new Date().getDate();
 

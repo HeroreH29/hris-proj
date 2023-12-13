@@ -7,8 +7,11 @@ import { useNavigate } from "react-router-dom";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
+import useTitle from "../../hooks/useTitle";
 
 const EditAnnouncementForm = ({ users, announcement }) => {
+  useTitle("Via Mare HRIS | Edit Announcement");
+
   const [updateAnnouncement, { isLoading, isSuccess, isError, error }] =
     useUpdateAnnouncementMutation();
 
@@ -85,7 +88,7 @@ const EditAnnouncementForm = ({ users, announcement }) => {
             </Button>
           </Col>
           <Col>
-            <h3>Update Announcement</h3>
+            <h3>Edit Announcement</h3>
           </Col>
         </Row>
         <Form

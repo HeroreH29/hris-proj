@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
+import usePersist from "../../hooks/usePersist";
 
 const DashFooter = () => {
   const { username, status } = useAuth();
+  const [persist] = usePersist();
 
   const date = new Date();
   const [currentTime, setCurrentTime] = useState(new Date());

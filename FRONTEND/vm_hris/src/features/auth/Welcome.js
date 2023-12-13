@@ -1,8 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button } from "react-bootstrap";
+import useTitle from "../../hooks/useTitle";
+import useAuth from "../../hooks/useAuth";
 
 const Welcome = () => {
+  const { status } = useAuth();
+  useTitle(`Via Mare HRIS | ${status} Dashboard`);
+
   const date = new Date();
   const currentMonth = date.toLocaleString("default", { month: "long" });
   const navigate = useNavigate();

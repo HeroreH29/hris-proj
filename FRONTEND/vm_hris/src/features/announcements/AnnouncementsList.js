@@ -5,15 +5,18 @@ import { Table, Container, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLeftLong,
-  faAdd,
   faFileCirclePlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
+import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../hooks/useTitle";
 
 const AnnouncementsList = () => {
   const { isHR, isAdmin } = useAuth();
+
+  useTitle("Via Mare HRIS | Announcements");
 
   const navigate = useNavigate();
 
@@ -31,7 +34,7 @@ const AnnouncementsList = () => {
 
   let content;
 
-  if (isLoading) content = <p>Loading...</p>;
+  if (isLoading) content = <PulseLoader color="#808080" />;
 
   if (isError) {
     content = <p className="text-danger">{error?.data?.message}</p>;

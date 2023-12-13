@@ -3,6 +3,7 @@ import { Row, Col, Container, Form, InputGroup, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import PulseLoader from "react-spinners/PulseLoader";
 
 import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
@@ -30,7 +31,7 @@ const Login = () => {
 
   // const errClass = errMsg ? "errmsg" : "offscreen";
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <PulseLoader color="#808080" />;
 
   const handleUserInput = (e) => setUsername(e.target.value);
   const handlePassInput = (e) => setPassword(e.target.value);

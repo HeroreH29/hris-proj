@@ -1,21 +1,20 @@
 import React from "react";
-import {
-  useGetPersonalinfosQuery,
-  useGetGeninfosQuery,
-} from "./celebrantsApiSlice";
+import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
+import { useGetGeninfosQuery } from "./gCelebrantsApiSlice";
 import Celebrant from "./Celebrant";
 import { useNavigate } from "react-router-dom";
 import { Table, Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const CelebrantsList = () => {
   const navigate = useNavigate();
 
   const {
     data: personalinfos,
-    isLoading,
-    isSuccess,
+    isLoading: isPersLoading,
+    isSuccess: isPersSuccess,
     isError,
     error,
   } = useGetPersonalinfosQuery();
@@ -30,14 +29,12 @@ const CelebrantsList = () => {
 
   let content;
 
-  if (isLoading || isGenLoading) content = <p>Loading...</p>;
+  if (isPersLoading || isGenLoading) return <PulseLoader color="#808080" />;
 
-  if (isError) {
-    content = <p className="text-danger">{error?.data?.message}</p>;
-  }
+  if (isError)
+    return (content = <p className="text-danger">{error?.data?.message}</p>);
 
-  if (isSuccess && isGenSuccess) {
-    //console.log(personalinfos);
+  if (isPersSuccess && isGenSuccess) {
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
@@ -112,8 +109,8 @@ const CelebrantsList = () => {
           <caption>Today's celebrant/s is/are highlighted</caption>
           <thead>
             <tr>
-              <th scope="col">Celebrant</th>
-              <th scope="col">Birthday</th>
+              <th>Celebrant</th>
+              <th>Birthday</th>
             </tr>
           </thead>
           <tbody>{tableContent}</tbody>

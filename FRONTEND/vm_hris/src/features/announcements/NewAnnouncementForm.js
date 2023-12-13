@@ -5,8 +5,11 @@ import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useAuth from "../../hooks/useAuth";
+import useTitle from "../../hooks/useTitle";
 
 const NewAnnouncementForm = ({ users }) => {
+  useTitle("Via Mare HRIS | Create Announcement");
+
   const [addNewAnnouncement, { isLoading, isSuccess, isError, error }] =
     useAddNewAnnouncementMutation();
 
@@ -18,7 +21,6 @@ const NewAnnouncementForm = ({ users }) => {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState("");
 
   useEffect(() => {
     if (isSuccess) {

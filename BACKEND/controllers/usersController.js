@@ -39,7 +39,7 @@ const createNewUser = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // Check duplicates
+  // Check duplicates (same username lowercase or uppercase is considered)
   const duplicate = await User.findOne({ username })
     .collation({ locale: "en", strength: 2 })
     .lean()
@@ -122,7 +122,7 @@ const updateUser = async (req, res) => {
   user.firstName = firstName;
   user.lastName = lastName;
   user.branch = branch;
-  u, (user.employeeId = employeeId);
+  user.employeeId = employeeId;
   user.userLevel = userLevel;
   user.active = active;
 

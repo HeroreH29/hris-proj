@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
-import Public from "./components/Public";
 import Login from "./features/auth/Login";
 import DashLayout from "./components/Dashboard/DashLayout";
 import Welcome from "./features/auth/Welcome";
@@ -11,12 +10,15 @@ import EditUser from "./features/users/EditUser";
 import NewUserForm from "./features/users/NewUserForm";
 import EditAnnouncement from "./features/announcements/EditAnnouncement";
 import NewAnnouncement from "./features/announcements/NewAnnouncement";
+import RecordsList from "./features/employeerecords/RecordsList";
 import Prefetch from "./features/auth/Prefetch";
 import PersistLogin from "./features/auth/PersistLogin";
 import { USERLEVELS } from "./config/userOptions";
 import RequireAuth from "./features/auth/RequireAuth";
+import useTitle from "./hooks/useTitle";
 
 function App() {
+  useTitle("Via Mare HRIS | Login");
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
@@ -65,6 +67,19 @@ function App() {
                     <Route index element={<UsersList />} />
                     <Route path=":id" element={<EditUser />} />
                     <Route path="new" element={<NewUserForm />} />
+                  </Route>
+                </Route>
+                <Route
+                  element={
+                    <RequireAuth
+                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                    />
+                  }
+                >
+                  <Route path="employeerecords">
+                    <Route index element={<RecordsList />} />
+                    {/* <Route path=":id" element={<EditUser />} />
+                    <Route path="new" element={<NewUserForm />} /> */}
                   </Route>
                 </Route>
               </Route>

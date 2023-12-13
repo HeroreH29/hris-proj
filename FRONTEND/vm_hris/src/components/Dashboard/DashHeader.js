@@ -26,34 +26,48 @@ const DashHeader = () => {
   if (isError) return <p>Error: {error?.data?.message}</p>;
 
   const content = (
-    <Navbar expand="lg" className="border-bottom border-dark-subtle">
+    <Navbar
+      collapseOnSelect={true}
+      expand="lg"
+      className="border-bottom border-dark-subtle"
+    >
       <Container>
         <Navbar.Brand id="logo">Via Mare</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Nav>
-            <Nav.Link onClick={() => navigate("/dashboard")}>
+            <Nav.Link href="#dashboard" onClick={() => navigate("/dashboard")}>
               Dashboard
             </Nav.Link>
             {(isHR || isAdmin) && (
-              <Nav.Link onClick={() => navigate("/employeerecords")}>
+              <Nav.Link
+                href="#employeerecords"
+                onClick={() => navigate("/employeerecords")}
+              >
                 Employee Records
               </Nav.Link>
             )}
             {(isHR || isAdmin) && (
-              <Nav.Link onClick={() => console.log("/attendances")}>
+              <Nav.Link
+                href="#attendances"
+                onClick={() => console.log("/attendances")}
+              >
                 Attendance
               </Nav.Link>
             )}
-            <Nav.Link onClick={() => console.log("/leaves")}>
+            <Nav.Link href="#leaves" onClick={() => console.log("/leaves")}>
               Leave Tracker
             </Nav.Link>
             {(isHR || isAdmin) && (
-              <Nav.Link onClick={() => navigate("/users")}>
+              <Nav.Link href="#users" onClick={() => navigate("/users")}>
                 User Settings
               </Nav.Link>
             )}
-            <Nav.Link onClick={onLogoutClicked} className="text-danger">
+            <Nav.Link
+              href="#logout"
+              onClick={onLogoutClicked}
+              className="text-danger"
+            >
               Logout
             </Nav.Link>
             <Nav.Item className="ms-2">

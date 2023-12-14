@@ -16,7 +16,7 @@ const Record = ({ geninfoId }) => {
   const navigate = useNavigate();
 
   if (geninfo) {
-    //const handleEdit = () => navigate(`/employeerecords/${geninfoId}`);
+    const handleEdit = () => navigate(`/employeerecords/geninfo/${geninfoId}`);
 
     const status = geninfo.EmpStatus === "Y" ? "Active" : "Inactive";
     const statusClr =
@@ -25,7 +25,7 @@ const Record = ({ geninfoId }) => {
         : "fw-semibold text-danger";
 
     return (
-      <tr>
+      <tr onClick={handleEdit}>
         <td>{geninfo.EmployeeID}</td>
         <td>{`${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}`}</td>
         <td>{geninfo.AssignedOutlet}</td>

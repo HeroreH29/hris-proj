@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Container, Form, InputGroup, Button } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Container,
+  Form,
+  InputGroup,
+  Button,
+  Spinner,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -29,9 +37,7 @@ const Login = () => {
 
   useEffect(() => {}, []);
 
-  // const errClass = errMsg ? "errmsg" : "offscreen";
-
-  if (isLoading) return <PulseLoader color="#808080" />;
+  if (isLoading) return <Spinner animation="border" />;
 
   const handleUserInput = (e) => setUsername(e.target.value);
   const handlePassInput = (e) => setPassword(e.target.value);

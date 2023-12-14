@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import EditUserForm from "./EditUserForm";
 
 import { useGetUsersQuery } from "./usersApiSlice";
-import PulseLoader from "react-spinners/PulseLoader";
+import { Spinner } from "react-bootstrap";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -15,7 +15,7 @@ const EditUser = () => {
     }),
   });
 
-  if (!user) return <PulseLoader color="#FFF" />;
+  if (!user) return <Spinner animation="border" />;
 
   const content = <EditUserForm user={user} />;
 

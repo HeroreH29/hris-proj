@@ -8,3 +8,4 @@
 6. [ ] ONLY Admin & HR users are allowed to create, read, update, and delete employee records & HR announcements
 7. [ ] Automate employee regularization
 8. [ ] The system can generate PDF of detailed employee records (Can only be accessed by HR & Admin)
+9. [ ] HR or Admin can search and view specific employee record

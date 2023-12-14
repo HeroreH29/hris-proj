@@ -11,7 +11,7 @@ const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const EditUserForm = ({ user }) => {
   const [updateUser, { isLoading, isSuccess, isError, error }] =
-    useUpdateUserMutation(0);
+    useUpdateUserMutation();
 
   const [
     deleteUser,

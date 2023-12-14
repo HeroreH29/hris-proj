@@ -11,6 +11,7 @@ import NewUserForm from "./features/users/NewUserForm";
 import EditAnnouncement from "./features/announcements/EditAnnouncement";
 import NewAnnouncement from "./features/announcements/NewAnnouncement";
 import RecordsList from "./features/employeerecords/RecordsList";
+import EditRecord from "./features/employeerecords/EditRecord";
 import Prefetch from "./features/auth/Prefetch";
 import PersistLogin from "./features/auth/PersistLogin";
 import { USERLEVELS } from "./config/userOptions";
@@ -78,8 +79,8 @@ function App() {
                 >
                   <Route path="employeerecords">
                     <Route index element={<RecordsList />} />
-                    {/* <Route path=":id" element={<EditUser />} />
-                    <Route path="new" element={<NewUserForm />} /> */}
+                    <Route path="geninfo/:id" element={<EditRecord />} />
+                    {/* <Route path="new" element={<NewUserForm />} /> */}
                   </Route>
                 </Route>
               </Route>

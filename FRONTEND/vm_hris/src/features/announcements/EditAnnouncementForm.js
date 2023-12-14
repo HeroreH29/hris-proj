@@ -6,7 +6,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
 
 const EditAnnouncementForm = ({ users, announcement }) => {

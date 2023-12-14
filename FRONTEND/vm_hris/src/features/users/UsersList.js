@@ -1,7 +1,7 @@
 import React from "react";
 import { useGetUsersQuery } from "./usersApiSlice";
 import User from "./User";
-import { Table, Container, Row, Col, Button } from "react-bootstrap";
+import { Table, Container, Row, Col, Button, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ const UsersList = () => {
 
   let content;
 
-  if (isLoading) content = <PulseLoader color="#808080" />;
+  if (isLoading) content = <Spinner animation="border" />;
 
   if (isError) {
     content = <p className="text-danger">{error?.data?.message}</p>;

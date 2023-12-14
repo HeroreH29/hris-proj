@@ -11,7 +11,6 @@ const genInfoSchema = new mongoose.Schema({
   },
   Prefix: {
     type: String,
-    required: false,
     default: "",
   },
   FirstName: {
@@ -20,12 +19,10 @@ const genInfoSchema = new mongoose.Schema({
   },
   MiddleName: {
     type: String,
-    required: false,
     default: "",
   },
   MI: {
     type: String,
-    required: false,
     default: "",
   },
   LastName: {
@@ -54,12 +51,10 @@ const genInfoSchema = new mongoose.Schema({
   },
   DateLeaved: {
     type: String,
-    required: false,
     default: "",
   },
   RegDate: {
     type: String,
-    required: false,
     default: "",
   },
   DateProbationary: {
@@ -72,7 +67,6 @@ const genInfoSchema = new mongoose.Schema({
   },
   Notes: {
     type: String,
-    required: false,
     default: "",
   },
   TINnumber: {
@@ -93,7 +87,6 @@ const genInfoSchema = new mongoose.Schema({
   },
   ATMnumber: {
     type: String,
-    required: false,
     default: "",
   },
 });

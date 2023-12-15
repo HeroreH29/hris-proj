@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { useGetGeninfosQuery } from "./recordsApiSlice";
+import {
+  useGetGeninfosQuery,
+  useGetPersonalinfosQuery,
+} from "./recordsApiSlice";
 import Record from "./Record";
 import {
   Table,
@@ -18,7 +21,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 //import useAuth from "../../hooks/useAuth";
-import PulseLoader from "react-spinners/PulseLoader";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 
 const RecordsList = () => {
@@ -52,21 +54,36 @@ const RecordsList = () => {
 
   const {
     data: geninfos,
-    isSuccess,
-    isLoading,
-    isError,
-    error,
+    isSuccess: genSuccess,
+    isLoading: genLoading,
+    isError: genError,
+    error: gerror,
   } = useGetGeninfosQuery();
 
-  if (isLoading) return <Spinner animation="border" />;
+  const {
+    data: personalinfos,
+    isSuccess: persSuccess,
+    isLoading: persLoading,
+    isError: persError,
+    error: perror,
+  } = useGetPersonalinfosQuery();
 
-  if (isError) return <p className="text-danger">{error?.data?.message}</p>;
+  if (genLoading && persLoading) return <Spinner animation="border" />;
 
-  if (isSuccess) {
-    const { ids, entities } = geninfos;
+  if (genError && persError)
+    return (
+      <p className="text-danger">
+        geninfo err: {gerror?.data?.message} | persinfo err:{" "}
+        {perror?.data?.message}
+      </p>
+    );
 
-    const filteredIds = ids?.filter((id) => {
-      const geninfo = entities[id];
+  if (genSuccess && persSuccess) {
+    const { ids: gids, entities: gentities } = geninfos;
+    const { ids: pids } = personalinfos;
+
+    const filteredIds = gids?.filter((id) => {
+      const geninfo = gentities[id];
 
       const searchLowerCase = searchValue.toLowerCase();
       const outletFilterLowerCase = outletFilter.toLowerCase();
@@ -87,13 +104,14 @@ const RecordsList = () => {
       return matchesSearch && matchesOutlet && matchesStatus;
     });
 
-    const tableContent = ids?.length
+    // Passing geninfo ids as table content
+    const tableContent = gids?.length
       ? searchValue.trim() === ""
-        ? [...ids]
+        ? [...gids]
             .sort((a, b) => {
               return !nameSort
-                ? entities[a].LastName.localeCompare(entities[b].LastName)
-                : entities[b].LastName.localeCompare(entities[a].LastName);
+                ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+                : gentities[b].LastName.localeCompare(gentities[a].LastName);
             })
             .slice(sliceStart, sliceEnd)
             .map((geninfoId) => (
@@ -102,13 +120,18 @@ const RecordsList = () => {
         : filteredIds
             .sort((a, b) => {
               return !nameSort
-                ? entities[a].LastName.localeCompare(entities[b].LastName)
-                : entities[b].LastName.localeCompare(entities[a].LastName);
+                ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+                : gentities[b].LastName.localeCompare(gentities[a].LastName);
             })
             .slice(sliceStart, sliceEnd)
             .map((geninfoId) => (
               <Record key={geninfoId} geninfoId={geninfoId} />
             ))
+      : null;
+
+    // Passing personalinfo ids as extra prop
+    const personalinfoRecords = pids?.length
+      ? pids.map((pid) => <Record personalinfoId={pid} />)
       : null;
 
     return (
@@ -144,7 +167,10 @@ const RecordsList = () => {
               <th scope="col">Status</th>
             </tr>
           </thead>
-          <tbody>{tableContent}</tbody>
+          <tbody>
+            {tableContent}
+            {personalinfoRecords}
+          </tbody>
           <tfoot>
             <tr>
               <td></td>
@@ -189,7 +215,7 @@ const RecordsList = () => {
                   disabled={
                     filteredIds?.length
                       ? sliceEnd >= filteredIds?.length
-                      : sliceEnd >= ids?.length
+                      : sliceEnd >= gids?.length
                   }
                   onClick={() => {
                     setSliceStart((prev) => prev + 10);

@@ -9,14 +9,12 @@ import {
   PREFIX,
 } from "../../config/gInfoOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { format, parse } from "date-fns";
 
 const NUMBER_REGEX = "[0-9]";
 const ALPHANUM_REGEX = "[A-z0-9]";
 
-const EditRecordForm = ({ geninfo, id }) => {
+const EditGenInfoForm = ({ geninfo }) => {
   const [updateGeninfo, { isLoading, isSuccess, isError, error }] =
     useUpdateGeninfoMutation();
 
@@ -31,7 +29,6 @@ const EditRecordForm = ({ geninfo, id }) => {
     : null;
 
   /* GENINFO VARIABLES */
-  const [employeeId, setEmployeeId] = useState(geninfo.EmployeeID);
   const [bioId, setBioId] = useState(geninfo.BioID);
   const [prefix, setPrefix] = useState(geninfo.Prefix);
   const [firstName, setFirstName] = useState(geninfo.FirstName);
@@ -61,7 +58,6 @@ const EditRecordForm = ({ geninfo, id }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setEmployeeId("");
       setBioId("");
       setPrefix("");
       setFirstName("");
@@ -71,10 +67,10 @@ const EditRecordForm = ({ geninfo, id }) => {
       setAssignedOutlet("");
       setDepartment("");
       setJobTitle("");
-      /* setDateEmployed("");
+      setDateEmployed("");
       setRegDate("");
       setDateLeaved("");
-      setDateProbationary(""); */
+      setDateProbationary("");
       setEmpStatus("");
       setNotes("");
       setTINnumber("");
@@ -94,8 +90,8 @@ const EditRecordForm = ({ geninfo, id }) => {
 
     if (form.checkValidity() && !isLoading) {
       await updateGeninfo({
-        id: id,
-        EmployeeID: employeeId,
+        id: geninfo.id,
+        EmployeeID: geninfo.EmployeeID,
         BioID: bioId,
         Prefix: prefix,
         FirstName: firstName,
@@ -105,10 +101,10 @@ const EditRecordForm = ({ geninfo, id }) => {
         AssignedOutlet: assignedOutlet,
         Department: department,
         JobTitle: jobTitle,
-        /* DateEmployed: dateEmployed,
+        DateEmployed: dateEmployed,
         RegDate: regDate,
         DateLeaved: dateLeaved,
-        DateProbationary: dateProbationary, */
+        DateProbationary: dateProbationary,
         EmpStatus: empStatus,
         Notes: notes,
         TINnumber: tinnumber,
@@ -169,19 +165,6 @@ const EditRecordForm = ({ geninfo, id }) => {
   return (
     <>
       <Container>
-        <Row>
-          <Col md="auto">
-            <Button
-              variant="outline-secondary"
-              onClick={() => navigate("/employeerecords")}
-            >
-              <FontAwesomeIcon icon={faLeftLong} />
-            </Button>
-          </Col>
-          <Col md="auto">
-            <h3>Edit Record</h3>
-          </Col>
-        </Row>
         <Form
           className="p-3"
           noValidate
@@ -198,8 +181,8 @@ const EditRecordForm = ({ geninfo, id }) => {
                 autoComplete="off"
                 type="text"
                 pattern={ALPHANUM_REGEX}
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
+                disabled
+                defaultValue={geninfo.EmployeeID}
               />
               <Form.Control.Feedback type="invalid">
                 This field is required
@@ -374,6 +357,18 @@ const EditRecordForm = ({ geninfo, id }) => {
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} md="auto">
+              <Form.Label className="fw-semibold">Employment Status</Form.Label>
+              <Form.Select
+                onChange={(e) => setEmpStatus(e.target.value)}
+                value={empStatus}
+              >
+                {empStatusOptions}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                This field is required!
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Notes</Form.Label>
               <Form.Control
                 type="text"
@@ -436,10 +431,15 @@ const EditRecordForm = ({ geninfo, id }) => {
               />
             </Form.Group>
           </Row>
+          <Row className="mb-3">
+            <Col md="auto">
+              <Button variant="outline-success">Save Changes</Button>
+            </Col>
+          </Row>
         </Form>
       </Container>
     </>
   );
 };
 
-export default EditRecordForm;
+export default EditGenInfoForm;

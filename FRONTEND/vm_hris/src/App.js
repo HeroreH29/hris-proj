@@ -79,7 +79,7 @@ function App() {
                 >
                   <Route path="employeerecords">
                     <Route index element={<RecordsList />} />
-                    <Route path="geninfo/:id" element={<EditRecord />} />
+                    <Route path=":employeeId" element={<EditRecord />} />
                     {/* <Route path="new" element={<NewUserForm />} /> */}
                   </Route>
                 </Route>

@@ -33,10 +33,10 @@ const DashFooter = () => {
     <div className="fixed-sm-bottom">
       <footer className="footer bg-body-secondary">
         <div className="container">
-          <strong>DATE:</strong> {`${month} ${day}, ${year}`} |
+          <strong>DATE:</strong> {`${month} ${day}, ${year} | `}
           <strong> TIME:</strong>
-          {` ${twelveHourFormat}:${minutes}:${seconds}`} {ampm} |
-          <strong> CURRENT USER:</strong> {username} |
+          {` ${twelveHourFormat}:${minutes}:${seconds} | `}
+          <strong> CURRENT USER:</strong> {`${username} | `}
           <strong> USER LEVEL:</strong> {status}
         </div>
       </footer>

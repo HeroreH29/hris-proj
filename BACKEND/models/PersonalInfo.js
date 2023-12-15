@@ -9,7 +9,11 @@ const personalInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  Address: {
+  PresentAddress: {
+    type: String,
+    required: true,
+  },
+  PermanentAddress: {
     type: String,
     required: true,
   },
@@ -19,7 +23,6 @@ const personalInfoSchema = new mongoose.Schema({
   },
   Email: {
     type: String,
-    required: false,
     default: "",
   },
   Gender: {
@@ -40,37 +43,30 @@ const personalInfoSchema = new mongoose.Schema({
   },
   Phone: {
     type: String,
-    required: false,
     default: "",
   },
   Mobile: {
     type: String,
-    required: false,
     default: "",
   },
   Spouse: {
     type: String,
-    required: false,
     default: "",
   },
   FatherName: {
     type: String,
-    required: false,
     default: "",
   },
   Foccupation: {
     type: String,
-    required: false,
     default: "",
   },
   MotherName: {
     type: String,
-    required: false,
     default: "",
   },
   Moccupation: {
     type: String,
-    required: false,
     default: "",
   },
 });

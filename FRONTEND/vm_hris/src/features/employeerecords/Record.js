@@ -1,22 +1,29 @@
 import { useNavigate } from "react-router-dom";
 
-import { useGetGeninfosQuery } from "./recordsApiSlice";
-
-//import { Button } from "react-bootstrap";
+import {
+  useGetGeninfosQuery,
+  useGetPersonalinfosQuery,
+} from "./recordsApiSlice";
 
 import React, { memo } from "react";
 
-const Record = ({ geninfoId }) => {
+const Record = ({ geninfoId, personalinfoId }) => {
   const { geninfo } = useGetGeninfosQuery("recordsList", {
     selectFromResult: ({ data }) => ({
       geninfo: data?.entities[geninfoId],
     }),
   });
 
+  const { personalinfo } = useGetPersonalinfosQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      personalinfo: data?.entities[personalinfoId],
+    }),
+  });
+
   const navigate = useNavigate();
 
   if (geninfo) {
-    const handleEdit = () => navigate(`/employeerecords/geninfo/${geninfoId}`);
+    const handleEdit = () => navigate(`/employeerecords/${geninfo.EmployeeID}`);
 
     const status = geninfo.EmpStatus === "Y" ? "Active" : "Inactive";
     const statusClr =

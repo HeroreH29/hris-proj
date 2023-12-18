@@ -93,7 +93,8 @@ const updatePersonalInfo = async (req, res) => {
     id,
     EmployeeID,
     Birthday,
-    Address,
+    PresentAddress,
+    PermanentAddress,
     ZipCode,
     Email,
     Gender,
@@ -120,17 +121,10 @@ const updatePersonalInfo = async (req, res) => {
     return res.status(400).json({ message: "Personal info not found" });
   }
 
-  // Check duplicate
-  const duplicate = await PersonalInfo.findOne({ EmployeeID }).lean().exec();
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "EmployeeID already taken" });
-  }
-
   personalinfo.EmployeeID = EmployeeID;
   personalinfo.Birthday = Birthday;
-  personalinfo.Address = Address;
+  personalinfo.PresentAddress = PresentAddress;
+  personalinfo.PermanentAddress = PermanentAddress;
   personalinfo.ZipCode = ZipCode;
   personalinfo.Email = Email;
   personalinfo.Gender = Gender;

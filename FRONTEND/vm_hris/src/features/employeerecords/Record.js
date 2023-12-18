@@ -7,16 +7,10 @@ import {
 
 import React, { memo } from "react";
 
-const Record = ({ geninfoId, personalinfoId }) => {
+const Record = ({ geninfoId }) => {
   const { geninfo } = useGetGeninfosQuery("recordsList", {
     selectFromResult: ({ data }) => ({
       geninfo: data?.entities[geninfoId],
-    }),
-  });
-
-  const { personalinfo } = useGetPersonalinfosQuery("recordsList", {
-    selectFromResult: ({ data }) => ({
-      personalinfo: data?.entities[personalinfoId],
     }),
   });
 

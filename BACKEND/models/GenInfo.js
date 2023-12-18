@@ -59,7 +59,7 @@ const genInfoSchema = new mongoose.Schema({
   },
   DateProbationary: {
     type: String,
-    required: true,
+    default: "",
   },
   EmpStatus: {
     type: String,

@@ -32,6 +32,7 @@ app.use("/users", require("./routes/userRoutes"));
 app.use("/announcements", require("./routes/announcementRoutes"));
 app.use("/geninfos", require("./routes/genInfoRoutes"));
 app.use("/personalinfos", require("./routes/personalInfoRoutes"));
+app.use("/dependents", require("./routes/dependentRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

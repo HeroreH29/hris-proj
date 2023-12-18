@@ -15,7 +15,7 @@ const personalInfoSchema = new mongoose.Schema({
   },
   PermanentAddress: {
     type: String,
-    required: true,
+    default: "",
   },
   ZipCode: {
     type: Number,

@@ -23,12 +23,6 @@ const EditRecord = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
 
-  /*  const { geninfo } = useGetGeninfosQuery("recordsList", {
-    selectFromResult: ({ data }) => ({
-      geninfo: data?.entities,
-    }),
-  }); */
-
   const {
     data: geninfos,
     isSuccess: genSuccess,
@@ -65,10 +59,11 @@ const EditRecord = () => {
   const { ids: gids, entities: gentities } = geninfos;
   const { ids: pids, entities: pentities } = personalinfos;
 
+  // Fetch general info using Employee ID
   const geninfo = gids?.filter(
     (id) => gentities[id]?.EmployeeID === employeeId
   );
-
+  // Fetch personal info using Employee ID
   const personalinfo = pids?.filter(
     (id) => pentities[id]?.EmployeeID === employeeId
   );
@@ -89,10 +84,10 @@ const EditRecord = () => {
         </Col>
       </Row>
       <Tabs className="mb-3" defaultActiveKey="geninfo">
-        <Tab eventKey="geninfo" title="General Info">
+        <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={gentities[geninfo]} />
         </Tab>
-        <Tab eventKey="personalinfo" title="Personal Info">
+        <Tab eventKey="personalinfo" title="Personal Info" unmountOnExit={true}>
           <EditPersonalInfoForm personalinfo={pentities[personalinfo]} />
         </Tab>
       </Tabs>

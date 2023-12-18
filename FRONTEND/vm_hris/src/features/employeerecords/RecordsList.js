@@ -131,7 +131,7 @@ const RecordsList = () => {
 
     // Passing personalinfo ids as extra prop
     const personalinfoRecords = pids?.length
-      ? pids.map((pid) => <Record personalinfoId={pid} />)
+      ? pids.map((pid) => <Record key={pid} personalinfoId={pid} />)
       : null;
 
     return (

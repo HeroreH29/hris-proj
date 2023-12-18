@@ -8,10 +8,20 @@ import {
   EMPSTATUS,
   PREFIX,
 } from "../../config/gInfoOptions";
-import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Col,
+  Row,
+  Container,
+  InputGroup,
+  DropdownButton,
+  Dropdown,
+} from "react-bootstrap";
 import { format, parse } from "date-fns";
 
-const NUMBER_REGEX = "[0-9]";
+const NUMBER_REGEX = /^[0-9]*$/;
+const IDNUMS_REGEX = /^[0-9-]*$/;
 const ALPHANUM_REGEX = "[A-z0-9]";
 
 const EditGenInfoForm = ({ geninfo }) => {
@@ -19,14 +29,18 @@ const EditGenInfoForm = ({ geninfo }) => {
     useUpdateGeninfoMutation();
 
   const navigate = useNavigate();
-  const parsedDE = parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date());
-  const parsedRD = parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date());
+  const parsedDE = geninfo.DateEmployed
+    ? parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date())
+    : "";
+  const parsedRD = geninfo.RegDate
+    ? parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date())
+    : "";
   const parsedDL = geninfo.DateLeaved
     ? parse(geninfo?.DateLeaved, "MMM dd, yyyy", new Date())
-    : null;
+    : "";
   const parsedDP = geninfo.DateProbationary
     ? parse(geninfo?.DateProbationary, "MMM dd, yyyy", new Date())
-    : null;
+    : "";
 
   /* GENINFO VARIABLES */
   const [bioId, setBioId] = useState(geninfo.BioID);
@@ -39,14 +53,16 @@ const EditGenInfoForm = ({ geninfo }) => {
   const [department, setDepartment] = useState(geninfo.Department);
   const [jobTitle, setJobTitle] = useState(geninfo.JobTitle);
   const [dateEmployed, setDateEmployed] = useState(
-    format(parsedDE, "yyyy-MM-dd")
+    parsedDE ? format(parsedDE, "yyyy-MM-dd") : ""
   );
-  const [regDate, setRegDate] = useState(format(parsedRD, "yyyy-MM-dd"));
+  const [regDate, setRegDate] = useState(
+    parsedRD ? format(parsedRD, "yyyy-MM-dd") : ""
+  );
   const [dateLeaved, setDateLeaved] = useState(
-    parsedDL ? format(parsedDL, "yyyy-MM-dd") : null
+    parsedDL ? format(parsedDL, "yyyy-MM-dd") : ""
   );
   const [dateProbationary, setDateProbationary] = useState(
-    parsedDP ? format(parsedDP, "yyyy-MM-dd") : null
+    parsedDP ? format(parsedDP, "yyyy-MM-dd") : ""
   );
   const [empStatus, setEmpStatus] = useState(geninfo.EmpStatus);
   const [notes, setNotes] = useState(geninfo.Notes);
@@ -82,13 +98,30 @@ const EditGenInfoForm = ({ geninfo }) => {
     }
   }, [isSuccess, navigate]);
 
+  /* DATE REVERT */
+  const dateRevert = (dateString, formatString) => {
+    return format(parse(dateString, "yyyy-MM-dd", new Date()), formatString);
+  };
+
   /* SUBMIT FUNCTION */
-  const onSaveUserClicked = async (e) => {
+  const onSaveInfoClicked = async (e) => {
     e.preventDefault();
 
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
+      // Revert dates
+      const revertedDE = dateEmployed
+        ? dateRevert(dateEmployed, "MMM dd, yyyy")
+        : "";
+      const revertedDP = dateProbationary
+        ? dateRevert(dateProbationary, "MMM dd, yyyy")
+        : "";
+      const revertedRD = regDate ? dateRevert(regDate, "MMMM dd, yyyy") : "";
+      const revertedDL = dateLeaved
+        ? dateRevert(dateLeaved, "MMM dd, yyyy")
+        : "";
+
       await updateGeninfo({
         id: geninfo.id,
         EmployeeID: geninfo.EmployeeID,
@@ -101,10 +134,10 @@ const EditGenInfoForm = ({ geninfo }) => {
         AssignedOutlet: assignedOutlet,
         Department: department,
         JobTitle: jobTitle,
-        DateEmployed: dateEmployed,
-        RegDate: regDate,
-        DateLeaved: dateLeaved,
-        DateProbationary: dateProbationary,
+        DateEmployed: revertedDE,
+        RegDate: revertedRD,
+        DateLeaved: revertedDL,
+        DateProbationary: revertedDP,
         EmpStatus: empStatus,
         Notes: notes,
         TINnumber: tinnumber,
@@ -117,6 +150,15 @@ const EditGenInfoForm = ({ geninfo }) => {
     }
 
     setValidated(true);
+  };
+
+  /* USER INPUT CHANGE */
+  const userInputChange = (e, REGEX, setStateVariable) => {
+    const inputValue = e.target.value;
+
+    if (REGEX.test(inputValue) || inputValue === "") {
+      setStateVariable(inputValue);
+    }
   };
 
   /* DROPDOWN OPTIONS */
@@ -132,9 +174,14 @@ const EditGenInfoForm = ({ geninfo }) => {
   const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
     ([key, value]) => {
       return (
-        <option key={key} value={value}>
+        <Dropdown.Item
+          key={key}
+          value={value}
+          as="option"
+          onClick={() => setAssignedOutlet(value)}
+        >
           {key}
-        </option>
+        </Dropdown.Item>
       );
     }
   );
@@ -169,7 +216,7 @@ const EditGenInfoForm = ({ geninfo }) => {
           className="p-3"
           noValidate
           validated={validated}
-          onSubmit={onSaveUserClicked}
+          onSubmit={onSaveInfoClicked}
         >
           {/* EmployeeID and BioID */}
           <Row className="mb-3">
@@ -177,7 +224,6 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Label className="fw-semibold">Employee ID</Form.Label>
               <Form.Control
                 required
-                autoFocus
                 autoComplete="off"
                 type="text"
                 pattern={ALPHANUM_REGEX}
@@ -191,12 +237,12 @@ const EditGenInfoForm = ({ geninfo }) => {
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Bio ID</Form.Label>
               <Form.Control
+                autoFocus
                 type="text"
                 autoComplete="off"
-                pattern={NUMBER_REGEX}
                 required
                 value={bioId}
-                onChange={(e) => setBioId(e.target.value)}
+                onChange={(e) => userInputChange(e, NUMBER_REGEX, setBioId)}
               />
               <Form.Control.Feedback type="invalid">
                 This field is required
@@ -223,7 +269,6 @@ const EditGenInfoForm = ({ geninfo }) => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
-              <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col}>
               <Form.Label className="fw-semibold">Middle Name</Form.Label>
@@ -266,13 +311,25 @@ const EditGenInfoForm = ({ geninfo }) => {
             </Form.Group>
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Assigned Outlet</Form.Label>
-              <Form.Select
+              <InputGroup>
+                <Form.Control
+                  required
+                  type="text"
+                  value={assignedOutlet}
+                  onChange={(e) => setAssignedOutlet(e.target.value)}
+                />
+                <DropdownButton variant="outline-secondary" title="Options">
+                  {assignedOutletOptions}
+                </DropdownButton>
+              </InputGroup>
+
+              {/* <Form.Select
                 required
                 value={assignedOutlet}
                 onChange={(e) => setAssignedOutlet(e.target.value)}
               >
                 {assignedOutletOptions}
-              </Form.Select>
+              </Form.Select> */}
               <Form.Control.Feedback type="invalid">
                 Select an option
               </Form.Control.Feedback>
@@ -321,7 +378,6 @@ const EditGenInfoForm = ({ geninfo }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Probationary Date</Form.Label>
               <Form.Control
-                required
                 type="date"
                 value={dateProbationary}
                 onChange={(e) => setDateProbationary(e.target.value)}
@@ -385,9 +441,8 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Control
                 required
                 type="text"
-                pattern={NUMBER_REGEX}
                 value={tinnumber}
-                onChange={(e) => setTINnumber(e.target.value)}
+                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setTINnumber)}
               />
             </Form.Group>
             <Form.Group as={Col} md="auto">
@@ -395,9 +450,8 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Control
                 required
                 type="text"
-                pattern={NUMBER_REGEX}
                 value={sssnumber}
-                onChange={(e) => setSSSnumber(e.target.value)}
+                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setSSSnumber)}
               />
             </Form.Group>
             <Form.Group as={Col} md="auto">
@@ -405,9 +459,8 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Control
                 required
                 type="text"
-                pattern={NUMBER_REGEX}
                 value={phnumber}
-                onChange={(e) => setPHnumber(e.target.value)}
+                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPHnumber)}
               />
             </Form.Group>
             <Form.Group as={Col} md="auto">
@@ -415,25 +468,25 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Control
                 required
                 type="text"
-                pattern={NUMBER_REGEX}
                 value={pinumber}
-                onChange={(e) => setPInumber(e.target.value)}
+                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPInumber)}
               />
             </Form.Group>
-            <Form.Group as={Col} md="auto">
+            <Form.Group as={Col} md="3">
               <Form.Label className="fw-semibold">ATM Number</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="(Optional for confidentiality)"
-                pattern={NUMBER_REGEX}
                 value={atmnumber}
-                onChange={(e) => setATMnumber(e.target.value)}
+                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setATMnumber)}
               />
             </Form.Group>
           </Row>
           <Row className="mb-3">
             <Col md="auto">
-              <Button variant="outline-success">Save Changes</Button>
+              <Button type="submit" variant="outline-success">
+                Save Changes
+              </Button>
             </Col>
           </Row>
         </Form>

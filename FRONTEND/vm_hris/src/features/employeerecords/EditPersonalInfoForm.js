@@ -2,7 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useUpdatePersonalinfoMutation } from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { GENDER, CIVILSTATUS } from "../../config/pInfoOptions";
-import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Col,
+  Row,
+  Container,
+  InputGroup,
+  DropdownButton,
+  Dropdown,
+} from "react-bootstrap";
 import { format, parse } from "date-fns";
 
 const ZIPCODE_REGEX = /^[0-9]{1,4}$/;
@@ -13,6 +22,8 @@ const PHONEMOBILE_REGEX = /^[0-9+ -]*$/;
 const EditPersonalInfoForm = ({ personalinfo }) => {
   const [updatePersonalinfo, { isLoading, isSuccess, isError, error }] =
     useUpdatePersonalinfoMutation();
+
+  const [disablePermAdd, setDisablePermAdd] = useState(true);
 
   const navigate = useNavigate();
   const parsedBD = personalinfo?.Birthday
@@ -65,7 +76,7 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
   }, [isSuccess, navigate]);
 
   /* SUBMIT FUNCTION */
-  const onSaveUserClicked = async (e) => {
+  const onSaveInfoClicked = async (e) => {
     e.preventDefault();
 
     const form = e.currentTarget;
@@ -82,10 +93,9 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
         EmployeeID: personalinfo.EmployeeID,
         Birthday: revertedBday,
         PresentAddress: presentAddress,
-        PermanentAddress:
-          presentAddress === permanentAddress
-            ? "(Same as present address)"
-            : permanentAddress,
+        PermanentAddress: presentAddress
+          ? "(Same as present address)"
+          : permanentAddress,
         ZipCode: zipCode,
         Email: email,
         Gender: gender,
@@ -141,7 +151,7 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
           className="p-3"
           noValidate
           validated={validated}
-          onSubmit={onSaveUserClicked}
+          onSubmit={onSaveInfoClicked}
         >
           {/* Birthday */}
           <Row className="mb-3">
@@ -161,21 +171,17 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Email</Form.Label>
               <Form.Control
-                required
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
               />
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
             </Form.Group>
           </Row>
           {/* Present Address, Permanent Address, and Zip Code */}
           <Row className="mb-3">
-            <Form.Group as={Col} md="auto">
+            <Form.Group as={Col} md="4">
               <Form.Label className="fw-semibold">Present Address</Form.Label>
               <Form.Control
                 required
@@ -187,14 +193,36 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} md="auto">
+            <Form.Group as={Col} md="4">
               <Form.Label className="fw-semibold">Permanent Address</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={permanentAddress}
-                onChange={(e) => setPermanentAddress(e.target.value)}
-              />
+              <InputGroup>
+                <Form.Control
+                  type="text"
+                  value={permanentAddress}
+                  disabled={disablePermAdd}
+                  onChange={(e) => setPermanentAddress(e.target.value)}
+                />
+                <DropdownButton
+                  variant="outline-secondary"
+                  title="Options"
+                  align="end"
+                >
+                  <Dropdown.Item
+                    as="option"
+                    onClick={() => {
+                      setDisablePermAdd(false);
+                      setPermanentAddress("");
+                    }}
+                  >{`(Input address)`}</Dropdown.Item>
+                  <Dropdown.Item
+                    as="option"
+                    onClick={() => {
+                      setPermanentAddress("(Same as present address)");
+                      setDisablePermAdd(true);
+                    }}
+                  >{`(Same as present address)`}</Dropdown.Item>
+                </DropdownButton>
+              </InputGroup>
               <Form.Control.Feedback type="invalid">
                 This field required!
               </Form.Control.Feedback>
@@ -268,6 +296,7 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Spouse</Form.Label>
               <Form.Control
+                disabled={civilStatus === "Single"}
                 type="text"
                 placeholder="(Optional)"
                 value={spouse}
@@ -304,64 +333,54 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* TIN number, SSS number, PH number, PI number, ATM number */}
-          {/* <Row className="mb-3">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">TIN Number</Form.Label>
+          {/* Father & Mother Name and Occupation */}
+          <Row className="mb-3">
+            <InputGroup as={Col} md="auto" className="mb-3">
+              <InputGroup.Text className="fw-semibold">
+                Father Name and Occupation
+              </InputGroup.Text>
               <Form.Control
                 required
                 type="text"
-                pattern={ZIPCODE_REGEX}
-                value={tinnumber}
-                onChange={(e) => setTINnumber(e.target.value)}
+                value={fatherName}
+                onChange={(e) => userInputChange(e, ALPHA_REGEX, setFatherName)}
               />
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">SSS Number</Form.Label>
               <Form.Control
                 required
                 type="text"
-                pattern={ZIPCODE_REGEX}
-                value={sssnumber}
-                onChange={(e) => setSSSnumber(e.target.value)}
+                value={foccupation}
+                onChange={(e) =>
+                  userInputChange(e, ALPHA_REGEX, setFoccupation)
+                }
               />
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">PH Number</Form.Label>
+            </InputGroup>
+            <InputGroup as={Col} md="auto" className="mb-3">
+              <InputGroup.Text className="fw-semibold">
+                Mother Name and Occupation
+              </InputGroup.Text>
               <Form.Control
                 required
                 type="text"
-                pattern={ZIPCODE_REGEX}
-                value={phnumber}
-                onChange={(e) => setPHnumber(e.target.value)}
+                value={motherName}
+                onChange={(e) => userInputChange(e, ALPHA_REGEX, setMotherName)}
               />
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">PI Number</Form.Label>
               <Form.Control
                 required
                 type="text"
-                pattern={ZIPCODE_REGEX}
-                value={pinumber}
-                onChange={(e) => setPInumber(e.target.value)}
+                value={moccupation}
+                onChange={(e) =>
+                  userInputChange(e, ALPHA_REGEX, setMoccupation)
+                }
               />
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">ATM Number</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="(Optional for confidentiality)"
-                pattern={ZIPCODE_REGEX}
-                value={atmnumber}
-                onChange={(e) => setATMnumber(e.target.value)}
-              />
-            </Form.Group>
+            </InputGroup>
           </Row>
           <Row className="mb-3">
             <Col md="auto">
-              <Button variant="outline-success">Save Changes</Button>
+              <Button type="submit" variant="outline-success">
+                Save Changes
+              </Button>
             </Col>
-          </Row> */}
+          </Row>
         </Form>
       </Container>
     </>

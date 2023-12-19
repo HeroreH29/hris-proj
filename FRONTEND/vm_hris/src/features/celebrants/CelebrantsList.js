@@ -7,9 +7,12 @@ import { Table, Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../hooks/useTitle";
 
 const CelebrantsList = () => {
   const navigate = useNavigate();
+
+  useTitle("Birthday Celebrants | Via Mare HRIS");
 
   const {
     data: personalinfos,

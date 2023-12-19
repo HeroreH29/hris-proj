@@ -16,7 +16,7 @@ import useTitle from "../../hooks/useTitle";
 const AnnouncementsList = () => {
   const { isHR, isAdmin } = useAuth();
 
-  useTitle("Via Mare HRIS | Announcements");
+  useTitle("Announcements | Via Mare HRIS");
 
   const navigate = useNavigate();
 

@@ -19,7 +19,7 @@ import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
 
 function App() {
-  useTitle("Via Mare HRIS | Login");
+  useTitle("Login | Via Mare HRIS");
   return (
     <Routes>
       <Route path="/" element={<Layout />}>

@@ -21,10 +21,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 //import useAuth from "../../hooks/useAuth";
+import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 
 const RecordsList = () => {
   const navigate = useNavigate();
+
+  useTitle("Employee Records | Via Mare HRIS");
 
   const [sliceStart, setSliceStart] = useState(0);
   const [sliceEnd, setSliceEnd] = useState(10);

@@ -11,7 +11,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import PulseLoader from "react-spinners/PulseLoader";
 
 import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
@@ -24,7 +23,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [persist, setPersist] = usePersist();
-  //const [errMsg, setErrMsg] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();

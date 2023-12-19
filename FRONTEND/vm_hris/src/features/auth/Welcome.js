@@ -6,7 +6,7 @@ import useAuth from "../../hooks/useAuth";
 
 const Welcome = () => {
   const { status } = useAuth();
-  useTitle(`Via Mare HRIS | ${status} Dashboard`);
+  //useTitle(`${status} Dashboard | Via Mare HRIS`);
 
   const date = new Date();
   const currentMonth = date.toLocaleString("default", { month: "long" });

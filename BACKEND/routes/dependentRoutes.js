@@ -9,7 +9,7 @@ router
   .route("/")
   .get(dependentsController.getAllDependents)
   .post(dependentsController.createDependent)
-  .patch()
-  .delete();
+  .patch(dependentsController.updateDependent)
+  .delete(dependentsController.deleteDependent);
 
 module.exports = router;

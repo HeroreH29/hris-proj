@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useUpdateGeninfoMutation } from "./recordsApiSlice";
+import {
+  useGetGeninfosQuery,
+  useUpdateGeninfoMutation,
+} from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
   ASSIGNEDOUTLET,
@@ -29,6 +32,7 @@ const EditGenInfoForm = ({ geninfo }) => {
     useUpdateGeninfoMutation();
 
   const navigate = useNavigate();
+
   const parsedDE = geninfo.DateEmployed
     ? parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date())
     : "";

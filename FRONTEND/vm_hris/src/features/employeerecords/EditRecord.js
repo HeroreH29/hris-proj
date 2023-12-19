@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import EditGenInfoForm from "./EditGenInfoForm";
 
 import {
+  useGetDependentsQuery,
   useGetGeninfosQuery,
   useGetPersonalinfosQuery,
 } from "./recordsApiSlice";
@@ -18,55 +19,43 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import EditPersonalInfoForm from "./EditPersonalInfoForm";
+import DependentsList from "./DependentsList";
 
 const EditRecord = () => {
   const { employeeId } = useParams();
+
   const navigate = useNavigate();
 
-  const {
-    data: geninfos,
-    isSuccess: genSuccess,
-    isLoading: genLoading,
-    isError: genError,
-    error: gerror,
-  } = useGetGeninfosQuery();
+  // Fetch general info using Employee ID
+  const { geninfo } = useGetGeninfosQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      geninfo: data?.ids
+        .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data.entities[id])[0],
+    }),
+  });
 
-  const {
-    data: personalinfos,
-    isSuccess: persSuccess,
-    isLoading: persLoading,
-    isError: persError,
-    error: perror,
-  } = useGetPersonalinfosQuery();
+  // Fetch personal info using Employee ID
+  const { personalinfo } = useGetPersonalinfosQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      personalinfo: data?.ids
+        .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data.entities[id])[0],
+    }),
+  });
 
-  if (genLoading && persLoading) {
+  // Fetch dependents using EmployeeID
+  const { dependents } = useGetDependentsQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      dependents: data?.ids
+        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data?.entities[id]),
+    }),
+  });
+
+  if (!geninfo && !personalinfo && !dependents) {
     return <Spinner animation="border" />;
   }
-
-  if (genError && persError) {
-    return (
-      <p className="text-danger">
-        geninfo err: {gerror?.data?.message} | persinfo err:{" "}
-        {perror?.data?.message}
-      </p>
-    );
-  }
-
-  if (!genSuccess || !persSuccess) {
-    return null; // or some default/fallback UI
-  }
-
-  const { ids: gids, entities: gentities } = geninfos;
-  const { ids: pids, entities: pentities } = personalinfos;
-
-  // Fetch general info using Employee ID
-  const geninfo = gids?.filter(
-    (id) => gentities[id]?.EmployeeID === employeeId
-  );
-  // Fetch personal info using Employee ID
-  const personalinfo = pids?.filter(
-    (id) => pentities[id]?.EmployeeID === employeeId
-  );
 
   return (
     <Container>
@@ -85,10 +74,13 @@ const EditRecord = () => {
       </Row>
       <Tabs className="mb-3" defaultActiveKey="geninfo">
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
-          <EditGenInfoForm geninfo={gentities[geninfo]} />
+          <EditGenInfoForm geninfo={geninfo} />
         </Tab>
         <Tab eventKey="personalinfo" title="Personal Info" unmountOnExit={true}>
-          <EditPersonalInfoForm personalinfo={pentities[personalinfo]} />
+          <EditPersonalInfoForm personalinfo={personalinfo} />
+        </Tab>
+        <Tab eventKey="dependents" title="Dependents" unmountOnExit={true}>
+          <DependentsList dependents={dependents} />
         </Tab>
       </Tabs>
     </Container>

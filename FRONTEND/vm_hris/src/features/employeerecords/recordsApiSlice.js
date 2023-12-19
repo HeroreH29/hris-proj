@@ -3,9 +3,11 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 const geninfosAdapter = createEntityAdapter({});
 const personalinfosAdapter = createEntityAdapter({});
+const dependentsAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
+const depInitialState = dependentsAdapter.getInitialState();
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({
@@ -128,6 +130,78 @@ export const personalinfosApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
+// Dependents
+export const dependentsApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getDependents: builder.query({
+      query: () => ({
+        url: "/dependents",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedDependents = responseData.map((dependent) => {
+          dependent.id = dependent._id;
+          return dependent;
+        });
+        return dependentsAdapter.setAll(depInitialState, loadedDependents);
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "Dependents", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "Dependents", id })),
+          ];
+        } else return [{ type: "Dependents", id: "LIST" }];
+      },
+    }),
+    addDependent: builder.mutation({
+      query: (initialDependent) => ({
+        url: "/dependents",
+        method: "POST",
+        body: {
+          ...initialDependent,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "Dependent",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateDependent: builder.mutation({
+      query: (initialDependent) => ({
+        url: "/dependents",
+        method: "PATCH",
+        body: {
+          ...initialDependent,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Dependent",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteDependent: builder.mutation({
+      query: ({ id }) => ({
+        url: "/dependents",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Dependent",
+          id: arg.id,
+        },
+      ],
+    }),
+  }),
+});
+
 export const {
   useGetGeninfosQuery,
   useAddGeninfoMutation,
@@ -140,11 +214,21 @@ export const {
   useUpdatePersonalinfoMutation,
 } = personalinfosApiSlice;
 
+export const {
+  useGetDependentsQuery,
+  useAddDependentMutation,
+  useUpdateDependentMutation,
+  useDeleteDependentMutation,
+} = dependentsApiSlice;
+
 export const selectGeninfosResult =
   geninfosApiSlice.endpoints.getGeninfos.select();
 
 export const selectPersonalinfosResult =
   personalinfosApiSlice.endpoints.getPersonalinfos.select();
+
+export const selectDependentsResult =
+  dependentsApiSlice.endpoints.getDependents.select();
 
 const selectGeninfosData = createSelector(
   selectGeninfosResult,
@@ -154,6 +238,11 @@ const selectGeninfosData = createSelector(
 const selectPersonalinfosData = createSelector(
   selectPersonalinfosResult,
   (personalinfosResult) => personalinfosResult.data
+);
+
+const selectDependentsData = createSelector(
+  selectDependentsResult,
+  (dependentsResult) => dependentsResult.data
 );
 
 export const {
@@ -172,4 +261,12 @@ export const {
   // Pass in a selector that returns the geninfos slice of state
 } = personalinfosAdapter.getSelectors(
   (state) => selectPersonalinfosData(state) ?? personalInitialState
+);
+
+export const {
+  selectAll: selectAllDependents,
+  selectById: selectDependentById,
+  selectIds: selectDependentIds,
+} = dependentsAdapter.getSelectors(
+  (state) => selectDependentsData(state) ?? depInitialState
 );

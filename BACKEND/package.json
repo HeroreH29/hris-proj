@@ -1,6 +1,6 @@
 {
   "name": "hris",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "via mare hris web application",
   "main": "server.js",
   "scripts": {
@@ -22,7 +22,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "mongoose-sequence": "^5.3.1",
-    "string-similarity": "^4.0.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

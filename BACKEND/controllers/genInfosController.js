@@ -1,4 +1,6 @@
 const GenInfo = require("../models/GenInfo");
+const PersonalInfo = require("../models/PersonalInfo");
+const Dependent = require("../models/Dependent");
 
 // @desc Get all users
 // @route GET /users
@@ -132,26 +134,53 @@ const updateGenInfo = async (req, res) => {
     ATMnumber,
   } = req.body;
 
+  const newEmployeeID = EmployeeID;
+
   // Confirm data
-  if (!id || !EmployeeID) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (!id) {
+    return res.status(400).json({ message: "Information 'id' is required" });
   }
 
   const geninfo = await GenInfo.findById(id).exec();
 
   if (!geninfo) {
-    return res.status(400).json({ message: "General info not found" });
+    return res.status(400).json({ message: "Information not found" });
   }
 
   // Check duplicate
-  const duplicate = await GenInfo.findOne({ EmployeeID }).lean().exec();
+  const duplicate = await GenInfo.exists({ EmployeeID: geninfo.EmployeeID });
 
   // Allow updates to the original user
   if (duplicate && duplicate?._id.toString() !== id) {
     return res.status(409).json({ message: "EmployeeID already taken" });
   }
 
-  geninfo.EmployeeID = EmployeeID;
+  /* It is also required to update the EmployeeID (changed or not) 
+  of other information of the specific employee */
+
+  const personalinfo = await PersonalInfo.findOne({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
+  const dependent = await Dependent.find({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
+
+  // Apply changes to other informations
+  let updatedPersonalInfo;
+  if (personalinfo) {
+    personalinfo.EmployeeID = newEmployeeID;
+    updatedPersonalInfo = await personalinfo.save();
+  }
+
+  let updatedDependent;
+  if (dependent?.length > 0) {
+    dependent.forEach((dep) => {
+      dep.EmployeeID = newEmployeeID;
+    });
+    updatedDependent = await dependent.save();
+  }
+
+  geninfo.EmployeeID = newEmployeeID;
   geninfo.BioID = BioID;
   geninfo.Prefix = Prefix;
   geninfo.FirstName = FirstName;
@@ -175,7 +204,13 @@ const updateGenInfo = async (req, res) => {
 
   const updatedGenInfo = await geninfo.save();
 
-  res.json({ message: `General info of ${updatedGenInfo.EmployeeID} updated` });
+  if (updatedGenInfo || updatedPersonalInfo || updatedDependent) {
+    res.json({
+      message: `Information of ${updatedGenInfo.EmployeeID} updated`,
+    });
+  } else {
+    res.json({ message: "Something went wrong" });
+  }
 };
 
 // @desc Delete user

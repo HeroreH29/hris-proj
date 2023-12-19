@@ -143,7 +143,9 @@ const RecordsList = () => {
           </Col>
 
           <Col md="auto">
+            {/* Temporarily disabled */}
             <Button
+              disabled
               variant="outline-primary"
               onClick={() => navigate("/users/new")}
             >

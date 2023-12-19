@@ -1,9 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import {
-  useGetGeninfosQuery,
-  useGetPersonalinfosQuery,
-} from "./recordsApiSlice";
+import { useGetGeninfosQuery } from "./recordsApiSlice";
 
 import React, { memo } from "react";
 

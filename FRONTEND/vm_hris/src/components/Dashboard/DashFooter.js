@@ -35,7 +35,7 @@ const DashFooter = () => {
         <div className="container">
           <strong>DATE:</strong> {`${month} ${day}, ${year} | `}
           <strong> TIME:</strong>
-          {` ${twelveHourFormat}:${minutes}:${seconds} | `}
+          {` ${twelveHourFormat}:${minutes}:${seconds} ${ampm} | `}
           <strong> CURRENT USER:</strong> {`${username} | `}
           <strong> USER LEVEL:</strong> {status}
         </div>

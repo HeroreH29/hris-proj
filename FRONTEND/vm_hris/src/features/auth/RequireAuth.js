@@ -7,13 +7,13 @@ const RequireAuth = ({ allowedUserLevels }) => {
   const location = useLocation();
   const { userLevel } = useAuth();
 
-  const content = allowedUserLevels.includes(userLevel) ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/" state={{ from: location }} replace />
-  );
+  const isUserAllowed = allowedUserLevels.includes(userLevel);
 
-  return content;
+  if (isUserAllowed) {
+    return <Outlet />;
+  } else {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
 };
 
 export default RequireAuth;

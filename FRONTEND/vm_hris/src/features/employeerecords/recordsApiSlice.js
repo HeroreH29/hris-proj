@@ -4,10 +4,12 @@ import { apiSlice } from "../../app/api/apiSlice";
 const geninfosAdapter = createEntityAdapter({});
 const personalinfosAdapter = createEntityAdapter({});
 const dependentsAdapter = createEntityAdapter({});
+const workinfosAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
 const depInitialState = dependentsAdapter.getInitialState();
+const workInitialState = workinfosAdapter.getInitialState();
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({
@@ -199,6 +201,78 @@ export const dependentsApiSlice = apiSlice.injectEndpoints({
         },
       ],
     }),
+  }),
+});
+
+// Work infos
+export const workinfosApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getWorkinfos: builder.query({
+      query: () => ({
+        url: "/workinfos",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedWorkinfos = responseData.map((workinfo) => {
+          workinfo.id = workinfo._id;
+          return workinfo;
+        });
+        return workinfosAdapter.setAll(workInitialState, loadedWorkinfos);
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "Workinfos", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "Workinfos", id })),
+          ];
+        } else return [{ type: "Workinfos", id: "LIST" }];
+      },
+    }),
+    /* addDependent: builder.mutation({
+      query: (initialDependent) => ({
+        url: "/dependents",
+        method: "POST",
+        body: {
+          ...initialDependent,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "Dependent",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateDependent: builder.mutation({
+      query: (initialDependent) => ({
+        url: "/dependents",
+        method: "PATCH",
+        body: {
+          ...initialDependent,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Dependent",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteDependent: builder.mutation({
+      query: ({ id }) => ({
+        url: "/dependents",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Dependent",
+          id: arg.id,
+        },
+      ],
+    }), */
   }),
 });
 

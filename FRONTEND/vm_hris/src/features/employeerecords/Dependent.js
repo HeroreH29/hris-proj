@@ -1,5 +1,4 @@
 import React, { useState, memo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button, Modal, Form, Col, Row } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
@@ -59,16 +58,11 @@ const Dependent = ({ dependent }) => {
   });
 
   useEffect(() => {
-    if (isSuccess) {
-      setNames("");
-      setDep("");
-      setBirthday("");
-      setStatus("");
-      setRelationship("");
-      setCovered("");
+    if (isSuccess || isDelSuccess) {
       setShowModal(false);
+      setValidated(false);
     }
-  }, [isSuccess]);
+  }, [isSuccess, isDelSuccess]);
 
   /* DATE REVERT */
   const dateRevert = (dateString, formatString) => {
@@ -120,16 +114,20 @@ const Dependent = ({ dependent }) => {
   if (dependent) {
     return (
       <>
-        <tr onClick={() => setShowModal(true)}>
+        <tr
+          onClick={() => {
+            setShowModal(true);
+          }}
+        >
           <td>{names}</td>
           <td>{dep}</td>
           <td>{dependent.Birthday}</td>
           <td>{status}</td>
-          <td>{relationship}</td>
+          <td>{relationship === "Daugther" ? "Daughter" : relationship}</td>
           <td>{covered}</td>
         </tr>
 
-        {/* View full message modal */}
+        {/* View edit dependent modal */}
         <Modal
           show={showModal}
           onHide={() => setShowModal(false)}
@@ -138,7 +136,7 @@ const Dependent = ({ dependent }) => {
           scrollable
         >
           <Modal.Header closeButton>
-            <Modal.Title>Edit {dep} Dependent</Modal.Title>
+            <Modal.Title>{`Edit ${dep} Dependent`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form noValidate validated={validated} onSubmit={onSaveInfoClicked}>
@@ -206,7 +204,9 @@ const Dependent = ({ dependent }) => {
                   <Form.Label className="fw-semibold">Relationship</Form.Label>
                   <Form.Select
                     required
-                    value={relationship}
+                    value={
+                      relationship === "Daugther" ? "Daughter" : relationship
+                    }
                     onChange={(e) => setRelationship(e.target.value)}
                   >
                     {relationshipOptions}
@@ -229,22 +229,26 @@ const Dependent = ({ dependent }) => {
                   </Form.Control.Feedback>
                 </Form.Group>
               </Row>
+              <Row className="mb-3 float-end">
+                <Col md="auto">
+                  <Button type="submit" variant="outline-success">
+                    Save Changes
+                  </Button>
+                </Col>
+                <Col md="auto">
+                  {/* Enable if dependent deletion is required */}
+                  <Button
+                    disabled
+                    type="button"
+                    onClick={onDeleteDependentClicked}
+                    variant="outline-danger"
+                  >
+                    Delete Dependent
+                  </Button>
+                </Col>
+              </Row>
             </Form>
           </Modal.Body>
-          <Modal.Footer>
-            <Button type="submit" variant="outline-success">
-              Save Changes
-            </Button>
-            {/* Enable if dependent deletion is required */}
-            <Button
-              disabled
-              type="button"
-              onClick={onDeleteDependentClicked}
-              variant="outline-danger"
-            >
-              Delete Dependent
-            </Button>
-          </Modal.Footer>
         </Modal>
       </>
     );

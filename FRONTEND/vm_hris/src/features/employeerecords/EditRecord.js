@@ -33,6 +33,9 @@ const EditRecord = () => {
         .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data.entities[id])[0],
     }),
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
   });
 
   // Fetch personal info using Employee ID
@@ -42,6 +45,9 @@ const EditRecord = () => {
         .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data.entities[id])[0],
     }),
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
   });
 
   // Fetch dependents using EmployeeID
@@ -51,6 +57,9 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
   });
 
   if (!geninfo && !personalinfo && !dependents) {
@@ -80,7 +89,7 @@ const EditRecord = () => {
           <EditPersonalInfoForm personalinfo={personalinfo} />
         </Tab>
         <Tab eventKey="dependents" title="Dependents" unmountOnExit={true}>
-          <DependentsList dependents={dependents} />
+          <DependentsList dependents={dependents} employeeId={employeeId} />
         </Tab>
       </Tabs>
     </Container>

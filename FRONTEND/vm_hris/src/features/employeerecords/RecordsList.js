@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-  useGetGeninfosQuery,
-  useGetPersonalinfosQuery,
-} from "./recordsApiSlice";
+import { useGetGeninfosQuery } from "./recordsApiSlice";
 import Record from "./Record";
 import {
   Table,
@@ -20,7 +17,6 @@ import {
   faArrowDownAZ,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-//import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 
@@ -63,27 +59,13 @@ const RecordsList = () => {
     error: gerror,
   } = useGetGeninfosQuery();
 
-  const {
-    data: personalinfos,
-    isSuccess: persSuccess,
-    isLoading: persLoading,
-    isError: persError,
-    error: perror,
-  } = useGetPersonalinfosQuery();
+  if (genLoading) return <Spinner animation="border" />;
 
-  if (genLoading && persLoading) return <Spinner animation="border" />;
+  if (genError)
+    return <p className="text-danger">geninfo err: {gerror?.data?.message}</p>;
 
-  if (genError && persError)
-    return (
-      <p className="text-danger">
-        geninfo err: {gerror?.data?.message} | persinfo err:{" "}
-        {perror?.data?.message}
-      </p>
-    );
-
-  if (genSuccess && persSuccess) {
+  if (genSuccess) {
     const { ids: gids, entities: gentities } = geninfos;
-    const { ids: pids } = personalinfos;
 
     const filteredIds = gids?.filter((id) => {
       const geninfo = gentities[id];
@@ -131,12 +113,6 @@ const RecordsList = () => {
               <Record key={geninfoId} geninfoId={geninfoId} />
             ))
       : null;
-
-    // Passing personalinfo ids as extra prop
-    const personalinfoRecords = pids?.length
-      ? pids.map((pid) => <Record key={pid} personalinfoId={pid} />)
-      : null;
-
     return (
       <Container>
         <Row>
@@ -172,10 +148,7 @@ const RecordsList = () => {
               <th scope="col">Status</th>
             </tr>
           </thead>
-          <tbody>
-            {tableContent}
-            {personalinfoRecords}
-          </tbody>
+          <tbody>{tableContent}</tbody>
           <tfoot>
             <tr>
               <td></td>

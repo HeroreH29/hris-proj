@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
-import usePersist from "../../hooks/usePersist";
 
 const DashFooter = () => {
-  const { username, status } = useAuth();
-  const [persist] = usePersist();
+  const { username, status, branch } = useAuth();
 
   const date = new Date();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   /* Extract month, day, and year */
+  const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
   const day = date.getDate();
   const month = date.toLocaleString("default", { month: "short" });
   const year = date.getFullYear();
@@ -33,9 +32,10 @@ const DashFooter = () => {
     <div className="fixed-sm-bottom">
       <footer className="footer bg-body-secondary">
         <div className="container">
-          <strong>DATE:</strong> {`${month} ${day}, ${year} | `}
+          <strong>DATE:</strong> {`${dayName} - ${month} ${day}, ${year} | `}
           <strong> TIME:</strong>
           {` ${twelveHourFormat}:${minutes}:${seconds} ${ampm} | `}
+          <strong> BRANCH:</strong> {`${branch} | `}
           <strong> CURRENT USER:</strong> {`${username} | `}
           <strong> USER LEVEL:</strong> {status}
         </div>

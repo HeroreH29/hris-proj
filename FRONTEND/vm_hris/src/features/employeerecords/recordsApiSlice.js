@@ -5,11 +5,13 @@ const geninfosAdapter = createEntityAdapter({});
 const personalinfosAdapter = createEntityAdapter({});
 const dependentsAdapter = createEntityAdapter({});
 const workinfosAdapter = createEntityAdapter({});
+const educinfosAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
 const depInitialState = dependentsAdapter.getInitialState();
 const workInitialState = workinfosAdapter.getInitialState();
+const educInitialState = educinfosAdapter.getInitialState();
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({
@@ -230,49 +232,121 @@ export const workinfosApiSlice = apiSlice.injectEndpoints({
         } else return [{ type: "Workinfos", id: "LIST" }];
       },
     }),
-    /* addDependent: builder.mutation({
-      query: (initialDependent) => ({
-        url: "/dependents",
+    addWorkinfo: builder.mutation({
+      query: (initialWorkinfo) => ({
+        url: "/workinfos",
         method: "POST",
         body: {
-          ...initialDependent,
+          ...initialWorkinfo,
         },
       }),
       invalidatesTags: [
         {
-          type: "Dependent",
+          type: "Workinfo",
           id: "LIST",
         },
       ],
     }),
-    updateDependent: builder.mutation({
-      query: (initialDependent) => ({
-        url: "/dependents",
+    updateWorkinfo: builder.mutation({
+      query: (initialWorkinfo) => ({
+        url: "/workinfos",
         method: "PATCH",
         body: {
-          ...initialDependent,
+          ...initialWorkinfo,
         },
       }),
       invalidatesTags: (result, error, arg) => [
         {
-          type: "Dependent",
+          type: "Workinfo",
           id: arg.id,
         },
       ],
     }),
-    deleteDependent: builder.mutation({
+    deleteWorkinfo: builder.mutation({
       query: ({ id }) => ({
-        url: "/dependents",
+        url: "/workinfos",
         method: "DELETE",
         body: { id },
       }),
       invalidatesTags: (result, error, arg) => [
         {
-          type: "Dependent",
+          type: "Workinfo",
           id: arg.id,
         },
       ],
-    }), */
+    }),
+  }),
+});
+
+// Educ infos
+export const educinfosApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getEducinfos: builder.query({
+      query: () => ({
+        url: "/educinfos",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedEducinfos = responseData.map((educinfo) => {
+          educinfo.id = educinfo._id;
+          return educinfo;
+        });
+        return educinfosAdapter.setAll(educInitialState, loadedEducinfos);
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "Educinfos", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "Educinfos", id })),
+          ];
+        } else return [{ type: "Educinfos", id: "LIST" }];
+      },
+    }),
+    addEducinfo: builder.mutation({
+      query: (initialEducinfo) => ({
+        url: "/educinfos",
+        method: "POST",
+        body: {
+          ...initialEducinfo,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "Educinfo",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateEducinfo: builder.mutation({
+      query: (initialEducinfo) => ({
+        url: "/educinfo",
+        method: "PATCH",
+        body: {
+          ...initialEducinfo,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Educinfo",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteEducinfo: builder.mutation({
+      query: ({ id }) => ({
+        url: "/educinfo",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Educinfo",
+          id: arg.id,
+        },
+      ],
+    }),
   }),
 });
 
@@ -295,6 +369,20 @@ export const {
   useDeleteDependentMutation,
 } = dependentsApiSlice;
 
+export const {
+  useGetWorkinfosQuery,
+  useAddWorkinfoMutation,
+  useUpdateWorkinfoMutation,
+  useDeleteWorkinfoMutation,
+} = workinfosApiSlice;
+
+export const {
+  useGetEducinfosQuery,
+  useAddEducinfoMutation,
+  useUpdateEducinfoMutation,
+  useDeleteEducinfoMutation,
+} = educinfosApiSlice;
+
 export const selectGeninfosResult =
   geninfosApiSlice.endpoints.getGeninfos.select();
 
@@ -303,6 +391,12 @@ export const selectPersonalinfosResult =
 
 export const selectDependentsResult =
   dependentsApiSlice.endpoints.getDependents.select();
+
+export const selectWorkinfosResult =
+  workinfosApiSlice.endpoints.getWorkinfos.select();
+
+export const selectEducinfosResult =
+  educinfosApiSlice.endpoints.getEducinfos.select();
 
 const selectGeninfosData = createSelector(
   selectGeninfosResult,
@@ -317,6 +411,16 @@ const selectPersonalinfosData = createSelector(
 const selectDependentsData = createSelector(
   selectDependentsResult,
   (dependentsResult) => dependentsResult.data
+);
+
+const selectWorkinfosData = createSelector(
+  selectWorkinfosResult,
+  (workinfosResult) => workinfosResult.data
+);
+
+const selectEducinfosData = createSelector(
+  selectEducinfosResult,
+  (educinfosResult) => educinfosResult.data
 );
 
 export const {
@@ -343,4 +447,20 @@ export const {
   selectIds: selectDependentIds,
 } = dependentsAdapter.getSelectors(
   (state) => selectDependentsData(state) ?? depInitialState
+);
+
+export const {
+  selectAll: selectAllWorkinfos,
+  selectById: selectWorkinfoById,
+  selectIds: selectWorkinfoIds,
+} = workinfosAdapter.getSelectors(
+  (state) => selectWorkinfosData(state) ?? workInitialState
+);
+
+export const {
+  selectAll: selectAllEducinfos,
+  selectById: selectEducinfoById,
+  selectIds: selectEducinfoIds,
+} = educinfosAdapter.getSelectors(
+  (state) => selectEducinfosData(state) ?? educInitialState
 );

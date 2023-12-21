@@ -42,6 +42,7 @@ const login = async (req, res) => {
       UserInfo: {
         username: foundUser.username,
         userLevel: foundUser.userLevel,
+        branch: foundUser.branch,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -88,6 +89,7 @@ const refresh = async (req, res) => {
           UserInfo: {
             userame: foundUser.username,
             userLevel: foundUser.roles,
+            branch: foundUser.branch,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,

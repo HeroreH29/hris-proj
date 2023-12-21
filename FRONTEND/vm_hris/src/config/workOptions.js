@@ -1,0 +1,16 @@
+export const SPECIALIZATION = {
+  "Accounting/Finance": "Accounting/Finance",
+  "Admin/Human Resource": "Admin/Human Resource",
+  "Arts/Media/Communications": "Arts/Media/Communications",
+  "Building/Construction": "Building/Construction",
+  "Computer/Information Technology": "Computer/Information Technology",
+  "Education/Training": "Education/Training",
+  Engineering: "Engineering",
+  Healthcare: "Healthcare",
+  "Hotel/Restaurant": "Hotel/Restaurant",
+  Manufacturing: "Manufacturing",
+  "Sales/Marketing": "Sales/Marketing",
+  Science: "Science",
+  Services: "Services",
+  Others: "Others",
+};

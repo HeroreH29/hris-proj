@@ -17,7 +17,9 @@ import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
 
 const DependentsList = ({ dependents, employeeId }) => {
   const tableContent = dependents?.length
-    ? dependents.map((dep) => <Dependent dependent={dep} />)
+    ? dependents
+        .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
+        .map((dep) => <Dependent dependent={dep} />)
     : null;
 
   const formRef = useRef();

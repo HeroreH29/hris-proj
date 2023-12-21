@@ -9,7 +9,7 @@ router
   .route("/")
   .get(workInfosController.getAllWorkInfo)
   .post(workInfosController.createWorkInfo)
-  .patch()
-  .delete();
+  .patch(workInfosController.updateWorkInfo)
+  .delete(workInfosController.deleteWorkInfo);
 
 module.exports = router;

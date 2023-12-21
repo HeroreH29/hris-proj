@@ -11,25 +11,22 @@ import {
   DropdownButton,
 } from "react-bootstrap";
 import {
-  useDeleteWorkinfoMutation,
-  useUpdateWorkinfoMutation,
+  useDeleteEducinfoMutation,
+  useUpdateEducinfoMutation,
 } from "./recordsApiSlice";
 
-const WorkInfo = ({ workinfo }) => {
+const EducInfo = ({ educinfo }) => {
   const [showModal, setShowModal] = useState(false);
 
   const [validated, setValidated] = useState(false);
 
-  const [showRegion, setShowRegion] = useState(false);
-  const [showCountry, setShowCountry] = useState(false);
-
-  const [updateWorkinfo, { isLoading, isSuccess, isError, error }] =
-    useUpdateWorkinfoMutation();
+  const [updateEducinfo, { isLoading, isSuccess, isError, error }] =
+    useUpdateEducinfoMutation();
 
   const [
-    deleteWorkinfo,
+    deleteEducinfo,
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
-  ] = useDeleteWorkinfoMutation();
+  ] = useDeleteEducinfoMutation();
 
   /* VARIABLES */
   const [positionTitle, setPositionTitle] = useState(workinfo?.Position_Title);
@@ -403,4 +400,4 @@ const WorkInfo = ({ workinfo }) => {
   }
 };
 
-export default WorkInfo;
+export default EducInfo;

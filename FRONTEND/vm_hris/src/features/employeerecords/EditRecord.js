@@ -6,6 +6,7 @@ import {
   useGetDependentsQuery,
   useGetGeninfosQuery,
   useGetPersonalinfosQuery,
+  useGetWorkinfosQuery,
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -20,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import EditPersonalInfoForm from "./EditPersonalInfoForm";
 import DependentsList from "./DependentsList";
+import WorkInfosList from "./WorkInfosList";
 
 const EditRecord = () => {
   const { employeeId } = useParams();
@@ -62,7 +64,19 @@ const EditRecord = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  if (!geninfo && !personalinfo && !dependents) {
+  // Fetch workinfos using EmployeeID
+  const { workinfos } = useGetWorkinfosQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      workinfos: data?.ids
+        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data?.entities[id]),
+    }),
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+  if (!geninfo && !personalinfo && !dependents && !workinfos) {
     return <Spinner animation="border" />;
   }
 
@@ -90,6 +104,13 @@ const EditRecord = () => {
         </Tab>
         <Tab eventKey="dependents" title="Dependents" unmountOnExit={true}>
           <DependentsList dependents={dependents} employeeId={employeeId} />
+        </Tab>
+        <Tab
+          eventKey="workinfo"
+          title="Employment History"
+          unmountOnExit={true}
+        >
+          <WorkInfosList workinfos={workinfos} employeeId={employeeId} />
         </Tab>
       </Tabs>
     </Container>

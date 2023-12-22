@@ -321,7 +321,7 @@ export const educinfosApiSlice = apiSlice.injectEndpoints({
     }),
     updateEducinfo: builder.mutation({
       query: (initialEducinfo) => ({
-        url: "/educinfo",
+        url: "/educinfos",
         method: "PATCH",
         body: {
           ...initialEducinfo,
@@ -336,7 +336,7 @@ export const educinfosApiSlice = apiSlice.injectEndpoints({
     }),
     deleteEducinfo: builder.mutation({
       query: ({ id }) => ({
-        url: "/educinfo",
+        url: "/educinfos",
         method: "DELETE",
         body: { id },
       }),

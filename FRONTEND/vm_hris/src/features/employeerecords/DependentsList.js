@@ -19,7 +19,7 @@ const DependentsList = ({ dependents, employeeId }) => {
   const tableContent = dependents?.length
     ? dependents
         .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
-        .map((dep) => <Dependent dependent={dep} />)
+        .map((dep, index) => <Dependent key={index} dependent={dep} />)
     : null;
 
   const formRef = useRef();

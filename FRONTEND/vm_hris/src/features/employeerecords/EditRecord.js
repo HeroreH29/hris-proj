@@ -4,6 +4,7 @@ import EditGenInfoForm from "./EditGenInfoForm";
 
 import {
   useGetDependentsQuery,
+  useGetEducinfosQuery,
   useGetGeninfosQuery,
   useGetPersonalinfosQuery,
   useGetWorkinfosQuery,
@@ -22,6 +23,7 @@ import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import EditPersonalInfoForm from "./EditPersonalInfoForm";
 import DependentsList from "./DependentsList";
 import WorkInfosList from "./WorkInfosList";
+import EducInfoList from "./EducInfosList";
 
 const EditRecord = () => {
   const { employeeId } = useParams();
@@ -56,6 +58,18 @@ const EditRecord = () => {
   const { dependents } = useGetDependentsQuery("recordsList", {
     selectFromResult: ({ data }) => ({
       dependents: data?.ids
+        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data?.entities[id]),
+    }),
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+  // Fetch educinfos using EmployeeID
+  const { educinfos } = useGetEducinfosQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      educinfos: data?.ids
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
@@ -104,6 +118,13 @@ const EditRecord = () => {
         </Tab>
         <Tab eventKey="dependents" title="Dependents" unmountOnExit={true}>
           <DependentsList dependents={dependents} employeeId={employeeId} />
+        </Tab>
+        <Tab
+          eventKey="educinfo"
+          title="Educational Attainment"
+          unmountOnExit={true}
+        >
+          <EducInfoList educinfos={educinfos} employeeId={employeeId} />
         </Tab>
         <Tab
           eventKey="workinfo"

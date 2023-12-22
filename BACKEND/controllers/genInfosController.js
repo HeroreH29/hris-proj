@@ -1,6 +1,8 @@
 const GenInfo = require("../models/GenInfo");
 const PersonalInfo = require("../models/PersonalInfo");
 const Dependent = require("../models/Dependent");
+const EducInfo = require("../models/EducInfo");
+const WorkInfo = require("../models/WorkInfo");
 
 // @desc Get all users
 // @route GET /users
@@ -164,6 +166,12 @@ const updateGenInfo = async (req, res) => {
   const dependent = await Dependent.find({
     EmployeeID: geninfo.EmployeeID,
   }).exec();
+  const educinfo = await EducInfo.find({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
+  const workinfo = await WorkInfo.find({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
 
   // Apply changes to other informations
   let updatedPersonalInfo;
@@ -178,6 +186,22 @@ const updateGenInfo = async (req, res) => {
       dep.EmployeeID = newEmployeeID;
     });
     updatedDependent = await dependent.save();
+  }
+
+  let updatedEducInfo;
+  if (educinfo?.length > 0) {
+    educinfo.forEach((educ) => {
+      educ.EmployeeID = newEmployeeID;
+    });
+    updatedEducInfo = await educinfo.save();
+  }
+
+  let updatedWorkInfo;
+  if (workinfo?.length > 0) {
+    workinfo.forEach((work) => {
+      work.EmployeeID = newEmployeeID;
+    });
+    updatedWorkInfo = await workinfo.save();
   }
 
   geninfo.EmployeeID = newEmployeeID;

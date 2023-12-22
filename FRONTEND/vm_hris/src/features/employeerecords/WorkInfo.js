@@ -180,7 +180,7 @@ const WorkInfo = ({ workinfo }) => {
                         onChange={(e) => setRegion(e.target.value)}
                       />
                     )}
-                    <DropdownButton variant="outline-secondary">
+                    <DropdownButton title="" variant="outline-secondary">
                       <Dropdown.Item
                         as={"option"}
                         onClick={() => setShowRegion(false)}
@@ -208,7 +208,7 @@ const WorkInfo = ({ workinfo }) => {
                         onChange={(e) => setCountry(e.target.value)}
                       />
                     )}
-                    <DropdownButton variant="outline-secondary">
+                    <DropdownButton title="" variant="outline-secondary">
                       <Dropdown.Item
                         as={"option"}
                         onClick={() => setShowCountry(false)}

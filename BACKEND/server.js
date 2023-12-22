@@ -34,6 +34,7 @@ app.use("/geninfos", require("./routes/genInfoRoutes"));
 app.use("/personalinfos", require("./routes/personalInfoRoutes"));
 app.use("/dependents", require("./routes/dependentRoutes"));
 app.use("/workinfos", require("./routes/workInfoRoutes"));
+app.use("/educinfos", require("./routes/educInfoRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

@@ -231,7 +231,6 @@ const EditGenInfoForm = ({ geninfo }) => {
                 autoComplete="off"
                 type="text"
                 pattern={ALPHANUM_REGEX}
-                disabled
                 defaultValue={geninfo.EmployeeID}
               />
               <Form.Control.Feedback type="invalid">

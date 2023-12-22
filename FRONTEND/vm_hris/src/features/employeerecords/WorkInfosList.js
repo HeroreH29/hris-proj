@@ -88,7 +88,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
   }, [isSuccess]);
 
   const tableContent = workinfos?.length
-    ? workinfos.map((work) => <WorkInfo workinfo={work} />)
+    ? workinfos.map((work, index) => <WorkInfo key={index} workinfo={work} />)
     : null;
 
   return (
@@ -195,7 +195,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                       onChange={(e) => setRegion(e.target.value)}
                     />
                   )}
-                  <DropdownButton variant="outline-secondary">
+                  <DropdownButton title="" variant="outline-secondary">
                     <Dropdown.Item
                       as={"option"}
                       onClick={() => setShowRegion(false)}
@@ -223,7 +223,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                       onChange={(e) => setCountry(e.target.value)}
                     />
                   )}
-                  <DropdownButton variant="outline-secondary">
+                  <DropdownButton title="" variant="outline-secondary">
                     <Dropdown.Item
                       as={"option"}
                       onClick={() => setShowCountry(false)}

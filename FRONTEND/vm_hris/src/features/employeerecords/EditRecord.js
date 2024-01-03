@@ -1,9 +1,9 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import EditGenInfoForm from "./EditGenInfoForm";
-
 import {
   useGetDependentsQuery,
+  useGetDocumentsQuery,
   useGetEducinfosQuery,
   useGetGeninfosQuery,
   useGetPersonalinfosQuery,
@@ -19,11 +19,12 @@ import {
   Button,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { faLeftLong, faPrint } from "@fortawesome/free-solid-svg-icons";
 import EditPersonalInfoForm from "./EditPersonalInfoForm";
 import DependentsList from "./DependentsList";
 import WorkInfosList from "./WorkInfosList";
 import EducInfoList from "./EducInfosList";
+import { PDFDocument } from "pdf-lib";
 
 const EditRecord = () => {
   const { employeeId } = useParams();
@@ -90,9 +91,30 @@ const EditRecord = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  if (!geninfo && !personalinfo && !dependents && !workinfos) {
+  // Fetch document using document name (filename)
+  const { document } = useGetDocumentsQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      document: data?.ids
+        ?.filter(
+          (id) =>
+            data?.entities?.[id]?.filename.toString() === "employee-record"
+        )
+        .map((id) => data?.entities[id]),
+    }),
+  });
+
+  if (!geninfo && !personalinfo && !dependents && !workinfos && !document) {
     return <Spinner animation="border" />;
   }
+
+  const handlePrintEmployeeRecord = async () => {
+    const formUrl = `data:application/pdf;base64,${document?.[0]?.data}`;
+    const formPdfBytes = await fetch(formUrl).then((res) => res.arrayBuffer());
+    const pdfDoc = await PDFDocument.load(formPdfBytes);
+    const form = pdfDoc.getForm();
+
+    console.log(form.getTextField(""));
+  };
 
   return (
     <Container>
@@ -107,6 +129,14 @@ const EditRecord = () => {
         </Col>
         <Col md="auto">
           <h3>Edit Record</h3>
+        </Col>
+        <Col className="d-flex justify-content-end">
+          <Button
+            variant="outline-secondary"
+            onClick={handlePrintEmployeeRecord}
+          >
+            <FontAwesomeIcon icon={faPrint} />
+          </Button>
         </Col>
       </Row>
       <Tabs className="mb-3" defaultActiveKey="geninfo">

@@ -6,12 +6,14 @@ const personalinfosAdapter = createEntityAdapter({});
 const dependentsAdapter = createEntityAdapter({});
 const workinfosAdapter = createEntityAdapter({});
 const educinfosAdapter = createEntityAdapter({});
+const documentsAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
 const depInitialState = dependentsAdapter.getInitialState();
 const workInitialState = workinfosAdapter.getInitialState();
 const educInitialState = educinfosAdapter.getInitialState();
+const docuInitialState = documentsAdapter.getInitialState();
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({
@@ -350,6 +352,78 @@ export const educinfosApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
+// Documents
+export const documentsApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getDocuments: builder.query({
+      query: () => ({
+        url: "/documents",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedDocuments = responseData.map((docus) => {
+          docus.id = docus._id;
+          return docus;
+        });
+        return documentsAdapter.setAll(docuInitialState, loadedDocuments);
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "Documents", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "Documents", id })),
+          ];
+        } else return [{ type: "Documents", id: "LIST" }];
+      },
+    }),
+    /* addEducinfo: builder.mutation({
+      query: (initialEducinfo) => ({
+        url: "/educinfos",
+        method: "POST",
+        body: {
+          ...initialEducinfo,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "Educinfo",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateEducinfo: builder.mutation({
+      query: (initialEducinfo) => ({
+        url: "/educinfos",
+        method: "PATCH",
+        body: {
+          ...initialEducinfo,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Educinfo",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteEducinfo: builder.mutation({
+      query: ({ id }) => ({
+        url: "/educinfos",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Educinfo",
+          id: arg.id,
+        },
+      ],
+    }), */
+  }),
+});
+
 export const {
   useGetGeninfosQuery,
   useAddGeninfoMutation,
@@ -383,6 +457,8 @@ export const {
   useDeleteEducinfoMutation,
 } = educinfosApiSlice;
 
+export const { useGetDocumentsQuery } = documentsApiSlice;
+
 export const selectGeninfosResult =
   geninfosApiSlice.endpoints.getGeninfos.select();
 
@@ -397,6 +473,9 @@ export const selectWorkinfosResult =
 
 export const selectEducinfosResult =
   educinfosApiSlice.endpoints.getEducinfos.select();
+
+export const selectDocusResult =
+  documentsApiSlice.endpoints.getDocuments.select();
 
 const selectGeninfosData = createSelector(
   selectGeninfosResult,
@@ -421,6 +500,11 @@ const selectWorkinfosData = createSelector(
 const selectEducinfosData = createSelector(
   selectEducinfosResult,
   (educinfosResult) => educinfosResult.data
+);
+
+const selectDocumentsData = createSelector(
+  selectDocusResult,
+  (documentsResult) => documentsResult.data
 );
 
 export const {
@@ -463,4 +547,12 @@ export const {
   selectIds: selectEducinfoIds,
 } = educinfosAdapter.getSelectors(
   (state) => selectEducinfosData(state) ?? educInitialState
+);
+
+export const {
+  selectAll: selectAllDocuments,
+  selectById: selectDocumentById,
+  selectIds: selectDocumentIds,
+} = documentsAdapter.getSelectors(
+  (state) => selectDocumentsData(state) ?? docuInitialState
 );

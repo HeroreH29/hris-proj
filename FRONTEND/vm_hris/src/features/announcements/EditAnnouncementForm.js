@@ -12,11 +12,13 @@ import useTitle from "../../hooks/useTitle";
 const EditAnnouncementForm = ({ users, announcement }) => {
   useTitle("Via Mare HRIS | Edit Announcement");
 
+  // eslint-disable-next-line
   const [updateAnnouncement, { isLoading, isSuccess, isError, error }] =
     useUpdateAnnouncementMutation();
 
   const [
     deleteAnnouncement,
+    // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
   ] = useDeleteAnnouncementMutation();
 
@@ -82,7 +84,7 @@ const EditAnnouncementForm = ({ users, announcement }) => {
           <Col md="auto">
             <Button
               variant="outline-secondary"
-              onClick={() => navigate("/dashboard/announcements")}
+              onClick={() => navigate("/dashboard")}
             >
               <FontAwesomeIcon icon={faLeftLong} />
             </Button>

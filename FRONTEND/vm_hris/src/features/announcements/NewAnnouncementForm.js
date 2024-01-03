@@ -10,6 +10,7 @@ import useTitle from "../../hooks/useTitle";
 const NewAnnouncementForm = ({ users }) => {
   useTitle("Via Mare HRIS | Create Announcement");
 
+  // eslint-disable-next-line
   const [addNewAnnouncement, { isLoading, isSuccess, isError, error }] =
     useAddNewAnnouncementMutation();
 
@@ -67,7 +68,7 @@ const NewAnnouncementForm = ({ users }) => {
           <Col md="auto">
             <Button
               variant="outline-secondary"
-              onClick={() => navigate("/dashboard/announcements")}
+              onClick={() => navigate("/dashboard")}
             >
               <FontAwesomeIcon icon={faLeftLong} />
             </Button>

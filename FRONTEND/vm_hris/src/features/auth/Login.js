@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Row,
   Col,
@@ -8,7 +8,7 @@ import {
   Button,
   Spinner,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
@@ -32,8 +32,6 @@ const Login = () => {
   const [userInvalid, setUserInvalid] = useState(false);
 
   const [login, { isLoading }] = useLoginMutation();
-
-  useEffect(() => {}, []);
 
   if (isLoading) return <Spinner animation="border" />;
 
@@ -111,6 +109,13 @@ const Login = () => {
                 <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
               </Button>
             </InputGroup>
+          </Form.Group>
+        </Row>
+        <Row className="d-flex justify-content-center mb-3">
+          <Form.Group as={Col} md={"auto"} className="mb-3">
+            <Link to="/forgotpassword" className="fst-italic">
+              Forgot password?
+            </Link>
           </Form.Group>
         </Row>
         <Row

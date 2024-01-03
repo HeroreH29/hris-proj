@@ -3,8 +3,6 @@ import Layout from "./components/Layout";
 import Login from "./features/auth/Login";
 import DashLayout from "./components/Dashboard/DashLayout";
 import Welcome from "./features/auth/Welcome";
-import AnnouncementsList from "./features/announcements/AnnouncementsList";
-import CelebrantsList from "./features/celebrants/CelebrantsList";
 import UsersList from "./features/users/UsersList";
 import EditUser from "./features/users/EditUser";
 import NewUserForm from "./features/users/NewUserForm";
@@ -14,6 +12,7 @@ import RecordsList from "./features/employeerecords/RecordsList";
 import EditRecord from "./features/employeerecords/EditRecord";
 import Prefetch from "./features/auth/Prefetch";
 import PersistLogin from "./features/auth/PersistLogin";
+import ForgotPass from "./features/auth/ForgotPass";
 import { USERLEVELS } from "./config/userOptions";
 import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
@@ -25,6 +24,7 @@ function App() {
       <Route path="/" element={<Layout />}>
         {/* public routes */}
         <Route index element={<Login />} />
+        <Route path="forgotpassword" element={<ForgotPass />} />
 
         {/* protected routes */}
         <Route element={<PersistLogin />}>
@@ -39,7 +39,7 @@ function App() {
                   <Route index element={<Welcome />} />
 
                   <Route path="announcements">
-                    <Route index element={<AnnouncementsList />} />
+                    {/* <Route index element={<AnnouncementsList />} /> */}
                     <Route
                       element={
                         <RequireAuth
@@ -52,9 +52,9 @@ function App() {
                     </Route>
                   </Route>
 
-                  <Route path="celebrants">
+                  {/* <Route path="celebrants">
                     <Route index element={<CelebrantsList />} />
-                  </Route>
+                  </Route> */}
                   {/* End Dash */}
                 </Route>
                 <Route

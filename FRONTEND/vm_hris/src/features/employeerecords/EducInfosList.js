@@ -9,8 +9,6 @@ import {
   Col,
   Row,
   InputGroup,
-  Dropdown,
-  DropdownButton,
   Container,
   Table,
 } from "react-bootstrap";
@@ -24,6 +22,7 @@ const EducInfoList = ({ educinfos, employeeId }) => {
 
   const [validated, setValidated] = useState(false);
 
+  // eslint-disable-next-line
   const [addEducinfo, { isLoading, isSuccess, isError, error }] =
     useAddEducinfoMutation();
 
@@ -88,7 +87,7 @@ const EducInfoList = ({ educinfos, employeeId }) => {
       <Container>
         <Row>
           <Col>
-            <small>{`(Click any work history to edit)`}</small>
+            <small>{`(Click any educational attainment to edit)`}</small>
           </Col>
           <Col>
             <Button

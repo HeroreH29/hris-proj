@@ -6,11 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import PulseLoader from "react-spinners/PulseLoader";
+import useTitle from "../../hooks/useTitle";
 
 const UsersList = () => {
   const navigate = useNavigate();
   const { isHR, isAdmin } = useAuth();
+
+  useTitle("User List | Via Mare HRIS");
 
   const {
     data: users,

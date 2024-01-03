@@ -2,18 +2,10 @@ import React from "react";
 import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 import { useGetGeninfosQuery } from "./gCelebrantsApiSlice";
 import Celebrant from "./Celebrant";
-import { useNavigate } from "react-router-dom";
-import { Table, Container, Row, Col, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { Table, Container, Row, Col } from "react-bootstrap";
 import PulseLoader from "react-spinners/PulseLoader";
-import useTitle from "../../hooks/useTitle";
 
 const CelebrantsList = () => {
-  const navigate = useNavigate();
-
-  useTitle("Birthday Celebrants | Via Mare HRIS");
-
   const {
     data: personalinfos,
     isLoading: isPersLoading,
@@ -26,7 +18,9 @@ const CelebrantsList = () => {
     data: generalinfos,
     isLoading: isGenLoading,
     isSuccess: isGenSuccess,
+    // eslint-disable-next-line
     isError: isGenErr,
+    // eslint-disable-next-line
     error: generr,
   } = useGetGeninfosQuery();
 
@@ -88,16 +82,16 @@ const CelebrantsList = () => {
       });
 
     content = (
-      <Container>
+      <Container style={{ maxHeight: "400px", overflowY: "scroll" }}>
         <Row>
-          <Col md="auto">
+          {/* <Col md="auto">
             <Button
               variant="outline-secondary"
               onClick={() => navigate("/dashboard")}
             >
               <FontAwesomeIcon icon={faLeftLong} />
             </Button>
-          </Col>
+          </Col> */}
           <Col md="auto">
             <h3>Birthday Celebrants for {monthName}</h3>
           </Col>

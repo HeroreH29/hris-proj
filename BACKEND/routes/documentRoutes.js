@@ -5,6 +5,6 @@ const verifyJWT = require("../middleware/verifyJWT");
 
 router.use(verifyJWT);
 
-router.route("/").get(documentsController.getDocument).post().patch().delete();
+router.route("/").get(documentsController.getDocuments).post().patch().delete();
 
 module.exports = router;

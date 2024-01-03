@@ -3,21 +3,14 @@ import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
 import { Table, Container, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faLeftLong,
-  faFileCirclePlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Row, Col } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 import PulseLoader from "react-spinners/PulseLoader";
-import useTitle from "../../hooks/useTitle";
 
 const AnnouncementsList = () => {
   const { isHR, isAdmin } = useAuth();
-
-  useTitle("Announcements | Via Mare HRIS");
-
   const navigate = useNavigate();
 
   const {
@@ -51,19 +44,18 @@ const AnnouncementsList = () => {
 
     content = (
       <>
-        <Container>
+        <Container style={{ maxHeight: "400px", overflowY: "scroll" }}>
           <Row>
-            <Col md="auto">
+            {/* <Col md="auto">
               <Button
                 variant="outline-secondary"
                 onClick={() => navigate("/dashboard")}
               >
                 <FontAwesomeIcon icon={faLeftLong} />
               </Button>
-            </Col>
+            </Col> */}
             <Col md="auto">
               <h3>HR Memos/Announcements</h3>
-              <small>{`(Click to view full message)`}</small>
             </Col>
             {(isHR || isAdmin) && (
               <Col>
@@ -83,8 +75,9 @@ const AnnouncementsList = () => {
             bordered
             striped
             hover
-            className="align-middle ms-3 mt-3 mb-3"
+            className="align-middle ms-3 mt-3 mb-3 caption-top"
           >
+            <caption>Click any announcement to view full message</caption>
             <thead>
               <tr>
                 <th scope="col">Title</th>

@@ -44,32 +44,10 @@ const AnnouncementsList = () => {
 
     content = (
       <>
-        <Container style={{ maxHeight: "400px", overflowY: "scroll" }}>
-          <Row>
-            {/* <Col md="auto">
-              <Button
-                variant="outline-secondary"
-                onClick={() => navigate("/dashboard")}
-              >
-                <FontAwesomeIcon icon={faLeftLong} />
-              </Button>
-            </Col> */}
-            <Col md="auto">
-              <h3>HR Memos/Announcements</h3>
-            </Col>
-            {(isHR || isAdmin) && (
-              <Col>
-                <Button
-                  variant="outline-primary"
-                  onClick={() => navigate("/dashboard/announcements/new")}
-                  className="float-end"
-                  md="auto"
-                >
-                  <FontAwesomeIcon icon={faFileCirclePlus} />
-                </Button>
-              </Col>
-            )}
-          </Row>
+        <Container
+          className="border"
+          style={{ maxHeight: "400px", overflowY: "scroll" }}
+        >
           <Table
             responsive
             bordered
@@ -77,7 +55,21 @@ const AnnouncementsList = () => {
             hover
             className="align-middle ms-3 mt-3 mb-3 caption-top"
           >
-            <caption>Click any announcement to view full message</caption>
+            <caption>
+              Click any announcement to view full message{" "}
+              <span className="float-end">
+                {(isHR || isAdmin) && (
+                  <Col>
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => navigate("/dashboard/announcements/new")}
+                    >
+                      <FontAwesomeIcon icon={faFileCirclePlus} />
+                    </Button>
+                  </Col>
+                )}
+              </span>
+            </caption>
             <thead>
               <tr>
                 <th scope="col">Title</th>

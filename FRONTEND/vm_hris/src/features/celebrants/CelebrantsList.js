@@ -35,7 +35,7 @@ const CelebrantsList = () => {
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
-    const monthName = date.toLocaleString("default", { month: "long" });
+    //const monthName = date.toLocaleString("default", { month: "long" });
 
     const celebrants = ids?.length
       ? ids.filter((personalInfoId) => {
@@ -82,20 +82,10 @@ const CelebrantsList = () => {
       });
 
     content = (
-      <Container style={{ maxHeight: "400px", overflowY: "scroll" }}>
-        <Row>
-          {/* <Col md="auto">
-            <Button
-              variant="outline-secondary"
-              onClick={() => navigate("/dashboard")}
-            >
-              <FontAwesomeIcon icon={faLeftLong} />
-            </Button>
-          </Col> */}
-          <Col md="auto">
-            <h3>Birthday Celebrants for {monthName}</h3>
-          </Col>
-        </Row>
+      <Container
+        className="border"
+        style={{ maxHeight: "400px", overflowY: "scroll" }}
+      >
         <Table
           bordered
           responsive

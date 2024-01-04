@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "../../features/auth/authSlice";
 
+const deploy = "https://viamare-hris-api.onrender.com";
+const development = "http://localhost:3500";
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://viamare-hris-api.onrender.com",
+  baseUrl: development,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;
@@ -43,6 +46,16 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Announcement", "User", "GenInfo", "PersonalInfo"],
+  tagTypes: [
+    "Announcement",
+    "User",
+    "GenInfo",
+    "PersonalInfo",
+    "Dependent",
+    "EducInfo",
+    "WorkInfo",
+    "Celebrant",
+    "Document",
+  ],
   endpoints: (builder) => ({}),
 });

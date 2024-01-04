@@ -14,7 +14,6 @@ const Welcome = () => {
   // const navigate = useNavigate();
 
   const date = new Date();
-  const currentMonth = date.getMonth() + 1;
   const monthName = date.toLocaleString("default", { month: "long" });
 
   const content = (

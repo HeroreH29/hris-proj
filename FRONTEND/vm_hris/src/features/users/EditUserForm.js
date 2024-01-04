@@ -10,11 +10,13 @@ const USER_REGEX = "[A-z0-9]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const EditUserForm = ({ user }) => {
+  // eslint-disable-next-line
   const [updateUser, { isLoading, isSuccess, isError, error }] =
     useUpdateUserMutation();
 
   const [
     deleteUser,
+    // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
   ] = useDeleteUserMutation();
 

@@ -23,11 +23,13 @@ const WorkInfo = ({ workinfo }) => {
   const [showRegion, setShowRegion] = useState(false);
   const [showCountry, setShowCountry] = useState(false);
 
+  // eslint-disable-next-line
   const [updateWorkinfo, { isLoading, isSuccess, isError, error }] =
     useUpdateWorkinfoMutation();
 
   const [
     deleteWorkinfo,
+    // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
   ] = useDeleteWorkinfoMutation();
 

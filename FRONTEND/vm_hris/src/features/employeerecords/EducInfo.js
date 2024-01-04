@@ -13,11 +13,13 @@ const EducInfo = ({ educinfo }) => {
 
   const [validated, setValidated] = useState(false);
 
+  // eslint-disable-next-line
   const [updateEducinfo, { isLoading, isSuccess, isError, error }] =
     useUpdateEducinfoMutation();
 
   const [
     deleteEducinfo,
+    // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
   ] = useDeleteEducinfoMutation();
 

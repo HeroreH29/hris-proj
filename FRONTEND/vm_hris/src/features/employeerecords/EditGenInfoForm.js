@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  useGetGeninfosQuery,
-  useUpdateGeninfoMutation,
-} from "./recordsApiSlice";
+import { useUpdateGeninfoMutation } from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
   ASSIGNEDOUTLET,
@@ -28,6 +25,7 @@ const IDNUMS_REGEX = /^[0-9-]*$/;
 const ALPHANUM_REGEX = "[A-z0-9]";
 
 const EditGenInfoForm = ({ geninfo }) => {
+  // eslint-disable-next-line
   const [updateGeninfo, { isLoading, isSuccess, isError, error }] =
     useUpdateGeninfoMutation();
 

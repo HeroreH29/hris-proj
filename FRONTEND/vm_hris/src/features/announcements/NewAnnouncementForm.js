@@ -8,7 +8,7 @@ import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
 
 const NewAnnouncementForm = ({ users }) => {
-  useTitle("Via Mare HRIS | Create Announcement");
+  useTitle("Create Announcement | Via Mare HRIS");
 
   // eslint-disable-next-line
   const [addNewAnnouncement, { isLoading, isSuccess, isError, error }] =

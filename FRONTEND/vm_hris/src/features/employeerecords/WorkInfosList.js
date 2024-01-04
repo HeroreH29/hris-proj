@@ -27,6 +27,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
   const [showRegion, setShowRegion] = useState(false);
   const [showCountry, setShowCountry] = useState(false);
 
+  // eslint-disable-next-line
   const [addWorkinfo, { isLoading, isSuccess, isError, error }] =
     useAddWorkinfoMutation();
 

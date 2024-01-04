@@ -10,7 +10,7 @@ import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
 
 const EditAnnouncementForm = ({ users, announcement }) => {
-  useTitle("Via Mare HRIS | Edit Announcement");
+  useTitle("Edit Announcement | Via Mare HRIS");
 
   // eslint-disable-next-line
   const [updateAnnouncement, { isLoading, isSuccess, isError, error }] =

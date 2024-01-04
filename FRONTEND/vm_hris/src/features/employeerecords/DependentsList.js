@@ -24,6 +24,7 @@ const DependentsList = ({ dependents, employeeId }) => {
 
   const formRef = useRef();
 
+  // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
     useAddDependentMutation();
 

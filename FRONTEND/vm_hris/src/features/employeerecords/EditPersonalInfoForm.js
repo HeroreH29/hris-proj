@@ -20,6 +20,7 @@ const ALPHA_REGEX = /^[a-zA-Z. ]*$/;
 const PHONEMOBILE_REGEX = /^[0-9+ -]*$/;
 
 const EditPersonalInfoForm = ({ personalinfo }) => {
+  // eslint-disable-next-line
   const [updatePersonalinfo, { isLoading, isSuccess, isError, error }] =
     useUpdatePersonalinfoMutation();
 

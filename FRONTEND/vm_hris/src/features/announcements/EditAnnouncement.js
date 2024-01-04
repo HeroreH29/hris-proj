@@ -14,6 +14,7 @@ const EditAnnouncement = () => {
   //   selectAnnouncementById(state, id)
   // );
   // const users = useSelector(selectAllUsers);
+  // eslint-disable-next-line
   const { username, isAdmin, isHR } = useAuth();
 
   const { announcement } = useGetAnnouncementsQuery("announcementsList", {

@@ -10,11 +10,13 @@ import {
 const Dependent = ({ dependent }) => {
   const [showModal, setShowModal] = useState(false);
 
+  // eslint-disable-next-line
   const [updateDependent, { isLoading, isSuccess, isError, error }] =
     useUpdateDependentMutation();
 
   const [
     deleteDependent,
+    // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
   ] = useDeleteDependentMutation();
 
@@ -85,7 +87,6 @@ const Dependent = ({ dependent }) => {
         Names: names,
         Dependent: dep,
         Birthday: revertedBD,
-        Status: status,
         Relationship: relationship,
         Status: status,
         Covered: covered,

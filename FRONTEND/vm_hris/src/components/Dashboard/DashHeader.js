@@ -53,11 +53,8 @@ const DashHeader = () => {
               </Nav.Link>
             )}
             {(isHR || isAdmin) && (
-              <Nav.Link
-                eventKey="3"
-                onClick={() => console.log("/attendances")}
-              >
-                Attendance
+              <Nav.Link eventKey="3" onClick={() => navigate("/attendances")}>
+                Attendances
               </Nav.Link>
             )}
             <Nav.Link eventKey="4" onClick={() => console.log("/leaves")}>

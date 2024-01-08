@@ -16,6 +16,7 @@ import ForgotPass from "./features/auth/ForgotPass";
 import { USERLEVELS } from "./config/userOptions";
 import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
+import Attendances from "./features/attendances/Attendances";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -51,10 +52,6 @@ function App() {
                       <Route path="new" element={<NewAnnouncement />} />
                     </Route>
                   </Route>
-
-                  {/* <Route path="celebrants">
-                    <Route index element={<CelebrantsList />} />
-                  </Route> */}
                   {/* End Dash */}
                 </Route>
                 <Route
@@ -80,6 +77,19 @@ function App() {
                   <Route path="employeerecords">
                     <Route index element={<RecordsList />} />
                     <Route path=":employeeId" element={<EditRecord />} />
+                    {/* <Route path="new" element={<NewUserForm />} /> */}
+                  </Route>
+                </Route>
+                <Route
+                  element={
+                    <RequireAuth
+                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                    />
+                  }
+                >
+                  <Route path="attendances">
+                    <Route index element={<Attendances />} />
+                    {/* <Route path=":bioId" element={<ViewAttendance />} /> */}
                     {/* <Route path="new" element={<NewUserForm />} /> */}
                   </Route>
                 </Route>

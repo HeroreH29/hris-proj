@@ -8,7 +8,6 @@ import {
   Form,
   Spinner,
 } from "react-bootstrap";
-import { format } from "date-fns";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import Attendance from "./Attendance";
 import useTitle from "../../hooks/useTitle";
@@ -26,7 +25,9 @@ const Attendances = () => {
     data: geninfos,
     isSuccess: genSuccess,
     isLoading: genLoading,
+    // eslint-disable-next-line
     isError: genError,
+    // eslint-disable-next-line
     error: gerror,
   } = useGetGeninfosQuery();
 
@@ -53,18 +54,11 @@ const Attendances = () => {
           lines.forEach((line) => {
             const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
 
-            /* const formattedDate = format(new Date(datetime), "P");
-            const formattedTime = format(new Date(datetime), "p"); */
-
             const matchedRecord = ids
               .filter(
                 (id) => entities[id].BioID.toString() === bioId.toString()
               )
               .map((id) => entities[id])[0];
-
-            /* const existingLine = tempAttList.findIndex((e) => {
-              return e.bioId === bioId && e.date === formattedDate;
-            }); */
 
             const existingLine = tempAttList.findIndex((e) => {
               return e.bioId === bioId;
@@ -74,44 +68,8 @@ const Attendances = () => {
               tempAttList.push({
                 bioId: bioId,
                 name: `${matchedRecord.LastName}, ${matchedRecord.FirstName} ${matchedRecord.MI}`,
-                /* date: formattedDate,
-                checkIn: val2 * 1 === 0 ? formattedTime : "",
-                checkOut: val2 * 1 === 1 ? formattedTime : "",
-                breakIn: val2 * 1 === 2 ? formattedTime : "",
-                breakOut: val2 * 1 === 3 ? formattedTime : "", */
               });
-              /* if (val2 * 1 === 0) {
-                tempAttList[existingLine] = {
-                  ...tempAttList[existingLine],
-                  checkIn: formattedTime,
-                };
-              } else if (val2 * 1 === 1) {
-                tempAttList[existingLine] = {
-                  ...tempAttList[existingLine],
-                  checkOut: formattedTime,
-                };
-              } else if (val2 * 1 === 2) {
-                tempAttList[existingLine] = {
-                  ...tempAttList[existingLine],
-                  breakIn: formattedTime,
-                };
-              } else if (val2 * 1 === 3) {
-                tempAttList[existingLine] = {
-                  ...tempAttList[existingLine],
-                  breakOut: formattedTime,
-                };
-              } */
-            } /* else {
-              tempAttList.push({
-                bioId: bioId,
-                name: `${matchedRecord.LastName}, ${matchedRecord.FirstName} ${matchedRecord.MI}`,
-                date: formattedDate,
-                checkIn: val2 * 1 === 0 ? formattedTime : "",
-                checkOut: val2 * 1 === 1 ? formattedTime : "",
-                breakIn: val2 * 1 === 2 ? formattedTime : "",
-                breakOut: val2 * 1 === 3 ? formattedTime : "",
-              });
-            } */
+            }
           });
         } catch (error) {
           console.error(`AttlogFileUpload Error: ${error}`);
@@ -126,7 +84,9 @@ const Attendances = () => {
   const tableContent = attList?.length
     ? attList
         .slice(startSlice, endSlice)
-        .map((att) => <Attendance att={att} attlogData={attlogData} />)
+        .map((att) => (
+          <Attendance key={att.bioId} att={att} attlogData={attlogData} />
+        ))
     : null;
 
   const handleNextPage = () => {
@@ -160,6 +120,7 @@ const Attendances = () => {
           bordered
           striped
           hover
+          responsive
           className="align-middle ms-3 mt-3 mb-3 caption-top"
         >
           <caption>Click any to see a record's attendance</caption>
@@ -167,11 +128,6 @@ const Attendances = () => {
             <tr>
               <th scope="col">Biometric ID</th>
               <th scope="col">Name</th>
-              {/* <th scope="col">Date</th>
-              <th scope="col">Time-In</th>
-              <th scope="col">Break-In</th>
-              <th scope="col">Break-Out</th>
-              <th scope="col">Time-Out</th> */}
             </tr>
           </thead>
           <tbody>{tableContent}</tbody>

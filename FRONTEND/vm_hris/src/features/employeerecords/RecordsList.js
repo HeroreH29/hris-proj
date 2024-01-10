@@ -113,6 +113,7 @@ const RecordsList = () => {
               <Record key={geninfoId} geninfoId={geninfoId} />
             ))
       : null;
+
     return (
       <Container>
         <Row>

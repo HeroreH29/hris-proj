@@ -127,13 +127,6 @@ const EditRecord = () => {
       const pdfDoc = await PDFDocument.load(formPdfBytes);
       const form = pdfDoc.getForm();
 
-      /* const fields = form.getFields();
-      fields.forEach((field) => {
-        const type = field.constructor.name;
-        const name = field.getName();
-        console.log(`${type}: ${name}`);
-      }); */
-
       try {
         const formEducAttain = [
           "Institution_Name",

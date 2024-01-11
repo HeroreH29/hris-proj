@@ -67,7 +67,7 @@ const Attendance = ({ att, attlogData }) => {
   const handlePrintAtt = async () => {
     let filename;
 
-    // Determine if the employee attendance to be printed is regular/probationary or casual
+    // Determine if the employee type is regular/probationary or casual to change which document to pull
     if (geninfo.EmployeeType !== "Casual") {
       filename = "reg-probi_time_sheet";
     } else {
@@ -98,7 +98,9 @@ const Attendance = ({ att, attlogData }) => {
         `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}`
       );
       BioID.setText(`(${geninfo.BioID.toString()})`);
-      DepartmentBranch.setText(geninfo.AssignedOutlet);
+      DepartmentBranch.setText(
+        `${geninfo.Department} - ${geninfo.AssignedOutlet}`
+      );
       Position.setText(geninfo.JobTitle);
       PrintDateTime.setText(format(new Date(), "eeee, MMMM dd, yyyy @ pp"));
       PeriodCovered.setText(
@@ -111,33 +113,28 @@ const Attendance = ({ att, attlogData }) => {
       // Copy of dates array returned from GetDatesInBetween()
       const dateArr = GetDatesInBetween(dateFrom, dateTo);
 
-      const fields = form.getFields();
-      const DAYRows = fields
-        .filter((field) => field.getName().includes("DAYSRow"))
-        .map((field) => form.getTextField(field.getName()));
+      // Check if document requested is appropriate based on employee type and length of dateArr
+      if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
+        alert(
+          `Required # of days for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Check your dates!`
+        );
+        return;
+      }
 
-      console.log(DAYRows);
-
-      /* DAYRows.forEach((field, index) => {
-        const textField = form.getTextField(field.getName());
-
-        const attIndex = filteredAtt.findIndex((att) => {
-          const date = dateArr[index];
-
-          return format(new Date(date), "MM/dd/yyyy") === att.date;
-        });
-
-        if (attIndex !== -1) {
-          textField.setText(
-            format(new Date(filteredAtt?.[attIndex]?.date), "dd-eee")
-          );
-        } else {
-          textField.setText(format(new Date(dateArr?.[index]), "dd-eee"));
+      // Function to find fields on the document
+      const FieldFinder = (fieldName, altFieldName) => {
+        let row = form.getFieldMaybe(fieldName);
+        if (!row) {
+          row = form.getField(altFieldName);
         }
-      }); */
+        let rowName = row.getName();
+        return form.getTextField(rowName);
+      };
 
-      dateArr.map((date, index) => {
-        // NOTE: the text field names suddenly had 'undefined' included after editing in Nitro Pro 5
+      dateArr.forEach((date, index) => {
+        /* NOTE: the text field names suddenly had 'undefined' included before
+        actual field name after editing in Nitro Pro 9 so i created
+        FieldFinder() to fix that issue somehow */
 
         // For finding specific index of the filtered attendance data
         const attIndex = filteredAtt.findIndex(
@@ -146,15 +143,27 @@ const Attendance = ({ att, attlogData }) => {
             new Date(format(date, "MM/dd/yyyy")).valueOf()
         );
 
-        const DAYSRow = form.getTextField(`undefined.DAYSRow${index + 1}`);
+        const DAYSRow = FieldFinder(
+          `DAYSRow${index + 1}`,
+          `undefined.DAYSRow${index + 1}`
+        );
 
-        const TimeInRow = form.getTextField(`Time InRow${index + 1}`);
-        const TimeOutRow = form.getTextField(`Time OutRow${index + 1}`);
+        const TimeInRow = FieldFinder(
+          `Time InRow${index + 1}`,
+          `undefined.Time InRow${index + 1}`
+        );
 
-        const BreakInRow = form.getTextField(
+        const TimeOutRow = FieldFinder(
+          `Time OutRow${index + 1}`,
+          `undefined.Time OutRow${index + 1}`
+        );
+
+        const BreakInRow = FieldFinder(
+          `Break InRow${index + 1}`,
           `undefined.Break InRow${index + 1}`
         );
-        const BreakOutRow = form.getTextField(
+        const BreakOutRow = FieldFinder(
+          `Break OutRow${index + 1}`,
           `undefined.Break OutRow${index + 1}`
         );
 
@@ -166,12 +175,12 @@ const Attendance = ({ att, attlogData }) => {
           );
 
           // Time in and time out rows set text
-          if (filteredAtt[attIndex].checkIn !== "") {
+          if (filteredAtt[attIndex].checkIn !== "" && TimeInRow) {
             TimeInRow.setText(
               `${filteredAtt[attIndex].date} ${filteredAtt[attIndex].checkIn}`
             );
           }
-          if (filteredAtt[attIndex].checkOut !== "") {
+          if (filteredAtt[attIndex].checkOut !== "" && TimeOutRow) {
             TimeOutRow.setText(
               `${filteredAtt[attIndex].date} ${filteredAtt[attIndex].checkOut}`
             );

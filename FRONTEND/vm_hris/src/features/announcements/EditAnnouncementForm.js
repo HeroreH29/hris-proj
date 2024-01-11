@@ -35,7 +35,7 @@ const EditAnnouncementForm = ({ users, announcement }) => {
       setDate("");
       setMessage("");
 
-      navigate("/dashboard/announcements");
+      navigate("/dashboard");
     }
   }, [isSuccess, isDelSuccess, navigate]);
 

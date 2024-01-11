@@ -34,7 +34,6 @@ const Announcement = ({ announcementId }) => {
             {announcement.message.length > 30
               ? announcement.message.slice(0, 30) + "..."
               : announcement.message}
-            {/* {announcement.message} */}
           </td>
           <td>{announcement.date}</td>
           <td>{announcement.user}</td>
@@ -66,7 +65,14 @@ const Announcement = ({ announcementId }) => {
         </Modal>
       </>
     );
-  } else return null;
+  } else
+    return (
+      <>
+        <tr>
+          <td>There are no announcements yet...</td>
+        </tr>
+      </>
+    );
 };
 
 const memoizedAnnouncement = memo(Announcement);

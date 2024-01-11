@@ -2,7 +2,7 @@ import React from "react";
 import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 import { useGetGeninfosQuery } from "./gCelebrantsApiSlice";
 import Celebrant from "./Celebrant";
-import { Table, Container, Row, Col } from "react-bootstrap";
+import { Table, Container, Row, Col, Spinner } from "react-bootstrap";
 import PulseLoader from "react-spinners/PulseLoader";
 
 const CelebrantsList = () => {
@@ -26,16 +26,19 @@ const CelebrantsList = () => {
 
   let content;
 
-  if (isPersLoading || isGenLoading) return <PulseLoader color="#808080" />;
+  if (isPersLoading || isGenLoading)
+    return (content = <Spinner animation="border" />);
 
   if (isError)
-    return (content = <p className="text-danger">{error?.data?.message}</p>);
+    return (content = (
+      <h5 className="text-secondary">{error?.data?.message}</h5>
+    ));
 
+  let tableContent;
   if (isPersSuccess && isGenSuccess) {
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
-    //const monthName = date.toLocaleString("default", { month: "long" });
 
     const celebrants = ids?.length
       ? ids.filter((personalInfoId) => {
@@ -69,7 +72,7 @@ const CelebrantsList = () => {
         })
       : [];
 
-    const tableContent = activeWithNames
+    tableContent = activeWithNames
       .filter((celebrant) => celebrant !== null)
       .map((celebrant) => {
         return (
@@ -80,33 +83,27 @@ const CelebrantsList = () => {
           />
         );
       });
-
-    content = (
-      <Container
-        className="border"
-        style={{ maxHeight: "400px", overflowY: "scroll" }}
-      >
-        <Table
-          bordered
-          responsive
-          striped
-          hover
-          className="align-middle m-3 caption-top"
-        >
-          <caption>Today's celebrant/s is/are highlighted</caption>
-          <thead>
-            <tr>
-              <th>Celebrant</th>
-              <th>Birthday</th>
-            </tr>
-          </thead>
-          <tbody>{tableContent}</tbody>
-        </Table>
-      </Container>
-    );
-
-    return content;
   }
+
+  content = (
+    <Container
+      className="border"
+      style={{ maxHeight: "500px", overflowY: "scroll" }}
+    >
+      <Table bordered striped hover className="align-middle mt-2 caption-top">
+        <caption>Today's celebrant/s is/are highlighted</caption>
+        <thead>
+          <tr>
+            <th>Celebrant</th>
+            <th>Birthday</th>
+          </tr>
+        </thead>
+        <tbody>{tableContent}</tbody>
+      </Table>
+    </Container>
+  );
+
+  return content;
 };
 
 export default CelebrantsList;

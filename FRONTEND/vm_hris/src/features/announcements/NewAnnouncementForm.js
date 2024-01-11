@@ -29,7 +29,7 @@ const NewAnnouncementForm = ({ users }) => {
       setDate("");
       setMessage("");
 
-      navigate("/dashboard/announcements");
+      navigate("/dashboard");
     }
   }, [isSuccess, navigate]);
 

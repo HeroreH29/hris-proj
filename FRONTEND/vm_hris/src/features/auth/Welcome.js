@@ -1,5 +1,8 @@
 import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import useAuth from "../../hooks/useAuth";
 import AnnouncementsList from "../announcements/AnnouncementsList";
@@ -9,9 +12,7 @@ const Welcome = () => {
   const { status } = useAuth();
   useTitle(`${status} Dashboard | Via Mare HRIS`);
 
-  // const date = new Date();
-  // const currentMonth = date.toLocaleString("default", { month: "long" });
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const date = new Date();
   const monthName = date.toLocaleString("default", { month: "long" });
@@ -22,42 +23,23 @@ const Welcome = () => {
       <Row className="p-3">
         {/* Announcements */}
         <Col>
-          <Row>
-            <Col>
-              {/* <Button
-                className="p-3"
-                variant="light"
-                onClick={() => navigate("/dashboard/announcements")}
-              >
-                <h4>View HR Memo/Announcements</h4>
-              </Button> */}
-              <h3>HR Memos/Announcements</h3>
-              <AnnouncementsList />
-            </Col>
-          </Row>
+          <h3>
+            HR Memos/Announcements{" "}
+            <Button
+              className="float-end"
+              variant="outline-primary"
+              onClick={() => navigate("/dashboard/announcements/new")}
+            >
+              <FontAwesomeIcon icon={faFileCirclePlus} />
+            </Button>
+          </h3>
+          <AnnouncementsList />
         </Col>
         <Col>
-          <Row>
-            <Col>
-              {/* <Button
-                className="p-3"
-                variant="light"
-                onClick={() => navigate("/dashboard/celebrants")}
-              >
-                <h4>View Birthday Celebrants for {currentMonth}</h4>
-              </Button> */}
-              <h3>Birthday Celebrants for {monthName}</h3>
-              <CelebrantsList />
-            </Col>
-          </Row>
+          <h3>Birthday Celebrants for {monthName}</h3>
+          <CelebrantsList />
         </Col>
       </Row>
-      {/* <p>
-        <Link to="/dash/announcements">View announcements</Link>
-      </p>
-      <p>
-        <Link to="/dash/users">View user settings</Link>
-      </p> */}
     </Container>
   );
 

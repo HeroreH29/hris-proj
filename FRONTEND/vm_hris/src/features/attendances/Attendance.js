@@ -304,7 +304,7 @@ const Attendance = ({ att, attlogData }) => {
     setShow(true);
   };
 
-  // Will check if attendance data is present
+  // Check if attendance data is present
   if (att) {
     return (
       <>

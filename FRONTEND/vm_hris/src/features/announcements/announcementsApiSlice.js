@@ -40,6 +40,8 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
             { type: "Announcement", id: "LIST" },
             ...result.ids.map((id) => ({ type: "Announcement", id })),
           ];
+        } else if (error) {
+          return [{ type: "Announcement", id: "LIST" }];
         } else return [{ type: "Announcement", id: "LIST" }];
       },
     }),

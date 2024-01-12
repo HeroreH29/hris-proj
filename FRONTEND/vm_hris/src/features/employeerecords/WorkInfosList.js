@@ -180,6 +180,34 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
               <Form.Group as={Col} md="auto" className="mb-3">
                 <Form.Label className="fw-semibold">Address</Form.Label>
                 <InputGroup>
+                  {showCountry ? (
+                    <CountryDropdown
+                      classes="form-select"
+                      value={country}
+                      onChange={(e) => setCountry(e)}
+                    />
+                  ) : (
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter Country"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                    />
+                  )}
+                  <DropdownButton title="" variant="outline-secondary">
+                    <Dropdown.Item
+                      as={"option"}
+                      onClick={() => setShowCountry(false)}
+                    >
+                      Enter Country
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      as={"option"}
+                      onClick={() => setShowCountry(true)}
+                    >
+                      Select Country
+                    </Dropdown.Item>
+                  </DropdownButton>
                   {showRegion ? (
                     <RegionDropdown
                       classes="dropdown-toggle show form-select"
@@ -208,34 +236,6 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                       onClick={() => setShowRegion(true)}
                     >
                       Select State
-                    </Dropdown.Item>
-                  </DropdownButton>
-                  {showCountry ? (
-                    <CountryDropdown
-                      classes="form-select"
-                      value={country}
-                      onChange={(e) => setCountry(e)}
-                    />
-                  ) : (
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter Country"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                    />
-                  )}
-                  <DropdownButton title="" variant="outline-secondary">
-                    <Dropdown.Item
-                      as={"option"}
-                      onClick={() => setShowCountry(false)}
-                    >
-                      Enter Country
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      as={"option"}
-                      onClick={() => setShowCountry(true)}
-                    >
-                      Select Country
                     </Dropdown.Item>
                   </DropdownButton>
                 </InputGroup>

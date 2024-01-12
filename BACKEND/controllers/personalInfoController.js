@@ -11,14 +11,15 @@ const getAllPersonalInfo = async (req, res) => {
   res.json(personalInfos);
 };
 
-// @desc Create new user
-// @route POST /users
+// @desc Create new personalinfo
+// @route POST /personalinfos
 // @access Private
 const createPersonalInfo = async (req, res) => {
   const {
     EmployeeID,
     Birthday,
-    Address,
+    PermanentAddress,
+    PresentAddress,
     ZipCode,
     Email,
     Gender,
@@ -38,7 +39,8 @@ const createPersonalInfo = async (req, res) => {
   if (
     !EmployeeID ||
     !Birthday ||
-    !Address ||
+    !PermanentAddress ||
+    !PresentAddress ||
     !ZipCode ||
     !Gender ||
     !CivilStatus ||
@@ -56,11 +58,12 @@ const createPersonalInfo = async (req, res) => {
       .json({ message: `EmployeeID ${EmployeeID} already exists` });
   }
 
-  // Create and store new user
+  // Create and store new personalinfo
   const personalinfo = await PersonalInfo.create({
     EmployeeID,
     Birthday,
-    Address,
+    PresentAddress,
+    PermanentAddress,
     ZipCode,
     Email,
     Gender,

@@ -125,9 +125,8 @@ const RecordsList = () => {
           <Col md="auto">
             {/* Temporarily disabled */}
             <Button
-              disabled
               variant="outline-primary"
-              onClick={() => navigate("/users/new")}
+              onClick={() => navigate("/employeerecords/new")}
             >
               <FontAwesomeIcon icon={faUserPlus} />
             </Button>

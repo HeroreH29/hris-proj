@@ -4,8 +4,8 @@ const Dependent = require("../models/Dependent");
 const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 
-// @desc Get all users
-// @route GET /users
+// @desc Get all geninfos
+// @route GET /geninfos
 // @access Private
 const getAllGenInfo = async (req, res) => {
   const geninfos = await GenInfo.find().lean();
@@ -15,8 +15,8 @@ const getAllGenInfo = async (req, res) => {
   res.json(geninfos);
 };
 
-// @desc Create new user
-// @route POST /users
+// @desc Create new geninfo
+// @route POST /geninfos
 // @access Private
 const createGenInfo = async (req, res) => {
   const {
@@ -72,14 +72,14 @@ const createGenInfo = async (req, res) => {
       .json({ message: `EmployeeID ${EmployeeID} already exists` });
   }
 
-  // Create and store new user
+  // Create and store new geninfo
   const geninfo = await GenInfo.create({
     EmployeeID,
     BioID,
     Prefix,
     FirstName,
     MiddleName,
-    MI: MiddleName[0],
+    MI: MiddleName ?? "",
     LastName,
     EmployeeType,
     AssignedOutlet,

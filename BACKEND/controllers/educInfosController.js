@@ -53,7 +53,7 @@ const updateEducInfo = async (req, res) => {
     return res.status(404).json({ message: "Info not found" });
   }
 
-  // Exclude variables that no needs to update before proceeding in updating
+  // Exclude variables that does not need to update before proceeding in updating
   const filteredData = { ...reqBody };
   delete filteredData?.id;
   delete filteredData?.EmployeeID;

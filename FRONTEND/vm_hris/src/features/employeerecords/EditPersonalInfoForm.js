@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useUpdatePersonalinfoMutation } from "./recordsApiSlice";
+import {
+  useUpdatePersonalinfoMutation,
+  useAddPersonalinfoMutation,
+} from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { GENDER, CIVILSTATUS } from "../../config/pInfoOptions";
 import {
@@ -19,10 +22,27 @@ const NUMERIC_REGEX = /^[0-9.]{1,5}$/;
 const ALPHA_REGEX = /^[a-zA-Z. ]*$/;
 const PHONEMOBILE_REGEX = /^[0-9+ -]*$/;
 
-const EditPersonalInfoForm = ({ personalinfo }) => {
+const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   // eslint-disable-next-line
-  const [updatePersonalinfo, { isLoading, isSuccess, isError, error }] =
-    useUpdatePersonalinfoMutation();
+  const [
+    updatePersonalinfo,
+    {
+      isLoading: updateLoading,
+      isSuccess: updateSuccess,
+      isError: updateError,
+      error: updateerr,
+    },
+  ] = useUpdatePersonalinfoMutation();
+
+  const [
+    addPersonalinfo,
+    {
+      isLoading: addLoading,
+      isSuccess: addSuccess,
+      isError: addError,
+      error: adderr,
+    },
+  ] = useAddPersonalinfoMutation();
 
   const [disablePermAdd, setDisablePermAdd] = useState(true);
 
@@ -32,29 +52,31 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
     : null;
 
   /* PERSONALINFO VARIABLES */
-  const [birthday, setBirthday] = useState(format(parsedBD, "yyyy-MM-dd"));
+  const [birthday, setBirthday] = useState(
+    parsedBD ? format(parsedBD, "yyyy-MM-dd") : ""
+  );
   const [presentAddress, setPresentAddress] = useState(
     personalinfo?.PresentAddress || personalinfo?.Address
   );
   const [permanentAddress, setPermanentAddress] = useState(
-    personalinfo.PermanentAddress
+    personalinfo?.PermanentAddress
   );
-  const [zipCode, setZipCode] = useState(personalinfo.ZipCode);
-  const [email, setEmail] = useState(personalinfo.Email);
-  const [gender, setGender] = useState(personalinfo.Gender);
-  const [civilStatus, setCivilStatus] = useState(personalinfo.CivilStatus);
-  const [height, setHeight] = useState(personalinfo.Height);
-  const [weight, setWeight] = useState(personalinfo.Weight);
-  const [phone, setPhone] = useState(personalinfo.Phone);
-  const [mobile, setMobile] = useState(personalinfo.Mobile);
-  const [spouse, setSpouse] = useState(personalinfo.Spouse);
-  const [fatherName, setFatherName] = useState(personalinfo.FatherName);
-  const [foccupation, setFoccupation] = useState(personalinfo.Foccupation);
-  const [motherName, setMotherName] = useState(personalinfo.MotherName);
-  const [moccupation, setMoccupation] = useState(personalinfo.Moccupation);
+  const [zipCode, setZipCode] = useState(personalinfo?.ZipCode);
+  const [email, setEmail] = useState(personalinfo?.Email);
+  const [gender, setGender] = useState(personalinfo?.Gender);
+  const [civilStatus, setCivilStatus] = useState(personalinfo?.CivilStatus);
+  const [height, setHeight] = useState(personalinfo?.Height);
+  const [weight, setWeight] = useState(personalinfo?.Weight);
+  const [phone, setPhone] = useState(personalinfo?.Phone);
+  const [mobile, setMobile] = useState(personalinfo?.Mobile);
+  const [spouse, setSpouse] = useState(personalinfo?.Spouse);
+  const [fatherName, setFatherName] = useState(personalinfo?.FatherName);
+  const [foccupation, setFoccupation] = useState(personalinfo?.Foccupation);
+  const [motherName, setMotherName] = useState(personalinfo?.MotherName);
+  const [moccupation, setMoccupation] = useState(personalinfo?.Moccupation);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (updateSuccess || addSuccess) {
       setBirthday("");
       setPresentAddress("");
       setPermanentAddress("");
@@ -74,7 +96,7 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
 
       navigate("/employeerecords");
     }
-  }, [isSuccess, navigate]);
+  }, [updateSuccess, addSuccess, navigate]);
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -82,35 +104,61 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() && !isLoading) {
+    const confirm = window.confirm("Add/Save this information?");
+
+    if (confirm && form.checkValidity() && (!updateLoading || !addLoading)) {
       // Revert birthday format to MM/DD/YYYY
       const revertedBday = format(
         parse(birthday, "yyyy-MM-dd", new Date()),
         "MM/dd/yyyy"
       );
 
-      await updatePersonalinfo({
-        id: personalinfo.id,
-        EmployeeID: personalinfo.EmployeeID,
-        Birthday: revertedBday,
-        PresentAddress: presentAddress,
-        PermanentAddress: presentAddress
-          ? "(Same as present address)"
-          : permanentAddress,
-        ZipCode: zipCode,
-        Email: email,
-        Gender: gender,
-        CivilStatus: civilStatus,
-        Height: height,
-        Weight: weight,
-        Phone: phone,
-        Mobile: mobile,
-        Spouse: spouse,
-        FatherName: fatherName,
-        Foccupation: foccupation,
-        MotherName: motherName,
-        Moccupation: moccupation,
-      });
+      if (personalinfo) {
+        await updatePersonalinfo({
+          id: personalinfo?.id,
+          EmployeeID: personalinfo?.EmployeeID,
+          Birthday: revertedBday,
+          PresentAddress: presentAddress,
+          PermanentAddress: presentAddress
+            ? "(Same as present address)"
+            : permanentAddress,
+          ZipCode: zipCode,
+          Email: email,
+          Gender: gender,
+          CivilStatus: civilStatus,
+          Height: height,
+          Weight: weight,
+          Phone: phone,
+          Mobile: mobile,
+          Spouse: spouse,
+          FatherName: fatherName,
+          Foccupation: foccupation,
+          MotherName: motherName,
+          Moccupation: moccupation,
+        });
+      } else {
+        await addPersonalinfo({
+          EmployeeID: employeeId,
+          Birthday: revertedBday,
+          PresentAddress: presentAddress,
+          PermanentAddress: presentAddress
+            ? "(Same as present address)"
+            : permanentAddress,
+          ZipCode: zipCode,
+          Email: email,
+          Gender: gender,
+          CivilStatus: civilStatus,
+          Height: height,
+          Weight: weight,
+          Phone: phone,
+          Mobile: mobile,
+          Spouse: spouse,
+          FatherName: fatherName,
+          Foccupation: foccupation,
+          MotherName: motherName,
+          Moccupation: moccupation,
+        });
+      }
     } else {
       e.stopPropagation();
     }
@@ -341,13 +389,11 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
                 Father Name and Occupation
               </InputGroup.Text>
               <Form.Control
-                required
                 type="text"
                 value={fatherName}
                 onChange={(e) => userInputChange(e, ALPHA_REGEX, setFatherName)}
               />
               <Form.Control
-                required
                 type="text"
                 value={foccupation}
                 onChange={(e) =>
@@ -360,13 +406,11 @@ const EditPersonalInfoForm = ({ personalinfo }) => {
                 Mother Name and Occupation
               </InputGroup.Text>
               <Form.Control
-                required
                 type="text"
                 value={motherName}
                 onChange={(e) => userInputChange(e, ALPHA_REGEX, setMotherName)}
               />
               <Form.Control
-                required
                 type="text"
                 value={moccupation}
                 onChange={(e) =>

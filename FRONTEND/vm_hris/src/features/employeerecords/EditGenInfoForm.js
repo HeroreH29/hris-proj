@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useUpdateGeninfoMutation } from "./recordsApiSlice";
+import {
+  useAddGeninfoMutation,
+  useUpdateGeninfoMutation,
+} from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
   ASSIGNEDOUTLET,
@@ -22,38 +25,56 @@ import { format, parse } from "date-fns";
 
 const NUMBER_REGEX = /^[0-9]*$/;
 const IDNUMS_REGEX = /^[0-9-]*$/;
-const ALPHANUM_REGEX = "[A-z0-9]";
+const ALPHANUM_REGEX = /^[A-z0-9]+$/;
 
 const EditGenInfoForm = ({ geninfo }) => {
   // eslint-disable-next-line
-  const [updateGeninfo, { isLoading, isSuccess, isError, error }] =
-    useUpdateGeninfoMutation();
+  const [
+    updateGeninfo,
+    {
+      isLoading: updateLoading,
+      isSuccess: updateSuccess,
+      isError: isUpdateError,
+      error: updateError,
+    },
+  ] = useUpdateGeninfoMutation();
+
+  const [
+    addGeninfo,
+    {
+      isLoading: addLoading,
+      isSuccess: addSuccess,
+      isError: isAddError,
+      error: addError,
+    },
+  ] = useAddGeninfoMutation();
 
   const navigate = useNavigate();
 
-  const parsedDE = geninfo.DateEmployed
+  const parsedDE = geninfo?.DateEmployed
     ? parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date())
     : "";
-  const parsedRD = geninfo.RegDate
+  const parsedRD = geninfo?.RegDate
     ? parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date())
     : "";
-  const parsedDL = geninfo.DateLeaved
+  const parsedDL = geninfo?.DateLeaved
     ? parse(geninfo?.DateLeaved, "MMM dd, yyyy", new Date())
     : "";
-  const parsedDP = geninfo.DateProbationary
+  const parsedDP = geninfo?.DateProbationary
     ? parse(geninfo?.DateProbationary, "MMM dd, yyyy", new Date())
     : "";
 
   /* GENINFO VARIABLES */
-  const [bioId, setBioId] = useState(geninfo.BioID);
-  const [prefix, setPrefix] = useState(geninfo.Prefix);
-  const [firstName, setFirstName] = useState(geninfo.FirstName);
-  const [middleName, setMiddleName] = useState(geninfo.MiddleName);
-  const [lastName, setLastName] = useState(geninfo.LastName);
-  const [employeeType, setEmployeeType] = useState(geninfo.EmployeeType);
-  const [assignedOutlet, setAssignedOutlet] = useState(geninfo.AssignedOutlet);
-  const [department, setDepartment] = useState(geninfo.Department);
-  const [jobTitle, setJobTitle] = useState(geninfo.JobTitle);
+  const [employeeId, setEmployeeId] = useState(geninfo?.EmployeeID);
+  const [bioId, setBioId] = useState(geninfo?.BioID);
+  const [prefix, setPrefix] = useState(geninfo?.Prefix);
+  const [firstName, setFirstName] = useState(geninfo?.FirstName);
+  const [middleName, setMiddleName] = useState(geninfo?.MiddleName);
+  const [lastName, setLastName] = useState(geninfo?.LastName);
+  const [employeeType, setEmployeeType] = useState(geninfo?.EmployeeType);
+  const [assignedOutlet, setAssignedOutlet] = useState(geninfo?.AssignedOutlet);
+  const [department, setDepartment] = useState(geninfo?.Department);
+  const [jobTitle, setJobTitle] = useState(geninfo?.JobTitle);
   const [dateEmployed, setDateEmployed] = useState(
     parsedDE ? format(parsedDE, "yyyy-MM-dd") : ""
   );
@@ -66,16 +87,16 @@ const EditGenInfoForm = ({ geninfo }) => {
   const [dateProbationary, setDateProbationary] = useState(
     parsedDP ? format(parsedDP, "yyyy-MM-dd") : ""
   );
-  const [empStatus, setEmpStatus] = useState(geninfo.EmpStatus);
-  const [notes, setNotes] = useState(geninfo.Notes);
-  const [tinnumber, setTINnumber] = useState(geninfo.TINnumber);
-  const [sssnumber, setSSSnumber] = useState(geninfo.SSSnumber);
-  const [phnumber, setPHnumber] = useState(geninfo.PHnumber);
-  const [pinumber, setPInumber] = useState(geninfo.PInumber);
-  const [atmnumber, setATMnumber] = useState(geninfo.ATMnumber);
+  const [empStatus, setEmpStatus] = useState(geninfo?.EmpStatus);
+  const [notes, setNotes] = useState(geninfo?.Notes);
+  const [tinnumber, setTINnumber] = useState(geninfo?.TINnumber);
+  const [sssnumber, setSSSnumber] = useState(geninfo?.SSSnumber);
+  const [phnumber, setPHnumber] = useState(geninfo?.PHnumber);
+  const [pinumber, setPInumber] = useState(geninfo?.PInumber);
+  const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (updateSuccess || addSuccess) {
       setBioId("");
       setPrefix("");
       setFirstName("");
@@ -98,7 +119,7 @@ const EditGenInfoForm = ({ geninfo }) => {
 
       navigate("/employeerecords");
     }
-  }, [isSuccess, navigate]);
+  }, [updateSuccess, addSuccess, navigate]);
 
   /* DATE REVERT */
   const dateRevert = (dateString, formatString) => {
@@ -111,42 +132,74 @@ const EditGenInfoForm = ({ geninfo }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() && !isLoading) {
-      // Revert dates
-      const revertedDE = dateEmployed
-        ? dateRevert(dateEmployed, "MMM dd, yyyy")
-        : "";
-      const revertedDP = dateProbationary
-        ? dateRevert(dateProbationary, "MMM dd, yyyy")
-        : "";
-      const revertedRD = regDate ? dateRevert(regDate, "MMMM dd, yyyy") : "";
-      const revertedDL = dateLeaved
-        ? dateRevert(dateLeaved, "MMM dd, yyyy")
-        : "";
+    if (form.checkValidity() && (!updateLoading || !addLoading)) {
+      const confirm = window.confirm("Proceed with these information?");
 
-      await updateGeninfo({
-        id: geninfo.id,
-        EmployeeID: geninfo.EmployeeID,
-        BioID: bioId,
-        Prefix: prefix,
-        FirstName: firstName,
-        MiddleName: middleName,
-        LastName: lastName,
-        EmployeeType: employeeType,
-        AssignedOutlet: assignedOutlet,
-        Department: department,
-        JobTitle: jobTitle,
-        DateEmployed: revertedDE,
-        RegDate: revertedRD,
-        DateLeaved: revertedDL,
-        DateProbationary: revertedDP,
-        EmpStatus: empStatus,
-        Notes: notes,
-        TINnumber: tinnumber,
-        SSSnumber: sssnumber,
-        PHnumber: phnumber,
-        PInumber: pinumber,
-      });
+      if (confirm) {
+        // Revert dates
+        const revertedDE = dateEmployed
+          ? dateRevert(dateEmployed, "MMM dd, yyyy")
+          : "";
+        const revertedDP = dateProbationary
+          ? dateRevert(dateProbationary, "MMM dd, yyyy")
+          : "";
+        const revertedRD = regDate ? dateRevert(regDate, "MMMM dd, yyyy") : "";
+        const revertedDL = dateLeaved
+          ? dateRevert(dateLeaved, "MMM dd, yyyy")
+          : "";
+
+        // Check if user is adding or updating an employee record
+        if (geninfo) {
+          await updateGeninfo({
+            id: geninfo?.id,
+            EmployeeID: employeeId,
+            BioID: bioId,
+            Prefix: prefix,
+            FirstName: firstName,
+            MiddleName: middleName,
+            LastName: lastName,
+            EmployeeType: employeeType,
+            AssignedOutlet: assignedOutlet,
+            Department: department,
+            JobTitle: jobTitle,
+            DateEmployed: revertedDE,
+            RegDate: revertedRD,
+            DateLeaved: revertedDL,
+            DateProbationary: revertedDP,
+            EmpStatus: empStatus,
+            Notes: notes,
+            ATMnumber: atmnumber,
+            TINnumber: tinnumber,
+            SSSnumber: sssnumber,
+            PHnumber: phnumber,
+            PInumber: pinumber,
+          });
+        } else {
+          await addGeninfo({
+            EmployeeID: employeeId,
+            BioID: bioId,
+            Prefix: prefix,
+            FirstName: firstName,
+            MiddleName: middleName,
+            LastName: lastName,
+            EmployeeType: employeeType,
+            AssignedOutlet: assignedOutlet,
+            Department: department,
+            JobTitle: jobTitle,
+            DateEmployed: revertedDE,
+            RegDate: revertedRD,
+            DateLeaved: revertedDL,
+            DateProbationary: revertedDP,
+            EmpStatus: empStatus,
+            Notes: notes,
+            ATMnumber: atmnumber,
+            TINnumber: tinnumber,
+            SSSnumber: sssnumber,
+            PHnumber: phnumber,
+            PInumber: pinumber,
+          });
+        }
+      }
     } else {
       e.stopPropagation();
     }
@@ -155,10 +208,14 @@ const EditGenInfoForm = ({ geninfo }) => {
   };
 
   /* USER INPUT CHANGE */
-  const userInputChange = (e, REGEX, setStateVariable) => {
+  const userInputChange = (e, REGEX = RegExp | null, setStateVariable) => {
     const inputValue = e.target.value;
 
-    if (REGEX.test(inputValue) || inputValue === "") {
+    if (REGEX) {
+      if (REGEX.test(inputValue) || inputValue === "") {
+        setStateVariable(inputValue);
+      }
+    } else {
       setStateVariable(inputValue);
     }
   };
@@ -226,10 +283,13 @@ const EditGenInfoForm = ({ geninfo }) => {
               <Form.Label className="fw-semibold">Employee ID</Form.Label>
               <Form.Control
                 required
+                autoFocus
                 autoComplete="off"
                 type="text"
-                pattern={ALPHANUM_REGEX}
-                defaultValue={geninfo.EmployeeID}
+                value={employeeId}
+                onChange={(e) =>
+                  userInputChange(e, ALPHANUM_REGEX, setEmployeeId)
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required
@@ -238,7 +298,6 @@ const EditGenInfoForm = ({ geninfo }) => {
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Bio ID</Form.Label>
               <Form.Control
-                autoFocus
                 type="text"
                 autoComplete="off"
                 required
@@ -323,14 +382,6 @@ const EditGenInfoForm = ({ geninfo }) => {
                   {assignedOutletOptions}
                 </DropdownButton>
               </InputGroup>
-
-              {/* <Form.Select
-                required
-                value={assignedOutlet}
-                onChange={(e) => setAssignedOutlet(e.target.value)}
-              >
-                {assignedOutletOptions}
-              </Form.Select> */}
               <Form.Control.Feedback type="invalid">
                 Select an option
               </Form.Control.Feedback>
@@ -486,7 +537,7 @@ const EditGenInfoForm = ({ geninfo }) => {
           <Row className="mb-3">
             <Col md="auto">
               <Button type="submit" variant="outline-success">
-                Save Changes
+                {geninfo ? "Save Change" : "Proceed"}
               </Button>
             </Col>
           </Row>

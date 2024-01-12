@@ -40,7 +40,6 @@ function App() {
                   <Route index element={<Welcome />} />
 
                   <Route path="announcements">
-                    {/* <Route index element={<AnnouncementsList />} /> */}
                     <Route
                       element={
                         <RequireAuth
@@ -77,7 +76,7 @@ function App() {
                   <Route path="employeerecords">
                     <Route index element={<RecordsList />} />
                     <Route path=":employeeId" element={<EditRecord />} />
-                    {/* <Route path="new" element={<NewUserForm />} /> */}
+                    <Route path="new" element={<EditRecord />} />
                   </Route>
                 </Route>
                 <Route

@@ -40,7 +40,10 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       }
       return refreshResult;
     }
+  } else if (result?.error?.status === 400) {
+    console.log(result.error.data.message);
   }
+
   return result;
 };
 

@@ -303,11 +303,19 @@ const EditRecord = () => {
           </Button>
         </Col>
         <Col md="auto">
-          <h3>Edit Record</h3>
+          <div>
+            <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
+            {!employeeId && (
+              <small className="text-decoration-underline">
+                You can only add GENERAL INFO for now. Add other details later.
+              </small>
+            )}
+          </div>
         </Col>
         <Col className="d-flex justify-content-end">
           <Button
             variant="outline-secondary"
+            disabled={!personalinfo}
             onClick={handlePrintEmployeeRecord}
           >
             <FontAwesomeIcon icon={faPrint} />
@@ -318,16 +326,30 @@ const EditRecord = () => {
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={geninfo} />
         </Tab>
-        <Tab eventKey="personalinfo" title="Personal Info" unmountOnExit={true}>
-          <EditPersonalInfoForm personalinfo={personalinfo} />
+        <Tab
+          eventKey="personalinfo"
+          title="Personal Info"
+          unmountOnExit={true}
+          disabled={!employeeId}
+        >
+          <EditPersonalInfoForm
+            employeeId={employeeId}
+            personalinfo={personalinfo}
+          />
         </Tab>
-        <Tab eventKey="dependents" title="Dependents" unmountOnExit={true}>
+        <Tab
+          eventKey="dependents"
+          title="Dependents"
+          unmountOnExit={true}
+          disabled={!employeeId}
+        >
           <DependentsList dependents={dependents} employeeId={employeeId} />
         </Tab>
         <Tab
           eventKey="educinfo"
           title="Educational Attainment"
           unmountOnExit={true}
+          disabled={!employeeId}
         >
           <EducInfoList educinfos={educinfos} employeeId={employeeId} />
         </Tab>
@@ -335,6 +357,7 @@ const EditRecord = () => {
           eventKey="workinfo"
           title="Employment History"
           unmountOnExit={true}
+          disabled={!employeeId}
         >
           <WorkInfosList workinfos={workinfos} employeeId={employeeId} />
         </Tab>

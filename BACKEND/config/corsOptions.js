@@ -1,10 +1,13 @@
-const allowedOrigins = require("./allowedOrigins");
+const {
+  allowedDevelopmentOrigins,
+  allowedProductionOrigins,
+} = require("./allowedOrigins");
 
 const corsOptions = {
   origin: (origin, callback) => {
     // '!origin' is included for postman testing
 
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    if (allowedDevelopmentOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));

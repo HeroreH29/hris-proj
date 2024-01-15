@@ -3,15 +3,30 @@ const PersonalInfo = require("../models/PersonalInfo");
 const Dependent = require("../models/Dependent");
 const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
+const Leave = require("../models/Leave");
+const LeaveCredit = require("../models/LeaveCredit");
+const { differenceInYears } = require("date-fns");
 
 // @desc Get all geninfos
 // @route GET /geninfos
 // @access Private
 const getAllGenInfo = async (req, res) => {
   const geninfos = await GenInfo.find().lean();
+
   if (!geninfos?.length) {
     return res.status(400).json({ message: "No general infos found" });
   }
+
+  // Employees w/ 0-4 service years
+  const zeroToFour = geninfos
+    .filter(
+      (geninfo) =>
+        differenceInYears(new Date(geninfo.DateEmployed), new Date()) <= 4 &&
+        geninfo.EmpStatus === "Y" &&
+        geninfo.EmployeeType === "Regular"
+    )
+    .map((geninfo) => geninfo.EmployeeID);
+
   res.json(geninfos);
 };
 
@@ -172,6 +187,12 @@ const updateGenInfo = async (req, res) => {
   const workinfo = await WorkInfo.find({
     EmployeeID: geninfo.EmployeeID,
   }).exec();
+  const leaveRecord = await Leave.find({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
+  const leaveCreditRecord = await LeaveCredit.find({
+    EmployeeID: geninfo.EmployeeID,
+  }).exec();
 
   // Apply changes to other informations
   let updatedPersonalInfo;
@@ -204,6 +225,20 @@ const updateGenInfo = async (req, res) => {
     updatedWorkInfo = await workinfo.save();
   }
 
+  let updatedLeaveRecord;
+  if (leaveRecord?.length > 0) {
+    leaveRecord.forEach((leave) => {
+      leave.EmployeeID = newEmployeeID;
+    });
+    updatedLeaveRecord = await leaveRecord.save();
+  }
+
+  let updatedLeaveCredit;
+  if (leaveCreditRecord) {
+    leaveCreditRecord.EmployeeID = newEmployeeID;
+    updatedLeaveCredit = await leaveCreditRecord.save();
+  }
+
   geninfo.EmployeeID = newEmployeeID;
   geninfo.BioID = BioID;
   geninfo.Prefix = Prefix;
@@ -228,7 +263,15 @@ const updateGenInfo = async (req, res) => {
 
   const updatedGenInfo = await geninfo.save();
 
-  if (updatedGenInfo || updatedPersonalInfo || updatedDependent) {
+  // Check if EmployeeID across other informations are updated
+  if (
+    updatedGenInfo &&
+    updatedPersonalInfo &&
+    updatedDependent &&
+    updatedEducInfo &&
+    updatedWorkInfo &&
+    updatedLeaveRecord
+  ) {
     res.json({
       message: `Information of ${updatedGenInfo.EmployeeID} updated`,
     });

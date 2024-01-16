@@ -17,6 +17,7 @@ import { USERLEVELS } from "./config/userOptions";
 import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
 import Attendances from "./features/attendances/Attendances";
+import LeavesList from "./features/leaves/LeavesList";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -88,8 +89,19 @@ function App() {
                 >
                   <Route path="attendances">
                     <Route index element={<Attendances />} />
-                    {/* <Route path=":bioId" element={<ViewAttendance />} /> */}
-                    {/* <Route path="new" element={<NewUserForm />} /> */}
+                    {/* Include more routes if necessary */}
+                  </Route>
+                </Route>
+                <Route
+                  element={
+                    <RequireAuth
+                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                    />
+                  }
+                >
+                  <Route path="leaves">
+                    <Route index element={<LeavesList />} />
+                    {/* Include more routes if necessary */}
                   </Route>
                 </Route>
               </Route>

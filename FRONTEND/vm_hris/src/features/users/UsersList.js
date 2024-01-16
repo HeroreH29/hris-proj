@@ -12,7 +12,7 @@ const UsersList = () => {
   const navigate = useNavigate();
   const { isHR, isAdmin } = useAuth();
 
-  useTitle("User List | Via Mare HRIS");
+  useTitle("User Settings | Via Mare HRIS");
 
   const {
     data: users,
@@ -45,7 +45,7 @@ const UsersList = () => {
       <Container>
         <Row>
           <Col>
-            <h3>User List</h3>
+            <h3>User Settings</h3>
           </Col>
           {(isHR || isAdmin) && (
             <Col md="auto">

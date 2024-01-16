@@ -57,8 +57,8 @@ const DashHeader = () => {
                 Attendances
               </Nav.Link>
             )}
-            <Nav.Link eventKey="4" onClick={() => console.log("/leaves")}>
-              Leave Tracker
+            <Nav.Link eventKey="4" onClick={() => navigate("/leaves")}>
+              Leaves
             </Nav.Link>
             {(isHR || isAdmin) && (
               <Nav.Link eventKey="5" onClick={() => navigate("/users")}>

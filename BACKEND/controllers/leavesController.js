@@ -15,6 +15,7 @@ const getAllLeaves = async (req, res) => {
 // desc Create new leave
 // @route POST /leaves
 // @access Private
+// Approve value equivalent: 0 = Pending; 1 = Approved; 2 = Declined; 3 = Cancelled
 const createLeave = async (req, res) => {
   const { ModifiedDate, DayTime, DateApproved, Approve, ...others } = req.body;
 

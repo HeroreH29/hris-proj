@@ -5,11 +5,277 @@ const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 const Leave = require("../models/Leave");
 const LeaveCredit = require("../models/LeaveCredit");
-const { differenceInYears } = require("date-fns");
+const {
+  differenceInYears,
+  differenceInMonths,
+  differenceInDays,
+  parse,
+  format,
+  addMonths,
+} = require("date-fns");
+
+// This is the leave credit inclusion and update
+const leaveCreditInclUpd = async (geninfos) => {
+  const existingLeaveCreditIds = await LeaveCredit.distinct("EmployeeID");
+
+  // Employees w/ 0-4 service years and no LeaveCredit records
+  const zeroToFourWithoutLeaveCredit = geninfos
+    .filter((geninfo) => {
+      const parsedDate = parse(
+        geninfo?.DateEmployed,
+        "MMM dd, yyyy",
+        new Date()
+      );
+
+      const serviceYears = differenceInYears(new Date(), parsedDate);
+
+      // Check for service years and absence in LeaveCredit
+      return (
+        serviceYears >= 0 &&
+        serviceYears <= 4 &&
+        geninfo.EmployeeType === "Regular" &&
+        geninfo.EmpStatus === "Y" &&
+        !existingLeaveCreditIds.includes(geninfo.EmployeeID)
+      );
+    })
+    .map((geninfo) => geninfo.EmployeeID);
+
+  // Employees w/ 5-7 service years will have updated leave credits
+  const fiveToSevenWithLeaveCredit = geninfos
+    .filter((geninfo) => {
+      const parsedDate = parse(
+        geninfo?.DateEmployed,
+        "MMM dd, yyyy",
+        new Date()
+      );
+
+      const serviceYears = differenceInYears(new Date(), parsedDate);
+
+      // Check for service years and absence in LeaveCredit
+      return (
+        serviceYears >= 5 &&
+        serviceYears <= 7 &&
+        geninfo.EmployeeType === "Regular" &&
+        geninfo.EmpStatus === "Y" &&
+        existingLeaveCreditIds.includes(geninfo.EmployeeID)
+      );
+    })
+    .map((geninfo) => geninfo.EmployeeID);
+
+  // Employees w/ 8-10 service years will have updated leave credits
+  const eightToTenWithLeaveCredit = geninfos
+    .filter((geninfo) => {
+      const parsedDate = parse(
+        geninfo?.DateEmployed,
+        "MMM dd, yyyy",
+        new Date()
+      );
+
+      const serviceYears = differenceInYears(new Date(), parsedDate);
+
+      // Check for service years and absence in LeaveCredit
+      return (
+        serviceYears >= 8 &&
+        serviceYears <= 10 &&
+        geninfo.EmployeeType === "Regular" &&
+        geninfo.EmpStatus === "Y" &&
+        existingLeaveCreditIds.includes(geninfo.EmployeeID)
+      );
+    })
+    .map((geninfo) => geninfo.EmployeeID);
+
+  // Employees w/ 11-13 service years will have updated leave credits
+  const elevenToThirteenWithLeaveCredit = geninfos
+    .filter((geninfo) => {
+      const parsedDate = parse(
+        geninfo?.DateEmployed,
+        "MMM dd, yyyy",
+        new Date()
+      );
+
+      const serviceYears = differenceInYears(new Date(), parsedDate);
+
+      // Check for service years and absence in LeaveCredit
+      return (
+        serviceYears >= 11 &&
+        serviceYears <= 13 &&
+        geninfo.EmployeeType === "Regular" &&
+        geninfo.EmpStatus === "Y" &&
+        existingLeaveCreditIds.includes(geninfo.EmployeeID)
+      );
+    })
+    .map((geninfo) => geninfo.EmployeeID);
+
+  // Employees w/ 14-100 service years will have updated leave credits
+  const fourteenToHundredWithLeaveCredit = geninfos
+    .filter((geninfo) => {
+      const parsedDate = parse(
+        geninfo?.DateEmployed,
+        "MMM dd, yyyy",
+        new Date()
+      );
+
+      const serviceYears = differenceInYears(new Date(), parsedDate);
+
+      // Check for service years and absence in LeaveCredit
+      return (
+        serviceYears >= 14 &&
+        serviceYears <= 100 &&
+        geninfo.EmployeeType === "Regular" &&
+        geninfo.EmpStatus === "Y" &&
+        existingLeaveCreditIds.includes(geninfo.EmployeeID)
+      );
+    })
+    .map((geninfo) => geninfo.EmployeeID);
+
+  // Include eligible 0-4 service years employees to leavecredits database
+  if (zeroToFourWithoutLeaveCredit?.length > 0) {
+    zeroToFourWithoutLeaveCredit.forEach(async (employeeId) => {
+      await LeaveCredit.create({ EmployeeID: employeeId });
+    });
+  }
+
+  /* Leave credits increase and update for employee service greater than 4 years
+  (only occurs every 1st of January) */
+  const today = new Date();
+
+  if (
+    fiveToSevenWithLeaveCredit?.length > 0 &&
+    today.getMonth() === 0 &&
+    today.getDate() === 1
+  ) {
+    fiveToSevenWithLeaveCredit.forEach(async (employeeId) => {
+      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+        { EmployeeID: employeeId },
+        { SickLeave: 7, VacationLeave: 7 },
+        { new: true }
+      ).exec();
+
+      await updatedLeaveCredits.save();
+    });
+  }
+
+  if (
+    eightToTenWithLeaveCredit?.length > 0 &&
+    today.getMonth() === 0 &&
+    today.getDate() === 1
+  ) {
+    eightToTenWithLeaveCredit.forEach(async (employeeId) => {
+      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+        { EmployeeID: employeeId },
+        { SickLeave: 10, VacationLeave: 10 },
+        { new: true }
+      ).exec();
+
+      await updatedLeaveCredits.save();
+    });
+  }
+
+  if (
+    elevenToThirteenWithLeaveCredit?.length > 0 &&
+    today.getMonth() === 0 &&
+    today.getDate() === 1
+  ) {
+    elevenToThirteenWithLeaveCredit.forEach(async (employeeId) => {
+      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+        { EmployeeID: employeeId },
+        { SickLeave: 12, VacationLeave: 12 },
+        { new: true }
+      ).exec();
+
+      await updatedLeaveCredits.save();
+    });
+  }
+
+  if (
+    fourteenToHundredWithLeaveCredit?.length > 0 &&
+    today.getMonth() === 0 &&
+    today.getDate() === 1
+  ) {
+    fourteenToHundredWithLeaveCredit.forEach(async (employeeId) => {
+      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+        { EmployeeID: employeeId },
+        { SickLeave: 15, VacationLeave: 15 },
+        { new: true }
+      ).exec();
+
+      await updatedLeaveCredits.save();
+    });
+  }
+};
+
+// This is the automated employee regularization
+const autoEmployeeRegularization = async (geninfos) => {
+  const toRegular = geninfos
+    .filter(
+      (geninfo) =>
+        geninfo?.EmployeeType === "Probationary" && geninfo.EmpStatus === "Y"
+    )
+    .map((geninfo) => geninfo);
+
+  if (toRegular?.length > 0) {
+    toRegular.forEach(async (geninfo) => {
+      let parsedDate;
+      const dateToday = new Date();
+
+      // Regularization Date exist
+      if (geninfo?.RegDate) {
+        parsedDate = parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date());
+        if (differenceInDays(dateToday, parsedDate) >= 1) {
+          const updateGeninfo = await GenInfo.findOneAndUpdate(
+            { EmployeeID: geninfo?.EmployeeID },
+            { EmployeeType: "Regular" },
+            { new: true }
+          ).exec();
+
+          await updateGeninfo.save();
+        }
+      }
+      // Probationary Date exist
+      else if (geninfo?.DateProbationary) {
+        parsedDate = parse(
+          geninfo?.DateProbationary,
+          "MMM dd, yyyy",
+          new Date()
+        );
+        if (differenceInMonths(dateToday, parsedDate) >= 6) {
+          const updateGeninfo = await GenInfo.findOneAndUpdate(
+            { EmployeeID: geninfo?.EmployeeID },
+            {
+              EmployeeType: "Regular",
+              RegDate: format(addMonths(parsedDate, 6), "MMMM dd, yyyy"),
+            },
+            { new: true }
+          ).exec();
+
+          await updateGeninfo.save();
+        }
+      }
+      // Date Employed exist
+      else if (geninfo?.DateEmployed) {
+        parsedDate = parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date());
+        if (differenceInMonths(dateToday, parsedDate) >= 6) {
+          const updateGeninfo = await GenInfo.findOneAndUpdate(
+            { EmployeeID: geninfo?.EmployeeID },
+            {
+              EmployeeType: "Regular",
+              RegDate: format(addMonths(parsedDate, 6), "MMMM dd, yyyy"),
+              DateProbationary: format(parsedDate, "MMM dd, yyyy"),
+            },
+            { new: true }
+          ).exec();
+
+          await updateGeninfo.save();
+        }
+      }
+    });
+  }
+};
 
 // @desc Get all geninfos
 // @route GET /geninfos
 // @access Private
+// Includes leave credit inclusion and update, and automated employee regularization
 const getAllGenInfo = async (req, res) => {
   const geninfos = await GenInfo.find().lean();
 
@@ -17,15 +283,8 @@ const getAllGenInfo = async (req, res) => {
     return res.status(400).json({ message: "No general infos found" });
   }
 
-  // Employees w/ 0-4 service years
-  const zeroToFour = geninfos
-    .filter(
-      (geninfo) =>
-        differenceInYears(new Date(geninfo.DateEmployed), new Date()) <= 4 &&
-        geninfo.EmpStatus === "Y" &&
-        geninfo.EmployeeType === "Regular"
-    )
-    .map((geninfo) => geninfo.EmployeeID);
+  autoEmployeeRegularization(geninfos);
+  leaveCreditInclUpd(geninfos);
 
   res.json(geninfos);
 };
@@ -270,7 +529,8 @@ const updateGenInfo = async (req, res) => {
     updatedDependent &&
     updatedEducInfo &&
     updatedWorkInfo &&
-    updatedLeaveRecord
+    updatedLeaveRecord &&
+    updatedLeaveCredit
   ) {
     res.json({
       message: `Information of ${updatedGenInfo.EmployeeID} updated`,

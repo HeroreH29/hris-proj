@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const leaveCreditSchema = new mongoose.Schema({
   EmployeeID: {
-    type: String,
+    type: Object,
     required: true,
   },
   SickLeave: {

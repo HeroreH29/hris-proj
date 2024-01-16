@@ -34,7 +34,7 @@ const educInfoSchema = new mongoose.Schema({
     default: "",
   },
   EmployeeID: {
-    type: String,
+    type: Object,
     required: true,
   },
 });

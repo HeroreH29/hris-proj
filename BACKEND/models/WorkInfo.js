@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const workInfoSchema = new mongoose.Schema({
   EmployeeID: {
-    type: String,
+    type: Object,
     required: true,
   },
   Position_Title: {

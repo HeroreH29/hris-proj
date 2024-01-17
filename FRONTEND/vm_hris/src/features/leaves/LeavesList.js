@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Table, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Button,
+  Spinner,
+  Form,
+} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFileAlt,
@@ -8,11 +16,40 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
 
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
+
+  const [contentLength, setContentLength] = useState(0);
+
+  const [name, setName] = useState("");
+
+  const [year, setYear] = useState("");
+  const [month, setMonth] = useState("");
+  const start = new Date().getFullYear();
+  const yearsArr = Array.from({ length: start - 2018 + 1 }, (_, i) => 2018 + i);
+  const monthsArr = Array.from({ length: 12 }, (_, index) => index).map(
+    (monthNum) => format(new Date(2023, monthNum, 1), "MMM")
+  );
+
+  const yearDropdown = yearsArr.map((yr, index) => {
+    return (
+      <option value={yr} key={index}>
+        {yr}
+      </option>
+    );
+  });
+
+  const monthDropdown = monthsArr.map((month, index) => {
+    return (
+      <option value={month} key={index}>
+        {month}
+      </option>
+    );
+  });
 
   const sortIconArr = [faSortNumericAsc, faSortNumericDesc];
   const [sortIcon, setSortIcon] = useState(0);
@@ -38,11 +75,7 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(/* "leavesList", {
-    pollingInterval: 10000,
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  } */);
+  } = useGetLeavesQuery();
 
   if (isLoading) return <Spinner animation="border" />;
 
@@ -52,11 +85,38 @@ const LeavesList = () => {
 
   let overallLeavesContent;
   if (isSuccess) {
-    const { ids } = leaves;
+    const { ids, entities } = leaves;
 
-    overallLeavesContent = ids?.length
-      ? [...ids]
+    const leavesThisYear = ids.filter((id) =>
+      entities[id]?.DateOfFilling.includes(new Date().getFullYear().toString())
+    );
+
+    console.log(leavesThisYear);
+
+    const filteredIds = leavesThisYear.filter((id) => {
+      const leave = entities[id];
+      let matches = true; // Initial assumption: all conditions match
+
+      if (name) {
+        matches =
+          matches && leave.User.toLowerCase().includes(name.toLowerCase());
+      }
+
+      if (month) {
+        matches = matches && leave.DateOfFilling.includes(month);
+      }
+
+      if (year) {
+        matches = matches && leave.DateOfFilling.includes(year);
+      }
+
+      return matches;
+    });
+
+    overallLeavesContent = filteredIds?.length
+      ? [...filteredIds]
           .sort(() => {
+            //setContentLength(filteredIds.length);
             return sortIcon === 0 ? 1 : -1;
           })
           .slice(startSlice, endSlice)
@@ -108,7 +168,40 @@ const LeavesList = () => {
             <tbody>{overallLeavesContent}</tbody>
             <tfoot>
               <tr>
-                <td colSpan={7}>
+                <td>
+                  <Form>
+                    <Form.Control
+                      type="text"
+                      placeholder="Type name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </Form>
+                </td>
+                <td>
+                  <Form>
+                    <Form.Select
+                      value={month}
+                      onChange={(e) => setMonth(e.target.value)}
+                    >
+                      <option value={""}>Select month</option>
+                      {monthDropdown}
+                    </Form.Select>
+                  </Form>
+                </td>
+                <td>
+                  <Form>
+                    <Form.Select
+                      value={year}
+                      disabled={!month}
+                      onChange={(e) => setYear(e.target.value)}
+                    >
+                      <option value={""}>Select year</option>
+                      {yearDropdown}
+                    </Form.Select>
+                  </Form>
+                </td>
+                <td colSpan={4}>
                   <Button
                     className="float-end ms-2"
                     variant="outline-secondary"

@@ -61,10 +61,6 @@ const leaveSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  DateApproved: {
-    type: String,
-    default: "",
-  },
 });
 
 module.exports = mongoose.model("Leave", leaveSchema);

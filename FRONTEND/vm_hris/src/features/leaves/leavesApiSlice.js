@@ -2,8 +2,10 @@ import { createSelector, createEntityAdapter } from "@reduxjs/toolkit";
 import { apiSlice } from "../../app/api/apiSlice";
 
 const leavesAdapter = createEntityAdapter({});
+const leaveCreditsAdapter = createEntityAdapter({});
 
-const initialState = leavesAdapter.getInitialState();
+const leavesInitialState = leavesAdapter.getInitialState();
+const leaveCreditsInitialState = leaveCreditsAdapter.getInitialState();
 
 export const leavesApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -19,7 +21,7 @@ export const leavesApiSlice = apiSlice.injectEndpoints({
           leave.id = leave._id;
           return leave;
         });
-        return leavesAdapter.setAll(initialState, loadedLeaves);
+        return leavesAdapter.setAll(leavesInitialState, loadedLeaves);
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
@@ -76,6 +78,80 @@ export const leavesApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
+export const leaveCreditsApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getLeaveCredits: builder.query({
+      query: () => ({
+        url: "/leavecredits",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedLeaveCredits = responseData.map((leavecredit) => {
+          leavecredit.id = leavecredit._id;
+          return leavecredit;
+        });
+        return leaveCreditsAdapter.setAll(
+          leaveCreditsInitialState,
+          loadedLeaveCredits
+        );
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "LeaveCredit", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "LeaveCredit", id })),
+          ];
+        } else return [{ type: "LeaveCredit", id: "LIST" }];
+      },
+    }),
+    addNewLeaveCredit: builder.mutation({
+      query: (initialLeaveCreditData) => ({
+        url: "/leavecredits",
+        method: "POST",
+        body: {
+          ...initialLeaveCreditData,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "LeaveCredit",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateLeaveCredit: builder.mutation({
+      query: (initialLeaveCreditData) => ({
+        url: "/leavecredits",
+        method: "PATCH",
+        body: {
+          ...initialLeaveCreditData,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "LeaveCredit",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteLeaveCredit: builder.mutation({
+      query: ({ id }) => ({
+        url: "/leavecredits",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "LeaveCredit",
+          id: arg.id,
+        },
+      ],
+    }),
+  }),
+});
+
 export const {
   useGetLeavesQuery,
   useAddNewLeaveMutation,
@@ -83,13 +159,28 @@ export const {
   useDeleteLeaveMutation,
 } = leavesApiSlice;
 
+export const {
+  useGetLeaveCreditsQuery,
+  useAddNewLeaveCreditMutation,
+  useUpdateLeaveCreditMutation,
+  useDeleteLeaveCreditMutation,
+} = leaveCreditsApiSlice;
+
 // returns the query result object
 export const selectLeavesResult = leavesApiSlice.endpoints.getLeaves.select();
+
+export const selectLeaveCreditsResult =
+  leaveCreditsApiSlice.endpoints.getLeaveCredits.select();
 
 // creates memoized selector
 const selectLeavesData = createSelector(
   selectLeavesResult,
   (leavesResult) => leavesResult.data // normalized state object with ids & entities
+);
+
+const selectLeaveCreditsData = createSelector(
+  selectLeaveCreditsResult,
+  (leaveCreditsResult) => leaveCreditsResult.data // normalized state object with ids & entities
 );
 
 //getSelectors creates these selectors and we rename them with aliases using destructuring
@@ -99,5 +190,14 @@ export const {
   selectIds: selectLeaveIds,
   // Pass in a selector that returns the leaves slice of state
 } = leavesAdapter.getSelectors(
-  (state) => selectLeavesData(state) ?? initialState
+  (state) => selectLeavesData(state) ?? leavesInitialState
+);
+
+export const {
+  selectAll: selectAllLeaveCredits,
+  selectById: selectLeaveCreditById,
+  selectIds: selectLeaveCreditIds,
+  // Pass in a selector that returns the leaves slice of state
+} = leaveCreditsAdapter.getSelectors(
+  (state) => selectLeaveCreditsData(state) ?? leaveCreditsInitialState
 );

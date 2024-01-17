@@ -15,9 +15,8 @@ const getAllLeaves = async (req, res) => {
 // desc Create new leave
 // @route POST /leaves
 // @access Private
-// Approve value equivalent: 0 = Pending; 1 = Approved; 2 = Declined; 3 = Cancelled
 const createLeave = async (req, res) => {
-  const { ModifiedDate, DayTime, DateApproved, Approve, ...others } = req.body;
+  const { ModifiedDate, DayTime, Approve, ...others } = req.body;
 
   // Check if other properties of the request body has values
   const othersHasValues = Object.values(others).every((value) => value !== "");
@@ -43,6 +42,7 @@ const createLeave = async (req, res) => {
 // desc Update leave
 // @route PATCH /leaves
 // @access Private
+// Approve value equivalent: 0 = Pending; 1 = Approved; 2 = Declined; 3 = Cancelled
 const updateLeave = async (req, res) => {
   const { id, ...others } = req.body;
 
@@ -51,7 +51,6 @@ const updateLeave = async (req, res) => {
   }
 
   /* Include duplicate checking if neccessary */
-
   const leaveRecord = await Leave.findByIdAndUpdate(id, others, {
     new: true,
   }).exec();

@@ -43,6 +43,7 @@ const login = async (req, res) => {
         username: foundUser.username,
         userLevel: foundUser.userLevel,
         branch: foundUser.branch,
+        user: `${foundUser.lastName}, ${foundUser.firstName}`,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -87,9 +88,10 @@ const refresh = async (req, res) => {
       const accessToken = jwt.sign(
         {
           UserInfo: {
-            userame: foundUser.username,
+            username: foundUser.username,
             userLevel: foundUser.roles,
             branch: foundUser.branch,
+            user: `${foundUser.lastname}, ${foundUser.firstname}`,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,

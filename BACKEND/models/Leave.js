@@ -13,6 +13,10 @@ const leaveSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  Ltype: {
+    type: String,
+    required: true,
+  },
   Lfrom: {
     type: String,
     requried: true,
@@ -37,28 +41,12 @@ const leaveSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  AddDate: {
-    type: String,
-    required: true,
-  },
   ModifiedDate: {
     type: String,
     default: "",
   },
   EmployeeID: {
     type: Object,
-    required: true,
-  },
-  EmpBioID: {
-    type: Number,
-    required: true,
-  },
-  PayMe: {
-    type: Number,
-    required: true,
-  },
-  Remain: {
-    type: Number,
     required: true,
   },
 });

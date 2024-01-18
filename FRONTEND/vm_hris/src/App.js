@@ -18,6 +18,7 @@ import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
 import Attendances from "./features/attendances/Attendances";
 import LeavesList from "./features/leaves/LeavesList";
+import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -102,6 +103,7 @@ function App() {
                   <Route path="leaves">
                     <Route index element={<LeavesList />} />
                     {/* Include more routes if necessary */}
+                    <Route path="new" element={<NewLeaveForm />} />
                   </Route>
                 </Route>
               </Route>

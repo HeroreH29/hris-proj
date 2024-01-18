@@ -1,12 +1,35 @@
 import React, { memo, useState } from "react";
-import { useGetLeavesQuery, useGetLeaveCreditsQuery } from "./leavesApiSlice";
+import { useGetLeavesQuery, useUpdateLeaveMutation } from "./leavesApiSlice";
+import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
-import { Modal, Table } from "react-bootstrap";
+import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
+import { format, parse } from "date-fns";
 
-const Leave = ({ leaveId }) => {
+const Leave = ({ leaveId, handleHover }) => {
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
+
+  const [leaveFrom, setLeaveFrom] = useState("");
+  const [leaveUntil, setLeaveUntil] = useState("");
+
+  const {
+    data: geninfos,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useGetGeninfosQuery();
+
+  const [
+    updateLeave,
+    {
+      isLoading: updateLoading,
+      isSuccess: updateSuccess,
+      isError: isUpdateError,
+      error: updateError,
+    },
+  ] = useUpdateLeaveMutation();
 
   const { leave } = useGetLeavesQuery("leavesList", {
     selectFromResult: ({ data }) => ({
@@ -14,31 +37,17 @@ const Leave = ({ leaveId }) => {
     }),
   });
 
-  const [leaveCredit, setLeaveCredit] = useState("");
+  const handleUpdateLeave = (approveStat) => {
+    console.log(approveStat);
+  };
 
-  const {
-    data: leavecredits,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetLeaveCreditsQuery();
-
-  const handleShowModal = () => {
-    if (isSuccess && !isLoading && !isError) {
-      const { ids, entities } = leavecredits;
-
-      const leavecredit = ids?.length
-        ? ids
-            .filter((id) => {
-              return entities[id]?.EmployeeID === leave?.EmployeeID;
-            })
-            .map((id) => entities[id])[0]
-        : "";
-
-      setLeaveCredit(leavecredit);
-      setShowModal(true);
-    }
+  const handleSetValues = (leave) => {
+    setLeaveFrom(
+      format(parse(leave?.Lfrom, "MMM dd, yyyy", new Date()), "yyyy-MM-dd")
+    );
+    setLeaveUntil(
+      format(parse(leave?.Lto, "MMM dd, yyyy", new Date()), "yyyy-MM-dd")
+    );
   };
 
   if (leave) {
@@ -50,7 +59,7 @@ const Leave = ({ leaveId }) => {
         apprvTxtColor = "fw-semibold text-success";
         break;
       case 2:
-        approve = "Declined";
+        approve = "Disapproved";
         apprvTxtColor = "fw-semibold text-danger";
         break;
       case 3:
@@ -64,10 +73,27 @@ const Leave = ({ leaveId }) => {
         break;
     }
 
+    // Get the actual name of the employee based on obtained EmployeeID
+    const { ids, entities } = geninfos;
+
+    const foundRecord = ids?.length
+      ? ids
+          .filter((id) => entities[id]?.EmployeeID === leave?.EmployeeID)
+          .map((id) => id)
+      : null;
+
     return (
       <>
-        <tr key={leaveId} onClick={handleShowModal}>
-          <td>{leave?.User}</td>
+        <tr
+          key={leaveId}
+          onMouseEnter={() => handleHover(leave?.EmployeeID)}
+          onMouseLeave={() => handleHover("")}
+          onClick={() => {
+            handleSetValues(leave);
+            setShowModal(true);
+          }}
+        >
+          <td>{`${entities[foundRecord]?.LastName}, ${entities[foundRecord]?.FirstName} ${entities[foundRecord]?.MI}.`}</td>
           <td>{leave?.DateOfFilling}</td>
           <td>{leave?.Lfrom}</td>
           <td>{leave?.Lto}</td>
@@ -76,61 +102,66 @@ const Leave = ({ leaveId }) => {
           <td className={apprvTxtColor}>{approve}</td>
         </tr>
 
-        <Modal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          size="lg"
-          centered
-        >
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>
-              {leave?.User}'s Leave Credits for {new Date().getFullYear()}
-            </Modal.Title>
+            <Modal.Title>{`${entities[foundRecord]?.LastName}, ${entities[foundRecord]?.FirstName} ${entities[foundRecord]?.MI}.'s Filed Leave`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Used</th>
-                  <th>Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="fw-semibold">Sick Leave</td>
-                  <td>{leaveCredit?.SickLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Vacation Leave</td>
-                  <td>{leaveCredit?.VacationLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Birthday Leave</td>
-                  <td>{leaveCredit?.BirthdayLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Maternity Leave</td>
-                  <td>{leaveCredit?.MaternityLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Paternity Leave</td>
-                  <td>{leaveCredit?.PaternityLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Matrimonial Leave</td>
-                  <td>{leaveCredit?.MatrimonialLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Bereavement Leave</td>
-                  <td>{leaveCredit?.BereavementLeave}</td>
-                </tr>
-              </tbody>
-            </Table>
+            <Container>
+              <Form>
+                <Row className="mb-3">
+                  <Form.Group as={Col}>
+                    <Form.Label className="fw-semibold">Reason</Form.Label>
+                    <Form.Control
+                      as={"textarea"}
+                      disabled
+                      defaultValue={leave?.Reason}
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                  <Form.Group as={Col}>
+                    <Form.Label className="fw-semibold">Leave From</Form.Label>
+                    <Form.Control
+                      disabled
+                      type="date"
+                      defaultValue={leaveFrom}
+                    />
+                  </Form.Group>
+                  <Form.Group as={Col}>
+                    <Form.Label className="fw-semibold">Leave Until</Form.Label>
+                    <Form.Control
+                      disabled
+                      type="date"
+                      defaultValue={leaveUntil}
+                    />
+                  </Form.Group>
+                </Row>
+              </Form>
+            </Container>
           </Modal.Body>
           <Modal.Footer>
-            {/* <p className="fst-italic">{`Author: ` + announcement.user}</p> */}
+            <Button
+              type="button"
+              variant="outline-success"
+              onClick={() => handleUpdateLeave(1)}
+            >
+              Approve
+            </Button>
+            <Button
+              type="button"
+              variant="outline-danger"
+              onClick={() => handleUpdateLeave(2)}
+            >
+              Disapprove
+            </Button>
+            <Button
+              type="button"
+              variant="outline-warning"
+              onClick={() => handleUpdateLeave(3)}
+            >
+              Cancel
+            </Button>
           </Modal.Footer>
         </Modal>
       </>

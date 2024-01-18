@@ -10,7 +10,7 @@ const useAuth = () => {
 
   if (token) {
     const decoded = jwtDecode(token);
-    const { username, userLevel, branch } = decoded.UserInfo;
+    const { username, userLevel, branch, user } = decoded.UserInfo;
 
     isHR = userLevel === "HR";
     isAdmin = userLevel === "Admin";
@@ -18,10 +18,18 @@ const useAuth = () => {
     if (isHR) status = "HR";
     if (isAdmin) status = "Admin";
 
-    return { username, status, isHR, isAdmin, userLevel, branch };
+    return { username, user, status, isHR, isAdmin, userLevel, branch };
   }
 
-  return { username: "", userLevel: "", isHR, isAdmin, status, branch: "" };
+  return {
+    user: "",
+    username: "",
+    userLevel: "",
+    isHR,
+    isAdmin,
+    status,
+    branch: "",
+  };
 };
 
 export default useAuth;

@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { Button, Modal, Table, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -116,7 +116,7 @@ const Attendance = ({ att, attlogData }) => {
       // Check if document requested is appropriate based on employee type and length of dateArr
       if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
         alert(
-          `Required # of days for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Check your dates!`
+          `Most # of days required for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Double check your dates!`
         );
         return;
       }
@@ -182,7 +182,10 @@ const Attendance = ({ att, attlogData }) => {
           }
           if (filteredAtt[attIndex].checkOut !== "" && TimeOutRow) {
             TimeOutRow.setText(
-              `${filteredAtt[attIndex].date} ${filteredAtt[attIndex].checkOut}`
+              `${
+                filteredAtt[attIndex]?.additionalDate ||
+                filteredAtt[attIndex].date
+              } ${filteredAtt[attIndex].checkOut}`
             );
           }
 
@@ -286,6 +289,27 @@ const Attendance = ({ att, attlogData }) => {
               };
             }
           } else {
+            /* Check first if the next line with a new date is a check out entry.
+            This just means that the employee has checked out on the following day */
+            if (
+              val2 * 1 === 1 /* &&
+              geninfo?.AssignedOutlet !== "Head Office" */ &&
+              formattedTime.includes("AM")
+            ) {
+              let prevDayAtt = tempAttData[tempAttData?.length - 1];
+              if (!prevDayAtt?.checkOut) {
+                prevDayAtt = {
+                  ...prevDayAtt,
+                  checkOut: formattedTime,
+                  additionalDate: formattedDate,
+                };
+
+                tempAttData[tempAttData?.length - 1] = prevDayAtt;
+
+                console.log(tempAttData);
+              }
+            }
+
             tempAttData.push({
               bioId: bioId,
               date: formattedDate,
@@ -314,7 +338,10 @@ const Attendance = ({ att, attlogData }) => {
         </tr>
         <>
           <Modal show={show} onHide={handleClose} scrollable size="lg">
-            <Modal.Header closeButton>{att.name}'s Attendance </Modal.Header>
+            <Modal.Header closeButton>
+              {att.name}'s Attendance{" "}
+              <span className="ms-1 fw-semibold">{` (${geninfo?.EmployeeType})`}</span>{" "}
+            </Modal.Header>
             <Modal.Body>
               <Table striped bordered hover>
                 <caption>{`(Pick date range before proceeding in printing)`}</caption>

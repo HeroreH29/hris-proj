@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -68,7 +68,6 @@ const LeavesList = () => {
   };
 
   const [name, setName] = useState("");
-
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const start = new Date().getFullYear();
@@ -111,10 +110,17 @@ const LeavesList = () => {
     setEndSlice((prev) => prev - 10);
   };
 
-  if (isLoading) return <Spinner animation="border" />;
+  useEffect(() => {
+    setStartSlice(0);
+    setEndSlice(10);
+  }, [year, month, name]);
+
+  let content;
+
+  if (isLoading) content = <Spinner animation="border" />;
 
   if (isError) {
-    return <p className="text-danger">{error?.data?.message}</p>;
+    content = <p className="text-danger">{error?.data?.message}</p>;
   }
 
   let overallLeavesContent;
@@ -148,178 +154,196 @@ const LeavesList = () => {
           })
           .slice(startSlice, endSlice)
           .map((leaveId) => (
-            <Leave key={leaveId} leaveId={leaveId} handleHover={handleHover} />
+            <Leave
+              key={leaveId}
+              leaveId={leaveId}
+              handleHover={handleHover}
+              leaveCredit={leaveCredit}
+            />
           ))
       : null;
+
+    content = (
+      <Container>
+        <Row>
+          <Col>
+            <h3>Leaves</h3>
+          </Col>
+          <Col>
+            <Button
+              className="float-end"
+              variant="outline-primary"
+              onClick={() => navigate("/leaves/new")}
+            >
+              <FontAwesomeIcon icon={faFileAlt} />
+            </Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Table
+              bordered
+              striped
+              hover
+              className="align-middle ms-3 mt-3 mb-3 caption-top"
+            >
+              <caption>Overall Filed Leaves</caption>
+              <thead>
+                <tr className="align-middle">
+                  <th scope="col">User</th>
+                  <th scope="col" onClick={handleSortIconChange}>
+                    Date Filed{" "}
+                    <FontAwesomeIcon
+                      className="float-end"
+                      icon={sortIconArr[sortIcon]}
+                    />
+                  </th>
+                  <th scope="col">From</th>
+                  <th scope="col">Until</th>
+                  <th scope="col"># of Days</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>{overallLeavesContent}</tbody>
+              <tfoot>
+                <tr>
+                  <td>
+                    <Form>
+                      <Form.Control
+                        type="text"
+                        placeholder="Type name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </Form>
+                  </td>
+                  <td>
+                    <Form>
+                      <Form.Select
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                      >
+                        <option value={""}>Select year</option>
+                        {yearDropdown}
+                      </Form.Select>
+                    </Form>
+                  </td>
+                  <td>
+                    <Form>
+                      <Form.Select
+                        value={month}
+                        disabled={!year}
+                        onChange={(e) => setMonth(e.target.value)}
+                      >
+                        <option value={""}>Select month</option>
+                        {monthDropdown}
+                      </Form.Select>
+                    </Form>
+                  </td>
+                  <td colSpan={4}>
+                    <Button
+                      className="float-end ms-2"
+                      variant="outline-secondary"
+                      onClick={handleNext}
+                      disabled={startSlice >= filteredIds?.length}
+                    >
+                      Next
+                    </Button>
+                    <Button
+                      className="float-end"
+                      variant="outline-secondary"
+                      onClick={handlePrev}
+                      disabled={startSlice === 0}
+                    >
+                      Prev
+                    </Button>
+                  </td>
+                </tr>
+              </tfoot>
+            </Table>
+          </Col>
+
+          <Col md="auto">
+            <Table
+              size="sm"
+              striped
+              bordered
+              hover
+              className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
+            >
+              <caption>Leave Credit Info of {leaveCredit?.EmployeeID}</caption>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Used</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="fw-semibold">Sick Leave</td>
+                  <td>{leaveCredit?.CreditBudget}</td>
+                  <td>{leaveCredit?.CreditBudget - leaveCredit?.SickLeave}</td>
+                  <td>{leaveCredit?.SickLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Vacation Leave</td>
+                  <td>{leaveCredit?.CreditBudget}</td>
+                  <td>
+                    {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
+                  </td>
+                  <td>{leaveCredit?.VacationLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Birthday Leave</td>
+                  <td>1</td>
+                  <td>{1 - leaveCredit?.BirthdayLeave}</td>
+                  <td>{leaveCredit?.BirthdayLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Maternity Leave</td>
+                  <td>{leaveCredit?.MaternityLeave && 105}</td>
+                  <td>
+                    {leaveCredit?.MaternityLeave &&
+                      105 - leaveCredit?.MaternityLeave}
+                  </td>
+                  <td>{leaveCredit?.MaternityLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Paternity Leave</td>
+                  <td>{leaveCredit?.PaternityLeave && 7}</td>
+                  <td>
+                    {leaveCredit?.PaternityLeave &&
+                      7 - leaveCredit?.PaternityLeave}
+                  </td>
+                  <td>{leaveCredit?.PaternityLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Matrimonial Leave</td>
+                  <td>{leaveCredit?.MatrimonialLeave && 7}</td>
+                  <td>
+                    {leaveCredit?.MatrimonialLeave &&
+                      7 - leaveCredit?.MatrimonialLeave}
+                  </td>
+                  <td>{leaveCredit?.MatrimonialLeave}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Bereavement Leave</td>
+                  <td>{leaveCredit?.BereavementLeave}</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      </Container>
+    );
   }
 
-  return (
-    <Container>
-      <Row>
-        <Col>
-          <h3>Leaves</h3>
-        </Col>
-        <Col>
-          <Button
-            className="float-end"
-            variant="outline-primary"
-            onClick={() => navigate("/leaves/new")}
-          >
-            <FontAwesomeIcon icon={faFileAlt} />
-          </Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Table
-            bordered
-            striped
-            hover
-            className="align-middle ms-3 mt-3 mb-3 caption-top"
-          >
-            <caption>Overall Filed Leaves</caption>
-            <thead>
-              <tr className="align-middle">
-                <th scope="col">User</th>
-                <th scope="col" onClick={handleSortIconChange}>
-                  Date Filed{" "}
-                  <FontAwesomeIcon
-                    className="float-end"
-                    icon={sortIconArr[sortIcon]}
-                  />
-                </th>
-                <th scope="col">From</th>
-                <th scope="col">Until</th>
-                <th scope="col"># of Days</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>{overallLeavesContent}</tbody>
-            <tfoot>
-              <tr>
-                <td>
-                  <Form>
-                    <Form.Control
-                      type="text"
-                      placeholder="Type name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </Form>
-                </td>
-                <td>
-                  <Form>
-                    <Form.Select
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                    >
-                      <option value={""}>Select year</option>
-                      {yearDropdown}
-                    </Form.Select>
-                  </Form>
-                </td>
-                <td>
-                  <Form>
-                    <Form.Select
-                      value={month}
-                      disabled={!year}
-                      onChange={(e) => setMonth(e.target.value)}
-                    >
-                      <option value={""}>Select month</option>
-                      {monthDropdown}
-                    </Form.Select>
-                  </Form>
-                </td>
-                <td colSpan={4}>
-                  <Button
-                    className="float-end ms-2"
-                    variant="outline-secondary"
-                    onClick={handleNext}
-                    disabled={startSlice >= leaves?.ids?.length}
-                  >
-                    Next
-                  </Button>
-                  <Button
-                    className="float-end"
-                    variant="outline-secondary"
-                    onClick={handlePrev}
-                    disabled={startSlice === 0}
-                  >
-                    Prev
-                  </Button>
-                </td>
-              </tr>
-            </tfoot>
-          </Table>
-        </Col>
-
-        <Col md="auto">
-          <Table
-            size="sm"
-            striped
-            bordered
-            hover
-            className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
-          >
-            <caption>Leave Credit Info</caption>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Used</th>
-                <th>Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="fw-semibold">Sick Leave</td>
-                <td>{leaveCredit?.SickLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Vacation Leave</td>
-                <td>{leaveCredit?.VacationLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Birthday Leave</td>
-                <td>{leaveCredit?.BirthdayLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Maternity Leave</td>
-                <td>{leaveCredit?.MaternityLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Paternity Leave</td>
-                <td>{leaveCredit?.PaternityLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Matrimonial Leave</td>
-                <td>{leaveCredit?.MatrimonialLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td className="fw-semibold">Bereavement Leave</td>
-                <td>{leaveCredit?.BereavementLeave}</td>
-                <td>0</td>
-                <td>0</td>
-              </tr>
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
-    </Container>
-  );
+  return content;
 };
 
 export default LeavesList;

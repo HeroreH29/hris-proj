@@ -45,7 +45,7 @@ const Attendances = () => {
       reader.onload = (event) => {
         const fileContents = event.target.result;
 
-        const lines = fileContents.split("\n");
+        const lines = fileContents.split("\n").map((line) => line.trim());
         setAttlogData(lines);
 
         const tempAttList = [];

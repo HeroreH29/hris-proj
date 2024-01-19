@@ -1,17 +1,22 @@
-import React, { memo, useState } from "react";
-import { useGetLeavesQuery, useUpdateLeaveMutation } from "./leavesApiSlice";
+import React, { memo, useEffect, useState } from "react";
+import {
+  useGetLeavesQuery,
+  useUpdateLeaveMutation,
+  useUpdateLeaveCreditMutation,
+} from "./leavesApiSlice";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 
-const Leave = ({ leaveId, handleHover }) => {
+const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
 
   const [leaveFrom, setLeaveFrom] = useState("");
   const [leaveUntil, setLeaveUntil] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   const {
     data: geninfos,
@@ -31,14 +36,63 @@ const Leave = ({ leaveId, handleHover }) => {
     },
   ] = useUpdateLeaveMutation();
 
+  const [
+    updateLeaveCredit,
+    {
+      isLoading: creditUpdateLoading,
+      isSuccess: creditUpdateSuccess,
+      isError: isCreditUpdateError,
+      error: creditUpdateError,
+    },
+  ] = useUpdateLeaveCreditMutation();
+
   const { leave } = useGetLeavesQuery("leavesList", {
     selectFromResult: ({ data }) => ({
       leave: data?.entities[leaveId],
     }),
   });
 
-  const handleUpdateLeave = (approveStat) => {
-    console.log(approveStat);
+  const handleUpdateLeave = async (approveStat) => {
+    const confirm = window.confirm(
+      `${
+        approveStat === 1
+          ? "APPROVE"
+          : approveStat === 2
+          ? "DISAPPROVE"
+          : approveStat === 3
+          ? "CANCEL"
+          : ""
+      } this leave?`
+    );
+
+    if (confirm) {
+      // Update leave
+      try {
+        await updateLeave({
+          id: leave?.id,
+          Approve: approveStat,
+          Remarks: remarks,
+        });
+      } catch (error) {
+        alert(`Something went wrong: ${error}`);
+      }
+
+      // Check first if leave is being approved. Then proceed in credit deduction if necessary
+      if (approveStat === 1) {
+        // Update leave credit of employee
+        const ltype = leave?.Ltype.replace(" ", "");
+
+        const updatedLeaveCredit = {
+          id: leaveCredit?.id,
+          [ltype]: leaveCredit?.[ltype] - leave?.NoOfDays,
+        };
+        try {
+          await updateLeaveCredit(updatedLeaveCredit);
+        } catch (error) {
+          alert(`Something went wrong: ${error}`);
+        }
+      }
+    }
   };
 
   const handleSetValues = (leave) => {
@@ -49,6 +103,18 @@ const Leave = ({ leaveId, handleHover }) => {
       format(parse(leave?.Lto, "MMM dd, yyyy", new Date()), "yyyy-MM-dd")
     );
   };
+
+  useEffect(() => {
+    if (updateSuccess || creditUpdateSuccess) {
+      setLeaveFrom("");
+      setLeaveUntil("");
+      handleHover("");
+      setRemarks("");
+      setShowModal(false);
+
+      navigate("/leaves");
+    }
+  }, [updateSuccess, creditUpdateSuccess, navigate]);
 
   if (leave) {
     let approve;
@@ -87,7 +153,6 @@ const Leave = ({ leaveId, handleHover }) => {
         <tr
           key={leaveId}
           onMouseEnter={() => handleHover(leave?.EmployeeID)}
-          onMouseLeave={() => handleHover("")}
           onClick={() => {
             handleSetValues(leave);
             setShowModal(true);
@@ -137,11 +202,25 @@ const Leave = ({ leaveId, handleHover }) => {
                     />
                   </Form.Group>
                 </Row>
+                <Row className="mb-3">
+                  <Form.Group as={Col}>
+                    <Form.Label className="fw-semibold">
+                      Remarks {`(Optional)`}
+                    </Form.Label>
+                    <Form.Control
+                      disabled={leave?.Approve !== 0}
+                      as={"textarea"}
+                      value={remarks}
+                      onChange={(e) => setRemarks(e.target.value)}
+                    />
+                  </Form.Group>
+                </Row>
               </Form>
             </Container>
           </Modal.Body>
           <Modal.Footer>
             <Button
+              disabled={leave?.Approve !== 0}
               type="button"
               variant="outline-success"
               onClick={() => handleUpdateLeave(1)}
@@ -149,6 +228,7 @@ const Leave = ({ leaveId, handleHover }) => {
               Approve
             </Button>
             <Button
+              disabled={leave?.Approve !== 0}
               type="button"
               variant="outline-danger"
               onClick={() => handleUpdateLeave(2)}
@@ -156,6 +236,7 @@ const Leave = ({ leaveId, handleHover }) => {
               Disapprove
             </Button>
             <Button
+              disabled={leave?.Approve !== 0}
               type="button"
               variant="outline-warning"
               onClick={() => handleUpdateLeave(3)}

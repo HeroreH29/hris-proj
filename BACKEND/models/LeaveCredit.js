@@ -33,6 +33,10 @@ const leaveCreditSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  CreditBudget: {
+    type: Number,
+    default: 5,
+  },
 });
 
 module.exports = mongoose.model("LeaveCredit", leaveCreditSchema);

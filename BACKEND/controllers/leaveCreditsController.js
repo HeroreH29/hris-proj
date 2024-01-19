@@ -8,6 +8,26 @@ const getAllLeaveCredits = async (req, res) => {
   if (!leavecredits?.length) {
     return res.status(400).json({ message: "No leave credits found" });
   }
+
+  // temporary
+  /* leavecredits.forEach(async (credit) => {
+    const { _id, SickLeave, ...others } = credit;
+    const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
+      _id,
+      { ...others, CreditBudget: SickLeave },
+      {
+        new: true,
+      }
+    ).exec();
+
+    const updatedLeaveCredit = await leaveCreditRecord.save();
+
+    if (updatedLeaveCredit) {
+      console.log("Credit updated");
+    } else {
+      console.log("Something went wrong");
+    }
+  }); */
   res.json(leavecredits);
 };
 

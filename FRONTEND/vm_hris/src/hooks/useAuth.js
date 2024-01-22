@@ -10,7 +10,7 @@ const useAuth = () => {
 
   if (token) {
     const decoded = jwtDecode(token);
-    const { username, userLevel, branch, user } = decoded.UserInfo;
+    const { username, userLevel, branch, user, employeeId } = decoded.UserInfo;
 
     isHR = userLevel === "HR";
     isAdmin = userLevel === "Admin";
@@ -18,7 +18,16 @@ const useAuth = () => {
     if (isHR) status = "HR";
     if (isAdmin) status = "Admin";
 
-    return { username, user, status, isHR, isAdmin, userLevel, branch };
+    return {
+      username,
+      user,
+      status,
+      isHR,
+      isAdmin,
+      userLevel,
+      branch,
+      employeeId,
+    };
   }
 
   return {
@@ -29,6 +38,7 @@ const useAuth = () => {
     isAdmin,
     status,
     branch: "",
+    employeeId: "",
   };
 };
 

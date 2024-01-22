@@ -19,9 +19,12 @@ import { useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
+import useAuth from "../../hooks/useAuth";
 
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
+
+  const { status, employeeId } = useAuth();
 
   const navigate = useNavigate();
 
@@ -34,7 +37,7 @@ const LeavesList = () => {
     isError: creditsError,
     error: credserr,
   } = useGetLeaveCreditsQuery(undefined, {
-    pollingInterval: 15000,
+    pollingInterval: 10000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -45,20 +48,16 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(undefined, {
-    pollingInterval: 15000,
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  });
+  } = useGetLeavesQuery();
 
-  const handleHover = (employeeId) => {
+  const handleHover = (empId) => {
     if (creditsSuccess && !creditsLoading && !creditsError) {
       const { ids, entities } = leavecredits;
 
       const leavecredit = ids?.length
         ? ids
             .filter((id) => {
-              return entities[id]?.EmployeeID === employeeId;
+              return entities[id]?.EmployeeID === empId;
             })
             .map((id) => entities[id])[0]
         : "";
@@ -68,7 +67,7 @@ const LeavesList = () => {
   };
 
   const [name, setName] = useState("");
-  const [year, setYear] = useState("");
+  const [year, setYear] = useState("2024");
   const [month, setMonth] = useState("");
   const start = new Date().getFullYear();
   const yearsArr = Array.from({ length: start - 2010 + 1 }, (_, i) => 2010 + i);
@@ -113,7 +112,7 @@ const LeavesList = () => {
   useEffect(() => {
     setStartSlice(0);
     setEndSlice(10);
-  }, [year, month, name]);
+  }, [month, name]);
 
   let content;
 
@@ -130,6 +129,10 @@ const LeavesList = () => {
     const filteredIds = ids.filter((id) => {
       const leave = entities[id];
       let matches = true;
+
+      if (status !== "Admin") {
+        matches = leave.EmployeeID === employeeId;
+      }
 
       if (name !== "") {
         matches =
@@ -149,8 +152,8 @@ const LeavesList = () => {
 
     overallLeavesContent = filteredIds?.length
       ? [...filteredIds]
-          .sort((a, b) => {
-            return sortIcon === 0 ? -1 : 1;
+          .sort(() => {
+            return sortIcon === 0 ? 1 : -1;
           })
           .slice(startSlice, endSlice)
           .map((leaveId) => (
@@ -214,6 +217,7 @@ const LeavesList = () => {
                         type="text"
                         placeholder="Type name"
                         value={name}
+                        disabled={status !== "Admin"}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </Form>
@@ -233,7 +237,6 @@ const LeavesList = () => {
                     <Form>
                       <Form.Select
                         value={month}
-                        disabled={!year}
                         onChange={(e) => setMonth(e.target.value)}
                       >
                         <option value={""}>Select month</option>
@@ -246,7 +249,7 @@ const LeavesList = () => {
                       className="float-end ms-2"
                       variant="outline-secondary"
                       onClick={handleNext}
-                      disabled={startSlice >= filteredIds?.length}
+                      disabled={endSlice > filteredIds?.length}
                     >
                       Next
                     </Button>
@@ -272,70 +275,90 @@ const LeavesList = () => {
               hover
               className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
             >
-              <caption>Leave Credit Info of {leaveCredit?.EmployeeID}</caption>
+              <caption>
+                {status === "Admin"
+                  ? `Leave Credit Info of ${leaveCredit?.EmployeeID}`
+                  : "Your Credit Info"}
+              </caption>
               <thead>
                 <tr>
-                  <th>Type</th>
+                  <th>Leave Type</th>
                   <th>Amount</th>
                   <th>Used</th>
                   <th>Balance</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td className="fw-semibold">Sick Leave</td>
-                  <td>{leaveCredit?.CreditBudget}</td>
-                  <td>{leaveCredit?.CreditBudget - leaveCredit?.SickLeave}</td>
-                  <td>{leaveCredit?.SickLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Vacation Leave</td>
-                  <td>{leaveCredit?.CreditBudget}</td>
-                  <td>
-                    {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
-                  </td>
-                  <td>{leaveCredit?.VacationLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Birthday Leave</td>
-                  <td>1</td>
-                  <td>{1 - leaveCredit?.BirthdayLeave}</td>
-                  <td>{leaveCredit?.BirthdayLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Maternity Leave</td>
-                  <td>{leaveCredit?.MaternityLeave && 105}</td>
-                  <td>
-                    {leaveCredit?.MaternityLeave &&
-                      105 - leaveCredit?.MaternityLeave}
-                  </td>
-                  <td>{leaveCredit?.MaternityLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Paternity Leave</td>
-                  <td>{leaveCredit?.PaternityLeave && 7}</td>
-                  <td>
-                    {leaveCredit?.PaternityLeave &&
-                      7 - leaveCredit?.PaternityLeave}
-                  </td>
-                  <td>{leaveCredit?.PaternityLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Matrimonial Leave</td>
-                  <td>{leaveCredit?.MatrimonialLeave && 7}</td>
-                  <td>
-                    {leaveCredit?.MatrimonialLeave &&
-                      7 - leaveCredit?.MatrimonialLeave}
-                  </td>
-                  <td>{leaveCredit?.MatrimonialLeave}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Bereavement Leave</td>
-                  <td>{leaveCredit?.BereavementLeave}</td>
-                  <td>0</td>
-                  <td>0</td>
-                </tr>
-              </tbody>
+              {leaveCredit ? (
+                <>
+                  <tbody>
+                    <tr>
+                      <td className="fw-semibold">Sick</td>
+                      <td>{leaveCredit?.CreditBudget}</td>
+                      <td>
+                        {leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
+                      </td>
+                      <td>{leaveCredit?.SickLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Vacation</td>
+                      <td>{leaveCredit?.CreditBudget}</td>
+                      <td>
+                        {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
+                      </td>
+                      <td>{leaveCredit?.VacationLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Birthday</td>
+                      <td>1</td>
+                      <td>{1 - leaveCredit?.BirthdayLeave}</td>
+                      <td>{leaveCredit?.BirthdayLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Maternity</td>
+                      <td>{leaveCredit?.MaternityLeave && 105}</td>
+                      <td>
+                        {leaveCredit?.MaternityLeave &&
+                          105 - leaveCredit?.MaternityLeave}
+                      </td>
+                      <td>{leaveCredit?.MaternityLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Paternity</td>
+                      <td>{leaveCredit?.PaternityLeave && 7}</td>
+                      <td>
+                        {leaveCredit?.PaternityLeave &&
+                          7 - leaveCredit?.PaternityLeave}
+                      </td>
+                      <td>{leaveCredit?.PaternityLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Matrimonial</td>
+                      <td>{leaveCredit?.MatrimonialLeave && 7}</td>
+                      <td>
+                        {leaveCredit?.MatrimonialLeave &&
+                          7 - leaveCredit?.MatrimonialLeave}
+                      </td>
+                      <td>{leaveCredit?.MatrimonialLeave}</td>
+                    </tr>
+                    <tr>
+                      <td className="fw-semibold">Bereavement</td>
+                      <td>{leaveCredit?.BereavementLeave}</td>
+                      <td>0</td>
+                      <td>0</td>
+                    </tr>
+                  </tbody>
+                </>
+              ) : (
+                <>
+                  <tbody>
+                    <tr>
+                      <td colSpan={4} className="text-center">
+                        No leave credits yet...
+                      </td>
+                    </tr>
+                  </tbody>
+                </>
+              )}
             </Table>
           </Col>
         </Row>

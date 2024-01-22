@@ -1,7 +1,21 @@
 import { createSelector, createEntityAdapter } from "@reduxjs/toolkit";
 import { apiSlice } from "../../app/api/apiSlice";
+import { parse } from "date-fns";
 
-const leavesAdapter = createEntityAdapter({});
+const leavesAdapter = createEntityAdapter({
+  sortComparer: (a, b) => {
+    const dateA = parse(a.DateOfFilling, "MMM dd, yyyy", new Date());
+    const dateB = parse(b.DateOfFilling, "MMM dd, yyyy", new Date());
+
+    if (dateA.valueOf() > dateB.valueOf()) {
+      return -1;
+    } else if (dateA.valueOf() < dateB.valueOf()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  },
+});
 const leaveCreditsAdapter = createEntityAdapter({});
 
 const leavesInitialState = leavesAdapter.getInitialState();

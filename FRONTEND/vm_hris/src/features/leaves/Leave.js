@@ -81,10 +81,11 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
       if (approveStat === 1) {
         // Update leave credit of employee
         const ltype = leave?.Ltype.replace(" ", "");
+        const noOfCreditsToDeduct = leaveCredit?.[ltype] - leave?.NoOfDays;
 
         const updatedLeaveCredit = {
           id: leaveCredit?.id,
-          [ltype]: leaveCredit?.[ltype] - leave?.NoOfDays,
+          [ltype]: noOfCreditsToDeduct >= 0 ? noOfCreditsToDeduct : 0,
         };
         try {
           await updateLeaveCredit(updatedLeaveCredit);

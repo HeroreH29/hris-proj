@@ -219,12 +219,12 @@ const EditRecord = () => {
           const element = form.getTextField(e);
           if (e === "PresentAddress") {
             element.setText(
-              String(personalinfo.PresentAddress)
-                ? String(personalinfo.PresentAddress)
-                : String(personalinfo.Address)
+              personalinfo?.PresentAddress
+                ? personalinfo?.PresentAddress
+                : personalinfo?.Address
             );
           } else if (e === "PermanentAddress") {
-            element.setText(String(personalinfo?.[e]));
+            element.setText(personalinfo?.PermanentAddress);
           } else {
             element.setText(String(personalinfo?.[e]));
           }

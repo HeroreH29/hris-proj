@@ -147,7 +147,7 @@ const leaveCreditInclUpd = async (geninfos) => {
     fiveToSevenWithLeaveCredit.forEach(async (employeeId) => {
       const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
         { EmployeeID: employeeId },
-        { SickLeave: 7, VacationLeave: 7 },
+        { SickLeave: 7, VacationLeave: 7, CreditBudget: 7 },
         { new: true }
       ).exec();
 
@@ -163,7 +163,7 @@ const leaveCreditInclUpd = async (geninfos) => {
     eightToTenWithLeaveCredit.forEach(async (employeeId) => {
       const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
         { EmployeeID: employeeId },
-        { SickLeave: 10, VacationLeave: 10 },
+        { SickLeave: 10, VacationLeave: 10, CreditBudget: 10 },
         { new: true }
       ).exec();
 
@@ -179,7 +179,7 @@ const leaveCreditInclUpd = async (geninfos) => {
     elevenToThirteenWithLeaveCredit.forEach(async (employeeId) => {
       const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
         { EmployeeID: employeeId },
-        { SickLeave: 12, VacationLeave: 12 },
+        { SickLeave: 12, VacationLeave: 12, CreditBudget: 12 },
         { new: true }
       ).exec();
 
@@ -195,7 +195,7 @@ const leaveCreditInclUpd = async (geninfos) => {
     fourteenToHundredWithLeaveCredit.forEach(async (employeeId) => {
       const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
         { EmployeeID: employeeId },
-        { SickLeave: 15, VacationLeave: 15 },
+        { SickLeave: 15, VacationLeave: 15, CreditBudget: 15 },
         { new: true }
       ).exec();
 

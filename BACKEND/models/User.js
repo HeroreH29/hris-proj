@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   employeeId: {
-    type: String,
+    type: Object,
     required: true,
   },
   userLevel: {

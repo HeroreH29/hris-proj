@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { format, subDays } from "date-fns";
+import { format, subDays, parse } from "date-fns";
 import { Button, Modal, Table, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -291,10 +291,12 @@ const Attendance = ({ att, attlogData }) => {
           } else {
             /* Check first if the next line with a new date is a check out entry.
             This just means that the employee has checked out on the following day */
+            const parsedFormattedTime = parse(formattedTime, "p", new Date());
+            const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
             if (
               val2 * 1 === 1 /* &&
               geninfo?.AssignedOutlet !== "Head Office" */ &&
-              formattedTime.includes("AM")
+              parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
             ) {
               let prevDayAtt = tempAttData[tempAttData?.length - 1];
               if (!prevDayAtt?.checkOut) {
@@ -305,8 +307,6 @@ const Attendance = ({ att, attlogData }) => {
                 };
 
                 tempAttData[tempAttData?.length - 1] = prevDayAtt;
-
-                console.log(tempAttData);
               }
             }
 

@@ -93,18 +93,11 @@ function App() {
                     {/* Include more routes if necessary */}
                   </Route>
                 </Route>
-                <Route
-                  element={
-                    <RequireAuth
-                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
-                    />
-                  }
-                >
-                  <Route path="leaves">
-                    <Route index element={<LeavesList />} />
-                    {/* Include more routes if necessary */}
-                    <Route path="new" element={<NewLeaveForm />} />
-                  </Route>
+
+                <Route path="leaves">
+                  <Route index element={<LeavesList />} />
+                  {/* Include more routes if necessary */}
+                  <Route path="new" element={<NewLeaveForm />} />
                 </Route>
               </Route>
             </Route>

@@ -22,7 +22,7 @@ const NewUserForm = () => {
   const [lastName, setLastname] = useState("");
   const [employeeId, setEmployeeId] = useState("");
 
-  const [userLevel, setUserLevel] = useState("User");
+  const [userLevel, setUserLevel] = useState("");
   const [branch, setBranch] = useState("");
 
   useEffect(() => {
@@ -178,6 +178,7 @@ const NewUserForm = () => {
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Branch</Form.Label>
               <Form.Select required onChange={onBranchChanged}>
+                <option value="">Select branch...</option>
                 {branchOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">
@@ -201,6 +202,7 @@ const NewUserForm = () => {
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">User Level</Form.Label>
               <Form.Select required onChange={onUserLevelChanged}>
+                <option value="">Select level...</option>
                 {userLevelOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">

@@ -25,13 +25,17 @@ const Welcome = () => {
         <Col>
           <h3>
             HR Memos/Announcements{" "}
-            <Button
-              className="float-end"
-              variant="outline-primary"
-              onClick={() => navigate("/dashboard/announcements/new")}
-            >
-              <FontAwesomeIcon icon={faFileCirclePlus} />
-            </Button>
+            {status === "Admin" && (
+              <>
+                <Button
+                  className="float-end"
+                  variant="outline-primary"
+                  onClick={() => navigate("/dashboard/announcements/new")}
+                >
+                  <FontAwesomeIcon icon={faFileCirclePlus} />
+                </Button>
+              </>
+            )}
           </h3>
           <AnnouncementsList />
         </Col>

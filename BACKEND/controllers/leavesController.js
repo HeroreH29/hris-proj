@@ -19,11 +19,11 @@ const createLeave = async (req, res) => {
   const { ModifiedDate, DayTime, Approve, ...others } = req.body;
 
   // Check if other properties of the request body has values
-  const othersHasValues = Object.values(others).every((value) => value !== "");
+  const othersHasValues = Object.values(others).every((value) => value);
 
   // Some values are missing
   if (!othersHasValues) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "Some fields are missing values" });
   }
 
   /* Include duplicate checking if neccessary */

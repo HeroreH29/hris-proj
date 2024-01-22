@@ -12,7 +12,7 @@ import useAuth from "../../hooks/useAuth";
 const NewLeaveForm = () => {
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  const { user, employeeId, status } = useAuth();
 
   const [leaveType, setLeaveType] = useState("");
   const [leaveFrom, setLeaveFrom] = useState("");
@@ -91,7 +91,7 @@ const NewLeaveForm = () => {
 
       if (confirm) {
         const leaveJson = {
-          EmployeeID: selectedEmployee,
+          EmployeeID: selectedEmployee ? selectedEmployee : employeeId,
           DateOfFilling: format(new Date(), "MMM dd, yyyy"),
           NoOfDays: dayTime
             ? 0.5
@@ -134,7 +134,7 @@ const NewLeaveForm = () => {
       navigate("/leaves");
     }
     if (isAddError) {
-      window.alert(`Something went wrong: ${addError}`);
+      alert(`Something went wrong: ${addError.data.message}`);
     }
   }, [addSuccess, addError, isAddError, navigate]);
 
@@ -156,35 +156,39 @@ const NewLeaveForm = () => {
         className="p-3"
         onSubmit={handleSubmit}
       >
-        <Row className="mb-3">
-          <Form.Group as={Col} md="4">
-            <Form.Label className="fw-semibold">File for</Form.Label>
-            <Form.Control
-              required
-              autoFocus
-              className="fw-semibold"
-              type="text"
-              value={searchQuery}
-              onChange={handleSearch}
-              placeholder="Search Employee..."
-            />
-            <Form.Control.Feedback type="invalid">
-              Field required
-            </Form.Control.Feedback>
-          </Form.Group>
-          {searchResults?.length > 0 && searchQuery.length > 0 && (
-            <ListGroup>
-              {searchResults.map((result) => (
-                <ListGroup.Item
-                  action
-                  href={`#${result.EmployeeID}`}
-                  key={result.id}
-                  onClick={() => handleSearchResultClick(result)}
-                >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
-              ))}
-            </ListGroup>
-          )}
-        </Row>
+        {status === "Admin" && (
+          <>
+            <Row className="mb-3">
+              <Form.Group as={Col} md="4">
+                <Form.Label className="fw-semibold">File for</Form.Label>
+                <Form.Control
+                  required
+                  autoFocus
+                  className="fw-semibold"
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  placeholder="Search Employee..."
+                />
+                <Form.Control.Feedback type="invalid">
+                  Field required
+                </Form.Control.Feedback>
+              </Form.Group>
+              {searchResults?.length > 0 && searchQuery.length > 0 && (
+                <ListGroup>
+                  {searchResults.map((result) => (
+                    <ListGroup.Item
+                      action
+                      href={`#${result.EmployeeID}`}
+                      key={result.id}
+                      onClick={() => handleSearchResultClick(result)}
+                    >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
+                  ))}
+                </ListGroup>
+              )}
+            </Row>
+          </>
+        )}
         <Row className="align-items-center mb-3">
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Leave Type</Form.Label>

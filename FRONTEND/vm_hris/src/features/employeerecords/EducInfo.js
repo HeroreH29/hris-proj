@@ -5,6 +5,7 @@ import {
   useUpdateEducinfoMutation,
 } from "./recordsApiSlice";
 import { LEVEL, DEGREE } from "../../config/educOptions";
+import { toast } from "react-toastify";
 
 const EducInfo = ({ educinfo }) => {
   const formRef = useRef();
@@ -83,6 +84,9 @@ const EducInfo = ({ educinfo }) => {
     if (isSuccess || isDelSuccess) {
       setShowModal(false);
       setValidated(false);
+
+      isSuccess && toast.info("Educational attainment updated!");
+      isDelSuccess && toast.info("Educational attainment deleted!");
     }
   }, [isSuccess, isDelSuccess]);
 

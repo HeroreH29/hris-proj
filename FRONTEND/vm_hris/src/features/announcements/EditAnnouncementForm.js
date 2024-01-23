@@ -8,6 +8,7 @@ import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
+import { toast } from "react-toastify";
 
 const EditAnnouncementForm = ({ users, announcement }) => {
   useTitle("Edit Announcement | Via Mare HRIS");
@@ -34,7 +35,8 @@ const EditAnnouncementForm = ({ users, announcement }) => {
       setTitle("");
       setDate("");
       setMessage("");
-
+      isSuccess && toast.success("Changes saved!");
+      isDelSuccess && toast.info("Announcement deleted!");
       navigate("/dashboard");
     }
   }, [isSuccess, isDelSuccess, navigate]);
@@ -67,11 +69,9 @@ const EditAnnouncementForm = ({ users, announcement }) => {
 
   /* DELETE FUNCTION */
   const onDeleteAnnouncement = async (e) => {
-    const isConfirmed = window.confirm(`Proceed deletion of "${title}"?`);
+    const isConfirmed = window.confirm(`Delete this announcement?`);
     if (isConfirmed) {
       await deleteAnnouncement({ id: announcement.id });
-    } else {
-      console.log("Deletion cancelled");
     }
   };
 

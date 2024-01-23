@@ -20,92 +20,99 @@ import Attendances from "./features/attendances/Attendances";
 import LeavesList from "./features/leaves/LeavesList";
 import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
+import { toast, ToastContainer } from "react-toastify";
+
 function App() {
   useTitle("Login | Via Mare HRIS");
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        {/* public routes */}
-        <Route index element={<Login />} />
-        <Route path="forgotpassword" element={<ForgotPass />} />
-
-        {/* protected routes */}
-        <Route element={<PersistLogin />}>
-          <Route
-            element={
-              <RequireAuth allowedUserLevels={[...Object.values(USERLEVELS)]} />
-            }
-          >
-            <Route element={<Prefetch />}>
-              <Route element={<DashLayout />}>
-                <Route path="dashboard">
-                  <Route index element={<Welcome />} />
-
-                  <Route path="announcements">
-                    <Route
-                      element={
-                        <RequireAuth
-                          allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
-                        />
-                      }
-                    >
-                      <Route path=":id" element={<EditAnnouncement />} />
-                      <Route path="new" element={<NewAnnouncement />} />
+    <>
+      <ToastContainer autoClose={3000} />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          {/* public routes */}
+          <Route index element={<Login />} />
+          <Route path="forgotpassword" element={<ForgotPass />} />
+          {/* protected routes */}
+          <Route element={<PersistLogin />}>
+            <Route
+              element={
+                <RequireAuth
+                  allowedUserLevels={[...Object.values(USERLEVELS)]}
+                />
+              }
+            >
+              <Route element={<Prefetch />}>
+                <Route element={<DashLayout />}>
+                  <Route path="dashboard">
+                    <Route index element={<Welcome />} />
+                    <Route path="announcements">
+                      <Route
+                        element={
+                          <RequireAuth
+                            allowedUserLevels={[
+                              USERLEVELS.Admin,
+                              USERLEVELS.HR,
+                            ]}
+                          />
+                        }
+                      >
+                        <Route path=":id" element={<EditAnnouncement />} />
+                        <Route path="new" element={<NewAnnouncement />} />
+                      </Route>
+                    </Route>
+                    {/* End Dash */}
+                  </Route>
+                  <Route
+                    element={
+                      <RequireAuth
+                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                      />
+                    }
+                  >
+                    <Route path="users">
+                      <Route index element={<UsersList />} />
+                      <Route path=":id" element={<EditUser />} />
+                      <Route path="new" element={<NewUserForm />} />
                     </Route>
                   </Route>
-                  {/* End Dash */}
-                </Route>
-                <Route
-                  element={
-                    <RequireAuth
-                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
-                    />
-                  }
-                >
-                  <Route path="users">
-                    <Route index element={<UsersList />} />
-                    <Route path=":id" element={<EditUser />} />
-                    <Route path="new" element={<NewUserForm />} />
+                  <Route
+                    element={
+                      <RequireAuth
+                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                      />
+                    }
+                  >
+                    <Route path="employeerecords">
+                      <Route index element={<RecordsList />} />
+                      <Route path=":employeeId" element={<EditRecord />} />
+                      <Route path="new" element={<EditRecord />} />
+                    </Route>
                   </Route>
-                </Route>
-                <Route
-                  element={
-                    <RequireAuth
-                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
-                    />
-                  }
-                >
-                  <Route path="employeerecords">
-                    <Route index element={<RecordsList />} />
-                    <Route path=":employeeId" element={<EditRecord />} />
-                    <Route path="new" element={<EditRecord />} />
+                  <Route
+                    element={
+                      <RequireAuth
+                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                      />
+                    }
+                  >
+                    <Route path="attendances">
+                      <Route index element={<Attendances />} />
+                      {/* Include more routes if necessary */}
+                    </Route>
                   </Route>
-                </Route>
-                <Route
-                  element={
-                    <RequireAuth
-                      allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
-                    />
-                  }
-                >
-                  <Route path="attendances">
-                    <Route index element={<Attendances />} />
+                  <Route path="leaves">
+                    <Route index element={<LeavesList />} />
                     {/* Include more routes if necessary */}
+                    <Route path="new" element={<NewLeaveForm />} />
                   </Route>
-                </Route>
-
-                <Route path="leaves">
-                  <Route index element={<LeavesList />} />
-                  {/* Include more routes if necessary */}
-                  <Route path="new" element={<NewLeaveForm />} />
                 </Route>
               </Route>
             </Route>
           </Route>
+          {/* end protected routes */}
         </Route>
-        {/* end protected routes */}
-      </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

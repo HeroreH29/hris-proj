@@ -34,7 +34,7 @@ const DashHeader = () => {
     <Navbar
       collapseOnSelect={true}
       expand="lg"
-      className="border-bottom border-dark-subtle"
+      className="border-bottom border-dark-subtle bg-white"
     >
       <Container>
         <Navbar.Brand id="logo">Via Mare</Navbar.Brand>

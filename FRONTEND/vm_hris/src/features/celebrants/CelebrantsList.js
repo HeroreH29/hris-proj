@@ -39,14 +39,28 @@ const CelebrantsList = () => {
     const { ids, entities } = personalinfos;
     const date = new Date();
     const currentMonth = date.getMonth() + 1;
+    const currentDate = date.getDate();
 
     const celebrants = ids?.length
-      ? ids.filter((personalInfoId) => {
-          const birthday = new Date(entities[personalInfoId].Birthday);
-          const birthmonth = birthday.getMonth() + 1;
+      ? ids
+          .filter((personalInfoId) => {
+            const birthday = new Date(entities[personalInfoId].Birthday);
+            const birthmonth = birthday.getMonth() + 1;
+            const isCurrentDay =
+              currentMonth === birthmonth && birthday.getDate() === currentDate;
 
-          return currentMonth === birthmonth;
-        })
+            return currentMonth === birthmonth;
+          })
+          .reduce((acc, personalInfoId) => {
+            const birthday = new Date(entities[personalInfoId].Birthday);
+            const birthmonth = birthday.getMonth() + 1;
+            const isCurrentDay =
+              currentMonth === birthmonth && birthday.getDate() === currentDate;
+
+            return isCurrentDay
+              ? [personalInfoId, ...acc] // Move current day celebrants to the top
+              : [...acc, personalInfoId]; // Append others
+          }, [])
       : [];
 
     // Convert generalinfos to array so it can be iterated

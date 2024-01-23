@@ -14,6 +14,7 @@ import {
   useDeleteWorkinfoMutation,
   useUpdateWorkinfoMutation,
 } from "./recordsApiSlice";
+import { toast } from "react-toastify";
 
 const WorkInfo = ({ workinfo }) => {
   const [showModal, setShowModal] = useState(false);
@@ -100,6 +101,9 @@ const WorkInfo = ({ workinfo }) => {
     if (isSuccess || isDelSuccess) {
       setShowModal(false);
       setValidated(false);
+
+      isSuccess && toast.info("Employment history updated!");
+      isDelSuccess && toast.info("Employment history deleted!");
     }
   }, [isSuccess, isDelSuccess]);
 

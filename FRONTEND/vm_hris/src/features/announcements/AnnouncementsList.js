@@ -51,21 +51,7 @@ const AnnouncementsList = () => {
     <>
       <Container className="border">
         <Table bordered striped hover className="align-middle mt-2 caption-top">
-          <caption>
-            Click any announcement to view full message{" "}
-            <span className="float-end">
-              {(isHR || isAdmin) && (
-                <Col>
-                  {/* <Button
-                    variant="outline-primary"
-                    onClick={() => navigate("/dashboard/announcements/new")}
-                  >
-                    <FontAwesomeIcon icon={faFileCirclePlus} />
-                  </Button> */}
-                </Col>
-              )}
-            </span>
-          </caption>
+          <caption>Click any announcement to view full message </caption>
           <thead>
             <tr>
               <th scope="col">Title</th>

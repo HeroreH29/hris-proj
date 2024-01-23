@@ -12,11 +12,11 @@ import { format, parse } from "date-fns";
 const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   const navigate = useNavigate();
 
-  const [showModal, setShowModal] = useState(false);
-
-  const [leaveFrom, setLeaveFrom] = useState("");
-  const [leaveUntil, setLeaveUntil] = useState("");
-  const [remarks, setRemarks] = useState("");
+  const { leave } = useGetLeavesQuery("leavesList", {
+    selectFromResult: ({ data }) => ({
+      leave: data?.entities[leaveId],
+    }),
+  });
 
   const {
     data: geninfos,
@@ -46,11 +46,12 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
     },
   ] = useUpdateLeaveCreditMutation();
 
-  const { leave } = useGetLeavesQuery("leavesList", {
-    selectFromResult: ({ data }) => ({
-      leave: data?.entities[leaveId],
-    }),
-  });
+  const [showModal, setShowModal] = useState(false);
+
+  const [leaveFrom, setLeaveFrom] = useState("");
+  const [leaveUntil, setLeaveUntil] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [leaveStatus, setLeaveStatus] = useState(leave && leave?.Approve);
 
   const handleUpdateLeave = async (approveStat) => {
     const confirm = window.confirm(
@@ -73,6 +74,8 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
           Approve: approveStat,
           Remarks: remarks,
         });
+
+        setLeaveStatus(approveStat);
       } catch (error) {
         alert(`Something went wrong: ${error}`);
       }
@@ -120,7 +123,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   if (leave) {
     let approve;
     let apprvTxtColor;
-    switch (leave?.Approve) {
+    switch (leave?.Approve || leaveStatus) {
       case 1:
         approve = "Approved";
         apprvTxtColor = "fw-semibold text-success";

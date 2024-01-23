@@ -215,9 +215,9 @@ const LeavesList = () => {
                     <Form>
                       <Form.Control
                         type="text"
-                        placeholder="Type name"
+                        placeholder="Temporary disable"
                         value={name}
-                        disabled={status !== "Admin"}
+                        disabled={/* status !== "Admin" */ true} // temporarily disabled
                         onChange={(e) => setName(e.target.value)}
                       />
                     </Form>
@@ -267,7 +267,7 @@ const LeavesList = () => {
             </Table>
           </Col>
 
-          <Col md="auto">
+          <Col className="align-items-center" md="auto">
             <Table
               size="sm"
               striped

@@ -69,30 +69,46 @@ const RecordsList = () => {
 
     const filteredIds = gids?.filter((id) => {
       const geninfo = gentities[id];
+      let matches = true;
 
       const searchLowerCase = searchValue.toLowerCase();
       const outletFilterLowerCase = outletFilter.toLowerCase();
       const statusFilterLowerCase = statusFilter.toLowerCase();
 
-      const matchesSearch =
+      if (searchValue !== "") {
+        matches =
+          geninfo.LastName.toLowerCase().includes(searchLowerCase) ||
+          geninfo.FirstName.toLowerCase().includes(searchLowerCase);
+      }
+
+      if (outletFilter !== "") {
+        matches =
+          geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
+      }
+
+      if (statusFilter !== "") {
+        matches = geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
+      }
+
+      /* const matchesSearch =
         !searchValue ||
         geninfo.LastName.toLowerCase().includes(searchLowerCase) ||
-        geninfo.FirstName.toLowerCase().includes(searchLowerCase);
+        geninfo.FirstName.toLowerCase().includes(searchLowerCase); */
 
-      const matchesOutlet =
+      /* const matchesOutlet =
         !outletFilter ||
-        geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
-      const matchesStatus =
+        geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase; */
+      /* const matchesStatus =
         !statusFilter ||
-        geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
+        geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase; */
 
-      return matchesSearch && matchesOutlet && matchesStatus;
+      return matches;
     });
 
     // Passing geninfo ids as table content
     const tableContent = gids?.length
       ? searchValue.trim() === ""
-        ? [...gids]
+        ? [...filteredIds]
             .sort((a, b) => {
               return !nameSort
                 ? gentities[a].LastName.localeCompare(gentities[b].LastName)
@@ -102,16 +118,7 @@ const RecordsList = () => {
             .map((geninfoId) => (
               <Record key={geninfoId} geninfoId={geninfoId} />
             ))
-        : filteredIds
-            .sort((a, b) => {
-              return !nameSort
-                ? gentities[a].LastName.localeCompare(gentities[b].LastName)
-                : gentities[b].LastName.localeCompare(gentities[a].LastName);
-            })
-            .slice(sliceStart, sliceEnd)
-            .map((geninfoId) => (
-              <Record key={geninfoId} geninfoId={geninfoId} />
-            ))
+        : null
       : null;
 
     return (
@@ -169,7 +176,11 @@ const RecordsList = () => {
               <td>
                 <Form>
                   <Form.Select
-                    onChange={(e) => setOutletFilter(e.target.value)}
+                    onChange={(e) => {
+                      setOutletFilter(e.target.value);
+                      setSliceStart(0);
+                      setSliceEnd(10);
+                    }}
                   >
                     {assignedOutletOptions}
                   </Form.Select>
@@ -179,7 +190,11 @@ const RecordsList = () => {
               <td>
                 <Form>
                   <Form.Select
-                    onChange={(e) => setStatusFilter(e.target.value)}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setSliceStart(0);
+                      setSliceEnd(10);
+                    }}
                   >
                     {empStatusOptions}
                   </Form.Select>

@@ -22,6 +22,7 @@ import {
   Dropdown,
 } from "react-bootstrap";
 import { format, parse } from "date-fns";
+import { toast } from "react-toastify";
 
 const NUMBER_REGEX = /^[0-9]*$/;
 const IDNUMS_REGEX = /^[0-9-]*$/;
@@ -116,6 +117,9 @@ const EditGenInfoForm = ({ geninfo }) => {
       setSSSnumber("");
       setPHnumber("");
       setPInumber("");
+
+      addSuccess && toast.success("Record successfully added!");
+      updateSuccess && toast.info("Record updated!");
 
       navigate("/employeerecords");
     }

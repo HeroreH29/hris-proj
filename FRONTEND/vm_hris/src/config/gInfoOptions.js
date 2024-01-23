@@ -1,5 +1,5 @@
 export const ASSIGNEDOUTLET = {
-  "": "",
+  "Select outlet...": "",
   Catering: "Catering",
   "Greenbelt 1": "Greenbelt 1",
   PICC: "PICC",
@@ -29,6 +29,7 @@ export const ASSIGNEDOUTLET = {
 };
 
 export const EMPLOYEETYPE = {
+  "Select type...": "",
   Probationary: "Probationary",
   Regular: "Regular",
   Casual: "Casual",
@@ -43,6 +44,7 @@ export const EMPLOYEETYPE = {
 };
 
 export const DEPARTMENT = {
+  "Select department...": "",
   Accounting: "Accounting",
   Admin: "Admin",
   Audit: "Audit",
@@ -66,14 +68,14 @@ export const DEPARTMENT = {
 };
 
 export const PREFIX = {
-  "": "",
+  "Select prefix...": "",
   Mr: "Mr.",
   Ms: "Ms.",
   Mrs: "Mrs.",
 };
 
 export const EMPSTATUS = {
-  "": "",
+  "Select status...": "",
   Active: "Y",
   Inactive: "N",
 };

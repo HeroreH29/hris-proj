@@ -100,13 +100,7 @@ const EducInfoList = ({ educinfos, employeeId }) => {
             </Button>
           </Col>
         </Row>
-        <Table
-          responsive
-          bordered
-          striped
-          hover
-          className="align-middle ms-3 mt-3 mb-3"
-        >
+        <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
             <tr>
               <th scope="col">Institution Name</th>

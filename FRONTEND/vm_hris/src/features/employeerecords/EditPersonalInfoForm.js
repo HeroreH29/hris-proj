@@ -16,6 +16,7 @@ import {
   Dropdown,
 } from "react-bootstrap";
 import { format, parse } from "date-fns";
+import { toast } from "react-toastify";
 
 const ZIPCODE_REGEX = /^[0-9]{1,4}$/;
 const NUMERIC_REGEX = /^[0-9.]{1,5}$/;
@@ -93,6 +94,9 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
       setFoccupation("");
       setMotherName("");
       setMoccupation("");
+
+      addSuccess && toast.success("Information successfully added!");
+      updateSuccess && toast.info("Record successfully updated!");
 
       navigate("/employeerecords");
     }

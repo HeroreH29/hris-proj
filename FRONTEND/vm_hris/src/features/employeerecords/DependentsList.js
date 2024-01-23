@@ -14,6 +14,7 @@ import { faPersonCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { format, parse } from "date-fns";
 import { useAddDependentMutation } from "./recordsApiSlice";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
+import { toast } from "react-toastify";
 
 const DependentsList = ({ dependents, employeeId }) => {
   const tableContent = dependents?.length
@@ -100,6 +101,7 @@ const DependentsList = ({ dependents, employeeId }) => {
       formRef.current.reset();
       setShowModal(false);
       setValidated(false);
+      toast.success("Dependen successfully addded!");
     }
   }, [isSuccess]);
 
@@ -121,13 +123,7 @@ const DependentsList = ({ dependents, employeeId }) => {
             </Button>
           </Col>
         </Row>
-        <Table
-          responsive
-          bordered
-          striped
-          hover
-          className="align-middle ms-3 mt-3 mb-3"
-        >
+        <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
             <tr>
               <th scope="col">Name</th>
@@ -196,6 +192,7 @@ const DependentsList = ({ dependents, employeeId }) => {
                   autoComplete="off"
                   type="text"
                   value={dep}
+                  placeholder="e.g. 1st/2nd/3rd/etc..."
                   onChange={(e) => setDep(e.target.value)}
                 />
                 <Form.Control.Feedback type="invalid">

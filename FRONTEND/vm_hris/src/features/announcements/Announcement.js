@@ -57,7 +57,8 @@ const Announcement = ({ announcementId }) => {
             <Modal.Title>{announcement.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p className="fw-semibold text-break">{announcement.message}</p>
+            <h6>Message:</h6>
+            <p className="text-break text-center">{announcement.message}</p>
           </Modal.Body>
           <Modal.Footer>
             <p className="fst-italic">{`Author: ` + announcement.user}</p>

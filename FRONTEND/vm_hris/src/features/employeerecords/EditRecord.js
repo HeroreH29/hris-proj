@@ -27,6 +27,7 @@ import EducInfoList from "./EducInfosList";
 import { PDFDocument } from "pdf-lib";
 import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
+import { toast } from "react-toastify";
 
 const EditRecord = () => {
   const { employeeId } = useParams();
@@ -282,6 +283,7 @@ const EditRecord = () => {
           new Blob([pdfBytes], { type: "application/pdf" })
         );
 
+        toast.success("Record generated!");
         window.open(blobUrl, "_blank");
       } catch (error) {
         console.error("formFill error: ", error);
@@ -302,7 +304,7 @@ const EditRecord = () => {
             <FontAwesomeIcon icon={faLeftLong} />
           </Button>
         </Col>
-        <Col md="auto">
+        <Col>
           <div>
             <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
             {!employeeId && (
@@ -312,17 +314,8 @@ const EditRecord = () => {
             )}
           </div>
         </Col>
-        <Col className="d-flex justify-content-end">
-          <Button
-            variant="outline-secondary"
-            disabled={!personalinfo}
-            onClick={handlePrintEmployeeRecord}
-          >
-            <FontAwesomeIcon icon={faPrint} />
-          </Button>
-        </Col>
       </Row>
-      <Tabs className="mb-3" defaultActiveKey="geninfo">
+      <Tabs className="p-3 mb-3" defaultActiveKey="geninfo" fill>
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={geninfo} />
         </Tab>
@@ -360,6 +353,24 @@ const EditRecord = () => {
           disabled={!employeeId}
         >
           <WorkInfosList workinfos={workinfos} employeeId={employeeId} />
+        </Tab>
+        <Tab
+          title="Print record"
+          disabled={!personalinfo}
+          eventKey={"printrecord"}
+          unmountOnExit={true}
+          onSelect={() => console.log("first")}
+        >
+          <div className="text-center">
+            <Button
+              variant="outline-dark"
+              disabled={!personalinfo}
+              onClick={handlePrintEmployeeRecord}
+            >
+              Click here to print record{" "}
+              <FontAwesomeIcon className="ms-2" icon={faPrint} />
+            </Button>
+          </div>
         </Tab>
       </Tabs>
     </Container>

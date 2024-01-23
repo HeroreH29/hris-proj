@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
+import { toast } from "react-toastify";
 
 const NewAnnouncementForm = ({ users }) => {
   useTitle("Create Announcement | Via Mare HRIS");
@@ -28,7 +29,7 @@ const NewAnnouncementForm = ({ users }) => {
       setTitle("");
       setDate("");
       setMessage("");
-
+      toast.success("Announcement posted!");
       navigate("/dashboard");
     }
   }, [isSuccess, navigate]);

@@ -6,6 +6,7 @@ import {
   useUpdateDependentMutation,
   useDeleteDependentMutation,
 } from "./recordsApiSlice";
+import { toast } from "react-toastify";
 
 const Dependent = ({ dependent }) => {
   const [showModal, setShowModal] = useState(false);
@@ -63,6 +64,9 @@ const Dependent = ({ dependent }) => {
     if (isSuccess || isDelSuccess) {
       setShowModal(false);
       setValidated(false);
+
+      isSuccess && toast.info("Dependent information updated!");
+      isDelSuccess && toast.info("Dependent successfully deleted!");
     }
   }, [isSuccess, isDelSuccess]);
 

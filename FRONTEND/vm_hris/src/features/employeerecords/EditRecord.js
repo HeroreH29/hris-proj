@@ -128,6 +128,23 @@ const EditRecord = () => {
       const pdfDoc = await PDFDocument.load(formPdfBytes);
       const form = pdfDoc.getForm();
 
+      // Function to find fields on the document
+      const FieldFinder = (fieldName, altFieldName) => {
+        let row = form.getFieldMaybe(fieldName);
+        if (!row) {
+          row = form.getField(altFieldName);
+        }
+        let rowName = row.getName();
+        return form.getTextField(rowName);
+      };
+
+      /* const fields = form.getFields();
+      fields.forEach((field) => {
+        const type = field.constructor.name;
+        const name = field.getName();
+        console.log(`${type}: ${name}`);
+      }); */
+
       try {
         const formEducAttain = [
           "Institution_Name",
@@ -138,8 +155,8 @@ const EditRecord = () => {
         const formEmpHist = [
           "Position_Title",
           "Company_Name",
-          "CompAddress",
-          "LengthofStay",
+          "WorkAddress",
+          "LengthOfStay",
         ];
 
         const genInfoValArr = [
@@ -189,13 +206,18 @@ const EditRecord = () => {
           "Covered",
         ];
 
-        const employeeName = form.getTextField("EmployeeName");
+        const employeeName = FieldFinder(
+          "EmployeeName",
+          `undefined.EmployeeName`
+        );
         employeeName.setText(
           `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}.`
         );
 
         genInfoValArr.forEach((e) => {
-          const element = form.getTextField(e);
+          //const element = form.getTextField(e);
+          const element = FieldFinder(e, `undefined.${e}`);
+
           if (e === "EmpStatus") {
             element.setText(
               String(geninfo?.[e]) === "Y" ? "Active" : "Inactive"
@@ -217,7 +239,9 @@ const EditRecord = () => {
         });
 
         personalInfoValArr.forEach((e) => {
-          const element = form.getTextField(e);
+          //const element = form.getTextField(e);
+          const element = FieldFinder(e, `undefined.${e}`);
+
           if (e === "PresentAddress") {
             element.setText(
               personalinfo?.PresentAddress
@@ -233,7 +257,11 @@ const EditRecord = () => {
 
         dependents.forEach((d, i) => {
           depValArr.forEach((e) => {
-            const element = form.getTextField(`${e}Row${i + 1}`);
+            //const element = form.getTextField(`${e}Row${i + 1}`);
+            const element = FieldFinder(
+              `${e}${i + 1}`,
+              `undefined.${e}${i + 1}`
+            );
 
             if (element) {
               if (e === "Covered") {
@@ -242,17 +270,23 @@ const EditRecord = () => {
                 element.setText(String(d[e]));
               }
             } else {
-              console.warn(`Element ${e}Row${i + 1} not found.`);
+              console.warn(`Element ${e}${i + 1} not found.`);
             }
           });
         });
 
         educinfos.forEach((e, i) => {
           formEducAttain.forEach((val) => {
-            const element = form.getTextField(`${val}Row${i + 1}`);
+            // const element = form.getTextField(`${val}Row${i + 1}`);
+            const element = FieldFinder(
+              `${val}${i + 1}`,
+              `undefined.${val}${i + 1}`
+            );
 
             if (val === "CourseDegreeStrand") {
-              element.setText(`${e?.Field_of_Study}/${e?.Degree}/${e?.Major}`);
+              element.setText(
+                `${e?.Field_of_Study}/${e?.Degree}/${e?.Major} (${e?.Level})`
+              );
             } else if (val === "YearAttended") {
               element.setText(`${e?.yrStart} - ${e?.yrGraduated}`);
             } else {
@@ -263,13 +297,17 @@ const EditRecord = () => {
 
         workinfos.forEach((w, i) => {
           formEmpHist.forEach((val) => {
-            const element = form.getTextField(`${val}Row${i + 1}`);
+            // const element = form.getTextField(`${val}Row${i + 1}`);
+            const element = FieldFinder(
+              `${val}${i + 1}`,
+              `undefined.${val}${i + 1}`
+            );
 
-            if (val === "LengthofStay") {
+            if (val === "LengthOfStay") {
               element.setText(
                 `${w?.JoinedFR_M} ${w?.JoinedFR_Y} - ${w?.JoinedTO_M} ${w?.JoinedTO_Y}`
               );
-            } else if (val === "CompAddress") {
+            } else if (val === "WorkAddress") {
               element.setText(`${w?.State}, ${w?.Country}`);
             } else {
               element.setText(String(w?.[val]));

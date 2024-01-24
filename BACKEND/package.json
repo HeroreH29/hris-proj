@@ -1,7 +1,7 @@
 {
   "name": "hris",
   "version": "1.0.20",
-  "description": "via mare hris web application",
+  "description": "backend for vm hris web application",
   "main": "server.js",
   "scripts": {
     "start": "node server",

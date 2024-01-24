@@ -1,4 +1,5 @@
 const Leave = require("../models/Leave");
+const Geninfo = require("../models/GenInfo");
 const { format } = require("date-fns");
 
 // desc Get all leaves
@@ -9,7 +10,21 @@ const getAllLeaves = async (req, res) => {
   if (!leaves?.length) {
     return res.status(400).json({ message: "No leaves found" });
   }
-  res.json(leaves);
+
+  const geninfos = await Geninfo.find().lean();
+
+  const newLeaves = leaves.map((leave) => {
+    const match = geninfos.find(
+      (geninfo) => geninfo.EmployeeID === leave.EmployeeID
+    );
+
+    return (leave = {
+      ...leave,
+      EmpName: `${match?.LastName}, ${match?.FirstName} ${match?.MI}.`,
+    });
+  });
+
+  res.json(newLeaves);
 };
 
 // desc Create new leave

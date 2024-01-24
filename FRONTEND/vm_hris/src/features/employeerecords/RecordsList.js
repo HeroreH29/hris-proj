@@ -77,17 +77,20 @@ const RecordsList = () => {
 
       if (searchValue !== "") {
         matches =
-          geninfo.LastName.toLowerCase().includes(searchLowerCase) ||
+          (matches &&
+            geninfo.LastName.toLowerCase().includes(searchLowerCase)) ||
           geninfo.FirstName.toLowerCase().includes(searchLowerCase);
       }
 
       if (outletFilter !== "") {
         matches =
+          matches &&
           geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
       }
 
       if (statusFilter !== "") {
-        matches = geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
+        matches =
+          matches && geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
       }
 
       /* const matchesSearch =
@@ -107,18 +110,14 @@ const RecordsList = () => {
 
     // Passing geninfo ids as table content
     const tableContent = gids?.length
-      ? searchValue.trim() === ""
-        ? [...filteredIds]
-            .sort((a, b) => {
-              return !nameSort
-                ? gentities[a].LastName.localeCompare(gentities[b].LastName)
-                : gentities[b].LastName.localeCompare(gentities[a].LastName);
-            })
-            .slice(sliceStart, sliceEnd)
-            .map((geninfoId) => (
-              <Record key={geninfoId} geninfoId={geninfoId} />
-            ))
-        : null
+      ? [...filteredIds]
+          .sort((a, b) => {
+            return !nameSort
+              ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+              : gentities[b].LastName.localeCompare(gentities[a].LastName);
+          })
+          .slice(sliceStart, sliceEnd)
+          .map((geninfoId) => <Record key={geninfoId} geninfoId={geninfoId} />)
       : null;
 
     return (

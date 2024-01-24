@@ -16,7 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
 import useAuth from "../../hooks/useAuth";
@@ -136,7 +136,7 @@ const LeavesList = () => {
 
       if (name !== "") {
         matches =
-          matches && leave.User.toLowerCase().includes(name.toLowerCase());
+          matches && leave.EmpName.toLowerCase().includes(name.toLowerCase());
       }
 
       if (month !== "") {
@@ -215,9 +215,8 @@ const LeavesList = () => {
                     <Form>
                       <Form.Control
                         type="text"
-                        placeholder="Temporary disable"
                         value={name}
-                        disabled={/* status !== "Admin" */ true} // temporarily disabled
+                        disabled={status !== "Admin" /* true */}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </Form>

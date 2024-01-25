@@ -16,6 +16,7 @@ import {
   useUpdateUserMutation,
 } from "../users/usersApiSlice";
 import useTitle from "../../hooks/useTitle";
+import { toast } from "react-toastify";
 
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
@@ -61,6 +62,7 @@ const ForgotPass = () => {
       setNewPassword("");
       setConfirmPassword("");
 
+      toast.success("Password reset successful");
       navigate("/");
     }
   }, [isUpdateSuccess, navigate]);

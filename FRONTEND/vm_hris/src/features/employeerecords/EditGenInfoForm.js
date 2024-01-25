@@ -21,7 +21,7 @@ import {
   DropdownButton,
   Dropdown,
 } from "react-bootstrap";
-import { format, parse } from "date-fns";
+import { format, parse, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 
 const NUMBER_REGEX = /^[0-9]*$/;
@@ -32,23 +32,11 @@ const EditGenInfoForm = ({ geninfo }) => {
   // eslint-disable-next-line
   const [
     updateGeninfo,
-    {
-      isLoading: updateLoading,
-      isSuccess: updateSuccess,
-      isError: isUpdateError,
-      error: updateError,
-    },
+    { isLoading: updateLoading, isSuccess: updateSuccess },
   ] = useUpdateGeninfoMutation();
 
-  const [
-    addGeninfo,
-    {
-      isLoading: addLoading,
-      isSuccess: addSuccess,
-      isError: isAddError,
-      error: addError,
-    },
-  ] = useAddGeninfoMutation();
+  const [addGeninfo, { isLoading: addLoading, isSuccess: addSuccess }] =
+    useAddGeninfoMutation();
 
   const navigate = useNavigate();
 
@@ -63,6 +51,9 @@ const EditGenInfoForm = ({ geninfo }) => {
     : "";
   const parsedDP = geninfo?.DateProbationary
     ? parse(geninfo?.DateProbationary, "MMM dd, yyyy", new Date())
+    : "";
+  const parsedCD = geninfo?.ContractDate
+    ? parse(geninfo?.ContractDate, "MMMM dd, yyyy", new Date())
     : "";
 
   /* GENINFO VARIABLES */
@@ -95,6 +86,10 @@ const EditGenInfoForm = ({ geninfo }) => {
   const [phnumber, setPHnumber] = useState(geninfo?.PHnumber);
   const [pinumber, setPInumber] = useState(geninfo?.PInumber);
   const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber);
+  const [isContractual, setIsContractual] = useState(parsedCD ? true : false);
+  const [contractDate, setContractDate] = useState(
+    parsedCD ? format(parsedCD, "yyyy-MM-dd") : ""
+  );
 
   useEffect(() => {
     if (updateSuccess || addSuccess) {
@@ -151,6 +146,9 @@ const EditGenInfoForm = ({ geninfo }) => {
         const revertedDL = dateLeaved
           ? dateRevert(dateLeaved, "MMM dd, yyyy")
           : "";
+        const revertedCD = contractDate
+          ? dateRevert(contractDate, "MMMM dd, yyyy")
+          : "";
 
         // Check if user is adding or updating an employee record
         if (geninfo) {
@@ -177,6 +175,7 @@ const EditGenInfoForm = ({ geninfo }) => {
             SSSnumber: sssnumber,
             PHnumber: phnumber,
             PInumber: pinumber,
+            ContractDate: revertedCD,
           });
         } else {
           await addGeninfo({
@@ -201,6 +200,7 @@ const EditGenInfoForm = ({ geninfo }) => {
             SSSnumber: sssnumber,
             PHnumber: phnumber,
             PInumber: pinumber,
+            ContractDate: revertedCD,
           });
         }
       }
@@ -358,7 +358,7 @@ const EditGenInfoForm = ({ geninfo }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Employee type, assigned outlet, department, and job title */}
+          {/* Employee type, contract date (if applicable), assigned outlet, department, and job title */}
           <Row className="mb-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employee Type</Form.Label>
@@ -373,6 +373,48 @@ const EditGenInfoForm = ({ geninfo }) => {
                 Select an option
               </Form.Control.Feedback>
             </Form.Group>
+            <Form.Group as={Col} md="auto">
+              <Form.Label className="fw-semibold">Contractual?</Form.Label>
+              <Form.Check
+                type="switch"
+                checked={isContractual}
+                label={isContractual ? "Yes" : "No"}
+                onChange={() => {
+                  setIsContractual(!isContractual);
+                  setContractDate("");
+                }}
+              />
+            </Form.Group>
+            {isContractual && (
+              <>
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">Contract Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    required
+                    value={contractDate}
+                    onChange={(e) => {
+                      // Checking if the contract date is after the employed date
+                      const daysDiff = differenceInDays(
+                        new Date(e.target.value),
+                        new Date(dateEmployed)
+                      );
+
+                      if (daysDiff > 0) {
+                        setContractDate(e.target.value);
+                      } else {
+                        toast.error(
+                          "Contract date must be greater than employed date"
+                        );
+                      }
+                    }}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    This field is required
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </>
+            )}
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Assigned Outlet</Form.Label>
               <InputGroup>

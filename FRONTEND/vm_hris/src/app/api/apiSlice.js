@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "../../features/auth/authSlice";
 
 const deploy = "https://viamare-hris-api.onrender.com";
-const development = "http://localhost:3500";
+const development = "http://192.168.1.6:3500";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: development,

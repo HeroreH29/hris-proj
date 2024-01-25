@@ -36,11 +36,11 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery(undefined, {
+  } = useGetLeaveCreditsQuery(/* undefined, {
     pollingInterval: 10000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  });
+  } */);
 
   const {
     data: leaves,
@@ -63,6 +63,8 @@ const LeavesList = () => {
         : "";
 
       setLeaveCredit(leavecredit);
+    } else {
+      console.error(credserr?.data?.message);
     }
   };
 
@@ -116,7 +118,7 @@ const LeavesList = () => {
 
   let content;
 
-  if (isLoading) content = <Spinner animation="border" />;
+  if (isLoading && !leaves) content = <Spinner animation="border" />;
 
   if (isError) {
     content = <p className="text-danger">{error?.data?.message}</p>;
@@ -143,15 +145,15 @@ const LeavesList = () => {
         matches = matches && leave.DateOfFilling.includes(month);
       }
 
-      if (year !== "") {
+      /* if (year !== "") {
         matches = matches && leave.DateOfFilling.includes(year);
-      }
+      } */
 
       return matches;
     });
 
     overallLeavesContent = filteredIds?.length
-      ? [...filteredIds]
+      ? filteredIds
           .sort(() => {
             return sortIcon === 0 ? 1 : -1;
           })
@@ -190,7 +192,7 @@ const LeavesList = () => {
               hover
               className="align-middle ms-3 mt-3 mb-3 caption-top"
             >
-              <caption>Overall Filed Leaves</caption>
+              <caption>Overall Filed Leaves of Year 2024</caption>
               <thead>
                 <tr className="align-middle">
                   <th scope="col">User</th>
@@ -225,6 +227,7 @@ const LeavesList = () => {
                     <Form>
                       <Form.Select
                         value={year}
+                        disabled
                         onChange={(e) => setYear(e.target.value)}
                       >
                         <option value={""}>Select year</option>

@@ -79,7 +79,11 @@ const EducInfoList = ({ educinfos, employeeId }) => {
   }, [isSuccess]);
 
   const tableContent = educinfos?.length
-    ? educinfos.map((educ, index) => <EducInfo key={index} educinfo={educ} />)
+    ? educinfos
+        .sort((a, b) => {
+          return b.yrStart - a.yrStart;
+        })
+        .map((educ, index) => <EducInfo key={index} educinfo={educ} />)
     : null;
 
   return (

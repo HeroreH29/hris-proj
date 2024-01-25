@@ -3,7 +3,7 @@ import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
 import { Table, Container } from "react-bootstrap";
 //import { useNavigate } from "react-router-dom";
-import { Spinner, Col } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const AnnouncementsList = () => {

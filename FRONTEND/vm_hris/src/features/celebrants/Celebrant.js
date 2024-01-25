@@ -1,6 +1,7 @@
 import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 
 import React from "react";
+import { format } from "date-fns";
 
 const Celebrant = ({ personalInfoId, name }) => {
   const { personalinfo } = useGetPersonalinfosQuery("celebrantsList", {
@@ -29,7 +30,9 @@ const Celebrant = ({ personalInfoId, name }) => {
     return (
       <tr>
         <td className={checkCurrentCelebrant()}>{name}</td>
-        <td className={checkCurrentCelebrant()}>{personalinfo.Birthday}</td>
+        <td className={checkCurrentCelebrant()}>
+          {format(new Date([personalinfo.Birthday]), "MMMM dd")}
+        </td>
       </tr>
     );
   } else return null;

@@ -11,6 +11,7 @@ import {
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import Attendance from "./Attendance";
 import useTitle from "../../hooks/useTitle";
+import { toast } from "react-toastify";
 
 const Attendances = () => {
   useTitle("Attendances | Via Mare HRIS");
@@ -31,7 +32,11 @@ const Attendances = () => {
     error: gerror,
   } = useGetGeninfosQuery();
 
-  useEffect(() => {}, [attList]);
+  useEffect(() => {
+    if (attList?.length > 0) {
+      toast.success("Attlog uploaded!");
+    }
+  }, [attList]);
 
   if (genLoading) return <Spinner animation="border" />;
 

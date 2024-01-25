@@ -61,6 +61,8 @@ const login = async (req, res) => {
 
   res.cookie("jwt", refreshToken, loginCookie);
 
+  console.log(accessToken);
+
   // Send accessToken containing username and user level
   res.json({ accessToken });
 };

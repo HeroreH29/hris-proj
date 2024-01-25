@@ -89,6 +89,10 @@ const genInfoSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  ContractDate: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("GenInfo", genInfoSchema);

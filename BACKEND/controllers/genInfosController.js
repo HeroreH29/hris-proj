@@ -408,6 +408,7 @@ const updateGenInfo = async (req, res) => {
     PInumber,
     PHnumber,
     ATMnumber,
+    ContractDate,
   } = req.body;
 
   const newEmployeeID = EmployeeID;
@@ -449,7 +450,7 @@ const updateGenInfo = async (req, res) => {
   const leaveRecord = await Leave.find({
     EmployeeID: geninfo.EmployeeID,
   }).exec();
-  const leaveCreditRecord = await LeaveCredit.find({
+  const leaveCreditRecord = await LeaveCredit.findOne({
     EmployeeID: geninfo.EmployeeID,
   }).exec();
 
@@ -519,6 +520,7 @@ const updateGenInfo = async (req, res) => {
   geninfo.PInumber = PInumber;
   geninfo.PHnumber = PHnumber;
   geninfo.ATMnumber = ATMnumber;
+  geninfo.ContractDate = ContractDate;
 
   const updatedGenInfo = await geninfo.save();
 

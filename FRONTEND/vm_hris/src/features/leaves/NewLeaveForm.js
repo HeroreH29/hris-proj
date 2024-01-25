@@ -8,6 +8,7 @@ import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useAddNewLeaveMutation } from "./leavesApiSlice";
 import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
 const NewLeaveForm = () => {
   const navigate = useNavigate();
@@ -22,22 +23,11 @@ const NewLeaveForm = () => {
   const [halfDay, setHalfDay] = useState(false);
   const [validated, setValidated] = useState(false);
 
-  const {
-    data: geninfos,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetGeninfosQuery();
+  const { data: geninfos } = useGetGeninfosQuery();
 
   const [
     addLeave,
-    {
-      isLoading: addLoading,
-      isSuccess: addSuccess,
-      isError: isAddError,
-      error: addError,
-    },
+    { isSuccess: addSuccess, isError: isAddError, error: addError },
   ] = useAddNewLeaveMutation();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -131,10 +121,11 @@ const NewLeaveForm = () => {
   useEffect(() => {
     if (addSuccess) {
       handleResetFields();
+      toast.success("Leave filed!");
       navigate("/leaves");
     }
     if (isAddError) {
-      alert(`Something went wrong: ${addError.data.message}`);
+      toast.error(`Something went wrong: ${addError.data.message}`);
     }
   }, [addSuccess, addError, isAddError, navigate]);
 

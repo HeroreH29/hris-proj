@@ -9,9 +9,13 @@ const personalInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  Address: {
+    type: String,
+    default: "",
+  },
   PresentAddress: {
     type: String,
-    required: true,
+    default: "",
   },
   PermanentAddress: {
     type: String,

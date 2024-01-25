@@ -5,6 +5,7 @@ import { USERLEVELS, BRANCHES } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
 const USER_REGEX = "[A-z0-9]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
@@ -35,6 +36,7 @@ const NewUserForm = () => {
       setEmployeeId("");
       setUserLevel("");
 
+      toast.success("New user added!");
       navigate("/users");
     }
   }, [isSuccess, navigate]);

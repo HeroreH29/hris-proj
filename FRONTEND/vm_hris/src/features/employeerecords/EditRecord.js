@@ -67,7 +67,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 15000,
+    pollingInterval: 5000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -79,7 +79,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 15000,
+    pollingInterval: 5000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -91,7 +91,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 15000,
+    pollingInterval: 5000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -285,7 +285,7 @@ const EditRecord = () => {
 
             if (val === "CourseDegreeStrand") {
               element.setText(
-                `${e?.Field_of_Study}/${e?.Degree}/${e?.Major} (${e?.Level})`
+                `${e?.Field_of_Study} | ${e?.Degree} | ${e?.Major} (${e?.Level})`
               );
             } else if (val === "YearAttended") {
               element.setText(`${e?.yrStart} - ${e?.yrGraduated}`);

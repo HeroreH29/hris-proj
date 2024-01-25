@@ -36,6 +36,7 @@ const Login = () => {
     if (isSuccess) {
       toast.success(`Welcome back ${username}!`);
     }
+    // eslint-disable-next-line
   }, [isSuccess]);
 
   if (isLoading) return <Spinner animation="border" />;

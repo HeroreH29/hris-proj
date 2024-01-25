@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Nav, Navbar, Image, Container } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 
@@ -19,7 +20,10 @@ const DashHeader = () => {
     useSendLogoutMutation();
 
   useEffect(() => {
-    if (isSuccess) navigate("/");
+    if (isSuccess) {
+      toast.info("Logged out");
+      navigate("/");
+    }
   }, [isSuccess, navigate]);
 
   const onLogoutClicked = () => sendLogout();

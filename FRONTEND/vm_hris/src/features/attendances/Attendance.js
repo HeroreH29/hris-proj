@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { format, subDays, parse } from "date-fns";
+import { format, parse } from "date-fns";
 import { Button, Modal, Table, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -8,6 +8,7 @@ import {
   useGetGeninfosQuery,
 } from "../employeerecords/recordsApiSlice";
 import { PDFDocument } from "pdf-lib";
+import { toast } from "react-toastify";
 
 const Attendance = ({ att, attlogData }) => {
   const [dateTo, setDateTo] = useState("");
@@ -202,6 +203,7 @@ const Attendance = ({ att, attlogData }) => {
       const modifiedPdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
       const modifiedPdfUrl = URL.createObjectURL(modifiedPdfBlob);
 
+      toast.success("Time sheet generated!");
       window.open(modifiedPdfUrl, "_blank");
     } catch (error) {
       console.error("handlePrintAtt error - ", error);
@@ -367,7 +369,10 @@ const Attendance = ({ att, attlogData }) => {
                           <Form.Control
                             type="date"
                             value={dateFrom}
-                            onChange={(e) => setDateFrom(e.target.value)}
+                            onChange={(e) => {
+                              setDateFrom(e.target.value);
+                              setStartSlice(0);
+                            }}
                           />
                         </Form.Group>
                       </Form>
@@ -379,7 +384,10 @@ const Attendance = ({ att, attlogData }) => {
                           <Form.Control
                             type="date"
                             value={dateTo}
-                            onChange={(e) => setDateTo(e.target.value)}
+                            onChange={(e) => {
+                              setDateTo(e.target.value);
+                              setEndSlice(10);
+                            }}
                           />
                         </Form.Group>
                       </Form>

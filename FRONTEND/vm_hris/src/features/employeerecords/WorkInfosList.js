@@ -16,6 +16,7 @@ import {
 } from "react-bootstrap";
 import { useAddWorkinfoMutation } from "./recordsApiSlice";
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
+import { toast } from "react-toastify";
 
 const WorkInfosList = ({ workinfos, employeeId }) => {
   const formRef = useRef();
@@ -85,6 +86,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
       formRef.current.reset();
       setShowModal(false);
       setValidated(false);
+      toast.success("Employment history added!");
     }
   }, [isSuccess]);
 

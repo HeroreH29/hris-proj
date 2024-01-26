@@ -12,4 +12,4 @@
 10. [x] Filed leaves can be viewed and filtered based on employee name, month & year.
 11. [x] Show toasts for every transaction within the system for a more interactive user experience.
 12. [x] Provide password reset for everyone.
-13. [ ] A notification system specific for contractual employees must be implemented.
+13. [x] A notification system specific for contractual employees must be implemented.

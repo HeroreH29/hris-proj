@@ -6,8 +6,12 @@ const {
 const corsOptions = {
   origin: (origin, callback) => {
     // '!origin' is included for postman testing
+    const allowedOrigins =
+      process.env.NODE_ENV === "development"
+        ? allowedDevelopmentOrigins
+        : allowedProductionOrigins;
 
-    if (allowedDevelopmentOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));

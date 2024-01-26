@@ -7,6 +7,7 @@ import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
 
 const NewAnnouncementForm = ({ users }) => {
   useTitle("Create Announcement | Via Mare HRIS");
@@ -46,10 +47,11 @@ const NewAnnouncementForm = ({ users }) => {
     const form = e.currentTarget;
 
     if (form.checkValidity() === true && !isLoading) {
+      const creationDate = format(new Date(), "Pp");
       await addNewAnnouncement({
         user: username,
         title,
-        date,
+        date: creationDate,
         message,
       });
     } else {
@@ -98,19 +100,6 @@ const NewAnnouncementForm = ({ users }) => {
               />
               <Form.Control.Feedback type="invalid">
                 Title is required
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">Date</Form.Label>
-              <Form.Control
-                required
-                type="date"
-                autoComplete="off"
-                placeholder="Date"
-                onChange={onDateChanged}
-              />
-              <Form.Control.Feedback type="invalid">
-                Date is required
               </Form.Control.Feedback>
             </Form.Group>
           </Row>

@@ -1,6 +1,25 @@
 const Announcement = require("../models/Announcement");
 //const User = require("../models/User");
 const format = require("date-fns/format");
+const parse = require("date-fns/parse");
+
+// Auto deletes expired announcements
+const DeleteExpiredAnnouncements = async (announcement) => {
+  const expiryDate = new Date(announcement?.expiryDate).valueOf();
+  const currentDate = new Date().valueOf();
+
+  if (currentDate >= expiryDate) {
+    const expiredAnnouncement = await Announcement.findById(
+      announcement?._id
+    ).exec();
+
+    if (!expiredAnnouncement) {
+      console.log("No expired announcements found");
+    } else {
+      await expiredAnnouncement.deleteOne();
+    }
+  }
+};
 
 // @desc Get all announcements
 // @route GET /announcements
@@ -10,6 +29,11 @@ const getAllAnnouncements = async (req, res) => {
   if (!announcements?.length) {
     return res.status(400).json({ message: "No announcements found" });
   }
+
+  // Searches for expired announcements
+  announcements.forEach((announcement) => {
+    DeleteExpiredAnnouncements(announcement);
+  });
 
   res.json(announcements);
 };
@@ -39,7 +63,8 @@ const createAnnouncement = async (req, res) => {
 
   // Auto generate an expiry date for every new announcement created
   const expiryDate = new Date();
-  expiryDate.setMonth(new Date(date).getMonth() + 1);
+  const creationDate = parse(date, "Pp", new Date());
+  expiryDate.setMonth(creationDate.getMonth() + 1);
 
   // Create and store new announcement
   const announcement = await Announcement.create({

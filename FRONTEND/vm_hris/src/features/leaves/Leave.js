@@ -18,33 +18,12 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
     }),
   });
 
-  const {
-    data: geninfos,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetGeninfosQuery();
+  const { data: geninfos } = useGetGeninfosQuery();
 
-  const [
-    updateLeave,
-    {
-      isLoading: updateLoading,
-      isSuccess: updateSuccess,
-      isError: isUpdateError,
-      error: updateError,
-    },
-  ] = useUpdateLeaveMutation();
+  const [updateLeave, { isSuccess: updateSuccess }] = useUpdateLeaveMutation();
 
-  const [
-    updateLeaveCredit,
-    {
-      isLoading: creditUpdateLoading,
-      isSuccess: creditUpdateSuccess,
-      isError: isCreditUpdateError,
-      error: creditUpdateError,
-    },
-  ] = useUpdateLeaveCreditMutation();
+  const [updateLeaveCredit, { isSuccess: creditUpdateSuccess }] =
+    useUpdateLeaveCreditMutation();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -118,6 +97,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
 
       navigate("/leaves");
     }
+    // eslint-disable-next-line
   }, [updateSuccess, creditUpdateSuccess, navigate]);
 
   if (leave) {

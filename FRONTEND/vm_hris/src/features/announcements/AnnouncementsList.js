@@ -26,21 +26,11 @@ const AnnouncementsList = () => {
 
   if (isLoading) content = <Spinner animation="border" />;
 
-  let tableContent;
-  if (isError) {
-    tableContent = (
-      <tr>
-        <td colSpan={5} className="text-secondary">
-          {error.data.message}
-        </td>
-      </tr>
-    );
-  }
-
+  let cardContent;
   if (isSuccess) {
     const { ids } = announcements;
 
-    tableContent = ids?.length
+    cardContent = ids?.length
       ? ids.map((announcementId) => (
           <Announcement key={announcementId} announcementId={announcementId} />
         ))
@@ -49,20 +39,20 @@ const AnnouncementsList = () => {
 
   content = (
     <>
-      <Container className="border">
-        <Table bordered striped hover className="align-middle mt-2 caption-top">
-          <caption>Click any announcement to view full message </caption>
-          <thead>
-            <tr>
-              <th scope="col">Title</th>
-              <th scope="col">Message</th>
-              <th scope="col">Date</th>
-              <th scope="col">Author</th>
-              {(isHR || isAdmin) && <th scope="col">Edit</th>}
-            </tr>
-          </thead>
-          <tbody>{tableContent}</tbody>
-        </Table>
+      <Container
+        className="border"
+        style={{ maxHeight: "500px", overflowY: "scroll", maxWidth: "500px" }}
+      >
+        <small className="text-muted">
+          {(isHR || isAdmin) && <>Click an announcement to edit</>}
+        </small>
+        {cardContent ? (
+          cardContent
+        ) : (
+          <p className="fw-semibold text-center mt-2">
+            No announcements yet...
+          </p>
+        )}
       </Container>
     </>
   );

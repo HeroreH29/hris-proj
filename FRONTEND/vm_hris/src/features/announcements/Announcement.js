@@ -1,16 +1,17 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 
-import React, { useState, memo } from "react";
-import { Button, Modal } from "react-bootstrap";
+import React, { memo, useState } from "react";
+import { Card } from "react-bootstrap";
 
 import useAuth from "../../hooks/useAuth";
 
 const Announcement = ({ announcementId }) => {
   const { isHR, isAdmin } = useAuth();
+
+  // Variables below are used to simulate hover animation on card
+  const [hovered, setHovered] = useState(false);
 
   const { announcement } = useGetAnnouncementsQuery("announcementsList", {
     selectFromResult: ({ data }) => ({
@@ -20,58 +21,45 @@ const Announcement = ({ announcementId }) => {
 
   const navigate = useNavigate();
 
-  const [showModal, setShowModal] = useState(false);
-
   if (announcement) {
-    const handleEdit = () =>
-      navigate(`/dashboard/announcements/${announcementId}`);
+    const handleEdit = () => {
+      if (isHR || isAdmin)
+        navigate(`/dashboard/announcements/${announcementId}`);
+    };
 
     return (
       <>
-        <tr onClick={() => setShowModal(true)}>
-          <td>{announcement.title}</td>
-          <td>
-            {announcement.message.length > 30
-              ? announcement.message.slice(0, 30) + "..."
-              : announcement.message}
-          </td>
-          <td>{announcement.date}</td>
-          <td>{announcement.user}</td>
-          {(isHR || isAdmin) && (
-            <td>
-              <Button variant="outline-primary" onClick={handleEdit}>
-                <FontAwesomeIcon icon={faPenToSquare} />
-              </Button>
-            </td>
-          )}
-        </tr>
-
-        {/* View full message modal */}
-        <Modal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          size="lg"
-          centered
+        <Card
+          border="dark"
+          className="text-center mt-2 mb-2"
+          bg={hovered ? "secondary" : ""}
+          onClick={handleEdit}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>{announcement.title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <h6>Message:</h6>
-            <p className="text-break text-center">{announcement.message}</p>
-          </Modal.Body>
-          <Modal.Footer>
-            <p className="fst-italic">{`Author: ` + announcement.user}</p>
-          </Modal.Footer>
-        </Modal>
+          <Card.Body>
+            <Card.Title>{announcement.title}</Card.Title>
+            <Card.Subtitle className="mb-2 text-muted">
+              from: {announcement.user}
+            </Card.Subtitle>
+            <Card.Text>
+              {
+                announcement.message /* .length > 30
+                ? announcement.message.slice(0, 30) + "..."
+                : announcement.message */
+              }
+            </Card.Text>
+          </Card.Body>
+          <Card.Footer className="text-muted">
+            Date posted: {announcement.date}
+          </Card.Footer>
+        </Card>
       </>
     );
   } else
     return (
       <>
-        <tr>
-          <td>There are no announcements yet...</td>
-        </tr>
+        <p>There are no announcements yet...</p>
       </>
     );
 };

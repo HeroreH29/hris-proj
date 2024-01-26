@@ -14,6 +14,7 @@ import {
 } from "react-bootstrap";
 import { useAddEducinfoMutation } from "./recordsApiSlice";
 import { LEVEL, DEGREE } from "../../config/educOptions";
+import { toast } from "react-toastify";
 
 const EducInfoList = ({ educinfos, employeeId }) => {
   const formRef = useRef();
@@ -75,6 +76,7 @@ const EducInfoList = ({ educinfos, employeeId }) => {
       formRef.current.reset();
       setShowModal(false);
       setValidated(false);
+      toast.success("Educational information added!");
     }
   }, [isSuccess]);
 

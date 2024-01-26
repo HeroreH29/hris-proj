@@ -102,7 +102,7 @@ const CelebrantsList = () => {
   content = (
     <Container
       className="border"
-      style={{ maxHeight: "500px", overflowY: "scroll" }}
+      style={{ maxHeight: "400px", overflowY: "scroll" }}
     >
       <Table bordered striped hover className="align-middle mt-2 caption-top">
         <caption>Today's celebrant/s is/are highlighted</caption>

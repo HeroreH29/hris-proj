@@ -10,3 +10,4 @@
 8. [x] Leave credit replenish amount should be based on how many service years an employee has
 9. [x] Leave credits should be given to those REGULAR employees who has serviced at least 1 year
 10. [x] Employee regularization should be automated
+11. [x] Expired announcements are automatically deleted

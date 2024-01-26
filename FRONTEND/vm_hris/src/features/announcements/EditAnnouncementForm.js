@@ -116,20 +116,6 @@ const EditAnnouncementForm = ({ users, announcement }) => {
                 Title is required
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">Date</Form.Label>
-              <Form.Control
-                required
-                type="date"
-                autoComplete="off"
-                placeholder="Date"
-                value={date}
-                onChange={onDateChanged}
-              />
-              <Form.Control.Feedback type="invalid">
-                Date is required
-              </Form.Control.Feedback>
-            </Form.Group>
           </Row>
           {/* Message */}
           <Row className="mb-3 ">

@@ -1,5 +1,17 @@
 const PersonalInfo = require("../models/PersonalInfo");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
 // @desc Get all users
 // @route GET /users
 // @access Private
@@ -58,9 +70,11 @@ const createPersonalInfo = async (req, res) => {
       .json({ message: `EmployeeID ${EmployeeID} already exists` });
   }
 
+  const newEmployeeID = isStringAllNumber(EmployeeID);
+
   // Create and store new personalinfo
   const personalinfo = await PersonalInfo.create({
-    EmployeeID,
+    EmployeeID: newEmployeeID,
     Birthday,
     PresentAddress,
     PermanentAddress,

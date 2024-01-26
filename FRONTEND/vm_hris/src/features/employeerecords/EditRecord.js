@@ -29,7 +29,7 @@ import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 
-const refetchInterval = 5000;
+const refetchInterval = 15000;
 
 const EditRecord = () => {
   const { employeeId } = useParams();

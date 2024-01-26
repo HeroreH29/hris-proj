@@ -1,5 +1,17 @@
 const Educ = require("../models/EducInfo");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
 // @desc Get all educinfos
 // @route GET /educinfos
 // @access Private
@@ -23,6 +35,9 @@ const createEducInfo = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
   }
+
+  const newEmployeeID = isStringAllNumber(reqBody.EmployeeID);
+  reqBody.EmployeeID = newEmployeeID;
 
   // Will put duplicate checker if needed/necessary
 

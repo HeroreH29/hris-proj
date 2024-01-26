@@ -1,6 +1,18 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
 // @desc Get all users
 // @route GET /users
 // @access Private
@@ -24,6 +36,7 @@ const createNewUser = async (req, res) => {
     branch,
     employeeId,
     userLevel,
+    userGroup,
   } = req.body;
 
   // Confirm data
@@ -34,7 +47,8 @@ const createNewUser = async (req, res) => {
     !lastName ||
     !branch ||
     !employeeId ||
-    !userLevel
+    !userLevel ||
+    !userGroup
   ) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -51,6 +65,8 @@ const createNewUser = async (req, res) => {
   // Hash password
   const hashedPwd = await bcrypt.hash(password, 10); // Salt rounds
 
+  const newEmployeeID = isStringAllNumber(employeeId);
+
   const userObject = !userLevel
     ? {
         username,
@@ -58,7 +74,8 @@ const createNewUser = async (req, res) => {
         firstName,
         lastName,
         branch,
-        employeeId,
+        userGroup,
+        employeeId: newEmployeeID,
       }
     : {
         username,
@@ -66,7 +83,8 @@ const createNewUser = async (req, res) => {
         firstName,
         lastName,
         branch,
-        employeeId,
+        userGroup,
+        employeeId: newEmployeeID,
         userLevel,
       };
 
@@ -91,13 +109,13 @@ const updateUser = async (req, res) => {
     firstName,
     lastName,
     branch,
-    employeeId,
     userLevel,
+    userGroup,
     active,
   } = req.body;
 
   // Confirm data
-  if (!id || !username || !userLevel) {
+  if (!id || !username || !userLevel || !userGroup) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -122,9 +140,9 @@ const updateUser = async (req, res) => {
   user.firstName = firstName;
   user.lastName = lastName;
   user.branch = branch;
-  user.employeeId = employeeId;
   user.userLevel = userLevel;
   user.active = active;
+  user.userGroup = userGroup;
 
   if (password) {
     // Hash password

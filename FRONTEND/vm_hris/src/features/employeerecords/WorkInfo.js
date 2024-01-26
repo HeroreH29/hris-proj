@@ -15,8 +15,10 @@ import {
   useUpdateWorkinfoMutation,
 } from "./recordsApiSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const WorkInfo = ({ workinfo }) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
   const [validated, setValidated] = useState(false);
@@ -104,8 +106,10 @@ const WorkInfo = ({ workinfo }) => {
 
       isSuccess && toast.info("Employment history updated!");
       isDelSuccess && toast.info("Employment history deleted!");
+
+      navigate(`/employeerecords/${workinfo?.EmployeeID}`);
     }
-  }, [isSuccess, isDelSuccess]);
+  }, [isSuccess, isDelSuccess, navigate, workinfo?.EmployeeID]);
 
   if (workinfo) {
     return (

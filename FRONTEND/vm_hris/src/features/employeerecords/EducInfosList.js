@@ -77,6 +77,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
       setShowModal(false);
       setValidated(false);
       toast.success("Educational information added!");
+
+      window.location.reload();
     }
   }, [isSuccess]);
 

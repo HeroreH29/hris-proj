@@ -1,5 +1,17 @@
 const Dep = require("../models/Dependent");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
 // @desc Get all deps
 // @route GET /dependents
 // @access Private
@@ -38,11 +50,13 @@ const createDependent = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+  const newEmployeeID = isStringAllNumber(EmployeeID);
+
   // Will put duplicate checker if needed/necessary
 
   // Create and store new user
   const dep = await Dep.create({
-    EmployeeID,
+    EmployeeID: newEmployeeID,
     Names,
     Dependent,
     Birthday,

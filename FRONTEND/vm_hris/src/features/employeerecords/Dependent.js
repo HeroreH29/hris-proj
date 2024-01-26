@@ -7,8 +7,10 @@ import {
   useDeleteDependentMutation,
 } from "./recordsApiSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Dependent = ({ dependent }) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
   // eslint-disable-next-line
@@ -67,8 +69,10 @@ const Dependent = ({ dependent }) => {
 
       isSuccess && toast.info("Dependent information updated!");
       isDelSuccess && toast.info("Dependent successfully deleted!");
+
+      navigate(`/employeerecords/${dependent?.EmployeeID}`);
     }
-  }, [isSuccess, isDelSuccess]);
+  }, [isSuccess, isDelSuccess, navigate, dependent?.EmployeeID]);
 
   /* DATE REVERT */
   const dateRevert = (dateString, formatString) => {

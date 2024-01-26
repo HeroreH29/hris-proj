@@ -87,6 +87,8 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
       setShowModal(false);
       setValidated(false);
       toast.success("Employment history added!");
+
+      window.location.reload();
     }
   }, [isSuccess]);
 

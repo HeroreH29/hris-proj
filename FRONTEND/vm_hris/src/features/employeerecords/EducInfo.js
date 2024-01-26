@@ -6,8 +6,10 @@ import {
 } from "./recordsApiSlice";
 import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const EducInfo = ({ educinfo }) => {
+  const navigate = useNavigate();
   const formRef = useRef();
 
   const [showModal, setShowModal] = useState(false);
@@ -87,8 +89,10 @@ const EducInfo = ({ educinfo }) => {
 
       isSuccess && toast.info("Educational attainment updated!");
       isDelSuccess && toast.info("Educational attainment deleted!");
+
+      navigate(`/employeerecords/${educinfo?.EmployeeID}`);
     }
-  }, [isSuccess, isDelSuccess]);
+  }, [isSuccess, navigate, educinfo?.EmployeeID, isDelSuccess]);
 
   if (educinfo) {
     return (

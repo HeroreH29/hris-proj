@@ -8,8 +8,10 @@ import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
+import useAuth from "../../hooks/useAuth";
 
 const Leave = ({ leaveId, handleHover, leaveCredit }) => {
+  const { isHR, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const { leave } = useGetLeavesQuery("leavesList", {
@@ -191,43 +193,61 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
                     <Form.Label className="fw-semibold">
                       Remarks {`(Optional)`}
                     </Form.Label>
-                    <Form.Control
-                      disabled={leave?.Approve !== 0}
-                      as={"textarea"}
-                      value={remarks}
-                      onChange={(e) => setRemarks(e.target.value)}
-                    />
+                    {isHR || isAdmin ? (
+                      <>
+                        <Form.Control
+                          disabled={leave?.Approve !== 0}
+                          as={"textarea"}
+                          value={remarks}
+                          onChange={(e) => setRemarks(e.target.value)}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Form.Control
+                          disabled
+                          as={"textarea"}
+                          value={remarks}
+                          onChange={(e) => setRemarks(e.target.value)}
+                        />
+                      </>
+                    )}
                   </Form.Group>
                 </Row>
               </Form>
             </Container>
           </Modal.Body>
-          <Modal.Footer>
-            <Button
-              disabled={leave?.Approve !== 0}
-              type="button"
-              variant="outline-success"
-              onClick={() => handleUpdateLeave(1)}
-            >
-              Approve
-            </Button>
-            <Button
-              disabled={leave?.Approve !== 0}
-              type="button"
-              variant="outline-danger"
-              onClick={() => handleUpdateLeave(2)}
-            >
-              Disapprove
-            </Button>
-            <Button
-              disabled={leave?.Approve !== 0}
-              type="button"
-              variant="outline-warning"
-              onClick={() => handleUpdateLeave(3)}
-            >
-              Cancel
-            </Button>
-          </Modal.Footer>
+          {isHR ||
+            (isAdmin && (
+              <>
+                <Modal.Footer>
+                  <Button
+                    disabled={leave?.Approve !== 0}
+                    type="button"
+                    variant="outline-success"
+                    onClick={() => handleUpdateLeave(1)}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    disabled={leave?.Approve !== 0}
+                    type="button"
+                    variant="outline-danger"
+                    onClick={() => handleUpdateLeave(2)}
+                  >
+                    Disapprove
+                  </Button>
+                  <Button
+                    disabled={leave?.Approve !== 0}
+                    type="button"
+                    variant="outline-warning"
+                    onClick={() => handleUpdateLeave(3)}
+                  >
+                    Cancel
+                  </Button>
+                </Modal.Footer>
+              </>
+            ))}
         </Modal>
       </>
     );

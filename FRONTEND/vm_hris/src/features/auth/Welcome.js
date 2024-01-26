@@ -12,7 +12,7 @@ import { parse, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 
 const Welcome = () => {
-  const { status } = useAuth();
+  const { isHR, isAdmin, status } = useAuth();
   useTitle(`${status} Dashboard | Via Mare HRIS`);
 
   const { data: geninfos, isSuccess } = useGetGeninfosQuery();
@@ -50,7 +50,7 @@ const Welcome = () => {
   };
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && (isAdmin || isHR)) {
       EmployeeContractNotif();
     }
     // eslint-disable-next-line

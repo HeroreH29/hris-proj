@@ -1,5 +1,17 @@
 const WorkInfo = require("../models/WorkInfo");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
 // @desc Get all work infos
 // @route GET /workinfos
 // @access Private
@@ -54,11 +66,13 @@ const createWorkInfo = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+  const newEmployeeID = isStringAllNumber(EmployeeID);
+
   // Will put duplicate checker if needed/necessary
 
   // Create and store new user
   const workinfo = await WorkInfo.create({
-    EmployeeID,
+    EmployeeID: newEmployeeID,
     Position_Title,
     Company_Name,
     JoinedFR_M,

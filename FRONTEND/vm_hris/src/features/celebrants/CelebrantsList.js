@@ -2,8 +2,7 @@ import React from "react";
 import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 import { useGetGeninfosQuery } from "./gCelebrantsApiSlice";
 import Celebrant from "./Celebrant";
-import { Table, Container, Row, Col, Spinner } from "react-bootstrap";
-import PulseLoader from "react-spinners/PulseLoader";
+import { Table, Container, Spinner } from "react-bootstrap";
 
 const CelebrantsList = () => {
   const {
@@ -18,10 +17,6 @@ const CelebrantsList = () => {
     data: generalinfos,
     isLoading: isGenLoading,
     isSuccess: isGenSuccess,
-    // eslint-disable-next-line
-    isError: isGenErr,
-    // eslint-disable-next-line
-    error: generr,
   } = useGetGeninfosQuery();
 
   let content;
@@ -46,8 +41,6 @@ const CelebrantsList = () => {
           .filter((personalInfoId) => {
             const birthday = new Date(entities[personalInfoId].Birthday);
             const birthmonth = birthday.getMonth() + 1;
-            const isCurrentDay =
-              currentMonth === birthmonth && birthday.getDate() === currentDate;
 
             return currentMonth === birthmonth;
           })

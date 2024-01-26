@@ -27,23 +27,11 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   // eslint-disable-next-line
   const [
     updatePersonalinfo,
-    {
-      isLoading: updateLoading,
-      isSuccess: updateSuccess,
-      isError: updateError,
-      error: updateerr,
-    },
+    { isLoading: updateLoading, isSuccess: updateSuccess },
   ] = useUpdatePersonalinfoMutation();
 
-  const [
-    addPersonalinfo,
-    {
-      isLoading: addLoading,
-      isSuccess: addSuccess,
-      isError: addError,
-      error: adderr,
-    },
-  ] = useAddPersonalinfoMutation();
+  const [addPersonalinfo, { isLoading: addLoading, isSuccess: addSuccess }] =
+    useAddPersonalinfoMutation();
 
   const [disablePermAdd, setDisablePermAdd] = useState(true);
 

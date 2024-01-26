@@ -101,7 +101,7 @@ const DependentsList = ({ dependents, employeeId }) => {
       formRef.current.reset();
       setShowModal(false);
       setValidated(false);
-      toast.success("Dependen successfully addded!");
+      toast.success("Dependent successfully addded!");
     }
   }, [isSuccess]);
 

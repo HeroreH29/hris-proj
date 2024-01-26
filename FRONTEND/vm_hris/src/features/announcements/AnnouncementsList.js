@@ -1,7 +1,7 @@
 import React from "react";
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
-import { Table, Container } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 //import { useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
@@ -14,8 +14,6 @@ const AnnouncementsList = () => {
     data: announcements,
     isLoading,
     isSuccess,
-    isError,
-    error,
   } = useGetAnnouncementsQuery(undefined, {
     pollingInterval: 15000,
     refetchOnFocus: true,

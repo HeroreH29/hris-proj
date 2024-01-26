@@ -29,6 +29,8 @@ import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 
+const refetchInterval = 5000;
+
 const EditRecord = () => {
   const { employeeId } = useParams();
 
@@ -43,7 +45,7 @@ const EditRecord = () => {
         .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data.entities[id])[0],
     }),
-    pollingInterval: 15000,
+    pollingInterval: refetchInterval,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -55,7 +57,7 @@ const EditRecord = () => {
         .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data.entities[id])[0],
     }),
-    pollingInterval: 15000,
+    pollingInterval: refetchInterval,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -67,7 +69,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 5000,
+    pollingInterval: refetchInterval,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -79,7 +81,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 5000,
+    pollingInterval: refetchInterval,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -91,7 +93,7 @@ const EditRecord = () => {
         .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
         .map((id) => data?.entities[id]),
     }),
-    pollingInterval: 5000,
+    pollingInterval: refetchInterval,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });

@@ -14,6 +14,85 @@ const {
   addMonths,
 } = require("date-fns");
 
+// Extra checking if EmployeeID are all numbers or not
+const isStringAllNumber = (EmployeeID) => {
+  // EmployeeID are all numbers
+  const isANumber = !isNaN(Number(EmployeeID));
+  if (isANumber) {
+    return EmployeeID * 1;
+  }
+
+  // Return unchanged if not
+  return EmployeeID;
+};
+
+// EmployeeID updater for other informations
+const UpdateEmployeeID = async (origEmployeeID, newEmployeeID) => {
+  // Fetch documents from other informations using EmployeeID
+  const personalinfo = await PersonalInfo.findOne({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const dependent = await Dependent.find({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const educinfo = await EducInfo.find({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const workinfo = await WorkInfo.find({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const leaveRecord = await Leave.find({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const leaveCreditRecord = await LeaveCredit.findOne({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  // Apply changes to other informations
+  if (personalinfo) {
+    personalinfo.EmployeeID = newEmployeeID;
+    await personalinfo.save();
+  }
+
+  if (dependent?.length) {
+    dependent.forEach(async (dep) => {
+      dep.EmployeeID = newEmployeeID;
+      await dep.save();
+    });
+  }
+
+  if (educinfo?.length) {
+    educinfo.forEach(async (educ) => {
+      educ.EmployeeID = newEmployeeID;
+      await educ.save();
+    });
+  }
+
+  if (workinfo?.length) {
+    workinfo.forEach(async (work) => {
+      work.EmployeeID = newEmployeeID;
+      await work.save();
+    });
+  }
+
+  if (leaveRecord?.length) {
+    leaveRecord.forEach(async (leave) => {
+      leave.EmployeeID = newEmployeeID;
+      await leave.save();
+    });
+  }
+
+  if (leaveCreditRecord) {
+    leaveCreditRecord.EmployeeID = newEmployeeID;
+    await leaveCreditRecord.save();
+  }
+};
+
 // This is the leave credit inclusion and update
 const leaveCreditInclUpd = async (geninfos) => {
   const existingLeaveCreditIds = await LeaveCredit.distinct("EmployeeID");
@@ -346,9 +425,11 @@ const createGenInfo = async (req, res) => {
       .json({ message: `EmployeeID ${EmployeeID} already exists` });
   }
 
+  const newEmployeeID = isStringAllNumber(EmployeeID);
+
   // Create and store new geninfo
   const geninfo = await GenInfo.create({
-    EmployeeID,
+    EmployeeID: newEmployeeID,
     BioID,
     Prefix,
     FirstName,
@@ -375,7 +456,7 @@ const createGenInfo = async (req, res) => {
   if (geninfo) {
     res
       .status(201)
-      .json({ message: `New general info with ${EmployeeID} created` });
+      .json({ message: `New general info with ${newEmployeeID} created` });
   } else {
     res.status(500).json({ message: "Invalid general info data received" });
   }
@@ -411,7 +492,7 @@ const updateGenInfo = async (req, res) => {
     ContractDate,
   } = req.body;
 
-  const newEmployeeID = EmployeeID;
+  const newEmployeeID = isStringAllNumber(EmployeeID);
 
   // Confirm data
   if (!id) {
@@ -432,71 +513,10 @@ const updateGenInfo = async (req, res) => {
     return res.status(409).json({ message: "EmployeeID already taken" });
   }
 
-  /* It is also required to update the EmployeeID (changed or not) 
-  of other information of the specific employee */
-
-  const personalinfo = await PersonalInfo.findOne({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-  const dependent = await Dependent.find({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-  const educinfo = await EducInfo.find({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-  const workinfo = await WorkInfo.find({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-  const leaveRecord = await Leave.find({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-  const leaveCreditRecord = await LeaveCredit.findOne({
-    EmployeeID: geninfo.EmployeeID,
-  }).exec();
-
-  // Apply changes to other informations
-  let updatedPersonalInfo;
-  if (personalinfo) {
-    personalinfo.EmployeeID = newEmployeeID;
-    updatedPersonalInfo = await personalinfo.save();
-  }
-
-  let updatedDependent;
-  if (dependent?.length > 0) {
-    dependent.forEach((dep) => {
-      dep.EmployeeID = newEmployeeID;
-    });
-    updatedDependent = await dependent.save();
-  }
-
-  let updatedEducInfo;
-  if (educinfo?.length > 0) {
-    educinfo.forEach((educ) => {
-      educ.EmployeeID = newEmployeeID;
-    });
-    updatedEducInfo = await educinfo.save();
-  }
-
-  let updatedWorkInfo;
-  if (workinfo?.length > 0) {
-    workinfo.forEach((work) => {
-      work.EmployeeID = newEmployeeID;
-    });
-    updatedWorkInfo = await workinfo.save();
-  }
-
-  let updatedLeaveRecord;
-  if (leaveRecord?.length > 0) {
-    leaveRecord.forEach((leave) => {
-      leave.EmployeeID = newEmployeeID;
-    });
-    updatedLeaveRecord = await leaveRecord.save();
-  }
-
-  let updatedLeaveCredit;
-  if (leaveCreditRecord) {
-    leaveCreditRecord.EmployeeID = newEmployeeID;
-    updatedLeaveCredit = await leaveCreditRecord.save();
+  /* It is also required to update the EmployeeID
+  of other information of the employee if EmployeeID is changed/modified */
+  if (geninfo?.EmployeeID !== newEmployeeID) {
+    UpdateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
   }
 
   geninfo.EmployeeID = newEmployeeID;
@@ -524,16 +544,7 @@ const updateGenInfo = async (req, res) => {
 
   const updatedGenInfo = await geninfo.save();
 
-  // Check if EmployeeID across other informations are updated
-  if (
-    updatedGenInfo &&
-    updatedPersonalInfo &&
-    updatedDependent &&
-    updatedEducInfo &&
-    updatedWorkInfo &&
-    updatedLeaveRecord &&
-    updatedLeaveCredit
-  ) {
+  if (updatedGenInfo) {
     res.json({
       message: `Information of ${updatedGenInfo.EmployeeID} updated`,
     });

@@ -2,6 +2,8 @@ const Leave = require("../models/Leave");
 const Geninfo = require("../models/GenInfo");
 const { format } = require("date-fns");
 
+// Extra checking if EmployeeID are all numbers or not
+
 // desc Get all leaves
 // @route GET /leaves
 // @access Private

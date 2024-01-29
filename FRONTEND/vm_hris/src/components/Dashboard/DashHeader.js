@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Nav, Navbar, Image, Container } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
@@ -9,7 +9,19 @@ import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 const DashHeader = () => {
   const { isHR, isAdmin } = useAuth();
 
+  const toastId = useRef(null);
+
   const [active, setActive] = useState(1);
+
+  const notify = () =>
+    (toastId.current = toast("Logging out...", { autoClose: false }));
+
+  const update = () =>
+    toast.update(toastId.current, {
+      render: "Logged out",
+      type: "success",
+      autoClose: 3000,
+    });
 
   // eslint-disable-next-line
   const [imageData, setImageData] = useState("https://placehold.jp/40x40.png");
@@ -21,14 +33,17 @@ const DashHeader = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.info("Logged out");
+      // Update toast when logged out successfully
+      update();
       navigate("/");
     }
   }, [isSuccess, navigate]);
 
-  const onLogoutClicked = () => sendLogout();
+  const onLogoutClicked = () => {
+    sendLogout();
 
-  if (isLoading) return <p>Logging out...</p>;
+    notify();
+  };
 
   if (isError) return <p>Error: {error?.data?.message}</p>;
 

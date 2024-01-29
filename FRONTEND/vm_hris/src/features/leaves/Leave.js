@@ -191,7 +191,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
                 <Row className="mb-3">
                   <Form.Group as={Col}>
                     <Form.Label className="fw-semibold">
-                      Remarks {`(Optional)`}
+                      Remarks {(isHR || isAdmin) && `(Optional)`}
                     </Form.Label>
                     {isHR || isAdmin ? (
                       <>

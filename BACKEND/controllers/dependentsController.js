@@ -41,7 +41,6 @@ const createDependent = async (req, res) => {
   if (
     !EmployeeID ||
     !Names ||
-    !Dependent ||
     !Birthday ||
     !Status ||
     !Relationship ||

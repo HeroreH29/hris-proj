@@ -11,7 +11,7 @@ const dependentSchema = new mongoose.Schema({
   },
   Dependent: {
     type: String,
-    required: true,
+    default: "",
   },
   Birthday: {
     type: String,

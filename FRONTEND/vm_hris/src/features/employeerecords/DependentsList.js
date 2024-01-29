@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Dependent from "./Dependent";
 import {
   Table,
@@ -12,18 +12,26 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPersonCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { format, parse } from "date-fns";
-import { useAddDependentMutation } from "./recordsApiSlice";
+import {
+  useAddDependentMutation,
+  useGetGeninfosQuery,
+} from "./recordsApiSlice";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
 import { toast } from "react-toastify";
 
 const DependentsList = ({ dependents, employeeId }) => {
-  const tableContent = dependents?.length
-    ? dependents
+  const [deps, setDeps] = useState([]);
+
+  useEffect(() => {
+    setDeps(dependents);
+    // eslint-disable-next-line
+  }, []);
+
+  const tableContent = deps?.length
+    ? deps
         .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
         .map((dep, index) => <Dependent key={index} dependent={dep} />)
     : null;
-
-  const formRef = useRef();
 
   // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
@@ -50,11 +58,10 @@ const DependentsList = ({ dependents, employeeId }) => {
     e.preventDefault();
 
     const form = e.currentTarget;
+    // Revert dates
+    const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
     if (form.checkValidity() && !isLoading) {
-      // Revert dates
-      const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
-
       await addDependent({
         EmployeeID: employeeId,
         Names: names,
@@ -64,6 +71,19 @@ const DependentsList = ({ dependents, employeeId }) => {
         Relationship: relationship,
         Covered: covered,
       });
+
+      setDeps((prev) => [
+        ...prev,
+        {
+          EmployeeID: employeeId,
+          Names: names,
+          Dependent: dep,
+          Birthday: revertedBD,
+          Status: status,
+          Relationship: relationship,
+          Covered: covered,
+        },
+      ]);
     } else {
       e.stopPropagation();
     }
@@ -98,13 +118,18 @@ const DependentsList = ({ dependents, employeeId }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      formRef.current.reset();
+      setNames("");
+      setDep("");
+      setBirthday("");
+      setStatus("");
+      setRelationship("");
+      setCovered("");
       setShowModal(false);
       setValidated(false);
 
       toast.success("Dependent successfully addded!");
 
-      window.location.reload();
+      //window.location.reload();
     }
   }, [isSuccess]);
 
@@ -151,12 +176,7 @@ const DependentsList = ({ dependents, employeeId }) => {
       >
         <Modal.Header closeButton>Add New Dependent</Modal.Header>
         <Modal.Body>
-          <Form
-            noValidate
-            validated={validated}
-            onSubmit={onSaveInfoClicked}
-            ref={formRef}
-          >
+          <Form noValidate validated={validated} onSubmit={onSaveInfoClicked}>
             {/* Name and Birthday */}
             <Row className="mb-3">
               <Form.Group as={Col} className="mb-3">
@@ -191,7 +211,9 @@ const DependentsList = ({ dependents, employeeId }) => {
               <Form.Group as={Col} className="mb-3">
                 <Form.Label className="fw-semibold">Dependent</Form.Label>
                 <Form.Control
-                  required
+                  disabled={
+                    relationship === "Mother" || relationship === "Father"
+                  }
                   autoComplete="off"
                   type="text"
                   value={dep}

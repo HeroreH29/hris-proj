@@ -9,8 +9,11 @@ import { useAddNewLeaveMutation } from "./leavesApiSlice";
 import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import useTitle from "../../hooks/useTitle";
 
 const NewLeaveForm = () => {
+  useTitle("Leave Filing | Via Mare HRIS");
+
   const navigate = useNavigate();
 
   const { user, employeeId, status } = useAuth();

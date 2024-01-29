@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import WorkInfo from "./WorkInfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -19,7 +19,12 @@ import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
 import { toast } from "react-toastify";
 
 const WorkInfosList = ({ workinfos, employeeId }) => {
-  const formRef = useRef();
+  const [works, setWorks] = useState([]);
+
+  useEffect(() => {
+    setWorks(workinfos);
+    // eslint-disable-next-line
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -74,6 +79,28 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
         Work_Description: workDesc,
         ToPresent: toPresent,
       });
+
+      setWorks((prev) => [
+        ...prev,
+        {
+          EmployeeID: employeeId,
+          Position_Title: positionTitle,
+          Company_Name: companyName,
+          JoinedFR_M: joinedFRM,
+          JoinedFR_Y: joinedFRY,
+          JoinedTO_M: joinedTOM,
+          JoinedTO_Y: joinedTOY,
+          Specialization: specialization,
+          Role: role,
+          Country: country,
+          State: region,
+          Industry: industry,
+          Position: position,
+          Salary: salary,
+          Work_Description: workDesc,
+          ToPresent: toPresent,
+        },
+      ]);
     } else {
       e.stopPropagation();
     }
@@ -83,17 +110,35 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      formRef.current.reset();
+      setPositionTitle("");
+      setCompanyName("");
+      setJoinedFRM("");
+      setJoinedFRY(0);
+      setJoinedTOM("");
+      setJoinedTOY(0);
+      setSpecialization("");
+      setRole("");
+      setCountry("");
+      setRegion(""); // aka State
+      setIndustry("");
+      setPosition("");
+      setSalary("");
+      setWorkDesc("");
+      setToPresent(0);
       setShowModal(false);
       setValidated(false);
       toast.success("Employment history added!");
 
-      window.location.reload();
+      //window.location.reload();
     }
   }, [isSuccess]);
 
-  const tableContent = workinfos?.length
-    ? workinfos.map((work, index) => <WorkInfo key={index} workinfo={work} />)
+  const tableContent = works?.length
+    ? works
+        .sort((a, b) => {
+          return b.JoinedFR_Y - a.JoinedFR_Y;
+        })
+        .map((work, index) => <WorkInfo key={index} workinfo={work} />)
     : null;
 
   return (
@@ -145,7 +190,6 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
             noValidate
             validated={validated}
             onSubmit={onSaveInfoClicked}
-            ref={formRef}
           >
             {/* Job Title, Company Name, and Company Address */}
             <Row className="mb-3">
@@ -365,6 +409,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                   autoComplete="off"
                   type="text"
                   value={salary}
+                  placeholder="(Optional)"
                   onChange={(e) => setSalary(e.target.value)}
                 />
                 <Form.Control.Feedback type="invalid">

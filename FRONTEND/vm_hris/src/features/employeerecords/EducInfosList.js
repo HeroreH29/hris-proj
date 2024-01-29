@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import EducInfo from "./EducInfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -17,7 +17,12 @@ import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 
 const EducInfoList = ({ educinfos, employeeId }) => {
-  const formRef = useRef();
+  const [educs, setEducs] = useState([]);
+
+  useEffect(() => {
+    setEducs(educinfos);
+    // eslint-disable-next-line
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -28,17 +33,15 @@ const EducInfoList = ({ educinfos, employeeId }) => {
     useAddEducinfoMutation();
 
   /* VARIABLES */
-  const [educInfoJson, setEducInfoJson] = useState({
-    Institution_Name: "",
-    Address: "",
-    Level: "",
-    Degree: "",
-    yrStart: "",
-    yrGraduated: "",
-    Field_of_Study: "",
-    Major: "",
-    EmployeeID: employeeId,
-  });
+  const [institutionName, setInstitutionName] = useState("");
+  const [address, setAddress] = useState("");
+  const [level, setLevel] = useState("");
+  const [degree, setDegree] = useState("");
+  const [yrStart, setYrStart] = useState("");
+  const [yrGraduated, setYrGraduated] = useState("");
+  const [fieldOfStudy, setFieldOfStudy] = useState("");
+  const [major, setMajor] = useState("");
+  const employeeID = employeeId;
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -47,7 +50,32 @@ const EducInfoList = ({ educinfos, employeeId }) => {
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
-      await addEducinfo(educInfoJson);
+      await addEducinfo({
+        Institution_Name: institutionName,
+        Address: address,
+        Degree: degree,
+        Level: level,
+        yrStart: yrStart,
+        yrGraduated: yrGraduated,
+        Field_of_Study: fieldOfStudy,
+        Major: major,
+        EmployeeID: employeeID,
+      });
+
+      setEducs((prev) => [
+        ...prev,
+        {
+          Institution_Name: institutionName,
+          Address: address,
+          Degree: degree,
+          Level: level,
+          yrStart: yrStart,
+          yrGraduated: yrGraduated,
+          Field_of_Study: fieldOfStudy,
+          Major: major,
+          EmployeeID: employeeID,
+        },
+      ]);
     } else {
       e.stopPropagation();
     }
@@ -73,17 +101,24 @@ const EducInfoList = ({ educinfos, employeeId }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      formRef.current.reset();
+      setInstitutionName("");
+      setAddress("");
+      setLevel("");
+      setDegree("");
+      setYrStart("");
+      setYrGraduated("");
+      setFieldOfStudy("");
+      setMajor("");
       setShowModal(false);
       setValidated(false);
       toast.success("Educational information added!");
 
-      window.location.reload();
+      //window.location.reload();
     }
   }, [isSuccess]);
 
-  const tableContent = educinfos?.length
-    ? educinfos
+  const tableContent = educs?.length
+    ? educs
         .sort((a, b) => {
           return b.yrStart - a.yrStart;
         })
@@ -138,7 +173,6 @@ const EducInfoList = ({ educinfos, employeeId }) => {
             noValidate
             validated={validated}
             onSubmit={onSaveInfoClicked}
-            ref={formRef}
           >
             {/* Institution Name and Address */}
             <Row className="mb-3">
@@ -151,13 +185,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   autoFocus
                   autoComplete="off"
                   type="text"
-                  value={educInfoJson.Institution_Name}
-                  onChange={(e) =>
-                    setEducInfoJson((prev) => ({
-                      ...prev,
-                      Institution_Name: e.target.value,
-                    }))
-                  }
+                  value={institutionName}
+                  onChange={(e) => setInstitutionName(e.target.value)}
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -169,13 +198,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   required
                   autoComplete="off"
                   type="text"
-                  value={educInfoJson.Address}
-                  onChange={(e) =>
-                    setEducInfoJson((prev) => ({
-                      ...prev,
-                      Address: e.target.value,
-                    }))
-                  }
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -192,25 +216,15 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="text"
                     placeholder="Enter Course (Field)"
-                    value={educInfoJson.Field_of_Study}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        Field_of_Study: e.target.value,
-                      }))
-                    }
+                    value={fieldOfStudy}
+                    onChange={(e) => setFieldOfStudy(e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                   <Form.Select
-                    value={educInfoJson.Degree}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        Degree: e.target.value,
-                      }))
-                    }
+                    value={degree}
+                    onChange={(e) => setDegree(e.target.value)}
                   >
                     {degreeOptions}
                   </Form.Select>
@@ -220,25 +234,15 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="text"
                     placeholder="Enter Strand (Major)"
-                    value={educInfoJson.Major}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        Major: e.target.value,
-                      }))
-                    }
+                    value={major}
+                    onChange={(e) => setMajor(e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                   <Form.Select
-                    value={educInfoJson.Level}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        Level: e.target.value,
-                      }))
-                    }
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value)}
                   >
                     {levelOptions}
                   </Form.Select>
@@ -253,13 +257,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="number"
                     placeholder="Year Started"
-                    value={educInfoJson.yrStart}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        yrStart: e.target.value,
-                      }))
-                    }
+                    value={yrStart}
+                    onChange={(e) => setYrStart(e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
@@ -267,13 +266,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="number"
                     placeholder="Year Graduated"
-                    value={educInfoJson.yrGraduated}
-                    onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
-                        yrGraduated: e.target.value,
-                      }))
-                    }
+                    value={yrGraduated}
+                    onChange={(e) => setYrGraduated(e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!

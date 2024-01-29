@@ -36,11 +36,7 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery(/* undefined, {
-    pollingInterval: 10000,
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  } */);
+  } = useGetLeaveCreditsQuery();
 
   const {
     data: leaves,

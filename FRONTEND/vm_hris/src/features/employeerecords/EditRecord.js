@@ -34,7 +34,7 @@ const refetchInterval = 15000;
 const EditRecord = () => {
   const { employeeId } = useParams();
 
-  useTitle("Edit Record | Via Mare HRIS");
+  useTitle(`${employeeId ? "Edit Record" : "Add Record"} | Via Mare HRIS`);
 
   const navigate = useNavigate();
 
@@ -251,7 +251,7 @@ const EditRecord = () => {
                 : personalinfo?.Address
             );
           } else if (e === "PermanentAddress") {
-            element.setText(personalinfo?.PermanentAddress);
+            element.setText(personalinfo?.PermanentAddress || "-");
           } else {
             element.setText(String(personalinfo?.[e]));
           }

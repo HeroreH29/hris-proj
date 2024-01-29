@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
+import { Container } from "react-bootstrap";
 
 const DashFooter = () => {
   const { username, status, branch } = useAuth();
@@ -31,14 +32,15 @@ const DashFooter = () => {
   const content = (
     <div className="sticky-bottom">
       <footer className="footer bg-body-secondary">
-        <div className="container">
-          <strong>DATE:</strong> {`${dayName} - ${month} ${day}, ${year} | `}
+        <Container>
+          <strong>DATE:</strong> <span className="fw-semibold">{dayName}</span>
+          {` - ${month} ${day}, ${year} | `}
           <strong> TIME:</strong>
           {` ${twelveHourFormat}:${minutes}:${seconds} ${ampm} | `}
           <strong> BRANCH:</strong> {`${branch} | `}
           <strong> CURRENT USER:</strong> {`${username} | `}
           <strong> USER LEVEL:</strong> {status}
-        </div>
+        </Container>
       </footer>
     </div>
   );

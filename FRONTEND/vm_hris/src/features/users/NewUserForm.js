@@ -6,11 +6,14 @@ import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import useTitle from "../../hooks/useTitle";
 
 const USER_REGEX = "[A-z0-9.,_-]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const NewUserForm = () => {
+  useTitle("Create New User | Via Mare HRIS");
+
   const [addNewUser, { isLoading, isSuccess, isError, error }] =
     useAddNewUserMutation();
 

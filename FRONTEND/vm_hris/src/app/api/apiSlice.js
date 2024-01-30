@@ -1,11 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "../../features/auth/authSlice";
 
-const deploy = "https://viamare-hris-api.onrender.com";
-const development = "http://192.168.1.6:3500";
+const baseUrls = [
+  "https://viamare-hris-api.onrender.com",
+  "http://192.168.1.6:3500",
+];
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: development,
+  baseUrl: baseUrls[0],
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;

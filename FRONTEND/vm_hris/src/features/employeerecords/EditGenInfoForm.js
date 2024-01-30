@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   useAddGeninfoMutation,
   useUpdateGeninfoMutation,
+  useAddInactiveEmpMutation,
+  useDeleteInactiveEmpMutation,
 } from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +11,7 @@ import {
   DEPARTMENT,
   EMPLOYEETYPE,
   EMPSTATUS,
+  MODE_OF_SEPARATION,
   PREFIX,
 } from "../../config/gInfoOptions";
 import {
@@ -23,12 +26,14 @@ import {
 } from "react-bootstrap";
 import { format, parse, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
+import useAuth from "../../hooks/useAuth";
 
 const NUMBER_REGEX = /^[0-9]*$/;
 const IDNUMS_REGEX = /^[0-9-]*$/;
 const ALPHANUM_REGEX = /^[A-z0-9]+$/;
 
-const EditGenInfoForm = ({ geninfo }) => {
+const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
+  const { username } = useAuth();
   // eslint-disable-next-line
   const [
     updateGeninfo,
@@ -37,6 +42,19 @@ const EditGenInfoForm = ({ geninfo }) => {
 
   const [addGeninfo, { isLoading: addLoading, isSuccess: addSuccess }] =
     useAddGeninfoMutation();
+
+  const [
+    addInactiveEmp,
+    { isLoading: addInactiveLoading, isSuccess: addInactiveSuccess },
+  ] = useAddInactiveEmpMutation();
+
+  const [
+    deleteInactiveEmp,
+    {
+      isLoading: deleteInactiveEmpLoading,
+      isSuccess: deleteInactiveEmpSuccess,
+    },
+  ] = useDeleteInactiveEmpMutation();
 
   const navigate = useNavigate();
 
@@ -80,6 +98,9 @@ const EditGenInfoForm = ({ geninfo }) => {
     parsedDP ? format(parsedDP, "yyyy-MM-dd") : ""
   );
   const [empStatus, setEmpStatus] = useState(geninfo?.EmpStatus);
+  const [modeOfSeparation, setModeOfSeparation] = useState(
+    inactiveEmp?.Mode_of_Separation
+  );
   const [notes, setNotes] = useState(geninfo?.Notes);
   const [tinnumber, setTINnumber] = useState(geninfo?.TINnumber);
   const [sssnumber, setSSSnumber] = useState(geninfo?.SSSnumber);
@@ -112,6 +133,9 @@ const EditGenInfoForm = ({ geninfo }) => {
       setSSSnumber("");
       setPHnumber("");
       setPInumber("");
+      setIsContractual(false);
+      setContractDate("");
+      setModeOfSeparation("");
 
       addSuccess && toast.success("Record successfully added!");
       updateSuccess && toast.info("Record updated!");
@@ -203,6 +227,18 @@ const EditGenInfoForm = ({ geninfo }) => {
             ContractDate: revertedCD,
           });
         }
+
+        /* Include inactive employee record in inactive list.
+        Remove from inactive list if reverted back to active */
+        if (empStatus === "N") {
+          await addInactiveEmp({
+            EmployeeID: employeeId,
+            Mode_of_Separation: modeOfSeparation,
+            UserName: username,
+          });
+        } else if (empStatus === "Y") {
+          await deleteInactiveEmp({ id: inactiveEmp?.id });
+        }
       }
     } else {
       e.stopPropagation();
@@ -269,6 +305,15 @@ const EditGenInfoForm = ({ geninfo }) => {
       </option>
     );
   });
+  const modeOfSeparationOptions = Object.entries(MODE_OF_SEPARATION).map(
+    ([key, value]) => {
+      return (
+        <option key={key} value={value}>
+          {key}
+        </option>
+      );
+    }
+  );
 
   const [validated, setValidated] = useState(false);
 
@@ -522,6 +567,26 @@ const EditGenInfoForm = ({ geninfo }) => {
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
+            {empStatus === "N" && (
+              <>
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">
+                    Mode of Separation
+                  </Form.Label>
+                  <Form.Select
+                    required
+                    value={modeOfSeparation}
+                    onChange={(e) => setModeOfSeparation(e.target.value)}
+                  >
+                    <option value={""}>Select mode...</option>
+                    {modeOfSeparationOptions}
+                  </Form.Select>
+                  <Form.Control.Feedback type="invalid">
+                    This field is required!
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </>
+            )}
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Notes</Form.Label>
               <Form.Control

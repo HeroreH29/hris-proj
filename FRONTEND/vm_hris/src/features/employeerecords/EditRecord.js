@@ -8,6 +8,7 @@ import {
   useGetGeninfosQuery,
   useGetPersonalinfosQuery,
   useGetWorkinfosQuery,
+  useGetInactiveEmpsQuery,
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -110,13 +111,26 @@ const EditRecord = () => {
     }),
   });
 
+  // Fetch workinfos using EmployeeID
+  const { inactiveEmp } = useGetInactiveEmpsQuery("recordsList", {
+    selectFromResult: ({ data }) => ({
+      inactiveEmp: data?.ids
+        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data?.entities[id])[0],
+    }),
+    pollingInterval: refetchInterval,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
   if (
     !geninfo &&
     !personalinfo &&
     !dependents &&
     !workinfos &&
     !educinfos &&
-    !document
+    !document &&
+    !inactiveEmp
   ) {
     return <Spinner animation="border" />;
   }
@@ -357,7 +371,7 @@ const EditRecord = () => {
       </Row>
       <Tabs className="p-3 mb-3" defaultActiveKey="geninfo" fill>
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
-          <EditGenInfoForm geninfo={geninfo} />
+          <EditGenInfoForm geninfo={geninfo} inactiveEmp={inactiveEmp} />
         </Tab>
         <Tab
           eventKey="personalinfo"

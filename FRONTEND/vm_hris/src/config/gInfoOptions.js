@@ -79,3 +79,15 @@ export const EMPSTATUS = {
   Active: "Y",
   Inactive: "N",
 };
+
+export const MODE_OF_SEPARATION = {
+  Resignation: "Resignation",
+  Retirement: "Retirement",
+  Retrenchment: "Retrenchment",
+  Dismisall: "Dismisall",
+  Termination: "Termination",
+  "Lay-Off": "Lay-Off",
+  "Permanent Disability/Illness": "Permanent Disability/Illness",
+  Death: "Death",
+  "End of Contract": "End of Contract",
+};

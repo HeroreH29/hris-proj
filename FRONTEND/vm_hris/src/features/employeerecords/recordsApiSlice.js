@@ -7,6 +7,7 @@ const dependentsAdapter = createEntityAdapter({});
 const workinfosAdapter = createEntityAdapter({});
 const educinfosAdapter = createEntityAdapter({});
 const documentsAdapter = createEntityAdapter({});
+const inactiveEmpsAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
@@ -14,6 +15,7 @@ const depInitialState = dependentsAdapter.getInitialState();
 const workInitialState = workinfosAdapter.getInitialState();
 const educInitialState = educinfosAdapter.getInitialState();
 const docuInitialState = documentsAdapter.getInitialState();
+const inactiveEmpsInitialState = inactiveEmpsAdapter.getInitialState();
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({
@@ -73,6 +75,28 @@ export const geninfosApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
+
+export const {
+  useGetGeninfosQuery,
+  useAddGeninfoMutation,
+  useUpdateGeninfoMutation,
+} = geninfosApiSlice;
+
+export const selectGeninfosResult =
+  geninfosApiSlice.endpoints.getGeninfos.select();
+
+const selectGeninfosData = createSelector(
+  selectGeninfosResult,
+  (geninfosResult) => geninfosResult.data
+);
+
+export const {
+  selectAll: selectAllGeninfos,
+  selectById: selectGeninfoById,
+  selectIds: selectGeninfoIds,
+} = geninfosAdapter.getSelectors(
+  (state) => selectGeninfosData(state) ?? genInitialState
+);
 
 // Personal infos
 export const personalinfosApiSlice = apiSlice.injectEndpoints({
@@ -135,6 +159,28 @@ export const personalinfosApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
+
+export const {
+  useGetPersonalinfosQuery,
+  useAddPersonalinfoMutation,
+  useUpdatePersonalinfoMutation,
+} = personalinfosApiSlice;
+
+export const selectPersonalinfosResult =
+  personalinfosApiSlice.endpoints.getPersonalinfos.select();
+
+const selectPersonalinfosData = createSelector(
+  selectPersonalinfosResult,
+  (personalinfosResult) => personalinfosResult.data
+);
+
+export const {
+  selectAll: selectAllPersonalinfos,
+  selectById: selectPersonalinfoById,
+  selectIds: selectPersonalinfoIds,
+} = personalinfosAdapter.getSelectors(
+  (state) => selectPersonalinfosData(state) ?? personalInitialState
+);
 
 // Dependents
 export const dependentsApiSlice = apiSlice.injectEndpoints({
@@ -208,6 +254,29 @@ export const dependentsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
+export const {
+  useGetDependentsQuery,
+  useAddDependentMutation,
+  useUpdateDependentMutation,
+  useDeleteDependentMutation,
+} = dependentsApiSlice;
+
+export const selectDependentsResult =
+  dependentsApiSlice.endpoints.getDependents.select();
+
+const selectDependentsData = createSelector(
+  selectDependentsResult,
+  (dependentsResult) => dependentsResult.data
+);
+
+export const {
+  selectAll: selectAllDependents,
+  selectById: selectDependentById,
+  selectIds: selectDependentIds,
+} = dependentsAdapter.getSelectors(
+  (state) => selectDependentsData(state) ?? depInitialState
+);
+
 // Work infos
 export const workinfosApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -279,6 +348,29 @@ export const workinfosApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
+
+export const {
+  useGetWorkinfosQuery,
+  useAddWorkinfoMutation,
+  useUpdateWorkinfoMutation,
+  useDeleteWorkinfoMutation,
+} = workinfosApiSlice;
+
+export const selectWorkinfosResult =
+  workinfosApiSlice.endpoints.getWorkinfos.select();
+
+const selectWorkinfosData = createSelector(
+  selectWorkinfosResult,
+  (workinfosResult) => workinfosResult.data
+);
+
+export const {
+  selectAll: selectAllWorkinfos,
+  selectById: selectWorkinfoById,
+  selectIds: selectWorkinfoIds,
+} = workinfosAdapter.getSelectors(
+  (state) => selectWorkinfosData(state) ?? workInitialState
+);
 
 // Educ infos
 export const educinfosApiSlice = apiSlice.injectEndpoints({
@@ -352,6 +444,29 @@ export const educinfosApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
+export const {
+  useGetEducinfosQuery,
+  useAddEducinfoMutation,
+  useUpdateEducinfoMutation,
+  useDeleteEducinfoMutation,
+} = educinfosApiSlice;
+
+export const selectEducinfosResult =
+  educinfosApiSlice.endpoints.getEducinfos.select();
+
+const selectEducinfosData = createSelector(
+  selectEducinfosResult,
+  (educinfosResult) => educinfosResult.data
+);
+
+export const {
+  selectAll: selectAllEducinfos,
+  selectById: selectEducinfoById,
+  selectIds: selectEducinfoIds,
+} = educinfosAdapter.getSelectors(
+  (state) => selectEducinfosData(state) ?? educInitialState
+);
+
 // Documents
 export const documentsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -424,129 +539,14 @@ export const documentsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useGetGeninfosQuery,
-  useAddGeninfoMutation,
-  useUpdateGeninfoMutation,
-} = geninfosApiSlice;
-
-export const {
-  useGetPersonalinfosQuery,
-  useAddPersonalinfoMutation,
-  useUpdatePersonalinfoMutation,
-} = personalinfosApiSlice;
-
-export const {
-  useGetDependentsQuery,
-  useAddDependentMutation,
-  useUpdateDependentMutation,
-  useDeleteDependentMutation,
-} = dependentsApiSlice;
-
-export const {
-  useGetWorkinfosQuery,
-  useAddWorkinfoMutation,
-  useUpdateWorkinfoMutation,
-  useDeleteWorkinfoMutation,
-} = workinfosApiSlice;
-
-export const {
-  useGetEducinfosQuery,
-  useAddEducinfoMutation,
-  useUpdateEducinfoMutation,
-  useDeleteEducinfoMutation,
-} = educinfosApiSlice;
-
 export const { useGetDocumentsQuery } = documentsApiSlice;
-
-export const selectGeninfosResult =
-  geninfosApiSlice.endpoints.getGeninfos.select();
-
-export const selectPersonalinfosResult =
-  personalinfosApiSlice.endpoints.getPersonalinfos.select();
-
-export const selectDependentsResult =
-  dependentsApiSlice.endpoints.getDependents.select();
-
-export const selectWorkinfosResult =
-  workinfosApiSlice.endpoints.getWorkinfos.select();
-
-export const selectEducinfosResult =
-  educinfosApiSlice.endpoints.getEducinfos.select();
 
 export const selectDocusResult =
   documentsApiSlice.endpoints.getDocuments.select();
 
-const selectGeninfosData = createSelector(
-  selectGeninfosResult,
-  (geninfosResult) => geninfosResult.data
-);
-
-const selectPersonalinfosData = createSelector(
-  selectPersonalinfosResult,
-  (personalinfosResult) => personalinfosResult.data
-);
-
-const selectDependentsData = createSelector(
-  selectDependentsResult,
-  (dependentsResult) => dependentsResult.data
-);
-
-const selectWorkinfosData = createSelector(
-  selectWorkinfosResult,
-  (workinfosResult) => workinfosResult.data
-);
-
-const selectEducinfosData = createSelector(
-  selectEducinfosResult,
-  (educinfosResult) => educinfosResult.data
-);
-
 const selectDocumentsData = createSelector(
   selectDocusResult,
   (documentsResult) => documentsResult.data
-);
-
-export const {
-  selectAll: selectAllGeninfos,
-  selectById: selectGeninfoById,
-  selectIds: selectGeninfoIds,
-  // Pass in a selector that returns the geninfos slice of state
-} = geninfosAdapter.getSelectors(
-  (state) => selectGeninfosData(state) ?? genInitialState
-);
-
-export const {
-  selectAll: selectAllPersonalinfos,
-  selectById: selectPersonalinfoById,
-  selectIds: selectPersonalinfoIds,
-  // Pass in a selector that returns the geninfos slice of state
-} = personalinfosAdapter.getSelectors(
-  (state) => selectPersonalinfosData(state) ?? personalInitialState
-);
-
-export const {
-  selectAll: selectAllDependents,
-  selectById: selectDependentById,
-  selectIds: selectDependentIds,
-} = dependentsAdapter.getSelectors(
-  (state) => selectDependentsData(state) ?? depInitialState
-);
-
-export const {
-  selectAll: selectAllWorkinfos,
-  selectById: selectWorkinfoById,
-  selectIds: selectWorkinfoIds,
-} = workinfosAdapter.getSelectors(
-  (state) => selectWorkinfosData(state) ?? workInitialState
-);
-
-export const {
-  selectAll: selectAllEducinfos,
-  selectById: selectEducinfoById,
-  selectIds: selectEducinfoIds,
-} = educinfosAdapter.getSelectors(
-  (state) => selectEducinfosData(state) ?? educInitialState
 );
 
 export const {
@@ -555,4 +555,99 @@ export const {
   selectIds: selectDocumentIds,
 } = documentsAdapter.getSelectors(
   (state) => selectDocumentsData(state) ?? docuInitialState
+);
+
+// Inactive Employees
+export const inactiveEmpApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getInactiveEmps: builder.query({
+      query: () => ({
+        url: "/inactiveemps",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedInactiveEmps = responseData.map((inactiveEmp) => {
+          inactiveEmp.id = inactiveEmp._id;
+          return inactiveEmp;
+        });
+        return inactiveEmpsAdapter.setAll(genInitialState, loadedInactiveEmps);
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "InactiveEmp", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "InactiveEmp", id })),
+          ];
+        } else return [{ type: "InactiveEmp", id: "LIST" }];
+      },
+    }),
+    addInactiveEmp: builder.mutation({
+      query: (initialInactiveEmp) => ({
+        url: "/inactiveemps",
+        method: "POST",
+        body: {
+          ...initialInactiveEmp,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "InactiveEmp",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateInactiveEmp: builder.mutation({
+      query: (initialInactiveEmp) => ({
+        url: "/inactiveemps",
+        method: "PATCH",
+        body: {
+          ...initialInactiveEmp,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "InactiveEmp",
+          id: arg.id,
+        },
+      ],
+    }),
+    deleteInactiveEmp: builder.mutation({
+      query: ({ id }) => ({
+        url: "/inactiveemps",
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "InactiveEmp",
+          id: arg.id,
+        },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useGetInactiveEmpsQuery,
+  useAddInactiveEmpMutation,
+  useUpdateInactiveEmpMutation,
+  useDeleteInactiveEmpMutation,
+} = inactiveEmpApiSlice;
+
+export const selectInactiveEmpsResult =
+  inactiveEmpApiSlice.endpoints.getInactiveEmps.select();
+
+const selectInactiveEmpsData = createSelector(
+  selectInactiveEmpsResult,
+  (inactiveEmpsResult) => inactiveEmpsResult.data
+);
+
+export const {
+  selectAll: selectAllInactiveEmps,
+  selectById: selectInactiveEmpById,
+  selectIds: selectInactiveEmpIds,
+} = inactiveEmpsAdapter.getSelectors(
+  (state) => selectInactiveEmpsData(state) ?? inactiveEmpsInitialState
 );

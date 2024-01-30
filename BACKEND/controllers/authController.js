@@ -5,14 +5,14 @@ const jwt = require("jsonwebtoken");
 const loginCookie = {
   httpOnly: true, // accessible only by web server
   secure: process.env.NODE_ENV === "development" ? false : true, // https
-  sameSite: process.env.NODE_ENV === "development" ? "Lax" : "None", // cross-site cookie
+  sameSite: "Lax", // cross-site cookie
   maxAge: 7 * 24 * 60 * 60 * 1000, // expiry set to match expiresIn of refreshToken variable
 };
 
 const logoutCookie = {
   httpOnly: true, // accessible only by web server
   secure: process.env.NODE_ENV === "development" ? false : true, // https
-  sameSite: process.env.NODE_ENV === "development" ? "Lax" : "None", // cross-site cookie
+  sameSite: "Lax", // cross-site cookie
 };
 
 // @desc Login

@@ -228,24 +228,40 @@ const Attendance = ({ att, attlogData }) => {
 
   // JSX variable for table body
   const tableContent = filteredAtt?.length
-    ? filteredAtt.slice(startSlice, endSlice).map((att, index) => (
-        <tr key={index}>
-          <td>{att.date}</td>
-          <td>{att.checkIn}</td>
-          <td>{att.breakIn}</td>
-          <td>{att.breakOut}</td>
-          <td>{att.checkOut}</td>
-        </tr>
-      ))
-    : matchingAtt.slice(startSlice, endSlice).map((att, index) => (
-        <tr key={index}>
-          <td>{att.date}</td>
-          <td>{att.checkIn}</td>
-          <td>{att.breakIn}</td>
-          <td>{att.breakOut}</td>
-          <td>{att.checkOut}</td>
-        </tr>
-      ));
+    ? filteredAtt
+        .sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+
+          return dateB - dateA;
+        })
+        .slice(startSlice, endSlice)
+        .map((att, index) => (
+          <tr key={index}>
+            <td>{att.date}</td>
+            <td>{att.checkIn}</td>
+            <td>{att.breakIn}</td>
+            <td>{att.breakOut}</td>
+            <td>{att.checkOut}</td>
+          </tr>
+        ))
+    : matchingAtt
+        .sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+
+          return dateB - dateA;
+        })
+        .slice(startSlice, endSlice)
+        .map((att, index) => (
+          <tr key={index}>
+            <td>{att.date}</td>
+            <td>{att.checkIn}</td>
+            <td>{att.breakIn}</td>
+            <td>{att.breakOut}</td>
+            <td>{att.checkOut}</td>
+          </tr>
+        ));
 
   // Function for showing modal
   const handleShowModal = () => {

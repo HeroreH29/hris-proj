@@ -12,6 +12,7 @@ import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import Attendance from "./Attendance";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
+import { ASSIGNEDOUTLET, EMPLOYEETYPE } from "../../config/gInfoOptions";
 
 const Attendances = () => {
   useTitle("Attendances | Via Mare HRIS");
@@ -21,6 +22,25 @@ const Attendances = () => {
 
   const [startSlice, setStartSlice] = useState(0);
   const [endSlice, setEndSlice] = useState(20);
+
+  const [outletFilter, setOutletFilter] = useState("");
+  const [empTypeFilter, setEmpTypeFilter] = useState("");
+
+  const outletOptions = Object.entries(ASSIGNEDOUTLET).map(([key, value]) => {
+    return (
+      <option key={key} value={value}>
+        {key}
+      </option>
+    );
+  });
+
+  const empTypeOptions = Object.entries(EMPLOYEETYPE).map(([key, value]) => {
+    return (
+      <option key={key} value={value}>
+        {key}
+      </option>
+    );
+  });
 
   const {
     data: geninfos,
@@ -73,6 +93,8 @@ const Attendances = () => {
               tempAttList.push({
                 bioId: bioId,
                 name: `${matchedRecord.LastName}, ${matchedRecord.FirstName} ${matchedRecord.MI}`,
+                outlet: matchedRecord.AssignedOutlet,
+                empType: matchedRecord.EmployeeType,
               });
             }
           });
@@ -88,6 +110,19 @@ const Attendances = () => {
 
   const tableContent = attList?.length
     ? attList
+        .filter((att) => {
+          let matches = true;
+
+          if (outletFilter !== "") {
+            matches = matches && att?.outlet === outletFilter;
+          }
+
+          if (empTypeFilter !== "") {
+            matches = matches && att?.empType === empTypeFilter;
+          }
+
+          return matches;
+        })
         .slice(startSlice, endSlice)
         .map((att) => (
           <Attendance key={att.bioId} att={att} attlogData={attlogData} />
@@ -125,7 +160,6 @@ const Attendances = () => {
           bordered
           striped
           hover
-          responsive
           className="align-middle ms-3 mt-3 mb-3 caption-top"
         >
           <caption>Click any to see a record's attendance</caption>
@@ -136,27 +170,45 @@ const Attendances = () => {
             </tr>
           </thead>
           <tbody>{tableContent}</tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={2}>
-                <Button
-                  variant="outline-secondary float-end"
-                  onClick={handleNextPage}
-                  disabled={endSlice >= attList?.length}
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline-secondary float-end me-3"
-                  onClick={handlePrevPage}
-                  disabled={startSlice === 0}
-                >
-                  Prev
-                </Button>
-              </td>
-            </tr>
-          </tfoot>
         </Table>
+      </Row>
+      <Row className="p-2">
+        <Form.Group as={Col}>
+          <Form.Select
+            disabled={attList?.length === 0}
+            onChange={(e) => setOutletFilter(e.target.value)}
+            placeholder="Select outlet..."
+            value={outletFilter}
+          >
+            {outletOptions}
+          </Form.Select>
+        </Form.Group>
+        <Form.Group as={Col}>
+          <Form.Select
+            disabled={attList?.length === 0}
+            onChange={(e) => setEmpTypeFilter(e.target.value)}
+            placeholder="Select type..."
+            value={empTypeFilter}
+          >
+            {empTypeOptions}
+          </Form.Select>
+        </Form.Group>
+        <Col>
+          <Button
+            variant="outline-secondary float-end"
+            onClick={handleNextPage}
+            disabled={endSlice >= attList?.length}
+          >
+            Next
+          </Button>
+          <Button
+            variant="outline-secondary float-end me-3"
+            onClick={handlePrevPage}
+            disabled={startSlice === 0}
+          >
+            Prev
+          </Button>
+        </Col>
       </Row>
     </Container>
   );

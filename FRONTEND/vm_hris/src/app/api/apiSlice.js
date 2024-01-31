@@ -7,7 +7,7 @@ const baseUrls = [
 ];
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: baseUrls[0],
+  baseUrl: baseUrls[1],
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;

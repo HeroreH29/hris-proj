@@ -20,7 +20,7 @@ import Attendances from "./features/attendances/Attendances";
 import LeavesList from "./features/leaves/LeavesList";
 import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   useTitle("Login | Via Mare HRIS");

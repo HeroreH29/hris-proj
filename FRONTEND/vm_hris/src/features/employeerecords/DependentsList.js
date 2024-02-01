@@ -174,7 +174,9 @@ const DependentsList = ({ dependents, employeeId }) => {
         centered
         scrollable
       >
-        <Modal.Header closeButton>Add New Dependent</Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Dependent</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Form noValidate validated={validated} onSubmit={onSaveInfoClicked}>
             {/* Name and Birthday */}

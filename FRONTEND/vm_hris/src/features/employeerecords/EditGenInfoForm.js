@@ -359,7 +359,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             </Form.Group>
           </Row>
           {/* First name, middle name, last name and prefix */}
-          <Row className="mb-3">
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Prefix</Form.Label>
               <Form.Select
@@ -403,8 +403,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Employee type, contract date (if applicable), assigned outlet, department, and job title */}
-          <Row className="mb-3">
+          {/* Employee type, contract date (if applicable), and assigned outlet */}
+          <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employee Type</Form.Label>
               <Form.Select
@@ -477,6 +477,9 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 Select an option
               </Form.Control.Feedback>
             </Form.Group>
+          </Row>
+          {/* Department & Job Title */}
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Department</Form.Label>
               <Form.Select
@@ -503,8 +506,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Date employed, date probationary, regular date, notes, date leaved, and notes  */}
-          <Row className="mb-3">
+          {/* Date employed, date probationary, regular date, notes, and date leaved */}
+          <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Date Employed</Form.Label>
               <Form.Control
@@ -555,6 +558,9 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
+          </Row>
+          {/* Employment Status, Mode of Separation & Notes */}
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employment Status</Form.Label>
               <Form.Select
@@ -598,7 +604,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             </Form.Group>
           </Row>
           {/* TIN number, SSS number, PH number, PI number, ATM number */}
-          <Row className="mb-3">
+          <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">TIN Number</Form.Label>
               <Form.Control
@@ -626,6 +632,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPHnumber)}
               />
             </Form.Group>
+          </Row>
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">PI Number</Form.Label>
               <Form.Control
@@ -645,7 +653,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               />
             </Form.Group>
           </Row>
-          <Row className="mb-3">
+          <Row className="pt-3">
             <Col md="auto">
               <Button type="submit" variant="outline-success">
                 {geninfo ? "Save Change" : "Proceed"}

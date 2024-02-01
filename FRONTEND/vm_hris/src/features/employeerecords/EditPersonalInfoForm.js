@@ -221,7 +221,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             </Form.Group>
           </Row>
           {/* Present Address, Permanent Address, and Zip Code */}
-          <Row className="mb-3">
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="4">
               <Form.Label className="fw-semibold">Present Address</Form.Label>
               <Form.Control
@@ -282,7 +282,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             </Form.Group>
           </Row>
           {/* Gender, height and weight */}
-          <Row className="mb-3">
+          <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Gender</Form.Label>
               <Form.Select
@@ -346,7 +346,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             </Form.Group>
           </Row>
           {/* Phone and mobile  */}
-          <Row className="mb-3">
+          <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Phone</Form.Label>
               <Form.Control
@@ -375,7 +375,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             </Form.Group>
           </Row>
           {/* Father & Mother Name and Occupation */}
-          <Row className="mb-3">
+          <Row className="mb-3 pt-3 pb-4 border-bottom">
             <InputGroup as={Col} md="auto" className="mb-3">
               <InputGroup.Text className="fw-semibold">
                 Father Name and Occupation
@@ -411,7 +411,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               />
             </InputGroup>
           </Row>
-          <Row className="mb-3">
+          <Row className="pt-3">
             <Col md="auto">
               <Button type="submit" variant="outline-success">
                 Save Changes

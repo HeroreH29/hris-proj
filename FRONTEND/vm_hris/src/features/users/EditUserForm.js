@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
-import { USERLEVELS, BRANCHES } from "../../config/userOptions";
+import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
 import { Form, Button, Col, Row, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import useTitle from "../../hooks/useTitle";
 
-const USER_REGEX = "[A-z0-9.,_-]{3,20}";
+const USER_REGEX = "[A-Za-z0-9._,-]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const EditUserForm = ({ user }) => {
@@ -34,6 +34,7 @@ const EditUserForm = ({ user }) => {
   const [employeeId, setEmployeeId] = useState(user.employeeId);
 
   const [userLevel, setUserLevel] = useState(user.userLevel);
+  const [userGroup, setUserGroup] = useState(user.userGroup);
   const [branch, setBranch] = useState(user.branch);
   const [active, setActive] = useState(user.active);
 
@@ -61,6 +62,7 @@ const EditUserForm = ({ user }) => {
   const onEmployeeIdChanged = (e) => setEmployeeId(e.target.value);
 
   const onUserLevelChanged = (e) => setUserLevel(e.target.value);
+  const onUserGroupChanged = (e) => setUserGroup(e.target.value);
   const onBranchChanged = (e) => setBranch(e.target.value);
   const onActiveChanged = () => setActive((prev) => !prev);
 
@@ -82,6 +84,7 @@ const EditUserForm = ({ user }) => {
           branch,
           employeeId,
           userLevel,
+          userGroup,
           active,
         });
       } else {
@@ -93,6 +96,7 @@ const EditUserForm = ({ user }) => {
           branch,
           employeeId,
           userLevel,
+          userGroup,
           active,
         });
       }
@@ -123,6 +127,13 @@ const EditUserForm = ({ user }) => {
     return (
       <option key={userlevel} value={userlevel}>
         {userlevel}
+      </option>
+    );
+  });
+  const userGroupOptions = Object.values(USERGROUPS).map((usergroup) => {
+    return (
+      <option key={usergroup} value={usergroup}>
+        {usergroup}
       </option>
     );
   });
@@ -169,7 +180,6 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="Username"
-                pattern={USER_REGEX}
                 value={username}
                 onChange={onUsernameChanged}
               />
@@ -226,6 +236,19 @@ const EditUserForm = ({ user }) => {
               <Form.Label className="fw-semibold">Branch</Form.Label>
               <Form.Select required value={branch} onChange={onBranchChanged}>
                 {branchOptions}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                Select an option
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group as={Col} md={"4"}>
+              <Form.Label className="fw-semibold">User Group</Form.Label>
+              <Form.Select
+                required
+                value={userGroup}
+                onChange={onUserGroupChanged}
+              >
+                {userGroupOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">
                 Select an option

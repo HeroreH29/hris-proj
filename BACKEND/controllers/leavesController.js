@@ -2,8 +2,6 @@ const Leave = require("../models/Leave");
 const Geninfo = require("../models/GenInfo");
 const { format } = require("date-fns");
 
-// Extra checking if EmployeeID are all numbers or not
-
 // desc Get all leaves
 // @route GET /leaves
 // @access Private
@@ -35,7 +33,7 @@ const getAllLeaves = async (req, res) => {
 // @route POST /leaves
 // @access Private
 const createLeave = async (req, res) => {
-  const { ModifiedDate, DayTime, Approve, ...others } = req.body;
+  const { ModifiedDate, DayTime, Approve, Lto, Remarks, ...others } = req.body;
 
   // Check if other properties of the request body has values
   const othersHasValues = Object.values(others).every((value) => value);
@@ -52,7 +50,7 @@ const createLeave = async (req, res) => {
 
   // Extra checking if leave data is valid or not
   if (leave) {
-    res.status(201).json({ message: `New leave filed` });
+    res.status(201).json(leave);
   } else {
     res.status(500).json({ message: "Invalid leave data received" });
   }
@@ -78,9 +76,7 @@ const updateLeave = async (req, res) => {
   const updatedLeaveRecord = await leaveRecord.save();
 
   if (updatedLeaveRecord) {
-    res.json({
-      message: `Leave record updated`,
-    });
+    res.json(updatedLeaveRecord);
   } else {
     res.json({ message: "Something went wrong" });
   }

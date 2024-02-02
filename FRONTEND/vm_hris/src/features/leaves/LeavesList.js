@@ -36,7 +36,11 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery();
+  } = useGetLeaveCreditsQuery(undefined, {
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   const {
     data: leaves,
@@ -44,7 +48,11 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery();
+  } = useGetLeavesQuery(undefined, {
+    pollingInterval: 15000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   const handleHover = (empId) => {
     if (creditsSuccess && !creditsLoading && !creditsError) {
@@ -124,29 +132,36 @@ const LeavesList = () => {
   if (isSuccess) {
     const { ids, entities } = leaves;
 
-    const filteredIds = ids.filter((id) => {
-      const leave = entities[id];
-      let matches = true;
+    const filteredIds = ids
+      .filter((id) => {
+        const leave = entities[id];
+        let matches = true;
 
-      if (status !== "Admin") {
-        matches = leave.EmployeeID === employeeId;
-      }
+        if (status !== "Admin") {
+          matches = leave.EmployeeID === employeeId;
+        }
 
-      if (name !== "") {
-        matches =
-          matches && leave.EmpName.toLowerCase().includes(name.toLowerCase());
-      }
+        if (name !== "") {
+          matches =
+            matches && leave.EmpName.toLowerCase().includes(name.toLowerCase());
+        }
 
-      if (month !== "") {
-        matches = matches && leave.DateOfFilling.includes(month);
-      }
+        if (month !== "") {
+          matches = matches && leave.DateOfFilling.includes(month);
+        }
 
-      /* if (year !== "") {
+        /* if (year !== "") {
         matches = matches && leave.DateOfFilling.includes(year);
       } */
 
-      return matches;
-    });
+        return matches;
+      })
+      .reduce((acc, id) => {
+        const leave = entities[id];
+        const isPending = leave.Approve === 0;
+
+        return isPending ? [id, ...acc] : [...acc, id];
+      }, []);
 
     overallLeavesContent = filteredIds?.length
       ? filteredIds

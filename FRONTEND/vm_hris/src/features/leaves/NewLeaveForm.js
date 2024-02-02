@@ -16,7 +16,7 @@ const NewLeaveForm = () => {
 
   const navigate = useNavigate();
 
-  const { user, employeeId, status } = useAuth();
+  const { user, employeeId, status, branch } = useAuth();
 
   const [leaveType, setLeaveType] = useState("");
   const [leaveFrom, setLeaveFrom] = useState("");
@@ -94,12 +94,16 @@ const NewLeaveForm = () => {
           DayTime: dayTime,
           Ltype: leaveType,
           Lfrom: format(new Date(leaveFrom), "MMM dd, yyyy"),
-          Lto: format(new Date(leaveUntil), "MMM dd, yyyy"),
+          Lto:
+            leaveUntil !== ""
+              ? format(new Date(leaveUntil), "MMM dd, yyyy")
+              : format(new Date(leaveFrom), "MMM dd, yyyy"),
           Reason: reason,
           User: user,
         };
 
-        await addLeave(leaveJson);
+        // Send data to database
+        await addLeave(leaveJson).unwrap();
       }
     } else {
       e.stopPropagation();
@@ -119,6 +123,27 @@ const NewLeaveForm = () => {
     setSearchQuery("");
     setSearchResults("");
     setValidated(false);
+  };
+
+  const LeaveApplicationUpload = (file) => {
+    if (!file.type.startsWith("application/json")) {
+      return toast.error("Invalid file type. Please upload a '.json' file");
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+      const leaveData = JSON.parse(event.target.result);
+
+      // Upload leave data to database
+      await addLeave(leaveData);
+    };
+
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
+
+    reader.readAsText(file);
   };
 
   useEffect(() => {
@@ -154,7 +179,7 @@ const NewLeaveForm = () => {
           <>
             <Row className="mb-3">
               <Form.Group as={Col} md="4">
-                <Form.Label className="fw-semibold">File for</Form.Label>
+                <Form.Label className="fw-semibold">File for...</Form.Label>
                 <Form.Control
                   required
                   autoFocus
@@ -167,6 +192,16 @@ const NewLeaveForm = () => {
                 <Form.Control.Feedback type="invalid">
                   Field required
                 </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group as={Col} className="p-2 border">
+                <Form.Label className="fw-semibold">
+                  ...or Upload a leave application
+                </Form.Label>
+                <Form.Control
+                  type="file"
+                  size="sm"
+                  onChange={(e) => LeaveApplicationUpload(e.target.files[0])}
+                />
               </Form.Group>
               {searchResults?.length > 0 && searchQuery.length > 0 && (
                 <ListGroup>

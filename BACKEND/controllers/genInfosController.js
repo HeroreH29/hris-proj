@@ -110,7 +110,7 @@ const leaveCreditInclUpd = async (geninfos) => {
 
       // Check for service years and absence in LeaveCredit
       return (
-        serviceYears >= 0 &&
+        serviceYears >= 1 &&
         serviceYears <= 4 &&
         geninfo.EmployeeType === "Regular" &&
         geninfo.EmpStatus === "Y" &&

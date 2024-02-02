@@ -19,11 +19,11 @@ const leaveSchema = new mongoose.Schema({
   },
   Lfrom: {
     type: String,
-    requried: true,
+    required: true,
   },
   Lto: {
     type: String,
-    required: true,
+    default: "",
   },
   Reason: {
     type: String,

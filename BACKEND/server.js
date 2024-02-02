@@ -39,6 +39,7 @@ app.use("/documents", require("./routes/documentRoutes"));
 app.use("/leaves", require("./routes/leaveRoutes"));
 app.use("/leavecredits", require("./routes/leaveCreditRoutes"));
 app.use("/inactiveemps", require("./routes/inactiveEmpRoutes"));
+app.use("/emailsender", require("./routes/emailSenderRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

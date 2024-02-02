@@ -3,6 +3,7 @@ import {
   useGetLeavesQuery,
   useUpdateLeaveMutation,
   useUpdateLeaveCreditMutation,
+  useSendLeaveThruEmailMutation,
 } from "./leavesApiSlice";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
@@ -11,8 +12,13 @@ import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 
 const Leave = ({ leaveId, handleHover, leaveCredit }) => {
-  const { isHR, isAdmin } = useAuth();
+  const { branch, isHR, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const [
+    sendLeaveThruEmail,
+    { isSuccess: emailSuccess, isError: emailError, error: emailerr },
+  ] = useSendLeaveThruEmailMutation();
 
   const { leave } = useGetLeavesQuery("leavesList", {
     selectFromResult: ({ data }) => ({
@@ -50,11 +56,31 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
     if (confirm) {
       // Update leave
       try {
-        await updateLeave({
+        const payload = await updateLeave({
           id: leave?.id,
           Approve: approveStat,
           Remarks: remarks,
-        });
+        }).unwrap();
+
+        // Send leave information thru email
+        if (branch !== "Head Office" && branch !== "Catering") {
+          const { _id, __v, ...others } = payload;
+
+          let emailMsg = {
+            email: "hero.viamare@gmail.com",
+            subject: `${branch} Leave Application for Filing`,
+            message: `Good day,\n\nThis email contains an employee leave application from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
+            attachments: [
+              {
+                filename: `${leave?.EmployeeID}-FiledLeave.json`,
+                content: JSON.stringify(others),
+                contentType: "application/json",
+              },
+            ],
+          };
+
+          await sendLeaveThruEmail(emailMsg);
+        }
 
         setLeaveStatus(approveStat);
       } catch (error) {
@@ -90,7 +116,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   };
 
   useEffect(() => {
-    if (updateSuccess || creditUpdateSuccess) {
+    if (updateSuccess || creditUpdateSuccess || emailSuccess) {
       setLeaveFrom("");
       setLeaveUntil("");
       handleHover("");
@@ -100,7 +126,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
       navigate("/leaves");
     }
     // eslint-disable-next-line
-  }, [updateSuccess, creditUpdateSuccess, navigate]);
+  }, [updateSuccess, creditUpdateSuccess, emailSuccess, navigate]);
 
   if (leave) {
     let approve;
@@ -155,7 +181,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${entities[foundRecord]?.LastName}, ${entities[foundRecord]?.FirstName} ${entities[foundRecord]?.MI}.'s Filed Leave`}</Modal.Title>
+            <Modal.Title>{`${entities[foundRecord]?.LastName}'s Filed Leave`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

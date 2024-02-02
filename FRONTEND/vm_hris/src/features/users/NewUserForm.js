@@ -142,7 +142,6 @@ const NewUserForm = () => {
                 autoComplete="off"
                 type="text"
                 placeholder="Username"
-                pattern={USER_REGEX}
                 onChange={onUsernameChanged}
               />
               <Form.Control.Feedback type="invalid">

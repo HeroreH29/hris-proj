@@ -20,6 +20,8 @@ import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
 import useAuth from "../../hooks/useAuth";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
@@ -29,6 +31,7 @@ const LeavesList = () => {
   const navigate = useNavigate();
 
   const [leaveCredit, setLeaveCredit] = useState("");
+  const [empId, setEmpId] = useState(undefined);
 
   const {
     data: leavecredits,
@@ -54,7 +57,11 @@ const LeavesList = () => {
     refetchOnMountOrArgChange: true,
   });
 
+  const { data: geninfos } = useGetGeninfosQuery();
+
   const handleHover = (empId) => {
+    setEmpId(empId);
+
     if (creditsSuccess && !creditsLoading && !creditsError) {
       const { ids, entities } = leavecredits;
 
@@ -113,6 +120,203 @@ const LeavesList = () => {
   const handlePrev = () => {
     setStartSlice((prev) => prev - 10);
     setEndSlice((prev) => prev - 10);
+  };
+
+  const handlePrintSummary = async () => {
+    const pdfDoc = await PDFDocument.create();
+    const helveticaFontBold = await pdfDoc.embedFont(
+      StandardFonts.HelveticaBold
+    );
+    const timesRomanBoldItalic = await pdfDoc.embedFont(
+      StandardFonts.TimesRomanBoldItalic
+    );
+    const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+
+    const page = pdfDoc.addPage();
+    const { width, height } = page.getSize();
+    const fontSize = 16;
+
+    const pageTitle = () => {
+      page.drawText("Via Mare Corporation", {
+        x: width / 2.75,
+        y: height - 2 * fontSize,
+        size: fontSize,
+        font: helveticaFontBold,
+        color: rgb(0, 124 / 255, 200 / 255),
+      });
+      page.drawText("Employee's Leave Ledger", {
+        x: width / 2.6,
+        y: height - 3.25 * fontSize,
+        size: fontSize - 5,
+        font: helveticaFontBold,
+      });
+    };
+
+    const pageBody = () => {
+      const { ids, entities } = geninfos;
+      const employeeName = ids
+        .filter((id) => entities[id]?.EmployeeID === empId)
+        .map(
+          (id) =>
+            `${entities[id].LastName}, ${entities[id].FirstName} ${entities[id].MI}.`
+        )[0];
+      const leaveData = leaves.ids
+        .filter((id) => leaves.entities[id]?.EmployeeID === empId)
+        .map((id) => leaves.entities[id]);
+
+      // Table Header
+      page.drawText(`${employeeName} (${empId})`, {
+        x: width * 0.06,
+        y: height * 0.88,
+        size: fontSize - 2,
+        font: timesRomanBoldItalic,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.87 },
+        end: { x: width * 0.95, y: height * 0.87 },
+        thickness: 3,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawText("Date Filed", {
+        x: width * 0.06,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Leave Type", {
+        x: width * 0.2,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Leave From", {
+        x: width * 0.378,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Leave Until", {
+        x: width * 0.57,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Status", {
+        x: width * 0.75,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Day/s", {
+        x: width * 0.9,
+        y: height * 0.855,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.85 },
+        end: { x: width * 0.95, y: height * 0.85 },
+        thickness: 1,
+        opacity: 1,
+      });
+
+      // Table Body
+      let dataHeight = 0.82;
+      let totalLeaves = 0;
+      leaveData.forEach((leave) => {
+        page.drawText(leave.DateOfFilling, {
+          x: width * 0.06,
+          y: height * dataHeight,
+          size: fontSize - 6,
+          font: timesRoman,
+        });
+        page.drawText(leave.Ltype, {
+          x: width * 0.2,
+          y: height * dataHeight,
+          size: fontSize - 6,
+          font: timesRoman,
+        });
+        page.drawText(leave.Lfrom, {
+          x: width * 0.378,
+          y: height * dataHeight,
+          size: fontSize - 6,
+          font: timesRoman,
+        });
+        page.drawText(leave.Lto, {
+          x: width * 0.57,
+          y: height * dataHeight,
+          size: fontSize - 6,
+          font: timesRoman,
+        });
+        page.drawText(
+          leave.Approve === 1
+            ? "Approved"
+            : leave.Approve === 2
+            ? "Disapproved"
+            : leave.Approve === 3
+            ? "Cancelled"
+            : "Pending",
+          {
+            x: width * 0.75,
+            y: height * dataHeight,
+            size: fontSize - 6,
+            font: timesRoman,
+          }
+        );
+        page.drawText(leave.NoOfDays.toString(), {
+          x: width * 0.91,
+          y: height * dataHeight,
+          size: fontSize - 6,
+          font: timesRoman,
+        });
+
+        if (leave.Approve === 1) {
+          totalLeaves += leave.NoOfDays;
+        }
+        dataHeight -= 0.025;
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * dataHeight + 0.02 },
+        end: { x: width * 0.95, y: height * dataHeight + 0.02 },
+        thickness: 1,
+        opacity: 1,
+      });
+      page.drawText("Total # of approved leaves:", {
+        x: width * 0.06,
+        y: height * dataHeight - 23,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(totalLeaves.toString(), {
+        x: width * 0.91,
+        y: height * dataHeight - 23,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * dataHeight - 40 },
+        end: { x: width * 0.95, y: height * dataHeight - 40 },
+        thickness: 1,
+        opacity: 1,
+      });
+    };
+
+    // Title
+    pageTitle();
+
+    // Body
+    pageBody();
+
+    // Footer
+
+    const pdfBytes = await pdfDoc.save();
+
+    const blobUrl = URL.createObjectURL(
+      new Blob([pdfBytes], { type: "application/pdf" })
+    );
+
+    window.open(blobUrl, "_blank");
   };
 
   useEffect(() => {
@@ -360,6 +564,21 @@ const LeavesList = () => {
                       <td>0</td>
                     </tr>
                   </tbody>
+                  <tfoot>
+                    <tr>
+                      <td className="fw-semibold">Print:</td>
+                      <td colSpan={3}>
+                        <Button
+                          variant="outline-secondary"
+                          className="me-2"
+                          onClick={handlePrintSummary}
+                        >
+                          Detailed
+                        </Button>
+                        <Button variant="outline-secondary">Summary</Button>
+                      </td>
+                    </tr>
+                  </tfoot>
                 </>
               ) : (
                 <>

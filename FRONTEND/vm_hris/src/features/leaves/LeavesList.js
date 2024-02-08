@@ -122,20 +122,41 @@ const LeavesList = () => {
     setEndSlice((prev) => prev - 10);
   };
 
-  const handlePrintSummary = async () => {
+  /* Function to execute when detailed/summary print leave button is clicked */
+  const handlePrintLeave = async (leaveToPrint) => {
+    // Page attributes setup
     const pdfDoc = await PDFDocument.create();
     const helveticaFontBold = await pdfDoc.embedFont(
       StandardFonts.HelveticaBold
     );
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const timesRomanBoldItalic = await pdfDoc.embedFont(
       StandardFonts.TimesRomanBoldItalic
     );
     const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const fontSize = 16;
 
+    // Necessary data setup
+    const { ids, entities } = geninfos;
+    const employeeName = ids
+      .filter((id) => entities[id]?.EmployeeID === empId)
+      .map(
+        (id) =>
+          `${entities[id].LastName}, ${entities[id].FirstName} ${entities[id].MI}.`
+      )[0];
+    const leaveData = leaves.ids
+      .filter((id) => leaves.entities[id]?.EmployeeID === empId)
+      .sort(() => {
+        return -1;
+      })
+      .map((id) => leaves.entities[id]);
+    const leaveCredit = leavecredits.ids
+      .filter((id) => leavecredits.entities[id]?.EmployeeID === empId)
+      .map((id) => leavecredits.entities[id])[0];
+
+    // Page parts
     const pageTitle = () => {
       page.drawText("Via Mare Corporation", {
         x: width / 2.75,
@@ -151,19 +172,7 @@ const LeavesList = () => {
         font: helveticaFontBold,
       });
     };
-
-    const pageBody = () => {
-      const { ids, entities } = geninfos;
-      const employeeName = ids
-        .filter((id) => entities[id]?.EmployeeID === empId)
-        .map(
-          (id) =>
-            `${entities[id].LastName}, ${entities[id].FirstName} ${entities[id].MI}.`
-        )[0];
-      const leaveData = leaves.ids
-        .filter((id) => leaves.entities[id]?.EmployeeID === empId)
-        .map((id) => leaves.entities[id]);
-
+    const detailedPageBody = () => {
       // Table Header
       page.drawText(`${employeeName} (${empId})`, {
         x: width * 0.06,
@@ -301,14 +310,305 @@ const LeavesList = () => {
         opacity: 1,
       });
     };
+    const summaryPageBody = () => {
+      // Used leave values
+      const usedSick = leaveCredit.CreditBudget - leaveCredit.SickLeave;
+      const usedVacation = leaveCredit.CreditBudget - leaveCredit.VacationLeave;
+      const usedMaternity = leaveCredit.MaternityLeave
+        ? 105 - leaveCredit.MaternityLeave
+        : 0;
+      const usedPaternity = leaveCredit.PaternityLeave
+        ? 7 - leaveCredit.PaternityLeave
+        : 0;
+      const usedBirthday = 1 - leaveCredit.BirthdayLeave;
+      const usedMatrim = leaveCredit.MatrimonialLeave
+        ? 3 - leaveCredit.MatrimonialLeave
+        : 0;
+      const usedBereave = leaveCredit.BereavementLeave;
+      const totalUsed =
+        usedSick +
+        usedVacation +
+        usedMaternity +
+        usedPaternity +
+        usedBirthday +
+        usedMatrim +
+        usedBereave;
+
+      // Table Header
+      page.drawText(`${employeeName} (${empId})`, {
+        x: width * 0.06,
+        y: height * 0.88,
+        size: fontSize - 2,
+        font: timesRomanBoldItalic,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.87 },
+        end: { x: width * 0.95, y: height * 0.87 },
+        thickness: 3,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+
+      // Table Body
+      page.drawText("Leave Credits", {
+        x: width * 0.06,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Sick", {
+        x: width * 0.24,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.CreditBudget.toString(), {
+        x: width * 0.247,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Vacation", {
+        x: width * 0.317,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.CreditBudget.toString(), {
+        x: width * 0.337,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Maternity", {
+        x: width * 0.43,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.MaternityLeave > 0 ? "105" : "0", {
+        x: width * 0.46,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Paternity", {
+        x: width * 0.55,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.PaternityLeave > 0 ? "7" : "0", {
+        x: width * 0.58,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Birthday", {
+        x: width * 0.66,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.BirthdayLeave.toString(), {
+        x: width * 0.685,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Matrim.", {
+        x: width * 0.766,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.MatrimonialLeave > 0 ? "3" : "0", {
+        x: width * 0.79,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText("Bereave.", {
+        x: width * 0.86,
+        y: height * 0.84,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(leaveCredit.BereavementLeave.toString(), {
+        x: width * 0.89,
+        y: height * 0.82,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.835 },
+        end: { x: width * 0.95, y: height * 0.835 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.815 },
+        end: { x: width * 0.95, y: height * 0.815 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawText("Used Credits", {
+        x: width * 0.06,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedSick), {
+        x: width * 0.247,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedVacation), {
+        x: width * 0.337,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedMaternity), {
+        x: width * 0.46,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedPaternity), {
+        x: width * 0.58,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedBirthday), {
+        x: width * 0.685,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedMatrim), {
+        x: width * 0.79,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawText(String(usedBereave), {
+        x: width * 0.89,
+        y: height * 0.8,
+        size: fontSize - 6,
+        font: helveticaFont,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.795 },
+        end: { x: width * 0.95, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawText("Total # of Used Credits:", {
+        x: width * 0.06,
+        y: height * 0.77,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(String(totalUsed), {
+        x: width * 0.89,
+        y: height * 0.77,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawLine({
+        start: { x: width * 0.05, y: height * 0.835 },
+        end: { x: width * 0.05, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.22, y: height * 0.835 },
+        end: { x: width * 0.22, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.3, y: height * 0.835 },
+        end: { x: width * 0.3, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.405, y: height * 0.835 },
+        end: { x: width * 0.405, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.525, y: height * 0.835 },
+        end: { x: width * 0.525, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.642, y: height * 0.835 },
+        end: { x: width * 0.642, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.745, y: height * 0.835 },
+        end: { x: width * 0.745, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.843, y: height * 0.835 },
+        end: { x: width * 0.843, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+      page.drawLine({
+        start: { x: width * 0.95, y: height * 0.835 },
+        end: { x: width * 0.95, y: height * 0.795 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+        opacity: 1,
+      });
+    };
+
+    const pageFooter = async () => {
+      page.drawText("Date Printed:", {
+        x: width * 0.03,
+        y: height * 0.02,
+        size: fontSize - 6,
+        font: helveticaFontBold,
+      });
+      page.drawText(`${format(new Date(), "PPPP")}`, {
+        x: width * 0.15,
+        y: height * 0.02,
+        size: fontSize - 6,
+        font: await pdfDoc.embedFont(StandardFonts.Helvetica),
+      });
+    };
 
     // Title
     pageTitle();
 
     // Body
-    pageBody();
+    leaveToPrint === "Detailed" ? detailedPageBody() : summaryPageBody();
 
     // Footer
+    pageFooter();
 
     const pdfBytes = await pdfDoc.save();
 
@@ -571,11 +871,18 @@ const LeavesList = () => {
                         <Button
                           variant="outline-secondary"
                           className="me-2"
-                          onClick={handlePrintSummary}
+                          onClick={(e) => handlePrintLeave(e.target.value)}
+                          value={"Detailed"}
                         >
                           Detailed
                         </Button>
-                        <Button variant="outline-secondary">Summary</Button>
+                        <Button
+                          value={"Summary"}
+                          variant="outline-secondary"
+                          onClick={(e) => handlePrintLeave(e.target.value)}
+                        >
+                          Summary
+                        </Button>
                       </td>
                     </tr>
                   </tfoot>

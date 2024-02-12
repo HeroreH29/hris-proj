@@ -214,72 +214,60 @@ const leaveCreditInclUpd = async (geninfos) => {
     });
   }
 
+  // Re-apply credit budget (necessary for new leavecredit data upload to database)
+
   /* Leave credits increase and update for employee service greater than 4 years
   (only occurs every 1st of January) */
   const today = new Date();
 
-  if (
-    fiveToSevenWithLeaveCredit?.length > 0 &&
-    today.getMonth() === 0 &&
-    today.getDate() === 1
-  ) {
-    fiveToSevenWithLeaveCredit.forEach(async (employeeId) => {
-      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-        { EmployeeID: employeeId },
-        { SickLeave: 7, VacationLeave: 7, CreditBudget: 7 },
-        { new: true }
-      ).exec();
+  if (today.getMonth() === 0 && today.getDate() === 1) {
+    if (fiveToSevenWithLeaveCredit?.length > 0) {
+      fiveToSevenWithLeaveCredit.forEach(async (employeeId) => {
+        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+          { EmployeeID: employeeId },
+          { SickLeave: 7, VacationLeave: 7, CreditBudget: 7 },
+          { new: true }
+        ).exec();
 
-      await updatedLeaveCredits.save();
-    });
-  }
+        await updatedLeaveCredits.save();
+      });
+    }
 
-  if (
-    eightToTenWithLeaveCredit?.length > 0 &&
-    today.getMonth() === 0 &&
-    today.getDate() === 1
-  ) {
-    eightToTenWithLeaveCredit.forEach(async (employeeId) => {
-      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-        { EmployeeID: employeeId },
-        { SickLeave: 10, VacationLeave: 10, CreditBudget: 10 },
-        { new: true }
-      ).exec();
+    if (eightToTenWithLeaveCredit?.length > 0) {
+      eightToTenWithLeaveCredit.forEach(async (employeeId) => {
+        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+          { EmployeeID: employeeId },
+          { SickLeave: 10, VacationLeave: 10, CreditBudget: 10 },
+          { new: true }
+        ).exec();
 
-      await updatedLeaveCredits.save();
-    });
-  }
+        await updatedLeaveCredits.save();
+      });
+    }
 
-  if (
-    elevenToThirteenWithLeaveCredit?.length > 0 &&
-    today.getMonth() === 0 &&
-    today.getDate() === 1
-  ) {
-    elevenToThirteenWithLeaveCredit.forEach(async (employeeId) => {
-      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-        { EmployeeID: employeeId },
-        { SickLeave: 12, VacationLeave: 12, CreditBudget: 12 },
-        { new: true }
-      ).exec();
+    if (elevenToThirteenWithLeaveCredit?.length > 0) {
+      elevenToThirteenWithLeaveCredit.forEach(async (employeeId) => {
+        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+          { EmployeeID: employeeId },
+          { SickLeave: 12, VacationLeave: 12, CreditBudget: 12 },
+          { new: true }
+        ).exec();
 
-      await updatedLeaveCredits.save();
-    });
-  }
+        await updatedLeaveCredits.save();
+      });
+    }
 
-  if (
-    fourteenToHundredWithLeaveCredit?.length > 0 &&
-    today.getMonth() === 0 &&
-    today.getDate() === 1
-  ) {
-    fourteenToHundredWithLeaveCredit.forEach(async (employeeId) => {
-      const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-        { EmployeeID: employeeId },
-        { SickLeave: 15, VacationLeave: 15, CreditBudget: 15 },
-        { new: true }
-      ).exec();
+    if (fourteenToHundredWithLeaveCredit?.length > 0) {
+      fourteenToHundredWithLeaveCredit.forEach(async (employeeId) => {
+        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
+          { EmployeeID: employeeId },
+          { SickLeave: 15, VacationLeave: 15, CreditBudget: 15 },
+          { new: true }
+        ).exec();
 
-      await updatedLeaveCredits.save();
-    });
+        await updatedLeaveCredits.save();
+      });
+    }
   }
 };
 

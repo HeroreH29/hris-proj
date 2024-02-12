@@ -1,4 +1,111 @@
 const LeaveCredit = require("../models/LeaveCredit");
+const Leave = require("../models/Leave");
+
+const reUpdateLeaveCredits = async (leavecredits) => {
+  const leaves = await Leave.find().lean();
+
+  if (leaves?.length) {
+    // Get all leaves that are filed and approved within the current year
+    const currentYearLeaves = leaves.filter((leave) => {
+      return (
+        leave?.DateOfFilling?.includes(new Date().getFullYear().toString()) &&
+        leave?.Approve === 1
+      );
+    });
+
+    /* Filter out leaves within the year to match a leave credit record based on EmployeeID.
+    Apply the necessary changes to the credits and update the data from the database afterwards. */
+    const matchingLeaves = currentYearLeaves.filter((leave) => {
+      const credit = leavecredits.find(
+        (credit) => credit.EmployeeID === leave.EmployeeID
+      );
+      return credit;
+    });
+
+    matchingLeaves.forEach(async (leave) => {
+      const credit = leavecredits.find(
+        (credit) => credit.EmployeeID === leave.EmployeeID
+      );
+
+      if (credit) {
+        const possibleResult =
+          credit[leave.Ltype.replace(/\s+/g, "")] - leave.NoOfDays;
+
+        if (possibleResult > 0) {
+          credit[leave.Ltype.replace(/\s+/g, "")] -= leave.NoOfDays;
+        } else {
+          credit[leave.Ltype.replace(/\s+/g, "")] = 0;
+        }
+      }
+
+      const { _id, __v, ...others } = credit;
+
+      const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
+        _id,
+        others,
+        {
+          new: true,
+        }
+      ).exec();
+
+      await leaveCreditRecord.save();
+    });
+
+    /* const matchingCredits = leavecredits.filter((credit) => {
+      const leave = matchingLeaves.find(
+        (leave) => leave.EmployeeID === credit.EmployeeID
+      );
+      return leave;
+    }); */
+
+    //console.log(matchingLeaves.length);
+    //console.log(matchingCredits.length);
+
+    /* leavecredits.forEach((credit) => {
+      const { _id, __v, ...others } = credit;
+      const matches = matchingLeaves.filter((leaves) => {
+        return leaves.EmployeeID === credit.EmployeeID;
+      });
+
+      if (matches?.length) {
+        matches.forEach(async (leave) => {
+          credit[leave.Ltype.replace(/\s+/g, "")] -= leave.NoOfDays;
+
+          const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
+            _id,
+            others,
+            {
+              new: true,
+            }
+          ).exec();
+
+          await leaveCreditRecord.save();
+        });
+      }
+    }); */
+  }
+};
+
+const reApplyCreditBudget = async (leavecredits) => {
+  leavecredits.forEach(async (credit) => {
+    credit = {
+      ...credit,
+      CreditBudget: credit.SickLeave || credit.VacationLeave,
+    };
+
+    const { _id, __v, ...others } = credit;
+
+    const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(_id, others, {
+      new: true,
+    }).exec();
+
+    const updatedLeaveCredit = await leaveCreditRecord.save();
+
+    if (updatedLeaveCredit) {
+      console.log("Budget re-applied");
+    }
+  });
+};
 
 // desc Get all leavecredits
 // @route GET /leavecredits
@@ -9,25 +116,9 @@ const getAllLeaveCredits = async (req, res) => {
     return res.status(400).json({ message: "No leave credits found" });
   }
 
-  // temporary
-  /* leavecredits.forEach(async (credit) => {
-    const { _id, SickLeave, ...others } = credit;
-    const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
-      _id,
-      { ...others, CreditBudget: SickLeave },
-      {
-        new: true,
-      }
-    ).exec();
+  //reApplyCreditBudget(leavecredits);
+  //reUpdateLeaveCredits(leavecredits);
 
-    const updatedLeaveCredit = await leaveCreditRecord.save();
-
-    if (updatedLeaveCredit) {
-      console.log("Credit updated");
-    } else {
-      console.log("Something went wrong");
-    }
-  }); */
   res.json(leavecredits);
 };
 

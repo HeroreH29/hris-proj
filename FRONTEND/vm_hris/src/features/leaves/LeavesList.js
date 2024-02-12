@@ -39,11 +39,13 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery(undefined, {
+  } = useGetLeaveCreditsQuery(
+    undefined /* {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  });
+  } */
+  );
 
   const {
     data: leaves,
@@ -51,11 +53,13 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(undefined, {
+  } = useGetLeavesQuery(
+    undefined /* {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  });
+  } */
+  );
 
   const { data: geninfos } = useGetGeninfosQuery();
 
@@ -137,6 +141,7 @@ const LeavesList = () => {
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const fontSize = 16;
+    let contentEnd = 0;
 
     // Necessary data setup
     const { ids, entities } = geninfos;
@@ -309,6 +314,9 @@ const LeavesList = () => {
         thickness: 1,
         opacity: 1,
       });
+
+      // Set end of content height for page footer use
+      contentEnd = height * dataHeight - 100;
     };
     const summaryPageBody = () => {
       // Used leave values
@@ -584,20 +592,25 @@ const LeavesList = () => {
         color: rgb(0, 0, 0),
         opacity: 1,
       });
+
+      // Set end of content height for page footer use
+      contentEnd = height * 0.02;
     };
 
     const pageFooter = async () => {
       page.drawText("Date Printed:", {
-        x: width * 0.03,
-        y: height * 0.02,
+        x: width * 0.06,
+        y: contentEnd,
         size: fontSize - 6,
-        font: helveticaFontBold,
+        font: await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique),
+        opacity: 0.65,
       });
       page.drawText(`${format(new Date(), "PPPP")}`, {
-        x: width * 0.15,
-        y: height * 0.02,
+        x: width * 0.2,
+        y: contentEnd,
         size: fontSize - 6,
-        font: await pdfDoc.embedFont(StandardFonts.Helvetica),
+        font: await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
+        opacity: 0.65,
       });
     };
 

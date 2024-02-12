@@ -14,7 +14,9 @@ const getAllLeaves = async (req, res) => {
   const geninfos = await Geninfo.find().lean();
 
   const newLeaves = leaves
-    .filter((leave) => leave?.DateOfFilling.includes("2024"))
+    .filter((leave) => {
+      return leave?.DateOfFilling && leave?.DateOfFilling.includes("2024");
+    })
     .map((leave) => {
       const match = geninfos.find(
         (geninfo) => geninfo.EmployeeID === leave.EmployeeID

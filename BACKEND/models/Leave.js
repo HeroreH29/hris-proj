@@ -27,7 +27,7 @@ const leaveSchema = new mongoose.Schema({
   },
   Reason: {
     type: String,
-    required: true,
+    default: "",
   },
   Remarks: {
     type: String,
@@ -48,6 +48,10 @@ const leaveSchema = new mongoose.Schema({
   EmployeeID: {
     type: Object,
     required: true,
+  },
+  Credited: {
+    type: Boolean,
+    default: false,
   },
 });
 

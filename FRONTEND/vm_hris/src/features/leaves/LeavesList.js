@@ -39,13 +39,11 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery(
-    undefined /* {
+  } = useGetLeaveCreditsQuery(undefined, {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  } */
-  );
+  });
 
   const {
     data: leaves,
@@ -53,13 +51,11 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(
-    undefined /* {
+  } = useGetLeavesQuery(undefined, {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  } */
-  );
+  });
 
   const { data: geninfos } = useGetGeninfosQuery();
 
@@ -130,14 +126,28 @@ const LeavesList = () => {
   const handlePrintLeave = async (leaveToPrint) => {
     // Page attributes setup
     const pdfDoc = await PDFDocument.create();
+
+    // Helvetic font family
     const helveticaFontBold = await pdfDoc.embedFont(
       StandardFonts.HelveticaBold
     );
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaFontOblique = await pdfDoc.embedFont(
+      StandardFonts.HelveticaOblique
+    );
+    const helveticaFontBoldOblique = await pdfDoc.embedFont(
+      StandardFonts.HelveticaBoldOblique
+    );
+
+    // Times Roman font family
     const timesRomanBoldItalic = await pdfDoc.embedFont(
       StandardFonts.TimesRomanBoldItalic
     );
     const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    const timesRomanItalic = await pdfDoc.embedFont(
+      StandardFonts.TimesRomanItalic
+    );
+
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const fontSize = 16;
@@ -594,7 +604,7 @@ const LeavesList = () => {
       });
 
       // Set end of content height for page footer use
-      contentEnd = height * 0.02;
+      contentEnd = height * 0.65;
     };
 
     const pageFooter = async () => {
@@ -602,15 +612,29 @@ const LeavesList = () => {
         x: width * 0.06,
         y: contentEnd,
         size: fontSize - 6,
-        font: await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique),
+        font: helveticaFontBoldOblique,
         opacity: 0.65,
       });
       page.drawText(`${format(new Date(), "PPPP")}`, {
         x: width * 0.2,
         y: contentEnd,
         size: fontSize - 6,
-        font: await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
+        font: helveticaFontOblique,
         opacity: 0.65,
+      });
+
+      const text = `"The information contained in this document is confidential and intended solely for the recipient. Unauthorized disclosure, copying, or distribution of this content is strictly prohibited. Any breach of confidentiality will be subject to legal action. This document also includes confidential information related to Via Mare Corporation and may only be requested within the organization."\n- Via Mare Corp. (${new Date()
+        .getFullYear()
+        .toString()})`;
+      page.drawText(text, {
+        x: width * 0.05,
+        y: contentEnd * 0.8,
+        size: fontSize - 6,
+        opacity: 0.5,
+        font: timesRomanItalic,
+        lineHeight: fontSize - 4,
+        maxWidth: 550,
+        wordBreaks: [" "],
       });
     };
 

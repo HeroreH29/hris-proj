@@ -5,6 +5,7 @@ const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 const Leave = require("../models/Leave");
 const LeaveCredit = require("../models/LeaveCredit");
+const InactiveEmp = require("../models/InactiveEmp");
 const {
   differenceInYears,
   differenceInMonths,
@@ -53,6 +54,10 @@ const UpdateEmployeeID = async (origEmployeeID, newEmployeeID) => {
     EmployeeID: origEmployeeID,
   }).exec();
 
+  const inactiveEmpRecord = await InactiveEmp.findOne({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
   // Apply changes to other informations
   if (personalinfo) {
     personalinfo.EmployeeID = newEmployeeID;
@@ -90,6 +95,11 @@ const UpdateEmployeeID = async (origEmployeeID, newEmployeeID) => {
   if (leaveCreditRecord) {
     leaveCreditRecord.EmployeeID = newEmployeeID;
     await leaveCreditRecord.save();
+  }
+
+  if (inactiveEmpRecord) {
+    inactiveEmpRecord.EmployeeID = newEmployeeID;
+    await inactiveEmpRecord.save();
   }
 };
 

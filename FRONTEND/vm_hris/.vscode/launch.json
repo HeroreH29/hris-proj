@@ -5,9 +5,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "type": "msedge",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "name": "Launch Edge against 192.168.1.6:3000",
             "url": "http://192.168.1.6:3000",
             "webRoot": "${workspaceFolder}"
         }

@@ -56,7 +56,7 @@ const DashHeader = () => {
       className="border-bottom border-dark-subtle bg-white"
     >
       <Container>
-        <Navbar.Brand id="logo">Via Mare</Navbar.Brand>
+        <Navbar.Brand id="logo">Via Mare HRIS</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Nav activeKey={active} onSelect={handleNavSelect}>

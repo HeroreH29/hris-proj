@@ -280,54 +280,14 @@ const Attendance = ({ att, attlogData }) => {
           const formattedDate = format(new Date(datetime), "P");
           const formattedTime = format(new Date(datetime), "p");
 
-          const existingLine = tempAttData.findIndex((e) => {
+          const existingIndex = tempAttData.findIndex((e) => {
             return e.bioId === bioId && e.date === formattedDate;
           });
 
-          if (existingLine !== -1) {
-            if (val2 * 1 === 0) {
-              tempAttData[existingLine] = {
-                ...tempAttData[existingLine],
-                checkIn: formattedTime,
-              };
-            } else if (val2 * 1 === 1) {
-              tempAttData[existingLine] = {
-                ...tempAttData[existingLine],
-                checkOut: formattedTime,
-              };
-            } else if (val2 * 1 === 2) {
-              tempAttData[existingLine] = {
-                ...tempAttData[existingLine],
-                breakIn: formattedTime,
-              };
-            } else if (val2 * 1 === 3) {
-              tempAttData[existingLine] = {
-                ...tempAttData[existingLine],
-                breakOut: formattedTime,
-              };
-            }
-          } else {
-            /* Check first if the next line with a new date is a check out entry.
-            This just means that the employee has checked out on the following day */
-            const parsedFormattedTime = parse(formattedTime, "p", new Date());
-            const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
-            if (
-              val2 * 1 === 1 /* &&
-              geninfo?.AssignedOutlet !== "Head Office" */ &&
-              parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
-            ) {
-              let prevDayAtt = tempAttData[tempAttData?.length - 1];
-              if (!prevDayAtt?.checkOut) {
-                prevDayAtt = {
-                  ...prevDayAtt,
-                  checkOut: formattedTime,
-                  additionalDate: formattedDate,
-                };
+          if (val2 * 1 === 1 && tempAttData[existingIndex].checkOut === "") {
+          }
 
-                tempAttData[tempAttData?.length - 1] = prevDayAtt;
-              }
-            }
-
+          if (existingIndex === -1) {
             tempAttData.push({
               bioId: bioId,
               date: formattedDate,
@@ -336,7 +296,84 @@ const Attendance = ({ att, attlogData }) => {
               breakIn: val2 * 1 === 2 ? formattedTime : "",
               breakOut: val2 * 1 === 3 ? formattedTime : "",
             });
+          } else if (existingIndex !== -1) {
+            if (val2 * 1 === 0) {
+              tempAttData[existingIndex] = {
+                ...tempAttData[existingIndex],
+                checkIn: formattedTime,
+              };
+            } else if (val2 * 1 === 1) {
+              tempAttData[existingIndex] = {
+                ...tempAttData[existingIndex],
+                checkOut: formattedTime,
+              };
+            } else if (val2 * 1 === 2) {
+              tempAttData[existingIndex] = {
+                ...tempAttData[existingIndex],
+                breakIn: formattedTime,
+              };
+            } else if (val2 * 1 === 3) {
+              tempAttData[existingIndex] = {
+                ...tempAttData[existingIndex],
+                breakOut: formattedTime,
+              };
+            }
           }
+
+          // // Line does not exist
+          // if (existingLine === -1) {
+          //   /* Check first if the next line with a new date is a check out entry.
+          //   This just means that the employee has checked out on the following day */
+          //   const parsedFormattedTime = parse(formattedTime, "p", new Date());
+          //   const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
+          //   if (
+          //     val2 * 1 === 1 &&
+          //     parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
+          //   ) {
+          //     let prevDayAtt = tempAttData[tempAttData?.length - 1];
+          //     if (!prevDayAtt?.checkOut) {
+          //       prevDayAtt = {
+          //         ...prevDayAtt,
+          //         checkOut: formattedTime,
+          //         additionalDate: formattedDate,
+          //       };
+
+          //       tempAttData[tempAttData?.length - 1] = prevDayAtt;
+          //     }
+          //   }
+
+          //   tempAttData.push({
+          //     bioId: bioId,
+          //     date: formattedDate,
+          //     checkIn: val2 * 1 === 0 ? formattedTime : "",
+          //     checkOut: val2 * 1 === 1 ? formattedTime : "",
+          //     breakIn: val2 * 1 === 2 ? formattedTime : "",
+          //     breakOut: val2 * 1 === 3 ? formattedTime : "",
+          //   });
+          // } else {
+          //   // Line already exist
+          //   if (val2 * 1 === 0) {
+          //     tempAttData[existingLine] = {
+          //       ...tempAttData[existingLine],
+          //       checkIn: formattedTime,
+          //     };
+          //   } else if (val2 * 1 === 1) {
+          //     tempAttData[existingLine] = {
+          //       ...tempAttData[existingLine],
+          //       checkOut: formattedTime,
+          //     };
+          //   } else if (val2 * 1 === 2) {
+          //     tempAttData[existingLine] = {
+          //       ...tempAttData[existingLine],
+          //       breakIn: formattedTime,
+          //     };
+          //   } else if (val2 * 1 === 3) {
+          //     tempAttData[existingLine] = {
+          //       ...tempAttData[existingLine],
+          //       breakOut: formattedTime,
+          //     };
+          //   }
+          // }
         });
     } catch (error) {
       console.error(`handleShowModal Error: ${error}`);

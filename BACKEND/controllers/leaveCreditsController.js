@@ -1,6 +1,7 @@
 const LeaveCredit = require("../models/LeaveCredit");
 const Leave = require("../models/Leave");
 
+// Updating leave credits especially for new filed leaves
 const reUpdateLeaveCredits = async (leavecredits) => {
   const leaves = await Leave.find().lean();
 
@@ -22,12 +23,15 @@ const reUpdateLeaveCredits = async (leavecredits) => {
       return credit;
     });
 
-    matchingLeaves.forEach(async (leave) => {
+    matchingLeaves.map(async (leave) => {
       const credit = leavecredits.find(
         (credit) => credit.EmployeeID === leave.EmployeeID
       );
 
-      if (credit) {
+      if (
+        credit &&
+        (leave.Credited === false || leave.Credited === undefined)
+      ) {
         const possibleResult =
           credit[leave.Ltype.replace(/\s+/g, "")] - leave.NoOfDays;
 
@@ -37,6 +41,52 @@ const reUpdateLeaveCredits = async (leavecredits) => {
           credit[leave.Ltype.replace(/\s+/g, "")] = 0;
         }
       }
+
+      // Save credit changes to database
+      const SaveCreditChanges = async () => {
+        const { _id, __v, ...others } = credit;
+
+        const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
+          _id,
+          others,
+          {
+            new: true,
+          }
+        ).exec();
+
+        if (leaveCreditRecord) {
+          await leaveCreditRecord.save();
+        }
+      };
+      SaveCreditChanges(); // Call the function
+
+      // Mark leave as credited
+      const MarkLeaveAsCredited = async () => {
+        leave = { ...leave, Credited: true };
+
+        const { _id, __v, ...others } = leave;
+
+        const leaveRecord = await Leave.findByIdAndUpdate(_id, others, {
+          new: true,
+        }).exec();
+
+        if (leaveRecord) {
+          await leaveRecord.save();
+        }
+      };
+      MarkLeaveAsCredited(); // Call the function
+    });
+  }
+};
+
+// Applying credit budget field on leave credits that still do not have it
+const reApplyCreditBudget = async (leavecredits) => {
+  leavecredits.forEach(async (credit) => {
+    if (credit.CreditBudget === undefined) {
+      credit = {
+        ...credit,
+        CreditBudget: credit.SickLeave || credit.VacationLeave,
+      };
 
       const { _id, __v, ...others } = credit;
 
@@ -49,62 +99,10 @@ const reUpdateLeaveCredits = async (leavecredits) => {
       ).exec();
 
       await leaveCreditRecord.save();
-    });
-
-    /* const matchingCredits = leavecredits.filter((credit) => {
-      const leave = matchingLeaves.find(
-        (leave) => leave.EmployeeID === credit.EmployeeID
-      );
-      return leave;
-    }); */
-
-    //console.log(matchingLeaves.length);
-    //console.log(matchingCredits.length);
-
-    /* leavecredits.forEach((credit) => {
-      const { _id, __v, ...others } = credit;
-      const matches = matchingLeaves.filter((leaves) => {
-        return leaves.EmployeeID === credit.EmployeeID;
-      });
-
-      if (matches?.length) {
-        matches.forEach(async (leave) => {
-          credit[leave.Ltype.replace(/\s+/g, "")] -= leave.NoOfDays;
-
-          const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(
-            _id,
-            others,
-            {
-              new: true,
-            }
-          ).exec();
-
-          await leaveCreditRecord.save();
-        });
-      }
-    }); */
-  }
-};
-
-const reApplyCreditBudget = async (leavecredits) => {
-  leavecredits.forEach(async (credit) => {
-    credit = {
-      ...credit,
-      CreditBudget: credit.SickLeave || credit.VacationLeave,
-    };
-
-    const { _id, __v, ...others } = credit;
-
-    const leaveCreditRecord = await LeaveCredit.findByIdAndUpdate(_id, others, {
-      new: true,
-    }).exec();
-
-    const updatedLeaveCredit = await leaveCreditRecord.save();
-
-    if (updatedLeaveCredit) {
-      console.log("Budget re-applied");
     }
   });
+
+  console.log("Budget re-applied");
 };
 
 // desc Get all leavecredits
@@ -116,8 +114,8 @@ const getAllLeaveCredits = async (req, res) => {
     return res.status(400).json({ message: "No leave credits found" });
   }
 
-  //reApplyCreditBudget(leavecredits);
-  //reUpdateLeaveCredits(leavecredits);
+  reApplyCreditBudget(leavecredits);
+  reUpdateLeaveCredits(leavecredits);
 
   res.json(leavecredits);
 };

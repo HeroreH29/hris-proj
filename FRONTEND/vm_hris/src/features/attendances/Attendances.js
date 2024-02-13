@@ -79,23 +79,25 @@ const Attendances = () => {
           lines.forEach((line) => {
             const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
 
-            const matchedRecord = ids
-              .filter(
-                (id) => entities[id].BioID.toString() === bioId.toString()
-              )
-              .map((id) => entities[id])[0];
+            if (bioId !== "1") {
+              const matchedRecord = ids
+                .filter((id) => {
+                  return String(entities[id].BioID) === String(bioId);
+                })
+                .map((id) => entities[id])[0];
 
-            const existingLine = tempAttList.findIndex((e) => {
-              return e.bioId === bioId;
-            });
-
-            if (existingLine === -1) {
-              tempAttList.push({
-                bioId: bioId,
-                name: `${matchedRecord.LastName}, ${matchedRecord.FirstName} ${matchedRecord.MI}`,
-                outlet: matchedRecord.AssignedOutlet,
-                empType: matchedRecord.EmployeeType,
+              const existingLine = tempAttList.findIndex((e) => {
+                return String(e.bioId) === String(bioId);
               });
+
+              if (existingLine === -1) {
+                tempAttList.push({
+                  bioId: bioId,
+                  name: `${matchedRecord?.LastName}, ${matchedRecord?.FirstName} ${matchedRecord?.MI}`,
+                  outlet: matchedRecord?.AssignedOutlet,
+                  empType: matchedRecord?.EmployeeType,
+                });
+              }
             }
           });
         } catch (error) {
@@ -110,6 +112,9 @@ const Attendances = () => {
 
   const tableContent = attList?.length
     ? attList
+        .sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        })
         .filter((att) => {
           let matches = true;
 
@@ -148,7 +153,7 @@ const Attendances = () => {
       </Row>
       <Row className="p-2">
         <Form.Group className="mb-3">
-          <Form.Label>Upload attlog file here</Form.Label>
+          <Form.Label>Upload attlog file here:</Form.Label>
           <Form.Control
             type="file"
             onChange={(e) => AttlogFileUpload(e.target.files[0])}
@@ -176,7 +181,11 @@ const Attendances = () => {
         <Form.Group as={Col}>
           <Form.Select
             disabled={attList?.length === 0}
-            onChange={(e) => setOutletFilter(e.target.value)}
+            onChange={(e) => {
+              setOutletFilter(e.target.value);
+              setStartSlice(0);
+              setEndSlice(20);
+            }}
             placeholder="Select outlet..."
             value={outletFilter}
           >
@@ -186,7 +195,11 @@ const Attendances = () => {
         <Form.Group as={Col}>
           <Form.Select
             disabled={attList?.length === 0}
-            onChange={(e) => setEmpTypeFilter(e.target.value)}
+            onChange={(e) => {
+              setEmpTypeFilter(e.target.value);
+              setStartSlice(0);
+              setEndSlice(20);
+            }}
             placeholder="Select type..."
             value={empTypeFilter}
           >

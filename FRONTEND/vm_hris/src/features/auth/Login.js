@@ -85,7 +85,12 @@ const Login = () => {
             Via Mare HRIS Login
           </h2>
         </div>
-        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Form
+          id="loginform"
+          noValidate
+          validated={validated}
+          onSubmit={handleSubmit}
+        >
           <Row className="d-flex justify-content-center mb-3">
             <Form.Group as={Col} md={"auto"} className="mb-3">
               <Form.Label className="fw-semibold">Username</Form.Label>

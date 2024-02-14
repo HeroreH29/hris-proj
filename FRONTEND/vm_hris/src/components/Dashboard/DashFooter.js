@@ -30,7 +30,7 @@ const DashFooter = () => {
   const twelveHourFormat = hours % 12 || 12;
 
   const content = (
-    <div className="sticky-bottom">
+    <div id="dashfooter" className="sticky-bottom">
       <footer className="footer bg-body-secondary">
         <Container>
           <strong>DATE:</strong> <span className="fw-semibold">{dayName}</span>

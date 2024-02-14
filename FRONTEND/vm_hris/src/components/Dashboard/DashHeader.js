@@ -58,7 +58,7 @@ const DashHeader = () => {
       <Container>
         <Navbar.Brand id="logo">Via Mare HRIS</Navbar.Brand>
         <Navbar.Toggle />
-        <Navbar.Collapse className="justify-content-end">
+        <Navbar.Collapse id="navbar" className="justify-content-end">
           <Nav activeKey={active} onSelect={handleNavSelect}>
             <Nav.Link eventKey="1" onClick={() => navigate("/dashboard")}>
               Dashboard

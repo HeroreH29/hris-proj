@@ -13,13 +13,25 @@ code {
 }
 
 @font-face {
-  font-family: Playfair Display-Bold;
-  src: url(PlayfairDisplay-Bold.ttf);
+  font-family: Gazpacho-Black;
+  src: url(Gazpacho\ Black.ttf);
+}
+@font-face {
+  font-family: Gazpacho-Medium;
+  src: url(Gazpacho\ Medium.ttf);
+}
+@font-face {
+  font-family: WorkSans;
+  src: url(WorkSans-VariableFont_wght.ttf);
 }
 
 #logo, #loginTitle {
-  font-family: Playfair Display-Bold;
+  font-family: Gazpacho-Black;
   color: #007CC8;
+}
+
+#navbar, #content, #loginform, #forgotpassform, #dashfooter {
+  font-family: WorkSans;
 }
 
 #employeePic {

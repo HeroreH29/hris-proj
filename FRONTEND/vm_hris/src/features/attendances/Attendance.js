@@ -7,7 +7,7 @@ import {
   useGetDocumentsQuery,
   useGetGeninfosQuery,
 } from "../employeerecords/recordsApiSlice";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import { toast } from "react-toastify";
 
 const Attendance = ({ att, attlogData }) => {
@@ -86,6 +86,8 @@ const Attendance = ({ att, attlogData }) => {
       );
       const pdfDoc = await PDFDocument.load(formPdfBytes);
       const form = pdfDoc.getForm();
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const fontSize = 8.5;
 
       const EmployeeName = form.getTextField("EmployeeName");
       const BioID = form.getTextField("BioID");
@@ -98,11 +100,15 @@ const Attendance = ({ att, attlogData }) => {
       EmployeeName.setText(
         `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}`
       );
+      EmployeeName.updateAppearances(helveticaBold);
       BioID.setText(`(${geninfo.BioID.toString()})`);
+      BioID.updateAppearances(helveticaBold);
       DepartmentBranch.setText(
         `${geninfo.Department} - ${geninfo.AssignedOutlet}`
       );
+      DepartmentBranch.updateAppearances(helveticaBold);
       Position.setText(geninfo.JobTitle);
+      Position.updateAppearances(helveticaBold);
       PrintDateTime.setText(format(new Date(), "eeee, MMMM dd, yyyy @ pp"));
       PeriodCovered.setText(
         `${format(new Date(dateFrom), "MMM dd")} - ${format(
@@ -153,20 +159,25 @@ const Attendance = ({ att, attlogData }) => {
           `Time InRow${index + 1}`,
           `undefined.Time InRow${index + 1}`
         );
+        TimeInRow.setFontSize(fontSize);
 
         const TimeOutRow = FieldFinder(
           `Time OutRow${index + 1}`,
           `undefined.Time OutRow${index + 1}`
         );
+        TimeOutRow.setFontSize(fontSize);
 
         const BreakInRow = FieldFinder(
           `Break InRow${index + 1}`,
           `undefined.Break InRow${index + 1}`
         );
+        BreakInRow.setFontSize(fontSize);
+
         const BreakOutRow = FieldFinder(
           `Break OutRow${index + 1}`,
           `undefined.Break OutRow${index + 1}`
         );
+        BreakOutRow.setFontSize(fontSize);
 
         // If an index is found...
         if (attIndex !== -1) {
@@ -177,17 +188,10 @@ const Attendance = ({ att, attlogData }) => {
 
           // Time in and time out rows set text
           if (filteredAtt[attIndex].checkIn !== "" && TimeInRow) {
-            TimeInRow.setText(
-              `${filteredAtt[attIndex].date} ${filteredAtt[attIndex].checkIn}`
-            );
+            TimeInRow.setText(`${filteredAtt[attIndex].checkIn}`);
           }
           if (filteredAtt[attIndex].checkOut !== "" && TimeOutRow) {
-            TimeOutRow.setText(
-              `${
-                filteredAtt[attIndex]?.additionalDate ||
-                filteredAtt[attIndex].date
-              } ${filteredAtt[attIndex].checkOut}`
-            );
+            TimeOutRow.setText(`${filteredAtt[attIndex].checkOut}`);
           }
 
           // Break in and break out rows set text
@@ -196,6 +200,7 @@ const Attendance = ({ att, attlogData }) => {
         } else {
           DAYSRow.setText(format(new Date(date), "dd-eee"));
         }
+        DAYSRow.updateAppearances(helveticaBold);
       });
 
       const pdfBytes = await pdfDoc.save();
@@ -224,44 +229,28 @@ const Attendance = ({ att, attlogData }) => {
 
           return dateToCompare >= formattedFrom && dateToCompare <= formattedTo;
         })
-      : [];
+      : matchingAtt;
 
   // JSX variable for table body
-  const tableContent = filteredAtt?.length
-    ? filteredAtt
-        .sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
+  const tableContent =
+    filteredAtt?.length &&
+    filteredAtt
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
 
-          return dateB - dateA;
-        })
-        .slice(startSlice, endSlice)
-        .map((att, index) => (
-          <tr key={index}>
-            <td>{att.date}</td>
-            <td>{att.checkIn}</td>
-            <td>{att.breakIn}</td>
-            <td>{att.breakOut}</td>
-            <td>{att.checkOut}</td>
-          </tr>
-        ))
-    : matchingAtt
-        .sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-
-          return dateB - dateA;
-        })
-        .slice(startSlice, endSlice)
-        .map((att, index) => (
-          <tr key={index}>
-            <td>{att.date}</td>
-            <td>{att.checkIn}</td>
-            <td>{att.breakIn}</td>
-            <td>{att.breakOut}</td>
-            <td>{att.checkOut}</td>
-          </tr>
-        ));
+        return dateB - dateA;
+      })
+      .slice(startSlice, endSlice)
+      .map((att, index) => (
+        <tr key={index}>
+          <td>{att.date}</td>
+          <td>{att.checkIn}</td>
+          <td>{att.breakIn}</td>
+          <td>{att.breakOut}</td>
+          <td>{att.checkOut}</td>
+        </tr>
+      ));
 
   // Function for showing modal
   const handleShowModal = () => {
@@ -277,35 +266,60 @@ const Attendance = ({ att, attlogData }) => {
         .forEach((line) => {
           const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
 
-          const formattedDate = format(new Date(datetime), "P");
+          const formattedDate = format(new Date(datetime), "M/d/yyyy");
           const formattedTime = format(new Date(datetime), "p");
 
           const existingIndex = tempAttData.findIndex((e) => {
-            return e.bioId === bioId && e.date === formattedDate;
+            return e.date === formattedDate;
           });
 
-          if (val2 * 1 === 1 && tempAttData[existingIndex].checkOut === "") {
+          if (formattedDate.includes("2/5/2024")) {
+            console.log("its time");
           }
 
+          // Line does not exist
           if (existingIndex === -1) {
-            tempAttData.push({
-              bioId: bioId,
-              date: formattedDate,
-              checkIn: val2 * 1 === 0 ? formattedTime : "",
-              checkOut: val2 * 1 === 1 ? formattedTime : "",
-              breakIn: val2 * 1 === 2 ? formattedTime : "",
-              breakOut: val2 * 1 === 3 ? formattedTime : "",
-            });
-          } else if (existingIndex !== -1) {
+            /* Check first if the next line with a new date is a check out entry.
+            This just means that the employee has checked out on the following day */
+            const parsedFormattedTime = parse(formattedTime, "p", new Date());
+            const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
+            if (
+              val2 * 1 === 1 &&
+              parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
+            ) {
+              let prevDayAtt = tempAttData[tempAttData?.length - 1];
+              if (!prevDayAtt?.checkOut) {
+                prevDayAtt = {
+                  ...prevDayAtt,
+                  checkOut: `${formattedDate} ${formattedTime}`,
+                  additionalDate: `${formattedDate} ${formattedTime}`,
+                };
+
+                tempAttData[tempAttData?.length - 1] = prevDayAtt;
+              }
+            } else {
+              tempAttData.push({
+                bioId: bioId,
+                date: formattedDate,
+                checkIn:
+                  val2 * 1 === 0 ? `${formattedDate} ${formattedTime}` : "",
+                checkOut:
+                  val2 * 1 === 1 ? `${formattedDate} ${formattedTime}` : "",
+                breakIn: val2 * 1 === 2 ? formattedTime : "",
+                breakOut: val2 * 1 === 3 ? formattedTime : "",
+              });
+            }
+          } else {
+            // Line already exist
             if (val2 * 1 === 0) {
               tempAttData[existingIndex] = {
                 ...tempAttData[existingIndex],
-                checkIn: formattedTime,
+                checkIn: `${formattedDate} ${formattedTime}`,
               };
             } else if (val2 * 1 === 1) {
               tempAttData[existingIndex] = {
                 ...tempAttData[existingIndex],
-                checkOut: formattedTime,
+                checkOut: `${formattedDate} ${formattedTime}`,
               };
             } else if (val2 * 1 === 2) {
               tempAttData[existingIndex] = {
@@ -319,66 +333,10 @@ const Attendance = ({ att, attlogData }) => {
               };
             }
           }
-
-          // // Line does not exist
-          // if (existingLine === -1) {
-          //   /* Check first if the next line with a new date is a check out entry.
-          //   This just means that the employee has checked out on the following day */
-          //   const parsedFormattedTime = parse(formattedTime, "p", new Date());
-          //   const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
-          //   if (
-          //     val2 * 1 === 1 &&
-          //     parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
-          //   ) {
-          //     let prevDayAtt = tempAttData[tempAttData?.length - 1];
-          //     if (!prevDayAtt?.checkOut) {
-          //       prevDayAtt = {
-          //         ...prevDayAtt,
-          //         checkOut: formattedTime,
-          //         additionalDate: formattedDate,
-          //       };
-
-          //       tempAttData[tempAttData?.length - 1] = prevDayAtt;
-          //     }
-          //   }
-
-          //   tempAttData.push({
-          //     bioId: bioId,
-          //     date: formattedDate,
-          //     checkIn: val2 * 1 === 0 ? formattedTime : "",
-          //     checkOut: val2 * 1 === 1 ? formattedTime : "",
-          //     breakIn: val2 * 1 === 2 ? formattedTime : "",
-          //     breakOut: val2 * 1 === 3 ? formattedTime : "",
-          //   });
-          // } else {
-          //   // Line already exist
-          //   if (val2 * 1 === 0) {
-          //     tempAttData[existingLine] = {
-          //       ...tempAttData[existingLine],
-          //       checkIn: formattedTime,
-          //     };
-          //   } else if (val2 * 1 === 1) {
-          //     tempAttData[existingLine] = {
-          //       ...tempAttData[existingLine],
-          //       checkOut: formattedTime,
-          //     };
-          //   } else if (val2 * 1 === 2) {
-          //     tempAttData[existingLine] = {
-          //       ...tempAttData[existingLine],
-          //       breakIn: formattedTime,
-          //     };
-          //   } else if (val2 * 1 === 3) {
-          //     tempAttData[existingLine] = {
-          //       ...tempAttData[existingLine],
-          //       breakOut: formattedTime,
-          //     };
-          //   }
-          // }
         });
     } catch (error) {
       console.error(`handleShowModal Error: ${error}`);
     }
-
     setMatchingAtt(tempAttData);
     setShow(true);
   };

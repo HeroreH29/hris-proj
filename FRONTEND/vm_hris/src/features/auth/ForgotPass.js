@@ -134,12 +134,17 @@ const ForgotPass = () => {
   };
 
   return (
-    <Container className="p-5 rounded bg-light mt-2 mb-2" as={Col} md={5}>
+    <Container id className="p-5 rounded bg-light mt-2 mb-2" as={Col} md={5}>
       <div className="mb-3 text-center" id="loginTitle">
         <h2 id="loginTitle">Forgot Password</h2>
         <small className="fst-italic">{`(Put username of account for password reset)`}</small>
       </div>
-      <Form noValidate validated={validated} onSubmit={handleSubmit}>
+      <Form
+        id="forgotpassform"
+        noValidate
+        validated={validated}
+        onSubmit={handleSubmit}
+      >
         {userFound === undefined || !userFound ? (
           <>
             <Row className="d-flex justify-content-center mb-3">

@@ -273,10 +273,6 @@ const Attendance = ({ att, attlogData }) => {
             return e.date === formattedDate;
           });
 
-          if (formattedDate.includes("2/5/2024")) {
-            console.log("its time");
-          }
-
           // Line does not exist
           if (existingIndex === -1) {
             /* Check first if the next line with a new date is a check out entry.

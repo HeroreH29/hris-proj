@@ -13,3 +13,4 @@
 11. [x] Show toasts for every transaction within the system for a more interactive user experience.
 12. [x] Provide password reset for everyone.
 13. [x] A notification system specific for contractual employees must be implemented.
+14. [x] Each employee's leave details/summary can be printed

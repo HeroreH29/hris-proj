@@ -54,7 +54,7 @@ const Attendances = () => {
 
   useEffect(() => {
     if (attList?.length > 0) {
-      toast.success("Attlog uploaded!");
+      toast.success("Attendance logs uploaded!");
     }
   }, [attList]);
 
@@ -110,33 +110,33 @@ const Attendances = () => {
     }
   };
 
-  const tableContent = attList?.length
-    ? attList
-        .sort((a, b) => {
-          return a.name.localeCompare(b.name);
-        })
-        .filter((att) => {
-          let matches = true;
+  const filteredList = attList?.filter((att) => {
+    let matches = true;
 
-          if (outletFilter !== "") {
-            matches = matches && att?.outlet === outletFilter;
-          }
+    if (outletFilter !== "") {
+      matches = matches && att?.outlet === outletFilter;
+    }
 
-          if (empTypeFilter !== "") {
-            matches = matches && att?.empType === empTypeFilter;
-          }
+    if (empTypeFilter !== "") {
+      matches = matches && att?.empType === empTypeFilter;
+    }
 
-          return matches;
-        })
-        .slice(startSlice, endSlice)
-        .map((att) => (
-          <Attendance key={att.bioId} att={att} attlogData={attlogData} />
-        ))
-    : null;
+    return matches;
+  });
+
+  const tableContent = filteredList
+    ?.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    })
+    .slice(startSlice, endSlice)
+    .map((att) => (
+      <Attendance key={att.bioId} att={att} attlogData={attlogData} />
+    ));
 
   const handleNextPage = () => {
     setStartSlice((prev) => prev + 20);
     setEndSlice((prev) => prev + 20);
+    console.log(filteredList?.length);
   };
 
   const handlePrevPage = () => {
@@ -210,7 +210,7 @@ const Attendances = () => {
           <Button
             variant="outline-secondary float-end"
             onClick={handleNextPage}
-            disabled={endSlice >= attList?.length}
+            disabled={endSlice >= filteredList?.length}
           >
             Next
           </Button>

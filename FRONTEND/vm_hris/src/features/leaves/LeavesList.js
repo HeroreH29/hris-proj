@@ -691,10 +691,6 @@ const LeavesList = () => {
           matches = matches && leave.DateOfFilling.includes(month);
         }
 
-        /* if (year !== "") {
-        matches = matches && leave.DateOfFilling.includes(year);
-      } */
-
         return matches;
       })
       .reduce((acc, id) => {
@@ -831,7 +827,9 @@ const LeavesList = () => {
             >
               <caption>
                 {status === "Admin"
-                  ? `Leave Credit Info of ${leaveCredit?.EmployeeID}`
+                  ? `Leave Credit Info of ${
+                      leaveCredit?.EmployeeID ? leaveCredit.EmployeeID : ""
+                    }`
                   : "Your Credit Info"}
               </caption>
               <thead>

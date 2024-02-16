@@ -21,6 +21,7 @@ import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
 import useAuth from "../../hooks/useAuth";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 
 const LeavesList = () => {
@@ -126,6 +127,9 @@ const LeavesList = () => {
   const handlePrintLeave = async (leaveToPrint) => {
     // Page attributes setup
     const pdfDoc = await PDFDocument.create();
+
+    // Register fontkit from pdf-lib to use a custom font
+    pdfDoc.registerFontkit(fontkit);
 
     // Helvetic font family
     const helveticaFontBold = await pdfDoc.embedFont(

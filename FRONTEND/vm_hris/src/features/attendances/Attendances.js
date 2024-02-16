@@ -136,7 +136,6 @@ const Attendances = () => {
   const handleNextPage = () => {
     setStartSlice((prev) => prev + 20);
     setEndSlice((prev) => prev + 20);
-    console.log(filteredList?.length);
   };
 
   const handlePrevPage = () => {

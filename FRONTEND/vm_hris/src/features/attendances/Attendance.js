@@ -89,12 +89,34 @@ const Attendance = ({ att, attlogData }) => {
       const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const fontSize = 8.5;
 
-      const EmployeeName = form.getTextField("EmployeeName");
-      const BioID = form.getTextField("BioID");
-      const DepartmentBranch = form.getTextField("DepartmentBranch");
-      const Position = form.getTextField("Position");
-      const PrintDateTime = form.getTextField("PrintDateTime");
-      const PeriodCovered = form.getTextField("PeriodCovered");
+      // Function to find fields on the document
+      const FieldFinder = (fieldName, altFieldName) => {
+        let row = form.getFieldMaybe(fieldName);
+        if (!row) {
+          row = form.getField(altFieldName);
+        }
+        let rowName = row.getName();
+        return form.getTextField(rowName);
+      };
+
+      const EmployeeName = FieldFinder(
+        "EmployeeName",
+        "undefined.EmployeeName"
+      );
+      const BioID = FieldFinder("BioID", "undefined.BioID");
+      const DepartmentBranch = FieldFinder(
+        "DepartmentBranch",
+        "undefined.DepartmentBranch"
+      );
+      const Position = FieldFinder("Position", "undefined.Position");
+      const PrintDateTime = FieldFinder(
+        "PrintDateTime",
+        "undefined.PrintDateTime"
+      );
+      const PeriodCovered = FieldFinder(
+        "PeriodCovered",
+        "undefined.PeriodCovered"
+      );
 
       // Set value to text fields
       EmployeeName.setText(
@@ -128,16 +150,6 @@ const Attendance = ({ att, attlogData }) => {
         return;
       }
 
-      // Function to find fields on the document
-      const FieldFinder = (fieldName, altFieldName) => {
-        let row = form.getFieldMaybe(fieldName);
-        if (!row) {
-          row = form.getField(altFieldName);
-        }
-        let rowName = row.getName();
-        return form.getTextField(rowName);
-      };
-
       dateArr.forEach((date, index) => {
         /* NOTE: the text field names suddenly had 'undefined' included before
         actual field name after editing in Nitro Pro 9 so i created
@@ -154,6 +166,7 @@ const Attendance = ({ att, attlogData }) => {
           `DAYSRow${index + 1}`,
           `undefined.DAYSRow${index + 1}`
         );
+        DAYSRow.setFontSize(fontSize - 1);
 
         const TimeInRow = FieldFinder(
           `Time InRow${index + 1}`,
@@ -307,12 +320,12 @@ const Attendance = ({ att, attlogData }) => {
             }
           } else {
             // Line already exist
-            if (val2 * 1 === 0) {
+            /* if (val2 * 1 === 0) {
               tempAttData[existingIndex] = {
                 ...tempAttData[existingIndex],
                 checkIn: `${formattedDate} ${formattedTime}`,
               };
-            } else if (val2 * 1 === 1) {
+            } else  */ if (val2 * 1 === 1) {
               tempAttData[existingIndex] = {
                 ...tempAttData[existingIndex],
                 checkOut: `${formattedDate} ${formattedTime}`,
@@ -407,7 +420,7 @@ const Attendance = ({ att, attlogData }) => {
               <Button
                 variant="outline-primary"
                 onClick={handlePrintAtt}
-                disabled={dateTo === "" && dateFrom === ""}
+                disabled={dateTo === "" || dateFrom === ""}
               >
                 <FontAwesomeIcon icon={faPrint} />
               </Button>

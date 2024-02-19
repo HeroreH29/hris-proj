@@ -29,6 +29,8 @@ import { PDFDocument } from "pdf-lib";
 import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
+import { FONTS } from "../../config/fontBase64";
+import fontkit from "@pdf-lib/fontkit";
 
 const refetchInterval = 15000;
 
@@ -55,8 +57,10 @@ const EditRecord = () => {
   const { personalinfo } = useGetPersonalinfosQuery("recordsList", {
     selectFromResult: ({ data }) => ({
       personalinfo: data?.ids
-        .filter((id) => data.entities[id].EmployeeID.toString() === employeeId)
-        .map((id) => data.entities[id])[0],
+        .filter(
+          (id) => data?.entities[id]?.EmployeeID?.toString() === employeeId
+        )
+        .map((id) => data?.entities[id])[0],
     }),
     pollingInterval: refetchInterval,
     refetchOnFocus: true,
@@ -79,7 +83,9 @@ const EditRecord = () => {
   const { educinfos } = useGetEducinfosQuery("recordsList", {
     selectFromResult: ({ data }) => ({
       educinfos: data?.ids
-        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .filter(
+          (id) => data?.entities[id]?.EmployeeID?.toString() === employeeId
+        )
         .map((id) => data?.entities[id]),
     }),
     pollingInterval: refetchInterval,
@@ -143,6 +149,16 @@ const EditRecord = () => {
       );
       const pdfDoc = await PDFDocument.load(formPdfBytes);
       const form = pdfDoc.getForm();
+      pdfDoc.registerFontkit(fontkit);
+      const fontSize = 14;
+      const workSans = await pdfDoc.embedFont(FONTS.WorkSansRegular);
+      const workSansItalic = await pdfDoc.embedFont(FONTS.WorkSansItalic);
+      const workSansBoldItalic = await pdfDoc.embedFont(
+        FONTS.WorkSansBoldItalic
+      );
+      const gazpachoRegularItalic = await pdfDoc.embedFont(
+        FONTS.GazpachoRegularItalic
+      );
 
       // Function to find fields on the document
       const FieldFinder = (fieldName, altFieldName) => {
@@ -230,6 +246,12 @@ const EditRecord = () => {
           `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}.`
         );
 
+        const empNameTxtLength = employeeName.getText().length;
+        employeeName.setFontSize(fontSize - empNameTxtLength * 0.1);
+        employeeName.updateAppearances(workSans);
+
+        let txtLength = 0;
+
         genInfoValArr.forEach((e) => {
           //const element = form.getTextField(e);
           const element = FieldFinder(e, `undefined.${e}`);
@@ -244,14 +266,19 @@ const EditRecord = () => {
                 new Date(geninfo?.[e]),
                 "MMM dd, yyyy"
               );
-              //element.setText(formattedDate);
               element.setText(formattedDate);
             } else {
               element.setText("");
             }
           } else {
-            element.setText(String(geninfo?.[e]));
+            element.setText(geninfo[e] ? String(geninfo[e]) : "");
           }
+
+          if (element.getText()) {
+            txtLength = element.getText().length ? element.getText().length : 0;
+          }
+          element.setFontSize(fontSize - txtLength * 0.2);
+          element.updateAppearances(workSans);
         });
 
         personalInfoValArr.forEach((e) => {
@@ -265,31 +292,44 @@ const EditRecord = () => {
                 : personalinfo?.Address
             );
           } else if (e === "PermanentAddress") {
-            element.setText(personalinfo?.PermanentAddress || "-");
-          } else {
-            element.setText(String(personalinfo?.[e]));
-          }
-        });
-
-        dependents.forEach((d, i) => {
-          depValArr.forEach((e) => {
-            //const element = form.getTextField(`${e}Row${i + 1}`);
-            const element = FieldFinder(
-              `${e}${i + 1}`,
-              `undefined.${e}${i + 1}`
+            element.setText(
+              personalinfo.PermanentAddress ? personalinfo.PermanentAddress : ""
             );
-
-            if (element) {
-              if (e === "Covered") {
-                element.setText(String(d[e]) === "1" ? "Yes" : "No");
-              } else {
-                element.setText(String(d[e]));
-              }
-            } else {
-              console.warn(`Element ${e}${i + 1} not found.`);
-            }
-          });
+          } else if (e === "Email") {
+            element.setText(personalinfo[e] ? String(personalinfo[e]) : "");
+          } else {
+            element.setFontSize(fontSize - 3);
+            element.setText(personalinfo[e] ? String(personalinfo[e]) : "");
+          }
+          element.updateAppearances(workSans);
         });
+
+        dependents
+          .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
+          .forEach((d, i) => {
+            depValArr.forEach((e) => {
+              //const element = form.getTextField(`${e}Row${i + 1}`);
+              const element = FieldFinder(
+                `${e}${i + 1}`,
+                `undefined.${e}${i + 1}`
+              );
+
+              if (element) {
+                if (e === "Covered") {
+                  element.setText(String(d[e]) === "1" ? "Yes" : "No");
+                } else {
+                  element.setText(String(d[e]));
+                }
+              } else {
+                console.warn(`Element ${e}${i + 1} not found.`);
+              }
+
+              if (e !== "Names") {
+                element.setFontSize(fontSize - 2);
+              }
+              element.updateAppearances(workSans);
+            });
+          });
 
         educinfos.forEach((e, i) => {
           formEducAttain.forEach((val) => {
@@ -308,6 +348,8 @@ const EditRecord = () => {
             } else {
               element.setText(e?.[val]);
             }
+            element.setFontSize(fontSize - 5);
+            element.updateAppearances(workSans);
           });
         });
 
@@ -328,7 +370,41 @@ const EditRecord = () => {
             } else {
               element.setText(String(w?.[val]));
             }
+            element.setFontSize(fontSize - 5);
+            element.updateAppearances(workSans);
           });
+        });
+
+        const pages = pdfDoc.getPages();
+        const thirdPage = pages[2];
+        const { height, width } = thirdPage.getSize();
+        const text = `"The information contained in this document is confidential and intended solely for the recipient. Unauthorized disclosure, copying, or distribution of this content is strictly prohibited. Any breach of confidentiality will be subject to legal action. This document also includes confidential information related to Via Mare Corporation and may only be requested within the organization."\n- Via Mare Corp. (${new Date()
+          .getFullYear()
+          .toString()})`;
+
+        thirdPage.drawText("Date Printed:", {
+          x: width * 0.06,
+          y: height * 0.55,
+          size: fontSize - 4,
+          font: workSansBoldItalic,
+          opacity: 0.5,
+        });
+        thirdPage.drawText(`${format(new Date(), "PPPP")}`, {
+          x: width * 0.2,
+          y: height * 0.55,
+          size: fontSize - 4,
+          font: workSansItalic,
+          opacity: 0.5,
+        });
+        thirdPage.drawText(text, {
+          y: height * 0.4,
+          x: width * 0.04,
+          size: fontSize - 6,
+          font: gazpachoRegularItalic,
+          opacity: 0.5,
+          lineHeight: fontSize - 2,
+          maxWidth: 550,
+          wordBreaks: [" "],
         });
 
         const pdfBytes = await pdfDoc.save();

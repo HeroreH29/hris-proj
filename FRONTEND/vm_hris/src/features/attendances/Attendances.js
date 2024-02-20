@@ -70,6 +70,9 @@ const Attendances = () => {
       reader.onload = (event) => {
         const fileContents = event.target.result;
 
+        const base64String = btoa(fileContents);
+        console.log("Base64 string:", base64String);
+
         const lines = fileContents.split("\n").map((line) => line.trim());
         setAttlogData(lines);
 

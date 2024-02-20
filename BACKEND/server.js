@@ -30,6 +30,7 @@ app.use("/", require("./routes/root"));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/announcements", require("./routes/announcementRoutes"));
+app.use("/attendances", require("./routes/attendanceRoutes"));
 app.use("/geninfos", require("./routes/genInfoRoutes"));
 app.use("/personalinfos", require("./routes/personalInfoRoutes"));
 app.use("/dependents", require("./routes/dependentRoutes"));

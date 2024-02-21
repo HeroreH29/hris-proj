@@ -13,6 +13,11 @@ import Attendance from "./Attendance";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 import { ASSIGNEDOUTLET, EMPLOYEETYPE } from "../../config/gInfoOptions";
+import {
+  useAddNewAttendanceMutation,
+  useGetAttendanceDataQuery,
+  useUpdateAttendanceMutation,
+} from "./attendancesApiSlice";
 
 const Attendances = () => {
   useTitle("Attendances | Via Mare HRIS");
@@ -46,11 +51,30 @@ const Attendances = () => {
     data: geninfos,
     isSuccess: genSuccess,
     isLoading: genLoading,
-    // eslint-disable-next-line
-    isError: genError,
-    // eslint-disable-next-line
-    error: gerror,
   } = useGetGeninfosQuery();
+
+  const { data: attdata, isSuccess: attdataSuccess } =
+    useGetAttendanceDataQuery();
+
+  const [
+    addAttData,
+    {
+      isSuccess: addattSuccess,
+      isLoading: addattLoading,
+      isError: addattError,
+      error: addatterr,
+    },
+  ] = useAddNewAttendanceMutation();
+
+  const [
+    updateAttData,
+    {
+      isSuccess: updateattSuccess,
+      isLoading: updateattLoading,
+      isError: updateattError,
+      error: updateatterr,
+    },
+  ] = useUpdateAttendanceMutation();
 
   useEffect(() => {
     if (attList?.length > 0) {
@@ -58,8 +82,26 @@ const Attendances = () => {
     }
   }, [attList]);
 
+  useEffect(() => {
+    if (attdata) {
+      const { ids, entities } = attdata;
+
+      ids.forEach((id) => {
+        console.log(entities[id].data);
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (addattError || updateattError) {
+      console.log(addatterr);
+      console.log(updateatterr);
+    }
+  }, [addattError, addatterr, updateattError, updateatterr]);
+
   if (genLoading) return <Spinner animation="border" />;
 
+  // Function for attlog uploading
   const AttlogFileUpload = (file) => {
     // Check if the uploaded file is an 'attlog.dat' file
     if (file.name.includes("attlog.dat") && genSuccess) {
@@ -67,11 +109,24 @@ const Attendances = () => {
 
       const { ids, entities } = geninfos;
 
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const fileContents = event.target.result;
 
-        const base64String = btoa(fileContents);
-        console.log("Base64 string:", base64String);
+        /* Upload file contents to database if data is not yet existing.
+        Else, append the data into the existing file */
+        if (!attdata) {
+          await addAttData({
+            attlogName: file.name,
+            data: fileContents,
+          });
+        } else {
+          const { ids } = attdata;
+          await updateAttData({
+            id: ids[0],
+            attlogName: file.name,
+            data: fileContents,
+          });
+        }
 
         const lines = fileContents.split("\n").map((line) => line.trim());
         setAttlogData(lines);

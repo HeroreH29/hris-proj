@@ -8,8 +8,8 @@ router.use(verifyJWT);
 router
   .route("/")
   .get(attendanceController.getAttendanceData)
-  .post(attendanceController.createAttendance);
-//   .patch(attendanceController.updateAnnouncement)
+  .post(attendanceController.createAttendance)
+  .patch(attendanceController.updateAttendance);
 //   .delete(attendanceController.deleteAnnouncement);
 
 module.exports = router;

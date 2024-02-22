@@ -18,6 +18,8 @@ import {
   useGetAttendanceDataQuery,
   useUpdateAttendanceMutation,
 } from "./attendancesApiSlice";
+import { faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Attendances = () => {
   useTitle("Attendances | Via Mare HRIS");
@@ -53,8 +55,11 @@ const Attendances = () => {
     isLoading: genLoading,
   } = useGetGeninfosQuery();
 
-  const { data: attdata, isSuccess: attdataSuccess } =
-    useGetAttendanceDataQuery();
+  const {
+    data: attdata,
+    isSuccess: attdataSuccess,
+    isLoading: attdataLoading,
+  } = useGetAttendanceDataQuery();
 
   const [
     addAttData,
@@ -76,21 +81,53 @@ const Attendances = () => {
     },
   ] = useUpdateAttendanceMutation();
 
+  // Function for processing attlog data
+  const ProcessAttlog = (ids, entities, fileContents) => {
+    const lines = fileContents.split("\n").map((line) => line.trim());
+    setAttlogData(lines);
+
+    const tempAttList = [];
+
+    try {
+      lines.forEach((line) => {
+        const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
+
+        if (bioId !== "1") {
+          const matchedRecord = ids
+            .filter((id) => {
+              return String(entities[id].BioID) === String(bioId);
+            })
+            .map((id) => entities[id])[0];
+
+          const existingLine = tempAttList.findIndex((e) => {
+            return String(e.bioId) === String(bioId);
+          });
+
+          if (existingLine === -1) {
+            const fullname = `${matchedRecord?.LastName}, ${
+              matchedRecord?.FirstName
+            } ${matchedRecord?.MI ? matchedRecord.MI : ""}`;
+            tempAttList.push({
+              bioId: bioId,
+              name: fullname,
+              outlet: matchedRecord?.AssignedOutlet,
+              empType: matchedRecord?.EmployeeType,
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error(`ProcessAttlog() Error: ${error}`);
+    }
+
+    return tempAttList;
+  };
+
   useEffect(() => {
     if (attList?.length > 0) {
-      toast.success("Attendance logs uploaded!");
+      toast.success("Attendance logs loaded!");
     }
   }, [attList]);
-
-  useEffect(() => {
-    if (attdata) {
-      const { ids, entities } = attdata;
-
-      ids.forEach((id) => {
-        console.log(entities[id].data);
-      });
-    }
-  });
 
   useEffect(() => {
     if (addattError || updateattError) {
@@ -99,7 +136,22 @@ const Attendances = () => {
     }
   }, [addattError, addatterr, updateattError, updateatterr]);
 
-  if (genLoading) return <Spinner animation="border" />;
+  /* useEffect(() => {
+    if (attdataSuccess && genSuccess) {
+      const { ids, entities } = attdata;
+
+      let fileContents;
+
+      ids.forEach((id) => {
+        fileContents = entities[id].data;
+      });
+
+      setAttList(ProcessAttlog(geninfos.ids, geninfos.entities, fileContents));
+    }
+    // eslint-disable-next-line
+  }, [attdataSuccess]); */
+
+  if (genLoading && attdataLoading) return <Spinner animation="border" />;
 
   // Function for attlog uploading
   const AttlogFileUpload = (file) => {
@@ -128,43 +180,25 @@ const Attendances = () => {
           });
         }
 
-        const lines = fileContents.split("\n").map((line) => line.trim());
-        setAttlogData(lines);
+        // Process the fetched attlog data
+        const attlogList = ProcessAttlog(ids, entities, fileContents);
 
-        const tempAttList = [];
-
-        try {
-          lines.forEach((line) => {
-            const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
-
-            if (bioId !== "1") {
-              const matchedRecord = ids
-                .filter((id) => {
-                  return String(entities[id].BioID) === String(bioId);
-                })
-                .map((id) => entities[id])[0];
-
-              const existingLine = tempAttList.findIndex((e) => {
-                return String(e.bioId) === String(bioId);
-              });
-
-              if (existingLine === -1) {
-                tempAttList.push({
-                  bioId: bioId,
-                  name: `${matchedRecord?.LastName}, ${matchedRecord?.FirstName} ${matchedRecord?.MI}`,
-                  outlet: matchedRecord?.AssignedOutlet,
-                  empType: matchedRecord?.EmployeeType,
-                });
-              }
-            }
-          });
-        } catch (error) {
-          console.error(`AttlogFileUpload Error: ${error}`);
-        }
-
-        setAttList(tempAttList);
+        setAttList(attlogList);
       };
       reader.readAsText(file);
+    }
+  };
+
+  const handleAttlistRefresh = () => {
+    if (attdataSuccess && genSuccess) {
+      const { ids: genids, entities: genentities } = geninfos;
+      const { ids: attids, entities: attentities } = attdata;
+
+      const fileContents = attids.map((id) => {
+        return attentities[id].data;
+      });
+
+      setAttList(ProcessAttlog(genids, genentities, fileContents[0]));
     }
   };
 
@@ -206,6 +240,15 @@ const Attendances = () => {
       <Row>
         <Col>
           <h3>Attendances</h3>
+        </Col>
+        <Col md="auto">
+          <Button
+            variant="outline-success"
+            onClick={() => handleAttlistRefresh()}
+          >
+            Load attendance
+            <FontAwesomeIcon className="ms-2" icon={faRefresh} />
+          </Button>
         </Col>
       </Row>
       <Row className="p-2">

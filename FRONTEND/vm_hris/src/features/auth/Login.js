@@ -147,7 +147,7 @@ const Login = () => {
             as={Col}
             md={"auto"}
           >
-            <Button type="submit" variant="success">
+            <Button type="submit" variant="outline-success">
               Login
             </Button>
           </Row>

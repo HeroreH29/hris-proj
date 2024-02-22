@@ -591,20 +591,23 @@ const LeavesList = () => {
     };
 
     const pageFooter = async () => {
-      page.drawText("Date Printed:", {
+      page.drawText("Date Generated:", {
         x: width * 0.06,
         y: contentEnd,
         size: fontSize - 6,
         font: workSansBoldItalic,
         opacity: 0.5,
       });
-      page.drawText(`${format(new Date(), "PPPP")}`, {
-        x: width * 0.2,
-        y: contentEnd,
-        size: fontSize - 6,
-        font: workSansItalic,
-        opacity: 0.5,
-      });
+      page.drawText(
+        `${format(new Date(), "PPPP")} @ ${format(new Date(), "pp")}`,
+        {
+          x: width * 0.225,
+          y: contentEnd,
+          size: fontSize - 6,
+          font: workSansItalic,
+          opacity: 0.5,
+        }
+      );
 
       const text = `"The information contained in this document is confidential and intended solely for the recipient. Unauthorized disclosure, copying, or distribution of this content is strictly prohibited. Any breach of confidentiality will be subject to legal action. This document also includes confidential information related to Via Mare Corporation and may only be requested within the organization."\n- Via Mare Corp. (${new Date()
         .getFullYear()

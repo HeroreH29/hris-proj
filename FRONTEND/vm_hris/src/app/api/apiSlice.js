@@ -62,6 +62,8 @@ export const apiSlice = createApi({
     "Celebrant",
     "Document",
     "Leave",
+    "LeaveCredit",
+    "Attendance",
   ],
   endpoints: (builder) => ({}),
 });

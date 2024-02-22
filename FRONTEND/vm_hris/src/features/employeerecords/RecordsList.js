@@ -93,18 +93,6 @@ const RecordsList = () => {
           matches && geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
       }
 
-      /* const matchesSearch =
-        !searchValue ||
-        geninfo.LastName.toLowerCase().includes(searchLowerCase) ||
-        geninfo.FirstName.toLowerCase().includes(searchLowerCase); */
-
-      /* const matchesOutlet =
-        !outletFilter ||
-        geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase; */
-      /* const matchesStatus =
-        !statusFilter ||
-        geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase; */
-
       return matches;
     });
 

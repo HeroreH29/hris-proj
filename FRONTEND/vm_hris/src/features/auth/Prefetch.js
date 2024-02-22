@@ -3,7 +3,6 @@ import { announcementsApiSlice } from "../announcements/announcementsApiSlice";
 import { usersApiSlice } from "../users/usersApiSlice";
 import { personalinfosApiSlice } from "../celebrants/pCelebrantsApiSlice";
 import { geninfosApiSlice } from "../celebrants/gCelebrantsApiSlice";
-import { leavesApiSlice } from "../leaves/leavesApiSlice";
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
@@ -37,16 +36,6 @@ const Prefetch = () => {
         force: true,
       })
     );
-
-    /* // Prefetch leaves and leave credits to reduce loading times
-    store.dispatch(
-      leavesApiSlice.util.prefetch("getLeaves", undefined, { force: true })
-    );
-    store.dispatch(
-      leavesApiSlice.util.prefetch("getLeaveCredits", undefined, {
-        force: true,
-      })
-    ); */
   }, []);
 
   return <Outlet />;

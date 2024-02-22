@@ -21,11 +21,12 @@ const Record = ({ geninfoId }) => {
       status === "Active"
         ? "fw-semibold text-success"
         : "fw-semibold text-danger";
-
     return (
       <tr onClick={handleEdit}>
         <td>{geninfo.EmployeeID}</td>
-        <td>{`${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}`}</td>
+        <td>{`${geninfo.LastName}, ${geninfo.FirstName} ${
+          geninfo.MI ? geninfo.MI : ""
+        }`}</td>
         <td>{geninfo.AssignedOutlet}</td>
         <td>{geninfo.JobTitle}</td>
         <td className={statusClr}>{status}</td>

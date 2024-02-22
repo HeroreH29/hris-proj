@@ -109,32 +109,13 @@ const ForgotPass = () => {
           password: newPassword,
         });
       }
-      /* try {
-        const { accessToken } = await login({ username, newPassword }).unwrap();
-        if (accessToken) {
-          dispatch(setCredentials({ accessToken }));
-          setUsername("");
-          setNewPassword("");
-          setPassInvalid(false);
-          setUserInvalid(false);
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        if (error.status === 401 || error.status === 404) {
-          alert("Username or newPassword incorrect");
-          setPassInvalid(true);
-          setUserInvalid(true);
-          setUsername("");
-          setNewPassword("");
-        }
-      } */
     }
 
     setValidated(true);
   };
 
   return (
-    <Container id className="p-5 rounded bg-light mt-2 mb-2" as={Col} md={5}>
+    <Container className="p-5 rounded bg-light mt-2 mb-2" as={Col} md={5}>
       <div className="mb-3 text-center" id="loginTitle">
         <h2 id="loginTitle">Forgot Password</h2>
         <small className="fst-italic">{`(Put username of account for password reset)`}</small>

@@ -1,27 +1,6 @@
 const Attendance = require("../models/Attendance");
 const { format } = require("date-fns");
 
-// Conversion function of base64 string to a usable file
-const base64ToFile = (base64String, fileName) => {
-  // Decode Base64 string
-  const binaryString = atob(base64String.toString("base64"));
-
-  // Convert binary string to ArrayBuffer
-  const arrayBuffer = new ArrayBuffer(binaryString.length);
-  const uint8Array = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < binaryString.length; i++) {
-    uint8Array[i] = binaryString.charCodeAt(i);
-  }
-
-  // Create Blob from ArrayBuffer
-  const blob = new Blob([arrayBuffer], { type: "application/octet-stream" });
-
-  // Create File object from Blob
-  const file = new File([blob], fileName);
-
-  return file;
-};
-
 // @desc Get attendance data
 // @route GET /attendances
 // @access Private
@@ -31,15 +10,9 @@ const getAttendanceData = async (req, res) => {
     return res.status(400).json({ message: "No attendance data found" });
   }
 
-  const modifiedAttendanceData = {
-    ...attendancedata,
-    fileContents: base64ToFile(
-      attendancedata[0].data,
-      attendancedata[0].attlogName
-    ),
-  };
+  attendancedata[0].data = atob(attendancedata[0].data.toString("base64"));
 
-  res.json(modifiedAttendanceData);
+  res.json(attendancedata);
 };
 
 // @desc Create attendance

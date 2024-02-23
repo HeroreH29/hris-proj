@@ -95,7 +95,10 @@ const Attendances = () => {
         if (bioId !== "1") {
           const matchedRecord = ids
             .filter((id) => {
-              return String(entities[id].BioID) === String(bioId);
+              return (
+                String(entities[id].BioID) === String(bioId) &&
+                entities[id].EmpStatus === "Y"
+              );
             })
             .map((id) => entities[id])[0];
 
@@ -198,6 +201,7 @@ const Attendances = () => {
         return attentities[id].data;
       });
 
+      setAttList([]);
       setAttList(ProcessAttlog(genids, genentities, fileContents[0]));
     }
   };
@@ -308,14 +312,14 @@ const Attendances = () => {
         </Form.Group>
         <Col>
           <Button
-            variant="outline-secondary float-end"
+            variant="outline-primary float-end"
             onClick={handleNextPage}
             disabled={endSlice >= filteredList?.length}
           >
             Next
           </Button>
           <Button
-            variant="outline-secondary float-end me-3"
+            variant="outline-primary float-end me-3"
             onClick={handlePrevPage}
             disabled={startSlice === 0}
           >

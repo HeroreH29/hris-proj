@@ -101,8 +101,6 @@ const reApplyCreditBudget = async (leavecredits) => {
       await leaveCreditRecord.save();
     }
   });
-
-  console.log("Budget re-applied");
 };
 
 // desc Get all leavecredits

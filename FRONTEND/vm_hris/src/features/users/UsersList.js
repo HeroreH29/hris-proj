@@ -58,7 +58,13 @@ const UsersList = () => {
             </Col>
           )}
         </Row>
-        <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
+        <Table
+          responsive
+          bordered
+          striped
+          hover
+          className="align-middle ms-3 mt-3 mb-3"
+        >
           <thead>
             <tr>
               <th scope="col">Username</th>

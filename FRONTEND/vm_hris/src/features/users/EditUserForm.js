@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
 import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
-import { Form, Button, Col, Row, Container } from "react-bootstrap";
+import { Form, Button, Col, Row, Container, InputGroup } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEye,
+  faEyeSlash,
+  faLeftLong,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import useTitle from "../../hooks/useTitle";
 
-const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
+const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const EditUserForm = ({ user }) => {
   useTitle("Edit User | Via Mare HRIS");
@@ -28,6 +32,7 @@ const EditUserForm = ({ user }) => {
   /* VARIABLES */
   const [username, setUsername] = useState(user.username);
   const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastname] = useState(user.lastName);
   const [employeeId, setEmployeeId] = useState(user.employeeId);
@@ -189,17 +194,25 @@ const EditUserForm = ({ user }) => {
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Password</Form.Label>
               <small>{` [empty field = no change]`}</small>
-              <Form.Control
-                type="password"
-                autoComplete="off"
-                pattern={PWD_REGEX}
-                placeholder="Password"
-                onChange={onPasswordChanged}
-              />
-              <Form.Control.Feedback type="invalid">
-                Minimum of 8 characters. At least - 1 uppercase letter, 1
-                lowercase letter, 1 unique symbol, and 1 digit/number.
-              </Form.Control.Feedback>
+              <InputGroup>
+                <Form.Control
+                  type={!showPass ? "password" : "text"}
+                  autoComplete="off"
+                  pattern={PWD_REGEX}
+                  placeholder="Password"
+                  onChange={onPasswordChanged}
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setShowPass(!showPass)}
+                >
+                  <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
+                </Button>
+                <Form.Control.Feedback type="invalid">
+                  Minimum of 8 characters. At least - 1 lowercase letter, 1
+                  unique symbol, and 1 digit/number.
+                </Form.Control.Feedback>
+              </InputGroup>
             </Form.Group>
           </Row>
           {/* First name and last name */}
@@ -211,6 +224,7 @@ const EditUserForm = ({ user }) => {
                 type="text"
                 autoComplete="off"
                 placeholder="First Name"
+                disabled
                 value={firstName}
                 onChange={onFirstNameChanged}
               />
@@ -223,6 +237,7 @@ const EditUserForm = ({ user }) => {
                 type="text"
                 autoComplete="off"
                 placeholder="Last Name"
+                disabled
                 value={lastName}
                 onChange={onLastnameChanged}
               />
@@ -233,7 +248,12 @@ const EditUserForm = ({ user }) => {
           <Row className="mb-3">
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Branch</Form.Label>
-              <Form.Select required value={branch} onChange={onBranchChanged}>
+              <Form.Select
+                disabled
+                required
+                value={branch}
+                onChange={onBranchChanged}
+              >
                 {branchOptions}
               </Form.Select>
               <Form.Control.Feedback type="invalid">

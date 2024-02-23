@@ -54,12 +54,14 @@ const createNewUser = async (req, res) => {
   }
 
   // Check duplicates (same username lowercase or uppercase is considered)
-  const duplicate = await User.findOne({ username })
+  const duplicate = await User.findOne({ employeeId })
     .collation({ locale: "en", strength: 2 })
     .lean()
     .exec();
   if (duplicate) {
-    return res.status(409).json({ message: "Username already taken" });
+    return res
+      .status(409)
+      .json({ message: "User account with Employee ID already exist" });
   }
 
   // Hash password

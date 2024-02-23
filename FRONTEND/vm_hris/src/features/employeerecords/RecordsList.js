@@ -145,8 +145,8 @@ const RecordsList = () => {
           <tbody>{tableContent}</tbody>
           <tfoot>
             <tr>
-              <td></td>
-              <td>
+              <td className="bg-secondary-subtle"></td>
+              <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Control
                     type="text"
@@ -160,7 +160,7 @@ const RecordsList = () => {
                   />
                 </Form>
               </td>
-              <td>
+              <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
                     onChange={(e) => {
@@ -173,8 +173,8 @@ const RecordsList = () => {
                   </Form.Select>
                 </Form>
               </td>
-              <td>{}</td>
-              <td>
+              <td className="bg-secondary-subtle"></td>
+              <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
                     onChange={(e) => {
@@ -191,7 +191,7 @@ const RecordsList = () => {
             <tr>
               <td colSpan={5}>
                 <Button
-                  variant="outline-secondary float-end"
+                  variant="outline-primary float-end"
                   disabled={
                     filteredIds?.length
                       ? sliceEnd >= filteredIds?.length
@@ -205,7 +205,7 @@ const RecordsList = () => {
                   Next
                 </Button>
                 <Button
-                  variant="outline-secondary float-end me-3"
+                  variant="outline-primary float-end me-3"
                   disabled={sliceStart === 0}
                   onClick={() => {
                     setSliceStart((prev) => prev - 10);

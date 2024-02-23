@@ -53,11 +53,11 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(undefined, {
+  } = useGetLeavesQuery(/* undefined, {
     pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
-  });
+  } */);
 
   const { data: geninfos } = useGetGeninfosQuery();
 
@@ -85,7 +85,7 @@ const LeavesList = () => {
   const [year, setYear] = useState("2024");
   const [month, setMonth] = useState("");
   const start = new Date().getFullYear();
-  const yearsArr = Array.from({ length: start - 2010 + 1 }, (_, i) => 2010 + i);
+  const yearsArr = Array.from({ length: start - 2018 + 1 }, (_, i) => 2018 + i);
   const monthsArr = Array.from({ length: 12 }, (_, index) => index).map(
     (monthNum) => format(new Date(2023, monthNum, 1), "MMM")
   );
@@ -652,7 +652,7 @@ const LeavesList = () => {
   if (isLoading && !leaves) content = <Spinner animation="border" />;
 
   if (isError) {
-    content = <p className="text-danger">{error?.data?.message}</p>;
+    content = <p className="text-danger fw-bold">{error?.data?.message}</p>;
   }
 
   let overallLeavesContent;
@@ -674,7 +674,11 @@ const LeavesList = () => {
         }
 
         if (month !== "") {
-          matches = matches && leave.DateOfFilling.includes(month);
+          matches = matches && leave.DateOfFilling?.includes(month);
+        }
+
+        if (year !== "") {
+          matches = matches && leave.DateOfFilling?.includes(year);
         }
 
         return matches;
@@ -726,7 +730,7 @@ const LeavesList = () => {
               hover
               className="align-middle ms-3 mt-3 mb-3 caption-top"
             >
-              <caption>Overall Filed Leaves of Year 2024</caption>
+              <caption>Overall Filed Leaves</caption>
               <thead>
                 <tr className="align-middle">
                   <th scope="col">User</th>
@@ -747,21 +751,21 @@ const LeavesList = () => {
               <tbody>{overallLeavesContent}</tbody>
               <tfoot>
                 <tr>
-                  <td>
+                  <td className="bg-secondary-subtle">
                     <Form>
                       <Form.Control
                         type="text"
                         value={name}
+                        placeholder="Enter name"
                         disabled={status !== "Admin" /* true */}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </Form>
                   </td>
-                  <td>
+                  <td className="bg-secondary-subtle">
                     <Form>
                       <Form.Select
                         value={year}
-                        disabled
                         onChange={(e) => setYear(e.target.value)}
                       >
                         <option value={""}>Select year</option>
@@ -769,7 +773,7 @@ const LeavesList = () => {
                       </Form.Select>
                     </Form>
                   </td>
-                  <td>
+                  <td className="bg-secondary-subtle">
                     <Form>
                       <Form.Select
                         value={month}
@@ -780,10 +784,10 @@ const LeavesList = () => {
                       </Form.Select>
                     </Form>
                   </td>
-                  <td colSpan={4}>
+                  <td className="bg-secondary-subtle" colSpan={4}>
                     <Button
                       className="float-end ms-2"
-                      variant="outline-secondary"
+                      variant="outline-primary"
                       onClick={handleNext}
                       disabled={endSlice > filteredIds?.length}
                     >
@@ -791,7 +795,7 @@ const LeavesList = () => {
                     </Button>
                     <Button
                       className="float-end"
-                      variant="outline-secondary"
+                      variant="outline-primary"
                       onClick={handlePrev}
                       disabled={startSlice === 0}
                     >

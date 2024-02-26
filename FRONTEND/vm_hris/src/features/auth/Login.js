@@ -30,7 +30,7 @@ const Login = () => {
   const [passInvalid, setPassInvalid] = useState(false);
   const [userInvalid, setUserInvalid] = useState(false);
 
-  const [login, { isLoading, isSuccess }] = useLoginMutation();
+  const [login, { isLoading, isSuccess, isError, error }] = useLoginMutation();
 
   useEffect(() => {
     if (isSuccess) {
@@ -63,7 +63,7 @@ const Login = () => {
         }
       } catch (error) {
         if (error.status === 401 || error.status === 404) {
-          alert("Username or password incorrect");
+          toast.warn("Username or password incorrect");
           setPassInvalid(true);
           setUserInvalid(true);
           setUsername("");

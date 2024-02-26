@@ -33,10 +33,13 @@ const getAllLeaves = async (req, res) => {
 // @route POST /leaves
 // @access Private
 const createLeave = async (req, res) => {
-  const { ModifiedDate, DayTime, Approve, Lto, Remarks, ...others } = req.body;
+  const { ModifiedDate, DayTime, Approve, Lto, Remarks, Credited, ...others } =
+    req.body;
 
   // Check if other properties of the request body has values
   const othersHasValues = Object.values(others).every((value) => value);
+
+  console.log(others);
 
   // Some values are missing
   if (!othersHasValues) {

@@ -1,10 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "../../features/auth/authSlice";
 
-const baseUrls = [
-  "https://viamare-hris-api.onrender.com",
-  "http://192.168.1.6:3500",
-];
+const baseUrls = ["http://192.168.1.6:3500", "http://localhost:3500"];
 
 const fetchIpAddress = () => {
   fetch("/ipaddress")
@@ -26,10 +23,10 @@ const fetchIpAddress = () => {
     });
 };
 
-fetchIpAddress();
+//fetchIpAddress();
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: /* `${fetchIpAddress()}` */ baseUrls[1],
+  baseUrl: baseUrls[0],
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;

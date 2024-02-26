@@ -319,13 +319,7 @@ const Attendance = ({ att, attlogData }) => {
               });
             }
           } else {
-            // Line already exist
-            /* if (val2 * 1 === 0) {
-              tempAttData[existingIndex] = {
-                ...tempAttData[existingIndex],
-                checkIn: `${formattedDate} ${formattedTime}`,
-              };
-            } else  */ if (val2 * 1 === 1) {
+            if (val2 * 1 === 1) {
               tempAttData[existingIndex] = {
                 ...tempAttData[existingIndex],
                 checkOut: `${formattedDate} ${formattedTime}`,

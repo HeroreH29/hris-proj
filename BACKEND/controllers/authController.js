@@ -31,6 +31,12 @@ const login = async (req, res) => {
     return res.status(404).json({ message: "User does not exist" });
   }
 
+  if (foundUser.online) {
+    return res
+      .status(401)
+      .json({ message: "This account is currently logged in" });
+  }
+
   const match = await bcrypt.compare(password, foundUser.password);
 
   if (!match) {
@@ -109,6 +115,9 @@ const refresh = async (req, res) => {
 // @access Public - clear cookies if exists
 const logout = async (req, res) => {
   const cookies = req.cookies;
+
+  // Revert online status of user to FALSE
+
   if (!cookies?.jwt) return res.sendStatus(204); // No content
   res.clearCookie("jwt", logoutCookie);
   res.json({ message: "Cookie cleared" });

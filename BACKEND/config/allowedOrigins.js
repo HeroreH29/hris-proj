@@ -1,9 +1,7 @@
-const allowedDevelopmentOrigins = [
+const allowedOrigins = [
   "http://192.168.1.6:3000",
   "http://192.168.1.6:3500",
-  undefined,
+  "http://localhost:3000",
 ];
 
-const allowedProductionOrigins = ["http://192.168.1.6:3000"];
-
-module.exports = { allowedDevelopmentOrigins, allowedProductionOrigins };
+module.exports = { allowedOrigins };

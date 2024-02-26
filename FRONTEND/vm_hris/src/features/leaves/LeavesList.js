@@ -20,7 +20,7 @@ import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
 import useAuth from "../../hooks/useAuth";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { FONTS } from "../../config/fontBase64";
@@ -762,24 +762,24 @@ const LeavesList = () => {
                       />
                     </Form>
                   </td>
-                  <td className="bg-secondary-subtle">
+                  <td className="bg-secondary-subtle" colSpan={2}>
                     <Form>
                       <Form.Select
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
                       >
-                        <option value={""}>Select year</option>
+                        <option value={""}>Year</option>
                         {yearDropdown}
                       </Form.Select>
                     </Form>
                   </td>
-                  <td className="bg-secondary-subtle">
+                  <td className="bg-secondary-subtle" colSpan={2}>
                     <Form>
                       <Form.Select
                         value={month}
                         onChange={(e) => setMonth(e.target.value)}
                       >
-                        <option value={""}>Select month</option>
+                        <option value={""}>Month</option>
                         {monthDropdown}
                       </Form.Select>
                     </Form>

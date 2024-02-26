@@ -170,13 +170,6 @@ const EditRecord = () => {
         return form.getTextField(rowName);
       };
 
-      /* const fields = form.getFields();
-      fields.forEach((field) => {
-        const type = field.constructor.name;
-        const name = field.getName();
-        console.log(`${type}: ${name}`);
-      }); */
-
       try {
         const formEducAttain = [
           "Institution_Name",
@@ -382,7 +375,7 @@ const EditRecord = () => {
           .getFullYear()
           .toString()})`;
 
-        thirdPage.drawText("Date Printed:", {
+        thirdPage.drawText("Date Generated:", {
           x: width * 0.06,
           y: height * 0.55,
           size: fontSize - 4,
@@ -486,15 +479,14 @@ const EditRecord = () => {
         </Tab>
         <Tab
           title="Print record"
-          disabled={!personalinfo}
+          disabled={!employeeId || !personalinfo}
           eventKey={"printrecord"}
           unmountOnExit={true}
           onSelect={() => console.log("first")}
         >
           <div className="text-center">
             <Button
-              variant="outline-dark"
-              disabled={!personalinfo}
+              variant="outline-primary"
               onClick={handlePrintEmployeeRecord}
             >
               Click here to print record{" "}

@@ -4,6 +4,7 @@ import {
   useUpdateGeninfoMutation,
   useAddInactiveEmpMutation,
   useDeleteInactiveEmpMutation,
+  useGetGeninfosQuery,
 } from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
@@ -34,6 +35,9 @@ const ALPHANUM_REGEX = /^[A-z0-9]+$/;
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const { username } = useAuth();
+
+  const { data: geninfos } = useGetGeninfosQuery();
+
   // eslint-disable-next-line
   const [
     updateGeninfo,
@@ -70,13 +74,27 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const parsedDP = geninfo?.DateProbationary
     ? parse(geninfo?.DateProbationary, "MMM dd, yyyy", new Date())
     : "";
-  const parsedCD = geninfo?.ContractDate
-    ? parse(geninfo?.ContractDate, "MMMM dd, yyyy", new Date())
+  const parsedCD = geninfo?.ContractDateEnd
+    ? parse(geninfo?.ContractDateEnd, "MMMM dd, yyyy", new Date())
     : "";
+
+  const incrementBioID = () => {
+    if (geninfos?.ids?.length > 0) {
+      const { ids, entities } = geninfos;
+
+      const latestBioId = [...ids]
+        .sort((a, b) => {
+          return entities[b].BioID - entities[a].BioID;
+        })
+        .map((id) => entities[id].BioID)[0];
+
+      return latestBioId;
+    }
+  };
 
   /* GENINFO VARIABLES */
   const [employeeId, setEmployeeId] = useState(geninfo?.EmployeeID);
-  const [bioId, setBioId] = useState(geninfo?.BioID);
+  const [bioId, setBioId] = useState(geninfo?.BioID ?? incrementBioID() + 1);
   const [prefix, setPrefix] = useState(geninfo?.Prefix);
   const [firstName, setFirstName] = useState(geninfo?.FirstName);
   const [middleName, setMiddleName] = useState(geninfo?.MiddleName);
@@ -108,7 +126,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const [pinumber, setPInumber] = useState(geninfo?.PInumber);
   const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber);
   const [isContractual, setIsContractual] = useState(parsedCD ? true : false);
-  const [contractDate, setContractDate] = useState(
+  const [contractDateEnd, setContractDateEnd] = useState(
     parsedCD ? format(parsedCD, "yyyy-MM-dd") : ""
   );
 
@@ -134,7 +152,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       setPHnumber("");
       setPInumber("");
       setIsContractual(false);
-      setContractDate("");
+      setContractDateEnd("");
       setModeOfSeparation("");
 
       addSuccess && toast.success("Record successfully added!");
@@ -170,8 +188,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
         const revertedDL = dateLeaved
           ? dateRevert(dateLeaved, "MMM dd, yyyy")
           : "";
-        const revertedCD = contractDate
-          ? dateRevert(contractDate, "MMMM dd, yyyy")
+        const revertedCD = contractDateEnd
+          ? dateRevert(contractDateEnd, "MMMM dd, yyyy")
           : "";
 
         // Check if user is adding or updating an employee record
@@ -179,7 +197,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           await updateGeninfo({
             id: geninfo?.id,
             EmployeeID: employeeId,
-            BioID: bioId,
             Prefix: prefix,
             FirstName: firstName,
             MiddleName: middleName,
@@ -199,7 +216,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             SSSnumber: sssnumber,
             PHnumber: phnumber,
             PInumber: pinumber,
-            ContractDate: revertedCD,
+            ContractDateEnd: revertedCD,
           });
         } else {
           await addGeninfo({
@@ -224,7 +241,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             SSSnumber: sssnumber,
             PHnumber: phnumber,
             PInumber: pinumber,
-            ContractDate: revertedCD,
+            ContractDateEnd: revertedCD,
           });
         }
 
@@ -350,6 +367,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 type="text"
                 autoComplete="off"
                 required
+                disabled
                 value={bioId}
                 onChange={(e) => userInputChange(e, NUMBER_REGEX, setBioId)}
               />
@@ -419,48 +437,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Contractual?</Form.Label>
-              <Form.Check
-                type="switch"
-                checked={isContractual}
-                label={isContractual ? "Yes" : "No"}
-                onChange={() => {
-                  setIsContractual(!isContractual);
-                  setContractDate("");
-                }}
-              />
-            </Form.Group>
-            {isContractual && (
-              <>
-                <Form.Group as={Col} md="auto">
-                  <Form.Label className="fw-semibold">Contract Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    required
-                    value={contractDate}
-                    onChange={(e) => {
-                      // Checking if the contract date is after the employed date
-                      const daysDiff = differenceInDays(
-                        new Date(e.target.value),
-                        new Date(dateEmployed)
-                      );
-
-                      if (daysDiff > 0) {
-                        setContractDate(e.target.value);
-                      } else {
-                        toast.error(
-                          "Contract date must be greater than employed date"
-                        );
-                      }
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </>
-            )}
-            <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Assigned Outlet</Form.Label>
               <InputGroup>
                 <Form.Control
@@ -522,8 +498,53 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} md="auto">
+              <Form.Label className="fw-semibold">Contractual?</Form.Label>
+              <Form.Check
+                type="switch"
+                checked={isContractual}
+                label={isContractual ? "Yes" : "No"}
+                onChange={() => {
+                  setIsContractual(!isContractual);
+                  setContractDateEnd("");
+                }}
+              />
+            </Form.Group>
+            {isContractual && (
+              <>
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">
+                    Contract Date End
+                  </Form.Label>
+                  <Form.Control
+                    type="date"
+                    required
+                    value={contractDateEnd}
+                    onChange={(e) => {
+                      // Checking if the contract date is after the employed date
+                      const daysDiff = differenceInDays(
+                        new Date(e.target.value),
+                        new Date(dateEmployed)
+                      );
+
+                      if (daysDiff > 0) {
+                        setContractDateEnd(e.target.value);
+                      } else {
+                        toast.error(
+                          "Contract date must be greater than employed date"
+                        );
+                      }
+                    }}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    This field is required
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </>
+            )}
+            <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Probationary Date</Form.Label>
               <Form.Control
+                disabled={isContractual}
                 type="date"
                 value={dateProbationary}
                 onChange={(e) => setDateProbationary(e.target.value)}
@@ -538,6 +559,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Label>
               <Form.Control
                 type="date"
+                disabled={isContractual}
                 value={regDate}
                 onChange={(e) => setRegDate(e.target.value)}
               />
@@ -551,6 +573,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Label>
               <Form.Control
                 type="date"
+                disabled={isContractual}
                 value={dateLeaved}
                 onChange={(e) => setDateLeaved(e.target.value)}
               />

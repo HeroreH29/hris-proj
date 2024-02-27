@@ -26,7 +26,7 @@ function App() {
   useTitle("Login | Via Mare HRIS");
   return (
     <>
-      <ToastContainer autoClose={3000} />
+      <ToastContainer autoClose={3000} limit={7} />
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* public routes */}

@@ -20,9 +20,9 @@ const getAllLeaves = async (req, res) => {
 
     return (leave = {
       ...leave,
-      EmpName: `${match?.LastName ? match.LastName : ""}, ${
-        match?.FirstName ? match.FirstName : ""
-      } ${match?.MI ? match.MI : ""}.`,
+      EmpName: `${match?.LastName ?? ""}, ${match?.FirstName ?? ""} ${
+        match?.MI ?? ""
+      }.`,
     });
   });
 
@@ -38,8 +38,6 @@ const createLeave = async (req, res) => {
 
   // Check if other properties of the request body has values
   const othersHasValues = Object.values(others).every((value) => value);
-
-  console.log(others);
 
   // Some values are missing
   if (!othersHasValues) {

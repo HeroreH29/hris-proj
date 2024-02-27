@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetGeninfosQuery } from "./recordsApiSlice";
 import Record from "./Record";
 import {
@@ -19,6 +19,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
+import { toast } from "react-toastify";
+import { parse, differenceInDays, differenceInMonths } from "date-fns";
 
 const RecordsList = () => {
   const navigate = useNavigate();
@@ -59,6 +61,62 @@ const RecordsList = () => {
     error: gerror,
   } = useGetGeninfosQuery();
 
+  useEffect(() => {
+    toast.clearWaitingQueue();
+  }, []);
+
+  const RegularizationNotifier = (gids, gentities) => {
+    const toRegularize = gids.reduce((acc, gid) => {
+      const dateToday = new Date();
+      let parsedDate;
+
+      if (
+        gentities[gid]?.EmployeeType === "Probationary" &&
+        gentities[gid].EmpStatus === "Y"
+      ) {
+        if (gentities[gid]?.RegDate) {
+          parsedDate = parse(
+            gentities[gid]?.RegDate,
+            "MMMM dd, yyyy",
+            new Date()
+          );
+          if (differenceInDays(dateToday, parsedDate) >= 1) {
+            acc.push(gentities[gid].EmployeeID);
+          }
+        } else if (gentities[gid]?.DateProbationary) {
+          parsedDate = parse(
+            gentities[gid]?.DateProbationary,
+            "MMM dd, yyyy",
+            new Date()
+          );
+          if (differenceInMonths(dateToday, parsedDate) >= 6) {
+            acc.push(gentities[gid].EmployeeID);
+          }
+        } else if (gentities[gid]?.DateEmployed) {
+          parsedDate = parse(
+            gentities[gid]?.DateEmployed,
+            "MMM dd, yyyy",
+            new Date()
+          );
+          if (differenceInMonths(dateToday, parsedDate) >= 6) {
+            acc.push(gentities[gid].EmployeeID);
+          }
+        }
+      }
+      return acc;
+    }, []);
+
+    toRegularize.forEach((e) => {
+      toast.warn(`${e} needs to be regularized`, {
+        toastId: e,
+        onClick: () => {
+          const newTab = window.open("", "_blank");
+          newTab.location.href = `/employeerecords/${e}`;
+        },
+      });
+    });
+  };
+
   if (genLoading) return <Spinner animation="border" />;
 
   if (genError)
@@ -66,6 +124,9 @@ const RecordsList = () => {
 
   if (genSuccess) {
     const { ids: gids, entities: gentities } = geninfos;
+
+    // For notifying HR/Admin for employee regularization
+    RegularizationNotifier(gids, gentities);
 
     const filteredIds = gids?.filter((id) => {
       const geninfo = gentities[id];

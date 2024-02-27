@@ -89,7 +89,7 @@ const genInfoSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  ContractDate: {
+  ContractDateEnd: {
     type: String,
     default: "",
   },

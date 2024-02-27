@@ -430,15 +430,19 @@ const EditRecord = () => {
         <Col>
           <div>
             <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
-            {!employeeId && (
-              <small className="text-decoration-underline">
+            {!employeeId ? (
+              <small className="text-decoration-underline fw-semibold fst-italic">
                 You can only add GENERAL INFO for now. Add other details later.
+              </small>
+            ) : (
+              <small className="text-decoration-underline fw-semibold fst-italic">
+                Click any from the navigation tab to reveal the information
               </small>
             )}
           </div>
         </Col>
       </Row>
-      <Tabs className="p-3 mb-3" defaultActiveKey="geninfo" fill>
+      <Tabs className="p-3 mb-3" defaultActiveKey={""} fill>
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={geninfo} inactiveEmp={inactiveEmp} />
         </Tab>

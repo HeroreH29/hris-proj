@@ -8,11 +8,9 @@ const LeaveCredit = require("../models/LeaveCredit");
 const InactiveEmp = require("../models/InactiveEmp");
 const {
   differenceInYears,
-  differenceInMonths,
   differenceInDays,
+  differenceInMonths,
   parse,
-  format,
-  addMonths,
 } = require("date-fns");
 
 // Extra checking if EmployeeID are all numbers or not
@@ -107,8 +105,8 @@ const UpdateEmployeeID = async (origEmployeeID, newEmployeeID) => {
 const leaveCreditInclUpd = async (geninfos) => {
   const existingLeaveCreditIds = await LeaveCredit.distinct("EmployeeID");
 
-  // Employees w/ 0-4 service years and no LeaveCredit records
-  const zeroToFourWithoutLeaveCredit = geninfos
+  // Employees w/ 1-4 service years and no LeaveCredit records
+  const oneToFourWithoutLeaveCredit = geninfos
     .filter((geninfo) => {
       const parsedDate = parse(
         geninfo?.DateEmployed,
@@ -218,8 +216,8 @@ const leaveCreditInclUpd = async (geninfos) => {
     .map((geninfo) => geninfo.EmployeeID);
 
   // Include eligible 0-4 service years employees to leavecredits database
-  if (zeroToFourWithoutLeaveCredit?.length > 0) {
-    zeroToFourWithoutLeaveCredit.forEach(async (employeeId) => {
+  if (oneToFourWithoutLeaveCredit?.length > 0) {
+    oneToFourWithoutLeaveCredit.forEach(async (employeeId) => {
       await LeaveCredit.create({ EmployeeID: employeeId });
     });
   }
@@ -281,74 +279,6 @@ const leaveCreditInclUpd = async (geninfos) => {
   }
 };
 
-// This is the automated employee regularization
-const autoEmployeeRegularization = async (geninfos) => {
-  const toRegular = geninfos
-    .filter(
-      (geninfo) =>
-        geninfo?.EmployeeType === "Probationary" && geninfo.EmpStatus === "Y"
-    )
-    .map((geninfo) => geninfo);
-
-  if (toRegular?.length > 0) {
-    toRegular.forEach(async (geninfo) => {
-      let parsedDate;
-      const dateToday = new Date();
-
-      // Regularization Date exist
-      if (geninfo?.RegDate) {
-        parsedDate = parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date());
-        if (differenceInDays(dateToday, parsedDate) >= 1) {
-          const updateGeninfo = await GenInfo.findOneAndUpdate(
-            { EmployeeID: geninfo?.EmployeeID },
-            { EmployeeType: "Regular" },
-            { new: true }
-          ).exec();
-
-          await updateGeninfo.save();
-        }
-      }
-      // Probationary Date exist
-      else if (geninfo?.DateProbationary) {
-        parsedDate = parse(
-          geninfo?.DateProbationary,
-          "MMM dd, yyyy",
-          new Date()
-        );
-        if (differenceInMonths(dateToday, parsedDate) >= 6) {
-          const updateGeninfo = await GenInfo.findOneAndUpdate(
-            { EmployeeID: geninfo?.EmployeeID },
-            {
-              EmployeeType: "Regular",
-              RegDate: format(addMonths(parsedDate, 6), "MMMM dd, yyyy"),
-            },
-            { new: true }
-          ).exec();
-
-          await updateGeninfo.save();
-        }
-      }
-      // Date Employed exist
-      else if (geninfo?.DateEmployed) {
-        parsedDate = parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date());
-        if (differenceInMonths(dateToday, parsedDate) >= 6) {
-          const updateGeninfo = await GenInfo.findOneAndUpdate(
-            { EmployeeID: geninfo?.EmployeeID },
-            {
-              EmployeeType: "Regular",
-              RegDate: format(addMonths(parsedDate, 6), "MMMM dd, yyyy"),
-              DateProbationary: format(parsedDate, "MMM dd, yyyy"),
-            },
-            { new: true }
-          ).exec();
-
-          await updateGeninfo.save();
-        }
-      }
-    });
-  }
-};
-
 // @desc Get all geninfos
 // @route GET /geninfos
 // @access Private
@@ -360,7 +290,6 @@ const getAllGenInfo = async (req, res) => {
     return res.status(400).json({ message: "No general infos found" });
   }
 
-  autoEmployeeRegularization(geninfos);
   leaveCreditInclUpd(geninfos);
 
   res.json(geninfos);
@@ -371,85 +300,42 @@ const getAllGenInfo = async (req, res) => {
 // @access Private
 const createGenInfo = async (req, res) => {
   const {
-    EmployeeID,
-    BioID,
     Prefix,
-    FirstName,
     MiddleName,
-    LastName,
-    EmployeeType,
-    AssignedOutlet,
-    Department,
-    JobTitle,
-    DateEmployed,
     DateLeaved,
-    DateProbationary,
     RegDate,
-    EmpStatus,
+    DateProbationary,
     Notes,
-    TINnumber,
-    SSSnumber,
-    PInumber,
-    PHnumber,
     ATMnumber,
+    ContractDateEnd,
+    ...others
   } = req.body;
 
+  // Check if other properties of the request body has values
+  const othersHasValues = Object.values(others).every(
+    (value) => value !== "" && value !== null
+  );
+
   // Confirm data
-  if (
-    !EmployeeID ||
-    !BioID ||
-    !FirstName ||
-    !LastName ||
-    !EmployeeType ||
-    !AssignedOutlet ||
-    !Department ||
-    !JobTitle ||
-    !DateEmployed ||
-    !DateProbationary ||
-    !EmpStatus ||
-    !TINnumber ||
-    !SSSnumber ||
-    !PInumber ||
-    !PHnumber
-  ) {
+  if (othersHasValues) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   // Check duplicates
-  const duplicate = await GenInfo.findOne({ EmployeeID }).lean().exec();
+  const duplicate = await GenInfo.findOne({ EmployeeID: others?.EmployeeID })
+    .lean()
+    .exec();
   if (duplicate) {
     return res
       .status(409)
-      .json({ message: `EmployeeID ${EmployeeID} already exists` });
+      .json({ message: `EmployeeID ${others?.EmployeeID} already exists` });
   }
 
-  const newEmployeeID = isStringAllNumber(EmployeeID);
+  const newEmployeeID = isStringAllNumber(others?.EmployeeID);
 
   // Create and store new geninfo
-  const geninfo = await GenInfo.create({
-    EmployeeID: newEmployeeID,
-    BioID,
-    Prefix,
-    FirstName,
-    MiddleName,
-    MI: MiddleName ?? "",
-    LastName,
-    EmployeeType,
-    AssignedOutlet,
-    Department,
-    JobTitle,
-    DateEmployed,
-    DateLeaved,
-    DateProbationary,
-    RegDate,
-    EmpStatus,
-    Notes,
-    TINnumber,
-    SSSnumber,
-    PInumber,
-    PHnumber,
-    ATMnumber,
-  });
+  const newGenInfo = { ...req.body, MI: MiddleName ?? "" };
+  const geninfo = await GenInfo.create(newGenInfo);
 
   if (geninfo) {
     res
@@ -464,31 +350,7 @@ const createGenInfo = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateGenInfo = async (req, res) => {
-  const {
-    id,
-    EmployeeID,
-    BioID,
-    Prefix,
-    FirstName,
-    MiddleName,
-    LastName,
-    EmployeeType,
-    AssignedOutlet,
-    Department,
-    JobTitle,
-    DateEmployed,
-    DateLeaved,
-    DateProbationary,
-    RegDate,
-    EmpStatus,
-    Notes,
-    TINnumber,
-    SSSnumber,
-    PInumber,
-    PHnumber,
-    ATMnumber,
-    ContractDate,
-  } = req.body;
+  const { id, EmployeeID, BioID, ...others } = req.body;
 
   const newEmployeeID = isStringAllNumber(EmployeeID);
 
@@ -511,36 +373,19 @@ const updateGenInfo = async (req, res) => {
     return res.status(409).json({ message: "EmployeeID already taken" });
   }
 
-  /* It is also required to update the EmployeeID
-  of other information of the employee if EmployeeID is changed/modified */
+  const newGenInfo = await GenInfo.findByIdAndUpdate(id, others, {
+    new: true,
+  }).exec();
+
   if (geninfo?.EmployeeID !== newEmployeeID) {
+    newGenInfo.EmployeeID = newEmployeeID;
+
+    /* It is also required to update the EmployeeID
+    of other information of the employee if EmployeeID is changed/modified */
     UpdateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
   }
 
-  geninfo.EmployeeID = newEmployeeID;
-  geninfo.BioID = BioID;
-  geninfo.Prefix = Prefix;
-  geninfo.FirstName = FirstName;
-  geninfo.MiddleName = MiddleName;
-  geninfo.LastName = LastName;
-  geninfo.EmployeeType = EmployeeType;
-  geninfo.AssignedOutlet = AssignedOutlet;
-  geninfo.Department = Department;
-  geninfo.JobTitle = JobTitle;
-  geninfo.DateEmployed = DateEmployed;
-  geninfo.DateLeaved = DateLeaved;
-  geninfo.DateProbationary = DateProbationary;
-  geninfo.RegDate = RegDate;
-  geninfo.EmpStatus = EmpStatus;
-  geninfo.Notes = Notes;
-  geninfo.TINnumber = TINnumber;
-  geninfo.SSSnumber = SSSnumber;
-  geninfo.PInumber = PInumber;
-  geninfo.PHnumber = PHnumber;
-  geninfo.ATMnumber = ATMnumber;
-  geninfo.ContractDate = ContractDate;
-
-  const updatedGenInfo = await geninfo.save();
+  const updatedGenInfo = await newGenInfo.save();
 
   if (updatedGenInfo) {
     res.json({

@@ -279,6 +279,33 @@ const leaveCreditInclUpd = async (geninfos) => {
   }
 };
 
+// Function to update records that are inactive or contract has ended
+const UpdateInactiveEmployees = async (geninfos) => {
+  geninfos
+    .filter((g) => {
+      const contractDateEnd = parse(
+        g?.ContractDateEnd,
+        "MMMM dd, yyyy",
+        new Date()
+      );
+      const dateToday = new Date();
+      const daysLeft = differenceInDays(dateToday, contractDateEnd);
+      return g.EmpStatus === "N" /* || daysLeft < 1 */;
+    })
+    .forEach(async (g) => {
+      await GenInfo.findOneAndUpdate(
+        { EmployeeID: g.EmployeeID },
+        {
+          DateEmployed: "",
+          DateProbationary: "",
+          RegDate: "",
+          EmpStatus: "N",
+          ContractDateEnd: "",
+        }
+      ).exec();
+    });
+};
+
 // @desc Get all geninfos
 // @route GET /geninfos
 // @access Private
@@ -291,6 +318,7 @@ const getAllGenInfo = async (req, res) => {
   }
 
   leaveCreditInclUpd(geninfos);
+  UpdateInactiveEmployees(geninfos);
 
   res.json(geninfos);
 };
@@ -317,7 +345,7 @@ const createGenInfo = async (req, res) => {
   );
 
   // Confirm data
-  if (othersHasValues) {
+  if (!othersHasValues) {
     return res.status(400).json({ message: "All fields are required" });
   }
 

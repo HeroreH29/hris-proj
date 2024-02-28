@@ -26,24 +26,43 @@ const Welcome = () => {
     const { ids, entities } = geninfos;
 
     const contractedEmployees = ids
-      .filter((id) => entities[id]?.ContractDate)
+      .filter((id) => entities[id]?.ContractDateEnd)
       .map((id) => entities[id]);
 
     contractedEmployees.forEach((employee) => {
-      const contractDate = parse(
-        employee?.ContractDate,
+      const contractDateEnd = parse(
+        employee?.ContractDateEnd,
         "MMMM dd, yyyy",
         new Date()
       );
       const dateToday = new Date();
 
-      if (contractDate) {
+      if (contractDateEnd) {
         // Notify user when contract of an employee is about to end
-        const daysLeft = differenceInDays(dateToday, contractDate);
+        const daysLeft = differenceInDays(dateToday, contractDateEnd);
 
-        daysLeft <= 7 &&
-          toast.warn(
-            `Contract of "${employee?.LastName}, ${employee?.FirstName} ${employee?.MI}." will end soon`
+        daysLeft < 7 &&
+          daysLeft > 0 &&
+          toast.info(`Contract of "${employee?.EmployeeID}" will end soon`, {
+            toastId: employee.EmployeeID,
+            onClick: () => {
+              const newTab = window.open("", "_blank");
+              newTab.location.href = `/employeerecords/${employee.EmployeeID}`;
+            },
+          });
+
+        console.log(daysLeft);
+
+        daysLeft < 1 &&
+          toast.warning(
+            `Contract of "${employee?.EmployeeID}" already ended. Change it ASAP!`,
+            {
+              toastId: employee.EmployeeID,
+              onClick: () => {
+                const newTab = window.open("", "_blank");
+                newTab.location.href = `/employeerecords/${employee.EmployeeID}`;
+              },
+            }
           );
       }
     });

@@ -18,7 +18,7 @@ import {
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 
-const PWD_REGEX = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
+const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const ForgotPass = () => {
   useTitle("Forgot Password | Via Mare HRIS");
@@ -173,8 +173,8 @@ const ForgotPass = () => {
                     required
                   />
                   <Form.Control.Feedback type="invalid">
-                    Minimum of 8 characters. At least - 1 uppercase letter, 1
-                    lowercase letter, 1 unique symbol, and 1 digit/number.
+                    Minimum of 8 characters. At least - 1 lowercase letter, 1
+                    unique symbol, and 1 digit/number.
                   </Form.Control.Feedback>
                   <Button
                     variant="secondary"

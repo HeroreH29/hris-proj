@@ -382,17 +382,20 @@ const EditRecord = () => {
           font: workSansBoldItalic,
           opacity: 0.5,
         });
-        thirdPage.drawText(`${format(new Date(), "PPPP")}`, {
-          x: width * 0.2,
-          y: height * 0.55,
-          size: fontSize - 4,
-          font: workSansItalic,
-          opacity: 0.5,
-        });
+        thirdPage.drawText(
+          `${format(new Date(), "PPPP")} @ ${format(new Date(), "pp")}`,
+          {
+            x: width * 0.225,
+            y: height * 0.55,
+            size: fontSize - 4,
+            font: workSansItalic,
+            opacity: 0.5,
+          }
+        );
         thirdPage.drawText(text, {
-          y: height * 0.4,
+          y: height * 0.5,
           x: width * 0.04,
-          size: fontSize - 6,
+          size: fontSize - 7,
           font: gazpachoRegularItalic,
           opacity: 0.5,
           lineHeight: fontSize - 2,
@@ -442,7 +445,11 @@ const EditRecord = () => {
           </div>
         </Col>
       </Row>
-      <Tabs className="p-3 mb-3" defaultActiveKey={""} fill>
+      <Tabs
+        className="p-3 mb-3"
+        defaultActiveKey={employeeId ? "" : "geninfo"}
+        fill
+      >
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={geninfo} inactiveEmp={inactiveEmp} />
         </Tab>

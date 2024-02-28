@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import useAuth from "../../hooks/useAuth";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 
 const DashFooter = () => {
-  const { username, status, branch } = useAuth();
+  const { username, userLevel, branch, employeeId } = useAuth();
 
   const date = new Date();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -33,13 +33,38 @@ const DashFooter = () => {
     <div id="dashfooter" className="sticky-bottom">
       <footer className="footer bg-body-secondary">
         <Container>
-          <strong>DATE:</strong> <span className="fw-semibold">{dayName}</span>
-          {` - ${month} ${day}, ${year} | `}
-          <strong> TIME:</strong>
-          {` ${twelveHourFormat}:${minutes}:${seconds} ${ampm} | `}
-          <strong> BRANCH:</strong> {`${branch} | `}
-          <strong> CURRENT USER:</strong> {`${username} | `}
-          <strong> USER LEVEL:</strong> {status}
+          <Row>
+            <Col>
+              <strong>DATE:</strong>{" "}
+              <span className="fw-semibold">{dayName}</span>
+              {` - ${month} ${day}, ${year}`}
+            </Col>
+            <Col md="auto">|</Col>
+            <Col>
+              <strong> TIME:</strong>
+              {` ${twelveHourFormat}:${minutes}:${seconds} ${ampm}`}
+            </Col>
+            <Col md="auto">|</Col>
+            <Col>
+              <strong> BRANCH:</strong> {branch}
+            </Col>
+            <Col md="auto">|</Col>
+          </Row>
+          <Row>
+            <Col>
+              <strong> CURRENT USER:</strong> {username}
+            </Col>
+            <Col md="auto">|</Col>
+            <Col>
+              <strong> USER LEVEL:</strong> {userLevel}
+            </Col>
+            <Col md="auto">|</Col>
+            <Col>
+              <strong> EMPLOYEE ID:</strong>
+              {` ${employeeId}`}
+            </Col>
+            <Col md="auto">|</Col>
+          </Row>
         </Container>
       </footer>
     </div>

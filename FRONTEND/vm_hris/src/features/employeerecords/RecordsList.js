@@ -34,7 +34,7 @@ const RecordsList = () => {
   const [searchValue, setSearchValue] = useState("");
 
   const [outletFilter, setOutletFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Y");
 
   const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
     ([key, value]) => {
@@ -63,7 +63,13 @@ const RecordsList = () => {
 
   useEffect(() => {
     toast.clearWaitingQueue();
-  }, []);
+    if (geninfos?.ids?.length > 0) {
+      const { ids: gids, entities: gentities } = geninfos;
+
+      // For notifying HR/Admin for employee regularization
+      RegularizationNotifier(gids, gentities);
+    }
+  }, [geninfos]);
 
   const RegularizationNotifier = (gids, gentities) => {
     const toRegularize = gids.reduce((acc, gid) => {
@@ -107,7 +113,7 @@ const RecordsList = () => {
     }, []);
 
     toRegularize.forEach((e) => {
-      toast.warn(`${e} needs to be regularized`, {
+      toast.info(`"${e}" needs to be regularized`, {
         toastId: e,
         onClick: () => {
           const newTab = window.open("", "_blank");
@@ -124,9 +130,6 @@ const RecordsList = () => {
 
   if (genSuccess) {
     const { ids: gids, entities: gentities } = geninfos;
-
-    // For notifying HR/Admin for employee regularization
-    RegularizationNotifier(gids, gentities);
 
     const filteredIds = gids?.filter((id) => {
       const geninfo = gentities[id];
@@ -238,6 +241,7 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
+                    value={statusFilter}
                     onChange={(e) => {
                       setStatusFilter(e.target.value);
                       setSliceStart(0);

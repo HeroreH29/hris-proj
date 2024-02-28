@@ -362,7 +362,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">Bio ID</Form.Label>
+              <Form.Label className="fw-semibold">{`Bio ID (Auto-Generated)`}</Form.Label>
               <Form.Control
                 type="text"
                 autoComplete="off"
@@ -482,7 +482,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Date employed, date probationary, regular date, notes, and date leaved */}
+          {/* Date employed, contractual, and date probationary */}
           <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Date Employed</Form.Label>
@@ -553,6 +553,9 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
+          </Row>
+          {/* Regularization Date and Date Leaved/Date of Resignation */}
+          <Row className="mb-3 ">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">
                 Regularization Date
@@ -666,7 +669,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPInumber)}
               />
             </Form.Group>
-            <Form.Group as={Col} md="3">
+            <Form.Group as={Col} md="4">
               <Form.Label className="fw-semibold">ATM Number</Form.Label>
               <Form.Control
                 type="text"

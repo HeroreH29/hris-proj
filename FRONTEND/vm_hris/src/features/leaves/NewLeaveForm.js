@@ -103,7 +103,11 @@ const NewLeaveForm = () => {
         };
 
         // Send data to database
-        await addLeave(leaveJson).unwrap();
+        try {
+          await addLeave(leaveJson).unwrap();
+        } catch (error) {
+          console.error(error.data.message);
+        }
       }
     } else {
       e.stopPropagation();
@@ -208,7 +212,7 @@ const NewLeaveForm = () => {
                   {searchResults.map((result) => (
                     <ListGroup.Item
                       action
-                      href={`#${result.EmployeeID}`}
+                      href={`#`}
                       key={result.id}
                       onClick={() => handleSearchResultClick(result)}
                     >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
@@ -222,6 +226,7 @@ const NewLeaveForm = () => {
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Leave Type</Form.Label>
             <Form.Select
+              disabled={selectedEmployee === ""}
               required
               value={leaveType}
               onChange={(e) => setLeaveType(e.target.value)}
@@ -240,6 +245,7 @@ const NewLeaveForm = () => {
                 className="ms-3 float-end"
                 type="checkbox"
                 checked={halfDay}
+                disabled={selectedEmployee === ""}
                 onChange={(e) => {
                   setHalfDay(e.target.checked);
                   setDayTime("");
@@ -267,6 +273,7 @@ const NewLeaveForm = () => {
             <Form.Label className="fw-semibold">From</Form.Label>
             <Form.Control
               required
+              disabled={selectedEmployee === ""}
               type="date"
               value={leaveFrom}
               onChange={(e) => setLeaveFrom(e.target.value)}
@@ -281,7 +288,7 @@ const NewLeaveForm = () => {
               required
               type="date"
               value={leaveUntil}
-              disabled={halfDay}
+              disabled={halfDay || selectedEmployee === ""}
               onChange={(e) => setLeaveUntil(e.target.value)}
             />
             <Form.Control.Feedback type="invalid">
@@ -293,13 +300,14 @@ const NewLeaveForm = () => {
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Reason</Form.Label>
             <Form.Control
-              required
+              required={leaveType === "Sick Leave"}
               as={"textarea"}
               value={reason}
+              disabled={selectedEmployee === ""}
               onChange={(e) => setReason(e.target.value)}
             />
             <Form.Control.Feedback type="invalid">
-              Field is required
+              Field is STRICTLY required
             </Form.Control.Feedback>
           </Form.Group>
         </Row>

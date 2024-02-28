@@ -181,7 +181,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${entities[foundRecord]?.LastName}'s Filed Leave`}</Modal.Title>
+            <Modal.Title>{`${entities[foundRecord]?.LastName}'s ${leave?.Ltype}`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

@@ -144,8 +144,8 @@ const LeavesList = () => {
     const workSansBold = await pdfDoc.embedFont(FONTS.WorkSansBold);
     const workSansBoldItalic = await pdfDoc.embedFont(FONTS.WorkSansBoldItalic);
 
-    const page = pdfDoc.addPage();
-    const { width, height } = page.getSize();
+    let page = pdfDoc.addPage();
+    let { width, height } = page.getSize();
     const fontSize = 16;
     let contentEnd = 0;
 
@@ -243,61 +243,107 @@ const LeavesList = () => {
         opacity: 1,
       });
 
+      // Custom comparison function for grouping leaves by type
+      const compareLeavesByType = (leaveA, leaveB) => {
+        const leaveTypeOrder = {
+          "Sick Leave": 1,
+          "Vacation Leave": 2,
+          "Birthday Leave:": 3,
+          "Matrimonial Leave": 4,
+          "Paternity Leave": 5,
+          "Maternity Leave": 6,
+          "Bereavement Leave": 7,
+        };
+
+        const typeA = leaveA.Ltype;
+        const typeB = leaveB.Ltype;
+
+        // Get the order index of each leave type
+        const orderIndexA = leaveTypeOrder[typeA] || Number.MAX_SAFE_INTEGER;
+        const orderIndexB = leaveTypeOrder[typeB] || Number.MAX_SAFE_INTEGER;
+
+        // Compare the order index of leave types
+        return orderIndexA - orderIndexB;
+      };
+
       // Table Body
       let dataHeight = 0.82;
       let totalLeaves = 0;
-      leaveData.forEach((leave) => {
-        page.drawText(leave.DateOfFilling, {
-          x: width * 0.06,
-          y: height * dataHeight,
-          size: fontSize - 6,
-          font: workSansRegular,
-        });
-        page.drawText(leave.Ltype, {
-          x: width * 0.2,
-          y: height * dataHeight,
-          size: fontSize - 6,
-          font: workSansRegular,
-        });
-        page.drawText(leave.Lfrom, {
-          x: width * 0.375,
-          y: height * dataHeight,
-          size: fontSize - 6,
-          font: workSansRegular,
-        });
-        page.drawText(leave.Lto, {
-          x: width * 0.57,
-          y: height * dataHeight,
-          size: fontSize - 6,
-          font: workSansRegular,
-        });
-        page.drawText(
-          leave.Approve === 1
-            ? "Approved"
-            : leave.Approve === 2
-            ? "Disapproved"
-            : leave.Approve === 3
-            ? "Cancelled"
-            : "Pending",
-          {
-            x: width * 0.75,
+      let currentLeaveType = "";
+      leaveData
+        .slice()
+        .sort(compareLeavesByType)
+        .forEach((leave) => {
+          // Checking if current page is full, another page will be created
+          if (dataHeight < 0.025) {
+            page = pdfDoc.addPage();
+            width = page.getSize().width;
+            height = page.getSize().height;
+            dataHeight = 0.95;
+          }
+
+          if (currentLeaveType === "" || currentLeaveType !== leave.Ltype) {
+            currentLeaveType = leave.Ltype;
+            page.drawText(String(currentLeaveType + "s").toUpperCase(), {
+              x: width * 0.045,
+              y: height * dataHeight,
+              size: fontSize - 2,
+              font: workSansBoldItalic,
+            });
+            dataHeight -= 0.025;
+          }
+
+          page.drawText(leave.DateOfFilling, {
+            x: width * 0.06,
             y: height * dataHeight,
             size: fontSize - 6,
             font: workSansRegular,
-          }
-        );
-        page.drawText(leave.NoOfDays.toString(), {
-          x: width * 0.91,
-          y: height * dataHeight,
-          size: fontSize - 6,
-          font: workSansRegular,
-        });
+          });
+          page.drawText(leave.Ltype, {
+            x: width * 0.2,
+            y: height * dataHeight,
+            size: fontSize - 6,
+            font: workSansRegular,
+          });
+          page.drawText(leave.Lfrom, {
+            x: width * 0.375,
+            y: height * dataHeight,
+            size: fontSize - 6,
+            font: workSansRegular,
+          });
+          page.drawText(leave.Lto, {
+            x: width * 0.57,
+            y: height * dataHeight,
+            size: fontSize - 6,
+            font: workSansRegular,
+          });
+          page.drawText(
+            leave.Approve === 1
+              ? "Approved"
+              : leave.Approve === 2
+              ? "Disapproved"
+              : leave.Approve === 3
+              ? "Cancelled"
+              : "Pending",
+            {
+              x: width * 0.75,
+              y: height * dataHeight,
+              size: fontSize - 6,
+              font: workSansRegular,
+            }
+          );
+          page.drawText(leave.NoOfDays.toString(), {
+            x: width * 0.91,
+            y: height * dataHeight,
+            size: fontSize - 6,
+            font: workSansRegular,
+          });
 
-        if (leave.Approve === 1) {
-          totalLeaves += leave.NoOfDays;
-        }
-        dataHeight -= 0.025;
-      });
+          if (leave.Approve === 1) {
+            totalLeaves += leave.NoOfDays;
+          }
+          dataHeight -= 0.025;
+        });
       page.drawLine({
         start: { x: width * 0.05, y: height * dataHeight + 0.02 },
         end: { x: width * 0.95, y: height * dataHeight + 0.02 },
@@ -324,7 +370,7 @@ const LeavesList = () => {
       });
 
       // Set end of content height for page footer use
-      contentEnd = height * dataHeight - 100;
+      contentEnd = height * dataHeight - 75;
     };
     const summaryPageBody = () => {
       // Used leave values
@@ -614,8 +660,8 @@ const LeavesList = () => {
         .toString()})`;
       page.drawText(text, {
         x: width * 0.04,
-        y: contentEnd * 0.8,
-        size: fontSize - 8,
+        y: contentEnd - 25,
+        size: fontSize - 9,
         opacity: 0.5,
         font: gazpachoRegularItalic,
         lineHeight: fontSize - 4,

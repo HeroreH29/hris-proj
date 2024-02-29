@@ -12,8 +12,8 @@ import { parse, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 
 const Welcome = () => {
-  const { isHR, isAdmin, status } = useAuth();
-  useTitle(`${status} Dashboard | Via Mare HRIS`);
+  const { isHR, isAdmin, isOutletProcessor, userLevel } = useAuth();
+  useTitle(`${userLevel} Dashboard | Via Mare HRIS`);
 
   const { data: geninfos, isSuccess } = useGetGeninfosQuery();
 
@@ -69,7 +69,7 @@ const Welcome = () => {
   };
 
   useEffect(() => {
-    if (isSuccess && (isAdmin || isHR)) {
+    if (isSuccess && (isHR || isAdmin || isOutletProcessor)) {
       EmployeeContractNotif();
     }
     // eslint-disable-next-line
@@ -83,17 +83,19 @@ const Welcome = () => {
         <Col>
           <h3>
             HR Memos/Announcements{" "}
-            {status === "Admin" && (
-              <>
-                <Button
-                  className="float-end"
-                  variant="outline-primary"
-                  onClick={() => navigate("/dashboard/announcements/new")}
-                >
-                  <FontAwesomeIcon icon={faFileCirclePlus} />
-                </Button>
-              </>
-            )}
+            {isHR ||
+              isAdmin ||
+              (isOutletProcessor && (
+                <>
+                  <Button
+                    className="float-end"
+                    variant="outline-primary"
+                    onClick={() => navigate("/dashboard/announcements/new")}
+                  >
+                    <FontAwesomeIcon icon={faFileCirclePlus} />
+                  </Button>
+                </>
+              ))}
           </h3>
           <AnnouncementsList />
         </Col>

@@ -12,7 +12,7 @@ import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 
 const Leave = ({ leaveId, handleHover, leaveCredit }) => {
-  const { branch, isHR, isAdmin } = useAuth();
+  const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
   const navigate = useNavigate();
 
   const [
@@ -63,7 +63,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
         }).unwrap();
 
         // Send leave information thru email
-        if (branch !== "Head Office" && branch !== "Catering") {
+        if (isOutletProcessor) {
           const { _id, __v, ...others } = payload;
 
           let emailMsg = {

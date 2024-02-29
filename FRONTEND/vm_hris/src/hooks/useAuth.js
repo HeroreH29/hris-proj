@@ -6,7 +6,7 @@ const useAuth = () => {
   const token = useSelector(selectCurrentToken);
   let isHR = false;
   let isAdmin = false;
-  let status = "User";
+  let isOutletProcessor = false;
 
   if (token) {
     const decoded = jwtDecode(token);
@@ -14,16 +14,14 @@ const useAuth = () => {
 
     isHR = userLevel === "HR";
     isAdmin = userLevel === "Admin";
-
-    if (isHR) status = "HR";
-    if (isAdmin) status = "Admin";
+    isOutletProcessor = userLevel === "Outlet/Processor";
 
     return {
       username,
       user,
-      status,
       isHR,
       isAdmin,
+      isOutletProcessor,
       userLevel,
       branch,
       employeeId,
@@ -36,7 +34,7 @@ const useAuth = () => {
     userLevel: "",
     isHR,
     isAdmin,
-    status,
+    isOutletProcessor,
     branch: "",
     employeeId: "",
   };

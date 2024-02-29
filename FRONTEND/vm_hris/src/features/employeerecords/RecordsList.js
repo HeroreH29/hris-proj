@@ -21,9 +21,12 @@ import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 import { toast } from "react-toastify";
 import { parse, differenceInDays, differenceInMonths } from "date-fns";
+import useAuth from "../../hooks/useAuth";
 
 const RecordsList = () => {
   const navigate = useNavigate();
+
+  const { isOutletProcessor, branch } = useAuth();
 
   useTitle("Employee Records | Via Mare HRIS");
 
@@ -33,7 +36,9 @@ const RecordsList = () => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  const [outletFilter, setOutletFilter] = useState("");
+  const [outletFilter, setOutletFilter] = useState(
+    isOutletProcessor ? branch : ""
+  );
   const [statusFilter, setStatusFilter] = useState("Y");
 
   const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
@@ -66,54 +71,65 @@ const RecordsList = () => {
     if (geninfos?.ids?.length > 0) {
       const { ids: gids, entities: gentities } = geninfos;
 
-      // For notifying HR/Admin for employee regularization
+      // For notifying HR/Admin or Outlet/Processor for employee regularization
       RegularizationNotifier(gids, gentities);
     }
   }, [geninfos]);
 
   const RegularizationNotifier = (gids, gentities) => {
-    const toRegularize = gids.reduce((acc, gid) => {
-      const dateToday = new Date();
-      let parsedDate;
+    const toRegularize = gids
+      .filter((gid) => {
+        let match = true;
 
-      if (
-        gentities[gid]?.EmployeeType === "Probationary" &&
-        gentities[gid].EmpStatus === "Y"
-      ) {
-        if (gentities[gid]?.RegDate) {
-          parsedDate = parse(
-            gentities[gid]?.RegDate,
-            "MMMM dd, yyyy",
-            new Date()
-          );
-          if (differenceInDays(dateToday, parsedDate) >= 1) {
-            acc.push(gentities[gid].EmployeeID);
-          }
-        } else if (gentities[gid]?.DateProbationary) {
-          parsedDate = parse(
-            gentities[gid]?.DateProbationary,
-            "MMM dd, yyyy",
-            new Date()
-          );
-          if (differenceInMonths(dateToday, parsedDate) >= 6) {
-            acc.push(gentities[gid].EmployeeID);
-          }
-        } else if (gentities[gid]?.DateEmployed) {
-          parsedDate = parse(
-            gentities[gid]?.DateEmployed,
-            "MMM dd, yyyy",
-            new Date()
-          );
-          if (differenceInMonths(dateToday, parsedDate) >= 6) {
-            acc.push(gentities[gid].EmployeeID);
+        if (isOutletProcessor) {
+          match = match && gentities[gid]?.AssignedOutlet === branch;
+        }
+
+        return match;
+      })
+      .reduce((acc, gid) => {
+        const dateToday = new Date();
+        let parsedDate;
+
+        if (
+          gentities[gid]?.EmployeeType === "Probationary" &&
+          gentities[gid].EmpStatus === "Y"
+        ) {
+          if (gentities[gid]?.RegDate) {
+            parsedDate = parse(
+              gentities[gid]?.RegDate,
+              "MMMM dd, yyyy",
+              new Date()
+            );
+            if (differenceInDays(dateToday, parsedDate) >= 1) {
+              acc.push(gentities[gid].EmployeeID);
+            }
+          } else if (gentities[gid]?.DateProbationary) {
+            parsedDate = parse(
+              gentities[gid]?.DateProbationary,
+              "MMM dd, yyyy",
+              new Date()
+            );
+            if (differenceInMonths(dateToday, parsedDate) >= 6) {
+              acc.push(gentities[gid].EmployeeID);
+            }
+          } else if (gentities[gid]?.DateEmployed) {
+            parsedDate = parse(
+              gentities[gid]?.DateEmployed,
+              "MMM dd, yyyy",
+              new Date()
+            );
+            if (differenceInMonths(dateToday, parsedDate) >= 6) {
+              acc.push(gentities[gid].EmployeeID);
+            }
           }
         }
-      }
-      return acc;
-    }, []);
+        return acc;
+      }, []);
 
     toRegularize.forEach((e) => {
       toast.info(`"${e}" needs to be regularized`, {
+        autoClose: false,
         toastId: e,
         onClick: () => {
           const newTab = window.open("", "_blank");
@@ -227,6 +243,8 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
+                    disabled={isOutletProcessor}
+                    value={outletFilter}
                     onChange={(e) => {
                       setOutletFilter(e.target.value);
                       setSliceStart(0);

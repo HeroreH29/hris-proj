@@ -8,7 +8,7 @@ import { Card } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const Announcement = ({ announcementId }) => {
-  const { isHR, isAdmin } = useAuth();
+  const { isHR, isAdmin, isOutletProcessor } = useAuth();
 
   // Variables below are used to simulate hover animation on card
   const [hovered, setHovered] = useState(false);
@@ -23,7 +23,7 @@ const Announcement = ({ announcementId }) => {
 
   if (announcement) {
     const handleEdit = () => {
-      if (isHR || isAdmin)
+      if (isHR || isAdmin || isOutletProcessor)
         navigate(`/dashboard/announcements/${announcementId}`);
     };
 

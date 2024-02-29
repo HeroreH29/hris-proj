@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 
 const DashHeader = () => {
-  const { isHR, isAdmin } = useAuth();
+  const { isHR, isAdmin, isOutletProcessor } = useAuth();
 
   const toastId = useRef(null);
 
@@ -63,7 +63,7 @@ const DashHeader = () => {
             <Nav.Link eventKey="1" onClick={() => navigate("/dashboard")}>
               Dashboard
             </Nav.Link>
-            {(isHR || isAdmin) && (
+            {(isHR || isAdmin || isOutletProcessor) && (
               <Nav.Link
                 eventKey="2"
                 onClick={() => navigate("/employeerecords")}
@@ -71,7 +71,7 @@ const DashHeader = () => {
                 Employee Records
               </Nav.Link>
             )}
-            {(isHR || isAdmin) && (
+            {(isHR || isAdmin || isOutletProcessor) && (
               <Nav.Link eventKey="3" onClick={() => navigate("/attendances")}>
                 Attendances
               </Nav.Link>
@@ -79,7 +79,7 @@ const DashHeader = () => {
             <Nav.Link eventKey="4" onClick={() => navigate("/leaves")}>
               Leaves
             </Nav.Link>
-            {(isHR || isAdmin) && (
+            {(isHR || isAdmin || isOutletProcessor) && (
               <Nav.Link eventKey="5" onClick={() => navigate("/users")}>
                 User Settings
               </Nav.Link>

@@ -75,4 +75,8 @@ const personalInfoSchema = new mongoose.Schema({
   },
 });
 
+/* personalInfoSchema.pre("updateOne", { document: true, query: false }, () => {
+  console.log("Updating...");
+}); */
+
 module.exports = mongoose.model("PersonalInfo", personalInfoSchema);

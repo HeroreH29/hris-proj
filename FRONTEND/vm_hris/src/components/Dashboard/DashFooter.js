@@ -50,7 +50,7 @@ const DashFooter = () => {
             </Col>
             <Col md="auto">|</Col>
           </Row>
-          <Row>
+          <Row className="border-top border-secondary-subtle">
             <Col>
               <strong> CURRENT USER:</strong> {username}
             </Col>

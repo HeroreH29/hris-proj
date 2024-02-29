@@ -18,6 +18,7 @@ import {
   Row,
   Col,
   Button,
+  Form,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong, faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -444,6 +445,12 @@ const EditRecord = () => {
             )}
           </div>
         </Col>
+        <Form.Group as={Col}>
+          <Form.Label className="fw-semibold">
+            Or upload a record file here...
+          </Form.Label>
+          <Form.Control type="file" />
+        </Form.Group>
       </Row>
       <Tabs
         className="p-3 mb-3"

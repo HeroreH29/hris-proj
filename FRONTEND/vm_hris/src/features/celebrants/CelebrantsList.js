@@ -3,8 +3,11 @@ import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
 import { useGetGeninfosQuery } from "./gCelebrantsApiSlice";
 import Celebrant from "./Celebrant";
 import { Table, Container, Spinner } from "react-bootstrap";
+import useAuth from "../../hooks/useAuth";
 
 const CelebrantsList = () => {
+  const { isHR, isAdmin, isOutletProcessor, userLeve, branch } = useAuth();
+
   const {
     data: personalinfos,
     isLoading: isPersLoading,
@@ -74,19 +77,28 @@ const CelebrantsList = () => {
             ? {
                 celebrantId: celebrant,
                 name: `${matchingRecord.FirstName} ${matchingRecord.LastName}`,
+                branch: matchingRecord.AssignedOutlet,
               }
             : null;
         })
       : [];
 
     tableContent = activeWithNames
-      .filter((celebrant) => celebrant !== null)
+      .filter((celebrant) => {
+        let matches = true;
+
+        if (isOutletProcessor) {
+          matches = matches && celebrant?.branch === branch;
+        }
+
+        return matches;
+      })
       .map((celebrant) => {
         return (
           <Celebrant
-            key={celebrant.celebrantId}
-            personalInfoId={celebrant.celebrantId}
-            name={celebrant.name}
+            key={celebrant?.celebrantId}
+            personalInfoId={celebrant?.celebrantId}
+            name={celebrant?.name}
           />
         );
       });

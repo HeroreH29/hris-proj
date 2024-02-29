@@ -28,7 +28,7 @@ import { FONTS } from "../../config/fontBase64";
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
 
-  const { status, employeeId } = useAuth();
+  const { userLevel, employeeId, isOutletProcessor } = useAuth();
 
   const navigate = useNavigate();
 
@@ -224,7 +224,7 @@ const LeavesList = () => {
         size: fontSize - 6,
         font: workSansBold,
       });
-      page.drawText("Status", {
+      page.drawText("UserLevel", {
         x: width * 0.75,
         y: height * 0.855,
         size: fontSize - 6,
@@ -710,7 +710,7 @@ const LeavesList = () => {
         const leave = entities[id];
         let matches = true;
 
-        if (status !== "Admin") {
+        if (userLevel !== "Admin") {
           matches = leave.EmployeeID === employeeId;
         }
 
@@ -791,7 +791,7 @@ const LeavesList = () => {
                   <th scope="col">Until</th>
                   <th scope="col"># of Days</th>
                   <th scope="col">Type</th>
-                  <th scope="col">Status</th>
+                  <th scope="col">UserLevel</th>
                 </tr>
               </thead>
               <tbody>{overallLeavesContent}</tbody>
@@ -803,7 +803,7 @@ const LeavesList = () => {
                         type="text"
                         value={name}
                         placeholder="Enter name"
-                        disabled={status !== "Admin" /* true */}
+                        disabled={userLevel !== "Admin" /* true */}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </Form>
@@ -862,7 +862,7 @@ const LeavesList = () => {
               className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
             >
               <caption>
-                {status === "Admin"
+                {userLevel === "Admin"
                   ? `Leave Credit Info of ${
                       leaveCredit?.EmployeeID ? leaveCredit.EmployeeID : ""
                     }`

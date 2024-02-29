@@ -290,7 +290,7 @@ const UpdateInactiveEmployees = async (geninfos) => {
       );
       const dateToday = new Date();
       const daysLeft = differenceInDays(dateToday, contractDateEnd);
-      return g.EmpStatus === "N" /* || daysLeft < 1 */;
+      return g.EmpStatus === "N" || daysLeft < 1;
     })
     .forEach(async (g) => {
       await GenInfo.findOneAndUpdate(

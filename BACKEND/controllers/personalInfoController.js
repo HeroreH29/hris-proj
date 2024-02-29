@@ -106,30 +106,11 @@ const createPersonalInfo = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updatePersonalInfo = async (req, res) => {
-  const {
-    id,
-    EmployeeID,
-    Birthday,
-    PresentAddress,
-    PermanentAddress,
-    ZipCode,
-    Email,
-    Gender,
-    CivilStatus,
-    Height,
-    Weight,
-    Phone,
-    Mobile,
-    Spouse,
-    FatherName,
-    Foccupation,
-    MotherName,
-    Moccupation,
-  } = req.body;
+  const { id, EmployeeID, ...others } = req.body;
 
   // Confirm data
   if (!id || !EmployeeID) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "id and EmployeeID is required" });
   }
 
   const personalinfo = await PersonalInfo.findById(id).exec();
@@ -138,28 +119,14 @@ const updatePersonalInfo = async (req, res) => {
     return res.status(400).json({ message: "Personal info not found" });
   }
 
-  personalinfo.EmployeeID = EmployeeID;
-  personalinfo.Birthday = Birthday;
-  personalinfo.PresentAddress = PresentAddress;
-  personalinfo.PermanentAddress = PermanentAddress;
-  personalinfo.ZipCode = ZipCode;
-  personalinfo.Email = Email;
-  personalinfo.Gender = Gender;
-  personalinfo.CivilStatus = CivilStatus;
-  personalinfo.Height = Height;
-  personalinfo.Weight = Weight;
-  personalinfo.Phone = Phone;
-  personalinfo.Mobile = Mobile;
-  personalinfo.Spouse = Spouse;
-  personalinfo.FatherName = FatherName;
-  personalinfo.Foccupation = Foccupation;
-  personalinfo.MotherName = MotherName;
-  personalinfo.Moccupation = Moccupation;
+  /* Updates/Add data to fields and removing 'Address' field in the process.
+  ('Address' field is not applicable to the current system) */
+  personalinfo.overwrite(req.body);
 
-  const updatedPersonalInfo = await personalinfo.save();
+  await personalinfo.save();
 
   res.json({
-    message: `Personal info of ${updatedPersonalInfo.EmployeeID} updated`,
+    message: `Personal info of ${EmployeeID} is updated`,
   });
 };
 

@@ -24,8 +24,10 @@ import { faPrint, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { format, parse } from "date-fns";
+import useAuth from "../../hooks/useAuth";
 
 const Attendances = () => {
+  const { isOutletProcessor, branch } = useAuth();
   useTitle("Attendances | Via Mare HRIS");
 
   const [showModal, setShowModal] = useState(false);
@@ -37,7 +39,9 @@ const Attendances = () => {
   const [startSlice, setStartSlice] = useState(0);
   const [endSlice, setEndSlice] = useState(20);
 
-  const [outletFilter, setOutletFilter] = useState("");
+  const [outletFilter, setOutletFilter] = useState(
+    isOutletProcessor ? branch : ""
+  );
   const [empTypeFilter, setEmpTypeFilter] = useState("");
 
   const [startDate, setStartDate] = useState("");
@@ -605,7 +609,7 @@ const Attendances = () => {
       <Row className="p-2">
         <Form.Group as={Col}>
           <Form.Select
-            disabled={attList?.length === 0}
+            disabled={attList?.length === 0 || isOutletProcessor}
             onChange={(e) => {
               setOutletFilter(e.target.value);
               setStartSlice(0);

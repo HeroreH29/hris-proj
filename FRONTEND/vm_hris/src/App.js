@@ -26,7 +26,13 @@ function App() {
   useTitle("Login | Via Mare HRIS");
   return (
     <>
-      <ToastContainer autoClose={3000} limit={4} />
+      <ToastContainer
+        autoClose={3000}
+        hideProgressBar={true}
+        stacked
+        newestOnTop={true}
+        closeOnClick={true}
+      />
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* public routes */}
@@ -52,6 +58,7 @@ function App() {
                             allowedUserLevels={[
                               USERLEVELS.Admin,
                               USERLEVELS.HR,
+                              USERLEVELS.OutletProcessor,
                             ]}
                           />
                         }
@@ -65,7 +72,11 @@ function App() {
                   <Route
                     element={
                       <RequireAuth
-                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                        allowedUserLevels={[
+                          USERLEVELS.Admin,
+                          USERLEVELS.HR,
+                          USERLEVELS.OutletProcessor,
+                        ]}
                       />
                     }
                   >
@@ -78,7 +89,11 @@ function App() {
                   <Route
                     element={
                       <RequireAuth
-                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                        allowedUserLevels={[
+                          USERLEVELS.Admin,
+                          USERLEVELS.HR,
+                          USERLEVELS.OutletProcessor,
+                        ]}
                       />
                     }
                   >
@@ -91,7 +106,11 @@ function App() {
                   <Route
                     element={
                       <RequireAuth
-                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                        allowedUserLevels={[
+                          USERLEVELS.Admin,
+                          USERLEVELS.HR,
+                          USERLEVELS.OutletProcessor,
+                        ]}
                       />
                     }
                   >

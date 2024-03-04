@@ -74,6 +74,7 @@ const RecordsList = () => {
       // For notifying HR/Admin or Outlet/Processor for employee regularization
       RegularizationNotifier(gids, gentities);
     }
+    // eslint-disable-next-line
   }, [geninfos]);
 
   const RegularizationNotifier = (gids, gentities) => {
@@ -129,8 +130,8 @@ const RecordsList = () => {
 
     toRegularize.forEach((e) => {
       toast.info(`"${e}" needs to be regularized`, {
-        autoClose: false,
         toastId: e,
+        position: "top-left",
         onClick: () => {
           const newTab = window.open("", "_blank");
           newTab.location.href = `/employeerecords/${e}`;

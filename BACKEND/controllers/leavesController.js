@@ -23,6 +23,7 @@ const getAllLeaves = async (req, res) => {
       EmpName: `${match?.LastName ?? ""}, ${match?.FirstName ?? ""} ${
         match?.MI ?? ""
       }.`,
+      Branch: match?.AssignedOutlet,
     });
   });
 

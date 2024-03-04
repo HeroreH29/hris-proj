@@ -166,23 +166,6 @@ export const leaveCreditsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-// extra api slice for sending leave thru email
-export const sendLeaveEmailApiSlice = apiSlice.injectEndpoints({
-  endpoints: (builder) => ({
-    sendLeaveThruEmail: builder.mutation({
-      query: (initialEmailData) => ({
-        url: "/emailsender",
-        method: "POST",
-        body: {
-          ...initialEmailData,
-        },
-      }),
-    }),
-  }),
-});
-
-export const { useSendLeaveThruEmailMutation } = sendLeaveEmailApiSlice;
-
 export const {
   useGetLeavesQuery,
   useAddNewLeaveMutation,

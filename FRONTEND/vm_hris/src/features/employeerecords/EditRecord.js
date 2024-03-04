@@ -9,6 +9,16 @@ import {
   useGetPersonalinfosQuery,
   useGetWorkinfosQuery,
   useGetInactiveEmpsQuery,
+  useUpdateGeninfoMutation,
+  useUpdatePersonalinfoMutation,
+  useUpdateDependentMutation,
+  useUpdateEducinfoMutation,
+  useUpdateWorkinfoMutation,
+  useAddGeninfoMutation,
+  useAddPersonalinfoMutation,
+  useAddDependentMutation,
+  useAddEducinfoMutation,
+  useAddWorkinfoMutation,
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -32,6 +42,7 @@ import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 import { FONTS } from "../../config/fontBase64";
 import fontkit from "@pdf-lib/fontkit";
+import uploadData from "../uploaddata/uploadData";
 
 const refetchInterval = 15000;
 
@@ -130,6 +141,21 @@ const EditRecord = () => {
     refetchOnMountOrArgChange: true,
   });
 
+  // Create and Update API's for employee record file upload
+  const [createGenInfo] = useAddGeninfoMutation();
+  const [createPersonalInfo] = useAddPersonalinfoMutation();
+  const [createDependent] = useAddDependentMutation();
+  const [createEducInfo] = useAddEducinfoMutation();
+  const [createWorkInfo] = useAddWorkinfoMutation();
+
+  const [updateGenInfo] = useUpdateGeninfoMutation();
+  const [updatePersonalInfo] = useUpdatePersonalinfoMutation();
+  const [updateDependents] = useUpdateDependentMutation();
+  const [updateEducInfo] = useUpdateEducinfoMutation();
+  const [updateWorkInfo] = useUpdateWorkinfoMutation();
+
+  let content;
+
   if (
     !geninfo &&
     !personalinfo &&
@@ -139,7 +165,7 @@ const EditRecord = () => {
     !document &&
     !inactiveEmp
   ) {
-    return <Spinner animation="border" />;
+    content = <Spinner animation="border" />;
   }
 
   const handlePrintEmployeeRecord = async () => {
@@ -420,7 +446,38 @@ const EditRecord = () => {
     }
   };
 
-  return (
+  const handleEmployeeRecordUpload = async (file) => {
+    if (!file.type.startsWith("application/json")) {
+      toast.error("Invalid file type. Please upload a '.json' file");
+    }
+
+    const reader = new FileReader();
+    const filename = file.name;
+
+    reader.onload = async (event) => {
+      const parsedData = JSON.parse(event.target.result);
+
+      if (filename.includes("GenInfo")) {
+        await uploadData(updateGenInfo, createGenInfo, parsedData);
+      } else if (filename.includes("PersonalInfo")) {
+        await uploadData(updatePersonalInfo, createPersonalInfo, parsedData);
+      } else if (filename.includes("Dependents")) {
+        await uploadData(updateDependents, createDependent, parsedData);
+      } else if (filename.includes("WorkInfo")) {
+        await uploadData(updateWorkInfo, createWorkInfo, parsedData);
+      } else if (filename.includes("EducInfo")) {
+        await uploadData(updateEducInfo, createEducInfo, parsedData);
+      }
+    };
+
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
+
+    reader.readAsText(file);
+  };
+
+  content = (
     <Container>
       <Row className="mb-3">
         <Col md="auto">
@@ -445,12 +502,18 @@ const EditRecord = () => {
             )}
           </div>
         </Col>
-        <Form.Group as={Col}>
-          <Form.Label className="fw-semibold">
-            Or upload a record file here...
-          </Form.Label>
-          <Form.Control type="file" />
-        </Form.Group>
+        {!employeeId && (
+          <Form.Group as={Col}>
+            <Form.Label className="fw-semibold">
+              Or upload a record file here...
+            </Form.Label>
+            <Form.Control
+              type="file"
+              size="sm"
+              onChange={(e) => handleEmployeeRecordUpload(e.target.files[0])}
+            />
+          </Form.Group>
+        )}
       </Row>
       <Tabs
         className="p-3 mb-3"
@@ -515,6 +578,8 @@ const EditRecord = () => {
       </Tabs>
     </Container>
   );
+
+  return content;
 };
 
 export default EditRecord;

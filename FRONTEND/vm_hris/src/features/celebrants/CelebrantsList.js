@@ -93,10 +93,10 @@ const CelebrantsList = () => {
 
         return matches;
       })
-      .map((celebrant) => {
+      .map((celebrant, index) => {
         return (
           <Celebrant
-            key={celebrant?.celebrantId}
+            key={index}
             personalInfoId={celebrant?.celebrantId}
             name={celebrant?.name}
           />

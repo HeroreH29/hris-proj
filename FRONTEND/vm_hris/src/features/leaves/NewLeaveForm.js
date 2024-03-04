@@ -16,7 +16,8 @@ const NewLeaveForm = () => {
 
   const navigate = useNavigate();
 
-  const { user, employeeId, status, branch } = useAuth();
+  const { user, employeeId, isAdmin, isHR, isOutletProcessor, branch } =
+    useAuth();
 
   const [leaveType, setLeaveType] = useState("");
   const [leaveFrom, setLeaveFrom] = useState("");
@@ -45,10 +46,24 @@ const NewLeaveForm = () => {
     if (ids?.length) {
       const filteredResults = ids
         .filter((id) => {
-          return (
-            entities[id].LastName.toLowerCase().includes(searchQuery) ||
-            entities[id].FirstName.toLowerCase().includes(searchQuery)
-          );
+          let matches = true;
+
+          if (isOutletProcessor) {
+            matches =
+              matches &&
+              entities[id].AssignedOutlet === branch &&
+              entities[id].EmpStatus === "Y" &&
+              (entities[id].LastName.toLowerCase().includes(searchQuery) ||
+                entities[id].FirstName.toLowerCase().includes(searchQuery));
+          } else {
+            matches =
+              matches &&
+              entities[id].EmpStatus === "Y" &&
+              (entities[id].LastName.toLowerCase().includes(searchQuery) ||
+                entities[id].FirstName.toLowerCase().includes(searchQuery));
+          }
+
+          return matches;
         })
         .map((id) => entities[id]);
 
@@ -179,49 +194,51 @@ const NewLeaveForm = () => {
         className="p-3"
         onSubmit={handleSubmit}
       >
-        {status === "Admin" && (
-          <>
-            <Row className="mb-3">
-              <Form.Group as={Col} md="4">
-                <Form.Label className="fw-semibold">File for...</Form.Label>
-                <Form.Control
-                  required
-                  autoFocus
-                  className="fw-semibold"
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  placeholder="Search Employee..."
-                />
-                <Form.Control.Feedback type="invalid">
-                  Field required
-                </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group as={Col} className="p-2 border">
-                <Form.Label className="fw-semibold">
-                  ...or Upload a leave application
-                </Form.Label>
-                <Form.Control
-                  type="file"
-                  size="sm"
-                  onChange={(e) => LeaveApplicationUpload(e.target.files[0])}
-                />
-              </Form.Group>
-              {searchResults?.length > 0 && searchQuery.length > 0 && (
-                <ListGroup>
-                  {searchResults.map((result) => (
-                    <ListGroup.Item
-                      action
-                      href={`#`}
-                      key={result.id}
-                      onClick={() => handleSearchResultClick(result)}
-                    >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
-            </Row>
-          </>
-        )}
+        {isAdmin ||
+          isHR ||
+          (isOutletProcessor && (
+            <>
+              <Row className="mb-3">
+                <Form.Group as={Col} md="4">
+                  <Form.Label className="fw-semibold">File for...</Form.Label>
+                  <Form.Control
+                    required
+                    autoFocus
+                    className="fw-semibold"
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    placeholder="Search Employee..."
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    Field required
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group as={Col} className="p-2 border">
+                  <Form.Label className="fw-semibold">
+                    ...or Upload a leave application
+                  </Form.Label>
+                  <Form.Control
+                    type="file"
+                    size="sm"
+                    onChange={(e) => LeaveApplicationUpload(e.target.files[0])}
+                  />
+                </Form.Group>
+                {searchResults?.length > 0 && searchQuery.length > 0 && (
+                  <ListGroup>
+                    {searchResults.map((result) => (
+                      <ListGroup.Item
+                        action
+                        href={`#`}
+                        key={result.id}
+                        onClick={() => handleSearchResultClick(result)}
+                      >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
+              </Row>
+            </>
+          ))}
         <Row className="align-items-center mb-3">
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Leave Type</Form.Label>

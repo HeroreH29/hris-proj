@@ -17,6 +17,9 @@ import {
 } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import { toast } from "react-toastify";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+import useAuth from "../../hooks/useAuth";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 
 const ZIPCODE_REGEX = /^[0-9]{1,4}$/;
 const NUMERIC_REGEX = /^[0-9.]{1,5}$/;
@@ -24,14 +27,24 @@ const ALPHA_REGEX = /^[a-zA-Z. ]*$/;
 const PHONEMOBILE_REGEX = /^[0-9+ -]*$/;
 
 const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
+  const { isOutletProcessor, branch } = useAuth();
+
   // eslint-disable-next-line
   const [
     updatePersonalinfo,
-    { isLoading: updateLoading, isSuccess: updateSuccess },
+    {
+      isLoading: updateLoading,
+      isSuccess: updateSuccess,
+      isError: updateError,
+    },
   ] = useUpdatePersonalinfoMutation();
 
-  const [addPersonalinfo, { isLoading: addLoading, isSuccess: addSuccess }] =
-    useAddPersonalinfoMutation();
+  const [
+    addPersonalinfo,
+    { isLoading: addLoading, isSuccess: addSuccess, isError: addError },
+  ] = useAddPersonalinfoMutation();
+
+  const [sendEmail] = useSendEmailMutation();
 
   const [disablePermAdd, setDisablePermAdd] = useState(true);
 
@@ -40,7 +53,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
     ? parse(personalinfo?.Birthday, "MM/dd/yyyy", new Date())
     : null;
 
-  /* PERSONALINFO VARIABLES */
+  /* PERSONAL INFO VARIABLES */
   const [birthday, setBirthday] = useState(
     parsedBD ? format(parsedBD, "yyyy-MM-dd") : ""
   );
@@ -65,30 +78,13 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   const [moccupation, setMoccupation] = useState(personalinfo?.Moccupation);
 
   useEffect(() => {
-    if (updateSuccess || addSuccess) {
-      setBirthday("");
-      setPresentAddress("");
-      setPermanentAddress("");
-      setZipCode("");
-      setEmail("");
-      setGender("");
-      setCivilStatus("");
-      setHeight("");
-      setWeight("");
-      setPhone("");
-      setMobile("");
-      setSpouse("");
-      setFatherName("");
-      setFoccupation("");
-      setMotherName("");
-      setMoccupation("");
-
-      addSuccess && toast.success("Information successfully added!");
-      updateSuccess && toast.info("Record successfully updated!");
-
+    if (addSuccess || updateSuccess) {
+      toast.success("Record saved!");
       navigate("/employeerecords");
+    } else if (addError || updateError) {
+      toast.error("Record saving error!");
     }
-  }, [updateSuccess, addSuccess, navigate]);
+  }, [addError, updateError, updateSuccess, addSuccess, navigate]);
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -105,51 +101,57 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
         "MM/dd/yyyy"
       );
 
+      let personalInfoData = {
+        EmployeeID: personalinfo?.EmployeeID ?? employeeId,
+        Birthday: revertedBday,
+        PresentAddress: presentAddress,
+        PermanentAddress: presentAddress
+          ? "(Same as present address)"
+          : permanentAddress,
+        ZipCode: zipCode,
+        Email: email,
+        Gender: gender,
+        CivilStatus: civilStatus,
+        Height: height,
+        Weight: weight,
+        Phone: phone,
+        Mobile: mobile,
+        Spouse: spouse,
+        FatherName: fatherName,
+        Foccupation: foccupation,
+        MotherName: motherName,
+        Moccupation: moccupation,
+      };
+
       if (personalinfo) {
-        await updatePersonalinfo({
-          id: personalinfo?.id,
-          EmployeeID: personalinfo?.EmployeeID,
-          Birthday: revertedBday,
-          PresentAddress: presentAddress,
-          PermanentAddress: presentAddress
-            ? "(Same as present address)"
-            : permanentAddress,
-          ZipCode: zipCode,
-          Email: email,
-          Gender: gender,
-          CivilStatus: civilStatus,
-          Height: height,
-          Weight: weight,
-          Phone: phone,
-          Mobile: mobile,
-          Spouse: spouse,
-          FatherName: fatherName,
-          Foccupation: foccupation,
-          MotherName: motherName,
-          Moccupation: moccupation,
-        });
+        await updatePersonalinfo({ id: personalinfo?.id, ...personalInfoData });
       } else {
-        await addPersonalinfo({
-          EmployeeID: employeeId,
-          Birthday: revertedBday,
-          PresentAddress: presentAddress,
-          PermanentAddress: presentAddress
-            ? "(Same as present address)"
-            : permanentAddress,
-          ZipCode: zipCode,
-          Email: email,
-          Gender: gender,
-          CivilStatus: civilStatus,
-          Height: height,
-          Weight: weight,
-          Phone: phone,
-          Mobile: mobile,
-          Spouse: spouse,
-          FatherName: fatherName,
-          Foccupation: foccupation,
-          MotherName: motherName,
-          Moccupation: moccupation,
-        });
+        await addPersonalinfo(personalInfoData);
+      }
+
+      // Send data to HR email if processed by outlet/branch
+
+      if (isOutletProcessor && personalinfo) {
+        // Update record
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${personalinfo?.id}-PersonalInfo.json`,
+            personalinfo,
+            personalInfoData,
+            true
+          )
+        );
+      } else if (isOutletProcessor) {
+        // Add new record
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${personalinfo?.id}-PersonalInfo.json`,
+            personalinfo,
+            personalInfoData
+          )
+        );
       }
     } else {
       e.stopPropagation();

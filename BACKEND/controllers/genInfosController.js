@@ -394,7 +394,7 @@ const updateGenInfo = async (req, res) => {
   }
 
   // Check duplicate
-  const duplicate = await GenInfo.exists({ EmployeeID: geninfo.EmployeeID });
+  const duplicate = await GenInfo.exists({ EmployeeID: newEmployeeID });
 
   // Allow updates to the original user
   if (duplicate && duplicate?._id.toString() !== id) {

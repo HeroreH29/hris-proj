@@ -3,22 +3,24 @@ import {
   useGetLeavesQuery,
   useUpdateLeaveMutation,
   useUpdateLeaveCreditMutation,
-  useSendLeaveThruEmailMutation,
 } from "./leavesApiSlice";
+
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+import { toast } from "react-toastify";
 
 const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
   const navigate = useNavigate();
 
   const [
-    sendLeaveThruEmail,
+    sendEmail,
     { isSuccess: emailSuccess, isError: emailError, error: emailerr },
-  ] = useSendLeaveThruEmailMutation();
+  ] = useSendEmailMutation();
 
   const { leave } = useGetLeavesQuery("leavesList", {
     selectFromResult: ({ data }) => ({
@@ -62,7 +64,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
           Remarks: remarks,
         }).unwrap();
 
-        // Send leave information thru email
+        // Send leave information to HR email if leave is filed from outlets/branches
         if (isOutletProcessor) {
           const { _id, __v, ...others } = payload;
 
@@ -79,7 +81,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
             ],
           };
 
-          await sendLeaveThruEmail(emailMsg);
+          sendEmail(emailMsg);
         }
 
         setLeaveStatus(approveStat);
@@ -122,11 +124,16 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
       handleHover("");
       setRemarks("");
       setShowModal(false);
+      if (isAdmin || isHR) {
+        toast.success("Leave status updated");
+      } else if (isOutletProcessor) {
+        toast.success("Leave status updated and sent to HR email");
+      }
 
       navigate("/leaves");
     }
     // eslint-disable-next-line
-  }, [updateSuccess, creditUpdateSuccess, emailSuccess, navigate]);
+  }, [updateSuccess, creditUpdateSuccess, navigate]);
 
   if (leave) {
     let approve;
@@ -243,37 +250,38 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
               </Form>
             </Container>
           </Modal.Body>
-          {isHR ||
-            (isAdmin && (
-              <>
-                <Modal.Footer>
-                  <Button
-                    disabled={leave?.Approve !== 0}
-                    type="button"
-                    variant="outline-success"
-                    onClick={() => handleUpdateLeave(1)}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    disabled={leave?.Approve !== 0}
-                    type="button"
-                    variant="outline-danger"
-                    onClick={() => handleUpdateLeave(2)}
-                  >
-                    Disapprove
-                  </Button>
-                  <Button
-                    disabled={leave?.Approve !== 0}
-                    type="button"
-                    variant="outline-warning"
-                    onClick={() => handleUpdateLeave(3)}
-                  >
-                    Cancel
-                  </Button>
-                </Modal.Footer>
-              </>
-            ))}
+          {isHR || isOutletProcessor || isAdmin ? (
+            <>
+              <Modal.Footer>
+                <Button
+                  disabled={leave?.Approve !== 0}
+                  type="button"
+                  variant="outline-success"
+                  onClick={() => handleUpdateLeave(1)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  disabled={leave?.Approve !== 0}
+                  type="button"
+                  variant="outline-danger"
+                  onClick={() => handleUpdateLeave(2)}
+                >
+                  Disapprove
+                </Button>
+                <Button
+                  disabled={leave?.Approve !== 0}
+                  type="button"
+                  variant="outline-warning"
+                  onClick={() => handleUpdateLeave(3)}
+                >
+                  Cancel
+                </Button>
+              </Modal.Footer>
+            </>
+          ) : (
+            <></>
+          )}
         </Modal>
       </>
     );

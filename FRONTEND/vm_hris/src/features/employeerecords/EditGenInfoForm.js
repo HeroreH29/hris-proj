@@ -28,37 +28,30 @@ import {
 import { format, parse, differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 
 const NUMBER_REGEX = /^[0-9]*$/;
 const IDNUMS_REGEX = /^[0-9-]*$/;
 const ALPHANUM_REGEX = /^[A-z0-9]+$/;
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
-  const { username } = useAuth();
+  const { username, isOutletProcessor, branch } = useAuth();
 
   const { data: geninfos } = useGetGeninfosQuery();
 
-  // eslint-disable-next-line
-  const [
-    updateGeninfo,
-    { isLoading: updateLoading, isSuccess: updateSuccess },
-  ] = useUpdateGeninfoMutation();
+  const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
+    useUpdateGeninfoMutation();
 
-  const [addGeninfo, { isLoading: addLoading, isSuccess: addSuccess }] =
+  const [addGeninfo, { isSuccess: addSuccess, isError: addError }] =
     useAddGeninfoMutation();
 
-  const [
-    addInactiveEmp,
-    { isLoading: addInactiveLoading, isSuccess: addInactiveSuccess },
-  ] = useAddInactiveEmpMutation();
+  const [sendEmail, { isSuccess: emailSuccess, isError: emailError }] =
+    useSendEmailMutation();
 
-  const [
-    deleteInactiveEmp,
-    {
-      isLoading: deleteInactiveEmpLoading,
-      isSuccess: deleteInactiveEmpSuccess,
-    },
-  ] = useDeleteInactiveEmpMutation();
+  const [addInactiveEmp] = useAddInactiveEmpMutation();
+
+  const [deleteInactiveEmp] = useDeleteInactiveEmpMutation();
 
   const navigate = useNavigate();
 
@@ -92,17 +85,19 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
     }
   };
 
-  /* GENINFO VARIABLES */
-  const [employeeId, setEmployeeId] = useState(geninfo?.EmployeeID);
+  /* GEN INFO VARIABLES */
+  const [employeeId, setEmployeeId] = useState(geninfo?.EmployeeID ?? "");
   const [bioId, setBioId] = useState(geninfo?.BioID ?? incrementBioID() + 1);
-  const [prefix, setPrefix] = useState(geninfo?.Prefix);
-  const [firstName, setFirstName] = useState(geninfo?.FirstName);
+  const [prefix, setPrefix] = useState(geninfo?.Prefix ?? "");
+  const [firstName, setFirstName] = useState(geninfo?.FirstName ?? "");
   const [middleName, setMiddleName] = useState(geninfo?.MiddleName);
-  const [lastName, setLastName] = useState(geninfo?.LastName);
-  const [employeeType, setEmployeeType] = useState(geninfo?.EmployeeType);
-  const [assignedOutlet, setAssignedOutlet] = useState(geninfo?.AssignedOutlet);
-  const [department, setDepartment] = useState(geninfo?.Department);
-  const [jobTitle, setJobTitle] = useState(geninfo?.JobTitle);
+  const [lastName, setLastName] = useState(geninfo?.LastName ?? "");
+  const [employeeType, setEmployeeType] = useState(geninfo?.EmployeeType ?? "");
+  const [assignedOutlet, setAssignedOutlet] = useState(
+    geninfo?.AssignedOutlet ?? ""
+  );
+  const [department, setDepartment] = useState(geninfo?.Department ?? "");
+  const [jobTitle, setJobTitle] = useState(geninfo?.JobTitle ?? "");
   const [dateEmployed, setDateEmployed] = useState(
     parsedDE ? format(parsedDE, "yyyy-MM-dd") : ""
   );
@@ -115,52 +110,43 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const [dateProbationary, setDateProbationary] = useState(
     parsedDP ? format(parsedDP, "yyyy-MM-dd") : ""
   );
-  const [empStatus, setEmpStatus] = useState(geninfo?.EmpStatus);
+  const [empStatus, setEmpStatus] = useState(geninfo?.EmpStatus ?? "");
   const [modeOfSeparation, setModeOfSeparation] = useState(
-    inactiveEmp?.Mode_of_Separation
+    inactiveEmp?.Mode_of_Separation ?? ""
   );
   const [notes, setNotes] = useState(geninfo?.Notes);
-  const [tinnumber, setTINnumber] = useState(geninfo?.TINnumber);
-  const [sssnumber, setSSSnumber] = useState(geninfo?.SSSnumber);
-  const [phnumber, setPHnumber] = useState(geninfo?.PHnumber);
-  const [pinumber, setPInumber] = useState(geninfo?.PInumber);
-  const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber);
+  const [tinnumber, setTINnumber] = useState(geninfo?.TINnumber ?? "");
+  const [sssnumber, setSSSnumber] = useState(geninfo?.SSSnumber ?? "");
+  const [phnumber, setPHnumber] = useState(geninfo?.PHnumber ?? "");
+  const [pinumber, setPInumber] = useState(geninfo?.PInumber ?? "");
+  const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber ?? "");
   const [isContractual, setIsContractual] = useState(parsedCD ? true : false);
   const [contractDateEnd, setContractDateEnd] = useState(
     parsedCD ? format(parsedCD, "yyyy-MM-dd") : ""
   );
 
   useEffect(() => {
-    if (updateSuccess || addSuccess) {
-      setBioId("");
-      setPrefix("");
-      setFirstName("");
-      setMiddleName("");
-      setLastName("");
-      setEmployeeType("");
-      setAssignedOutlet("");
-      setDepartment("");
-      setJobTitle("");
-      setDateEmployed("");
-      setRegDate("");
-      setDateLeaved("");
-      setDateProbationary("");
-      setEmpStatus("");
-      setNotes("");
-      setTINnumber("");
-      setSSSnumber("");
-      setPHnumber("");
-      setPInumber("");
-      setIsContractual(false);
-      setContractDateEnd("");
-      setModeOfSeparation("");
-
-      addSuccess && toast.success("Record successfully added!");
-      updateSuccess && toast.info("Record updated!");
-
+    if (addSuccess || updateSuccess) {
+      toast.success("Record saved!");
       navigate("/employeerecords");
+    } else if (addError || updateError) {
+      toast.error("Record saving error!");
     }
-  }, [updateSuccess, addSuccess, navigate]);
+
+    if (emailSuccess) {
+      toast.success("Record sent to HR!");
+    } else if (emailError) {
+      toast.error("Failed to send record to HR!");
+    }
+  }, [
+    addSuccess,
+    updateSuccess,
+    addError,
+    updateError,
+    emailSuccess,
+    emailError,
+    navigate,
+  ]);
 
   /* DATE REVERT */
   const dateRevert = (dateString, formatString) => {
@@ -173,7 +159,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() && (!updateLoading || !addLoading)) {
+    if (form.checkValidity()) {
       const confirm = window.confirm("Proceed with these information?");
 
       if (confirm) {
@@ -192,57 +178,35 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           ? dateRevert(contractDateEnd, "MMMM dd, yyyy")
           : "";
 
+        let genInfoData = {
+          EmployeeID: employeeId,
+          Prefix: prefix,
+          FirstName: firstName,
+          MiddleName: middleName,
+          LastName: lastName,
+          EmployeeType: employeeType,
+          AssignedOutlet: assignedOutlet,
+          Department: department,
+          JobTitle: jobTitle,
+          DateEmployed: revertedDE,
+          RegDate: revertedRD,
+          DateLeaved: revertedDL,
+          DateProbationary: revertedDP,
+          EmpStatus: empStatus,
+          Notes: notes,
+          ATMnumber: atmnumber,
+          TINnumber: tinnumber,
+          SSSnumber: sssnumber,
+          PHnumber: phnumber,
+          PInumber: pinumber,
+          ContractDateEnd: revertedCD,
+        };
+
         // Check if user is adding or updating an employee record
         if (geninfo) {
-          await updateGeninfo({
-            id: geninfo?.id,
-            EmployeeID: employeeId,
-            Prefix: prefix,
-            FirstName: firstName,
-            MiddleName: middleName,
-            LastName: lastName,
-            EmployeeType: employeeType,
-            AssignedOutlet: assignedOutlet,
-            Department: department,
-            JobTitle: jobTitle,
-            DateEmployed: revertedDE,
-            RegDate: revertedRD,
-            DateLeaved: revertedDL,
-            DateProbationary: revertedDP,
-            EmpStatus: empStatus,
-            Notes: notes,
-            ATMnumber: atmnumber,
-            TINnumber: tinnumber,
-            SSSnumber: sssnumber,
-            PHnumber: phnumber,
-            PInumber: pinumber,
-            ContractDateEnd: revertedCD,
-          });
+          await updateGeninfo({ id: geninfo?.id, ...genInfoData });
         } else {
-          await addGeninfo({
-            EmployeeID: employeeId,
-            BioID: bioId,
-            Prefix: prefix,
-            FirstName: firstName,
-            MiddleName: middleName,
-            LastName: lastName,
-            EmployeeType: employeeType,
-            AssignedOutlet: assignedOutlet,
-            Department: department,
-            JobTitle: jobTitle,
-            DateEmployed: revertedDE,
-            RegDate: revertedRD,
-            DateLeaved: revertedDL,
-            DateProbationary: revertedDP,
-            EmpStatus: empStatus,
-            Notes: notes,
-            ATMnumber: atmnumber,
-            TINnumber: tinnumber,
-            SSSnumber: sssnumber,
-            PHnumber: phnumber,
-            PInumber: pinumber,
-            ContractDateEnd: revertedCD,
-          });
+          await addGeninfo(genInfoData);
         }
 
         /* Include inactive employee record in inactive list.
@@ -255,6 +219,30 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           });
         } else if (empStatus === "Y") {
           await deleteInactiveEmp({ id: inactiveEmp?.id });
+        }
+
+        // Send data to HR email if processed by outlet/branch
+        if (isOutletProcessor && geninfo) {
+          // Update record
+          sendEmail(
+            generateEmailMsg(
+              branch,
+              `${geninfo?.id}-GenInfo.json`,
+              geninfo,
+              genInfoData,
+              true
+            )
+          );
+        } else if (isOutletProcessor) {
+          // Add new record
+          sendEmail(
+            generateEmailMsg(
+              branch,
+              `${geninfo?.id}-PersonalInfo.json`,
+              geninfo,
+              genInfoData
+            )
+          );
         }
       }
     } else {

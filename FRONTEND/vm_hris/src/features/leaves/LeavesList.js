@@ -28,7 +28,15 @@ import { FONTS } from "../../config/fontBase64";
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
 
-  const { userLevel, employeeId, isOutletProcessor } = useAuth();
+  const {
+    userLevel,
+    employeeId,
+    isUser,
+    isOutletProcessor,
+    isHR,
+    isAdmin,
+    branch,
+  } = useAuth();
 
   const navigate = useNavigate();
 
@@ -53,11 +61,7 @@ const LeavesList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetLeavesQuery(/* undefined, {
-    pollingInterval: 15000,
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  } */);
+  } = useGetLeavesQuery();
 
   const { data: geninfos } = useGetGeninfosQuery();
 
@@ -710,8 +714,12 @@ const LeavesList = () => {
         const leave = entities[id];
         let matches = true;
 
-        if (userLevel !== "Admin") {
-          matches = leave.EmployeeID === employeeId;
+        if (isOutletProcessor) {
+          matches = matches && leave.Branch === branch;
+        }
+
+        if (isUser) {
+          matches = matches && leave?.EmployeeID === employeeId;
         }
 
         if (name !== "") {
@@ -862,7 +870,7 @@ const LeavesList = () => {
               className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
             >
               <caption>
-                {userLevel === "Admin"
+                {isHR || isAdmin || isOutletProcessor
                   ? `Leave Credit Info of ${
                       leaveCredit?.EmployeeID ? leaveCredit.EmployeeID : ""
                     }`

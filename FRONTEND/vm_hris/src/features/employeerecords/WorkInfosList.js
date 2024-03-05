@@ -17,9 +17,16 @@ import {
 import { useAddWorkinfoMutation } from "./recordsApiSlice";
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
 import { toast } from "react-toastify";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import useAuth from "../../hooks/useAuth";
 
 const WorkInfosList = ({ workinfos, employeeId }) => {
+  const { isOutletProcessor, branch } = useAuth();
+
   const [works, setWorks] = useState([]);
+
+  const [sendEmail] = useSendEmailMutation();
 
   useEffect(() => {
     setWorks(workinfos);
@@ -60,47 +67,40 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() && !isLoading) {
-      await addWorkinfo({
-        EmployeeID: employeeId,
-        Position_Title: positionTitle,
-        Company_Name: companyName,
-        JoinedFR_M: joinedFRM,
-        JoinedFR_Y: joinedFRY,
-        JoinedTO_M: joinedTOM,
-        JoinedTO_Y: joinedTOY,
-        Specialization: specialization,
-        Role: role,
-        Country: country,
-        State: region,
-        Industry: industry,
-        Position: position,
-        Salary: salary,
-        Work_Description: workDesc,
-        ToPresent: toPresent,
-      });
+    let workInfoData = {
+      EmployeeID: employeeId,
+      Position_Title: positionTitle,
+      Company_Name: companyName,
+      JoinedFR_M: joinedFRM,
+      JoinedFR_Y: joinedFRY,
+      JoinedTO_M: joinedTOM,
+      JoinedTO_Y: joinedTOY,
+      Specialization: specialization,
+      Role: role,
+      Country: country,
+      State: region,
+      Industry: industry,
+      Position: position,
+      Salary: salary,
+      Work_Description: workDesc,
+      ToPresent: toPresent,
+    };
 
-      setWorks((prev) => [
-        ...prev,
-        {
-          EmployeeID: employeeId,
-          Position_Title: positionTitle,
-          Company_Name: companyName,
-          JoinedFR_M: joinedFRM,
-          JoinedFR_Y: joinedFRY,
-          JoinedTO_M: joinedTOM,
-          JoinedTO_Y: joinedTOY,
-          Specialization: specialization,
-          Role: role,
-          Country: country,
-          State: region,
-          Industry: industry,
-          Position: position,
-          Salary: salary,
-          Work_Description: workDesc,
-          ToPresent: toPresent,
-        },
-      ]);
+    if (form.checkValidity() && !isLoading) {
+      await addWorkinfo(workInfoData);
+
+      setWorks((prev) => [...prev, workInfoData]);
+
+      if (isOutletProcessor) {
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${employeeId}-WorkInfo.json`,
+            "",
+            workInfoData
+          )
+        );
+      }
     } else {
       e.stopPropagation();
     }
@@ -138,7 +138,16 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
         .sort((a, b) => {
           return b.JoinedFR_Y - a.JoinedFR_Y;
         })
-        .map((work, index) => <WorkInfo key={index} workinfo={work} />)
+        .map((work, index) => (
+          <WorkInfo
+            key={index}
+            workinfo={work}
+            branch={branch}
+            isOutletProcessor={isOutletProcessor}
+            sendEmail={sendEmail}
+            generateEmailMsg={generateEmailMsg}
+          />
+        ))
     : null;
 
   return (
@@ -146,7 +155,7 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
       <Container>
         <Row>
           <Col>
-            <small>{`(Click any work history to edit)`}</small>
+            <small>{`(Click any work history to edit. Present work is highlighted in GREEN)`}</small>
           </Col>
           <Col>
             <Button
@@ -319,7 +328,9 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                 </Form.Label>
                 <InputGroup>
                   <Form.Control
+                    disabled={toPresent === 1}
                     type="text"
+                    required={toPresent !== 1}
                     value={joinedTOM}
                     onChange={(e) => setJoinedTOM(e.target.value)}
                   />
@@ -328,6 +339,8 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
                   </Form.Control.Feedback>
 
                   <Form.Control
+                    disabled={toPresent === 1}
+                    required={toPresent !== 1}
                     type="number"
                     value={joinedTOY}
                     onChange={(e) => setJoinedTOY(e.target.value)}

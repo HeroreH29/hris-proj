@@ -23,11 +23,11 @@ const workInfoSchema = new mongoose.Schema({
   },
   JoinedTO_M: {
     type: String,
-    required: true,
+    default: "",
   },
   JoinedTO_Y: {
     type: Number,
-    required: true,
+    default: 0,
   },
   Specialization: {
     type: String,

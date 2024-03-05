@@ -15,8 +15,16 @@ import {
 import { useAddEducinfoMutation } from "./recordsApiSlice";
 import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
+import useAuth from "../../hooks/useAuth";
+import {
+  sendEmailApiSlice,
+  useSendEmailMutation,
+} from "../emailSender/sendEmailApiSlice";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 
 const EducInfoList = ({ educinfos, employeeId }) => {
+  const { branch, isOutletProcessor } = useAuth();
+
   const [educs, setEducs] = useState([]);
 
   useEffect(() => {
@@ -31,6 +39,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
   // eslint-disable-next-line
   const [addEducinfo, { isLoading, isSuccess, isError, error }] =
     useAddEducinfoMutation();
+
+  const [sendEmail] = useSendEmailMutation();
 
   /* VARIABLES */
   const [institutionName, setInstitutionName] = useState("");
@@ -49,33 +59,28 @@ const EducInfoList = ({ educinfos, employeeId }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() && !isLoading) {
-      await addEducinfo({
-        Institution_Name: institutionName,
-        Address: address,
-        Degree: degree,
-        Level: level,
-        yrStart: yrStart,
-        yrGraduated: yrGraduated,
-        Field_of_Study: fieldOfStudy,
-        Major: major,
-        EmployeeID: employeeID,
-      });
+    let educInfoData = {
+      Institution_Name: institutionName,
+      Address: address,
+      Degree: degree,
+      Level: level,
+      yrStart: yrStart,
+      yrGraduated: yrGraduated,
+      Field_of_Study: fieldOfStudy,
+      Major: major,
+      EmployeeID: employeeID,
+    };
 
-      setEducs((prev) => [
-        ...prev,
-        {
-          Institution_Name: institutionName,
-          Address: address,
-          Degree: degree,
-          Level: level,
-          yrStart: yrStart,
-          yrGraduated: yrGraduated,
-          Field_of_Study: fieldOfStudy,
-          Major: major,
-          EmployeeID: employeeID,
-        },
-      ]);
+    if (form.checkValidity() && !isLoading) {
+      const payload = await addEducinfo(educInfoData);
+
+      setEducs((prev) => [...prev, educInfoData]);
+
+      if (isOutletProcessor && payload) {
+        await sendEmail(
+          generateEmailMsg(branch, `${branch}-EducInfo.json`, "", educInfoData)
+        );
+      }
     } else {
       e.stopPropagation();
     }
@@ -122,7 +127,16 @@ const EducInfoList = ({ educinfos, employeeId }) => {
         .sort((a, b) => {
           return b.yrStart - a.yrStart;
         })
-        .map((educ, index) => <EducInfo key={index} educinfo={educ} />)
+        .map((educ, index) => (
+          <EducInfo
+            key={index}
+            educinfo={educ}
+            branch={branch}
+            isOutletProcessor={isOutletProcessor}
+            sendEmail={sendEmail}
+            generateEmailMsg={generateEmailMsg}
+          />
+        ))
     : null;
 
   return (

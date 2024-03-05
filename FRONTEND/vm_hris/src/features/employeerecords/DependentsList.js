@@ -12,14 +12,16 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPersonCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { format, parse } from "date-fns";
-import {
-  useAddDependentMutation,
-  useGetGeninfosQuery,
-} from "./recordsApiSlice";
+import { useAddDependentMutation } from "./recordsApiSlice";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
 import { toast } from "react-toastify";
+import useAuth from "../../hooks/useAuth";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 
 const DependentsList = ({ dependents, employeeId }) => {
+  const { isOutletProcessor, branch } = useAuth();
+
   const [deps, setDeps] = useState([]);
 
   useEffect(() => {
@@ -27,15 +29,11 @@ const DependentsList = ({ dependents, employeeId }) => {
     // eslint-disable-next-line
   }, []);
 
-  const tableContent = deps?.length
-    ? deps
-        .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
-        .map((dep, index) => <Dependent key={index} dependent={dep} />)
-    : null;
-
   // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
     useAddDependentMutation();
+
+  const [sendEmail] = useSendEmailMutation();
 
   const [showModal, setShowModal] = useState(false);
   const [validated, setValidated] = useState(false);
@@ -61,29 +59,31 @@ const DependentsList = ({ dependents, employeeId }) => {
     // Revert dates
     const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
-    if (form.checkValidity() && !isLoading) {
-      await addDependent({
-        EmployeeID: employeeId,
-        Names: names,
-        Dependent: dep,
-        Birthday: revertedBD,
-        Status: status,
-        Relationship: relationship,
-        Covered: covered,
-      });
+    let dependentData = {
+      EmployeeID: employeeId,
+      Names: names,
+      Dependent: dep,
+      Birthday: revertedBD,
+      Status: status,
+      Relationship: relationship,
+      Covered: covered,
+    };
 
-      setDeps((prev) => [
-        ...prev,
-        {
-          EmployeeID: employeeId,
-          Names: names,
-          Dependent: dep,
-          Birthday: revertedBD,
-          Status: status,
-          Relationship: relationship,
-          Covered: covered,
-        },
-      ]);
+    if (form.checkValidity() && !isLoading) {
+      await addDependent(dependentData);
+
+      setDeps((prev) => [...prev, dependentData]);
+
+      if (isOutletProcessor) {
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${employeeId}-Dependent.json`,
+            "",
+            dependentData
+          )
+        );
+      }
     } else {
       e.stopPropagation();
     }
@@ -116,6 +116,21 @@ const DependentsList = ({ dependents, employeeId }) => {
     );
   });
 
+  const tableContent = deps?.length
+    ? deps
+        .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
+        .map((dep, index) => (
+          <Dependent
+            key={index}
+            dependent={dep}
+            isOutletProcessor={isOutletProcessor}
+            branch={branch}
+            sendEmail={sendEmail}
+            generateEmailMsg={generateEmailMsg}
+          />
+        ))
+    : null;
+
   useEffect(() => {
     if (isSuccess) {
       setNames("");
@@ -128,8 +143,6 @@ const DependentsList = ({ dependents, employeeId }) => {
       setValidated(false);
 
       toast.success("Dependent successfully addded!");
-
-      //window.location.reload();
     }
   }, [isSuccess]);
 

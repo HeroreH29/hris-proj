@@ -9,18 +9,24 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const Dependent = ({ dependent }) => {
+const Dependent = ({
+  dependent,
+  isOutletProcessor,
+  branch,
+  sendEmail,
+  generateEmailMsg,
+}) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
   // eslint-disable-next-line
-  const [updateDependent, { isLoading, isSuccess, isError, error }] =
+  const [updateDependent, { isLoading, isSuccess, isError }] =
     useUpdateDependentMutation();
 
   const [
     deleteDependent,
     // eslint-disable-next-line
-    { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
+    { isSuccess: isDelSuccess, isError: isDelError },
   ] = useDeleteDependentMutation();
 
   // Parse and format the birthday to make it editable through date input
@@ -89,7 +95,7 @@ const Dependent = ({ dependent }) => {
       // Revert dates
       const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
-      await updateDependent({
+      let dependentData = {
         id: dependent.id,
         EmployeeID: dependent.EmployeeID,
         Names: names,
@@ -98,7 +104,21 @@ const Dependent = ({ dependent }) => {
         Relationship: relationship,
         Status: status,
         Covered: covered,
-      });
+      };
+
+      await updateDependent(dependentData);
+
+      if (isOutletProcessor) {
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${dependent.EmployeeID}-Dependent.json`,
+            dependent.id,
+            dependentData,
+            true
+          )
+        );
+      }
     } else {
       e.stopPropagation();
     }
@@ -133,7 +153,7 @@ const Dependent = ({ dependent }) => {
           <td>{dependent.Birthday}</td>
           <td>{status}</td>
           <td>{relationship === "Daugther" ? "Daughter" : relationship}</td>
-          <td>{covered}</td>
+          <td>{covered === 1 ? "Yes" : "No"}</td>
         </tr>
 
         {/* View edit dependent modal */}

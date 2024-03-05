@@ -101,24 +101,8 @@ const createWorkInfo = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateWorkInfo = async (req, res) => {
-  const {
-    id,
-    Position_Title,
-    Company_Name,
-    JoinedFR_M,
-    JoinedFR_Y,
-    JoinedTO_M,
-    JoinedTO_Y,
-    Specialization,
-    Role,
-    Country,
-    State,
-    Industry,
-    Position,
-    Salary,
-    Work_Description,
-    ToPresent,
-  } = req.body;
+  const { id, ...others } = req.body;
+  let recordFound = false;
 
   // Confirm data
   if (!id) {
@@ -128,38 +112,18 @@ const updateWorkInfo = async (req, res) => {
   const workinfo = await WorkInfo.findById(id).exec();
 
   if (!workinfo) {
-    return res.status(400).json({ message: "Work info not found" });
+    recordFound = false;
+    res.json({ message: "Work info not found. Creating new record..." });
+
+    const newWork = new WorkInfo({ _id: id, ...others });
+    newWork.save();
+    res.json({ message: "Work info has been added" });
+  } else {
+    recordFound = true;
+    Object.assign(workinfo, others);
+    workinfo.save();
+    res.json({ message: "Work info has been updated" });
   }
-
-  /* // Check duplicate
-  const duplicate = await GenInfo.findOne({ EmployeeID }).lean().exec();
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "EmployeeID already taken" });
-  } */
-
-  workinfo.Position_Title = Position_Title;
-  workinfo.Company_Name = Company_Name;
-  workinfo.JoinedFR_M = JoinedFR_M;
-  workinfo.JoinedFR_Y = JoinedFR_Y;
-  workinfo.JoinedTO_M = JoinedTO_M;
-  workinfo.JoinedTO_Y = JoinedTO_Y;
-  workinfo.Specialization = Specialization;
-  workinfo.Role = Role;
-  workinfo.Country = Country;
-  workinfo.State = State;
-  workinfo.Industry = Industry;
-  workinfo.Position = Position;
-  workinfo.Salary = Salary;
-  workinfo.Work_Description = Work_Description;
-  workinfo.ToPresent = ToPresent;
-
-  await workinfo.save();
-
-  res.json({
-    message: `Work Info has been updated`,
-  });
 };
 
 // @desc Delete user

@@ -8,7 +8,13 @@ import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const EducInfo = ({ educinfo }) => {
+const EducInfo = ({
+  educinfo,
+  branch,
+  isOutletProcessor,
+  sendEmail,
+  generateEmailMsg,
+}) => {
   const navigate = useNavigate();
   const formRef = useRef();
 
@@ -37,6 +43,7 @@ const EducInfo = ({ educinfo }) => {
     Field_of_Study: educinfo?.Field_of_Study,
     Major: educinfo?.Major,
     id: educinfo?.id,
+    EmployeeID: educinfo?.EmployeeID,
   });
 
   /* SUBMIT FUNCTION */
@@ -46,7 +53,19 @@ const EducInfo = ({ educinfo }) => {
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
-      await updateEducinfo(educInfoJson);
+      const payload = await updateEducinfo(educInfoJson);
+
+      if (isOutletProcessor && payload) {
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${educinfo?.EmployeeID}-EducInfo.json`,
+            educinfo?.id,
+            educInfoJson,
+            true
+          )
+        );
+      }
     } else {
       e.stopPropagation();
     }

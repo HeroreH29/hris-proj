@@ -17,7 +17,13 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const WorkInfo = ({ workinfo }) => {
+const WorkInfo = ({
+  workinfo,
+  branch,
+  isOutletProcessor,
+  sendEmail,
+  generateEmailMsg,
+}) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
@@ -61,25 +67,40 @@ const WorkInfo = ({ workinfo }) => {
 
     const form = e.currentTarget;
 
+    let workInfoData = {
+      id: workinfo.id,
+      EmployeeID: workinfo.EmployeeID,
+      Position_Title: positionTitle,
+      Company_Name: companyName,
+      JoinedFR_M: joinedFRM,
+      JoinedFR_Y: joinedFRY,
+      JoinedTO_M: joinedTOM,
+      JoinedTO_Y: joinedTOY,
+      Specialization: specialization,
+      Role: role,
+      Country: country,
+      State: region,
+      Industry: industry,
+      Position: position,
+      Salary: salary,
+      Work_Description: workDesc,
+      ToPresent: toPresent,
+    };
+
     if (form.checkValidity() && !isLoading) {
-      await updateWorkinfo({
-        id: workinfo.id,
-        Position_Title: positionTitle,
-        Company_Name: companyName,
-        JoinedFR_M: joinedFRM,
-        JoinedFR_Y: joinedFRY,
-        JoinedTO_M: joinedTOM,
-        JoinedTO_Y: joinedTOY,
-        Specialization: specialization,
-        Role: role,
-        Country: country,
-        State: region,
-        Industry: industry,
-        Position: position,
-        Salary: salary,
-        Work_Description: workDesc,
-        ToPresent: toPresent,
-      });
+      await updateWorkinfo(workInfoData);
+
+      if (isOutletProcessor) {
+        await sendEmail(
+          generateEmailMsg(
+            branch,
+            `${workinfo.EmployeeID}-WorkInfo.json`,
+            workinfo.id,
+            workInfoData,
+            true
+          )
+        );
+      }
     } else {
       e.stopPropagation();
     }
@@ -119,11 +140,21 @@ const WorkInfo = ({ workinfo }) => {
             setShowModal(true);
           }}
         >
-          <td>{positionTitle}</td>
-          <td>{companyName}</td>
-          <td>{`${region}, ${country}`}</td>
-          <td>{`${joinedFRM}, ${joinedFRY}`}</td>
-          <td>{`${joinedTOM}, ${joinedTOY}`}</td>
+          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>
+            {positionTitle}
+          </td>
+          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>
+            {companyName}
+          </td>
+          <td
+            className={toPresent === 1 ? "bg-success-subtle" : ""}
+          >{`${region}, ${country}`}</td>
+          <td
+            className={toPresent === 1 ? "bg-success-subtle" : ""}
+          >{`${joinedFRM}, ${joinedFRY}`}</td>
+          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>{`${
+            joinedTOM !== "" ? joinedTOM + "," : ""
+          } ${joinedTOY !== 0 ? joinedTOY : ""}`}</td>
         </tr>
 
         {/* View edit work info modal */}
@@ -271,6 +302,8 @@ const WorkInfo = ({ workinfo }) => {
                   </Form.Label>
                   <InputGroup>
                     <Form.Control
+                      disabled={toPresent === 1}
+                      required={toPresent !== 1}
                       type="text"
                       value={joinedTOM}
                       onChange={(e) => setJoinedTOM(e.target.value)}
@@ -280,6 +313,8 @@ const WorkInfo = ({ workinfo }) => {
                     </Form.Control.Feedback>
 
                     <Form.Control
+                      disabled={toPresent === 1}
+                      required={toPresent !== 1}
                       type="number"
                       value={joinedTOY}
                       onChange={(e) => setJoinedTOY(e.target.value)}

@@ -55,41 +55,30 @@ const createEducInfo = async (req, res) => {
 // @route PATCH /educinfos
 // @access Private
 const updateEducInfo = async (req, res) => {
-  const reqBody = req.body;
+  const { id, _id, __v, ...others } = req.body;
+  let recordFound = false;
 
   // Confirm data
-  if (!reqBody.id) {
+  if (!id) {
     return res.status(400).json({ message: "Id is required" });
   }
 
-  const educ = await Educ.findById(reqBody.id).exec();
+  const educ = await Educ.findById(id).exec();
 
   if (!educ) {
-    return res.status(404).json({ message: "Info not found" });
+    recordFound = false;
+    res.json({ message: "Info not found. Creating a new record..." });
+
+    const newEduc = new Educ({ _id: id, ...others });
+    newEduc.save();
+    res.json({ message: "Educational info has been added" });
+  } else {
+    recordFound = true;
+    // Continue with updating the record
+    Object.assign(educ, others);
+    educ.save();
+    res.json({ message: "An educational info has been updated" });
   }
-
-  // Exclude variables that does not need to update before proceeding in updating
-  const filteredData = { ...reqBody };
-  delete filteredData?.id;
-  delete filteredData?.EmployeeID;
-  delete filteredData?._id;
-  delete filteredData?.__v;
-
-  /* // Check duplicate
-  const duplicate = await GenInfo.findOne({ EmployeeID }).lean().exec();
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "EmployeeID already taken" });
-  } */
-
-  Object.assign(educ, filteredData);
-
-  educ.save();
-
-  res.json({
-    message: `An educational info has been updated`,
-  });
 };
 
 // @desc Delete educ info

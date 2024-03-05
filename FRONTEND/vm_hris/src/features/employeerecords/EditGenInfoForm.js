@@ -227,8 +227,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           sendEmail(
             generateEmailMsg(
               branch,
-              `${geninfo?.id}-GenInfo.json`,
-              geninfo,
+              `${geninfo?.EmployeeID}-GenInfo.json`,
+              geninfo?.id,
               genInfoData,
               true
             )
@@ -238,8 +238,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           sendEmail(
             generateEmailMsg(
               branch,
-              `${geninfo?.id}-PersonalInfo.json`,
-              geninfo,
+              `${geninfo?.EmployeeID}-PersonalInfo.json`,
+              geninfo?.id,
               genInfoData
             )
           );

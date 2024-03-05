@@ -1,13 +1,24 @@
-const uploadData = async (updateFunction, createFunction, parsedData) => {
+const uploadData = async (
+  updateFunction,
+  createFunction,
+  parsedData,
+  navigate,
+  toast
+) => {
   try {
+    let res;
     if (parsedData?.id) {
-      await updateFunction(parsedData);
+      res = await updateFunction(parsedData);
     } else {
-      await createFunction(parsedData);
+      res = await createFunction(parsedData);
+    }
+
+    if (res) {
+      navigate("/employeerecords");
+      toast.success("Record saved!");
     }
   } catch (error) {
-    console.error("Error uploading data:", error);
-    // Handle error as needed
+    toast.error("Error uploading data:", error);
   }
 };
 

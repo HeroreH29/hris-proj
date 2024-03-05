@@ -1,16 +1,5 @@
 const PersonalInfo = require("../models/PersonalInfo");
-
-// Extra checking if EmployeeID are all numbers or not
-const isStringAllNumber = (EmployeeID) => {
-  // EmployeeID are all numbers
-  const isANumber = !isNaN(Number(EmployeeID));
-  if (isANumber) {
-    return EmployeeID * 1;
-  }
-
-  // Return unchanged if not
-  return EmployeeID;
-};
+const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
 // @desc Get all users
 // @route GET /users
@@ -70,7 +59,7 @@ const createPersonalInfo = async (req, res) => {
       .json({ message: `EmployeeID ${EmployeeID} already exists` });
   }
 
-  const newEmployeeID = isStringAllNumber(EmployeeID);
+  const newEmployeeID = isStringAllNumbers(EmployeeID);
 
   // Create and store new personalinfo
   const personalinfo = await PersonalInfo.create({
@@ -116,18 +105,21 @@ const updatePersonalInfo = async (req, res) => {
   const personalinfo = await PersonalInfo.findById(id).exec();
 
   if (!personalinfo) {
-    return res.status(400).json({ message: "Personal info not found" });
+    res.json({ message: "Personal info not found. Creating new record..." });
+
+    const newPers = new PersonalInfo({
+      _id: id,
+      EmployeeID: EmployeeID,
+      ...others,
+    });
+    newPers.save();
+    res.json({ message: "Personal info has been added" });
+  } else {
+    Object.assign(personalinfo, others);
+    personalinfo.overwrite(req.body);
+    personalinfo.save();
+    res.json({ message: "Personal info has been updated" });
   }
-
-  /* Updates/Add data to fields and removing 'Address' field in the process.
-  ('Address' field is not applicable to the current system) */
-  personalinfo.overwrite(req.body);
-
-  await personalinfo.save();
-
-  res.json({
-    message: `Personal info of ${EmployeeID} is updated`,
-  });
 };
 
 // @desc Delete user

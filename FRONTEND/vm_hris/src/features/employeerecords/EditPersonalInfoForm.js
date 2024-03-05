@@ -136,8 +136,8 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
         await sendEmail(
           generateEmailMsg(
             branch,
-            `${personalinfo?.id}-PersonalInfo.json`,
-            personalinfo,
+            `${personalinfo?.EmployeeID}-PersonalInfo.json`,
+            personalinfo?.id,
             personalInfoData,
             true
           )
@@ -147,8 +147,8 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
         await sendEmail(
           generateEmailMsg(
             branch,
-            `${personalinfo?.id}-PersonalInfo.json`,
-            personalinfo,
+            `${personalinfo?.EmployeeID}-PersonalInfo.json`,
+            personalinfo?.id,
             personalInfoData
           )
         );

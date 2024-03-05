@@ -18,5 +18,5 @@ export const RELATIONSHIP = {
 export const COVERED = {
   "Cover status...": "",
   Yes: 1,
-  No: 2,
+  No: 0,
 };

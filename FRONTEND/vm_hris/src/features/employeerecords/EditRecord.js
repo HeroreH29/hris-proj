@@ -297,7 +297,12 @@ const EditRecord = () => {
           if (element.getText()) {
             txtLength = element.getText().length ? element.getText().length : 0;
           }
-          element.setFontSize(fontSize - txtLength * 0.2);
+
+          element.setFontSize(fontSize - txtLength * 0.25);
+
+          if (e === "Notes") {
+            element.setFontSize(fontSize - txtLength * 0.15);
+          }
           element.updateAppearances(workSans);
         });
 
@@ -344,9 +349,8 @@ const EditRecord = () => {
                 console.warn(`Element ${e}${i + 1} not found.`);
               }
 
-              if (e !== "Names") {
-                element.setFontSize(fontSize - 2);
-              }
+              element.setFontSize(fontSize - 4);
+
               element.updateAppearances(workSans);
             });
           });
@@ -373,27 +377,35 @@ const EditRecord = () => {
           });
         });
 
-        workinfos.forEach((w, i) => {
-          formEmpHist.forEach((val) => {
-            // const element = form.getTextField(`${val}Row${i + 1}`);
-            const element = FieldFinder(
-              `${val}${i + 1}`,
-              `undefined.${val}${i + 1}`
-            );
-
-            if (val === "LengthOfStay") {
-              element.setText(
-                `${w?.JoinedFR_M} ${w?.JoinedFR_Y} - ${w?.JoinedTO_M} ${w?.JoinedTO_Y}`
+        workinfos
+          .sort((a, b) => {
+            return b.JoinedFR_Y - a.JoinedFR_Y;
+          })
+          .forEach((w, i) => {
+            formEmpHist.forEach((val) => {
+              // const element = form.getTextField(`${val}Row${i + 1}`);
+              const element = FieldFinder(
+                `${val}${i + 1}`,
+                `undefined.${val}${i + 1}`
               );
-            } else if (val === "WorkAddress") {
-              element.setText(`${w?.State}, ${w?.Country}`);
-            } else {
-              element.setText(String(w?.[val]));
-            }
-            element.setFontSize(fontSize - 5);
-            element.updateAppearances(workSans);
+
+              if (val === "LengthOfStay") {
+                if (w?.ToPresent === 1) {
+                  element.setText("Present Job");
+                } else {
+                  element.setText(
+                    `${w?.JoinedFR_M} ${w?.JoinedFR_Y} - ${w?.JoinedTO_M} ${w?.JoinedTO_Y}`
+                  );
+                }
+              } else if (val === "WorkAddress") {
+                element.setText(`${w?.State}, ${w?.Country}`);
+              } else {
+                element.setText(String(w?.[val]));
+              }
+              element.setFontSize(fontSize - 5);
+              element.updateAppearances(workSans);
+            });
           });
-        });
 
         const pages = pdfDoc.getPages();
         const thirdPage = pages[2];
@@ -460,13 +472,37 @@ const EditRecord = () => {
       if (filename.includes("GenInfo")) {
         await uploadData(updateGenInfo, createGenInfo, parsedData);
       } else if (filename.includes("PersonalInfo")) {
-        await uploadData(updatePersonalInfo, createPersonalInfo, parsedData);
-      } else if (filename.includes("Dependents")) {
-        await uploadData(updateDependents, createDependent, parsedData);
+        await uploadData(
+          updatePersonalInfo,
+          createPersonalInfo,
+          parsedData,
+          navigate,
+          toast
+        );
+      } else if (filename.includes("Dependent")) {
+        await uploadData(
+          updateDependents,
+          createDependent,
+          parsedData,
+          navigate,
+          toast
+        );
       } else if (filename.includes("WorkInfo")) {
-        await uploadData(updateWorkInfo, createWorkInfo, parsedData);
+        await uploadData(
+          updateWorkInfo,
+          createWorkInfo,
+          parsedData,
+          navigate,
+          toast
+        );
       } else if (filename.includes("EducInfo")) {
-        await uploadData(updateEducInfo, createEducInfo, parsedData);
+        await uploadData(
+          updateEducInfo,
+          createEducInfo,
+          parsedData,
+          navigate,
+          toast
+        );
       }
     };
 

@@ -75,40 +75,30 @@ const createDependent = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateDependent = async (req, res) => {
-  const { id, Names, Dependent, Birthday, Status, Relationship, Covered } =
-    req.body;
+  const { id, ...others } = req.body;
+
+  let recordFound = false;
 
   // Confirm data
   if (!id) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "Id is required" });
   }
 
   const dependent = await Dep.findById(id).exec();
 
   if (!dependent) {
-    return res.status(400).json({ message: "Dependent not found" });
+    recordFound = false;
+    res.json({ message: "Info not found. Creating a new record..." });
+
+    const newDep = new Dep({ _id: id, ...others });
+    newDep.save();
+    res.json({ message: "Dependent info has been added" });
+  } else {
+    recordFound = true;
+    Object.assign(dependent, others);
+    dependent.save();
+    res.json({ message: "A dependent info has been updated" });
   }
-
-  /* // Check duplicate
-  const duplicate = await GenInfo.findOne({ EmployeeID }).lean().exec();
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "EmployeeID already taken" });
-  } */
-
-  dependent.Names = Names;
-  dependent.Dependent = Dependent;
-  dependent.Birthday = Birthday;
-  dependent.Status = Status;
-  dependent.Relationship = Relationship;
-  dependent.Covered = Covered;
-
-  const updatedDependent = await dependent.save();
-
-  res.json({
-    message: `Dependent - ${updatedDependent.Names} - has been updated`,
-  });
 };
 
 // @desc Delete user

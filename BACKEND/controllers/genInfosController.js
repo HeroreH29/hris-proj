@@ -390,37 +390,39 @@ const updateGenInfo = async (req, res) => {
   const geninfo = await GenInfo.findById(id).exec();
 
   if (!geninfo) {
-    return res.status(400).json({ message: "Information not found" });
-  }
+    res
+      .status(400)
+      .json({ message: "Information not found. Creating new record..." });
 
-  // Check duplicate
-  const duplicate = await GenInfo.exists({ EmployeeID: newEmployeeID });
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "EmployeeID already taken" });
-  }
-
-  const newGenInfo = await GenInfo.findByIdAndUpdate(id, others, {
-    new: true,
-  }).exec();
-
-  if (geninfo?.EmployeeID !== newEmployeeID) {
-    newGenInfo.EmployeeID = newEmployeeID;
-
-    /* It is also required to update the EmployeeID
-    of other information of the employee if EmployeeID is changed/modified */
-    UpdateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
-  }
-
-  const updatedGenInfo = await newGenInfo.save();
-
-  if (updatedGenInfo) {
-    res.json({
-      message: `Information of ${updatedGenInfo.EmployeeID} updated`,
-    });
+    const newGen = new GenInfo({ _id: id, EmployeeID, BioID, others });
+    newGen.save();
+    res.json({ message: "General info has been added" });
   } else {
-    res.json({ message: "Something went wrong" });
+    // Check duplicate
+    const duplicate = await GenInfo.exists({ EmployeeID: newEmployeeID });
+
+    // Allow updates to the original user
+    if (duplicate && duplicate?._id.toString() !== id) {
+      return res.status(409).json({ message: "EmployeeID already taken" });
+    }
+
+    const newGenInfo = await GenInfo.findByIdAndUpdate(id, others, {
+      new: true,
+    }).exec();
+
+    if (geninfo?.EmployeeID !== newEmployeeID) {
+      newGenInfo.EmployeeID = newEmployeeID;
+
+      /* It is also required to update the EmployeeID
+  of other information of the employee if EmployeeID is changed/modified */
+      UpdateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
+    }
+
+    const updatedGenInfo = await newGenInfo.save();
+
+    if (updatedGenInfo) {
+      res.json({ message: "General info has been updated" });
+    }
   }
 };
 

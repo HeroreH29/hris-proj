@@ -470,7 +470,13 @@ const EditRecord = () => {
       const parsedData = JSON.parse(event.target.result);
 
       if (filename.includes("GenInfo")) {
-        await uploadData(updateGenInfo, createGenInfo, parsedData);
+        await uploadData(
+          updateGenInfo,
+          createGenInfo,
+          parsedData,
+          navigate,
+          toast
+        );
       } else if (filename.includes("PersonalInfo")) {
         await uploadData(
           updatePersonalInfo,

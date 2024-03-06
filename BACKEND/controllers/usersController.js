@@ -1,17 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-
-// Extra checking if EmployeeID are all numbers or not
-const isStringAllNumber = (EmployeeID) => {
-  // EmployeeID are all numbers
-  const isANumber = !isNaN(Number(EmployeeID));
-  if (isANumber) {
-    return EmployeeID * 1;
-  }
-
-  // Return unchanged if not
-  return EmployeeID;
-};
+const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
 // @desc Get all users
 // @route GET /users
@@ -67,7 +56,7 @@ const createNewUser = async (req, res) => {
   // Hash password
   const hashedPwd = await bcrypt.hash(password, 10); // Salt rounds
 
-  const newEmployeeID = isStringAllNumber(employeeId);
+  const newEmployeeID = isStringAllNumbers(employeeId);
 
   const userObject = !userLevel
     ? {

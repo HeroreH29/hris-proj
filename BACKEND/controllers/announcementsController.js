@@ -2,24 +2,9 @@ const Announcement = require("../models/Announcement");
 //const User = require("../models/User");
 const format = require("date-fns/format");
 const parse = require("date-fns/parse");
-
-// Auto deletes expired announcements
-const DeleteExpiredAnnouncements = async (announcement) => {
-  const expiryDate = new Date(announcement?.expiryDate).valueOf();
-  const currentDate = new Date().valueOf();
-
-  if (currentDate >= expiryDate) {
-    const expiredAnnouncement = await Announcement.findById(
-      announcement?._id
-    ).exec();
-
-    if (!expiredAnnouncement) {
-      console.log("No expired announcements found");
-    } else {
-      await expiredAnnouncement.deleteOne();
-    }
-  }
-};
+const {
+  deleteExpiredAnnouncements,
+} = require("../xtra_functions/deleteExpiredAnnouncements");
 
 // @desc Get all announcements
 // @route GET /announcements
@@ -27,12 +12,12 @@ const DeleteExpiredAnnouncements = async (announcement) => {
 const getAllAnnouncements = async (req, res) => {
   const announcements = await Announcement.find().lean();
   if (!announcements?.length) {
-    return res.status(400).json({ message: "No announcements found" });
+    console.error("No announcements found...");
   }
 
   // Searches for expired announcements
   announcements.forEach((announcement) => {
-    DeleteExpiredAnnouncements(announcement);
+    deleteExpiredAnnouncements(announcement);
   });
 
   res.json(announcements);

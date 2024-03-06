@@ -1,32 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "../../features/auth/authSlice";
 
-const baseUrls = ["http://192.168.1.6:3500", "http://localhost:3500"];
-
-const fetchIpAddress = () => {
-  fetch("/ipaddress")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch IP address from the server");
-      }
-      return response.json();
-    })
-    .then((ipAddresses) => {
-      // Do something with the retrieved IP addresses
-      console.log("Local IP addresses:", ipAddresses);
-      // If you only need the first IP address, you can access it like this:
-      const firstIpAddress = ipAddresses[0];
-      console.log("First local IP address:", firstIpAddress);
-    })
-    .catch((error) => {
-      console.error("Error fetching IP address:", error.message);
-    });
-};
-
-//fetchIpAddress();
+//const baseUrls = ["http://192.168.1.6:3500", "http://localhost:3500"];
+const hostUrl = `http://${window.location.hostname}:3500`;
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: baseUrls[0],
+  baseUrl: hostUrl,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;

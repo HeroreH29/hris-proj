@@ -1,16 +1,5 @@
 const Educ = require("../models/EducInfo");
-
-// Extra checking if EmployeeID are all numbers or not
-const isStringAllNumber = (EmployeeID) => {
-  // EmployeeID are all numbers
-  const isANumber = !isNaN(Number(EmployeeID));
-  if (isANumber) {
-    return EmployeeID * 1;
-  }
-
-  // Return unchanged if not
-  return EmployeeID;
-};
+const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
 // @desc Get all educinfos
 // @route GET /educinfos
@@ -36,7 +25,7 @@ const createEducInfo = async (req, res) => {
     }
   }
 
-  const newEmployeeID = isStringAllNumber(reqBody.EmployeeID);
+  const newEmployeeID = isStringAllNumbers(reqBody.EmployeeID);
   reqBody.EmployeeID = newEmployeeID;
 
   // Will put duplicate checker if needed/necessary

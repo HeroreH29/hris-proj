@@ -44,9 +44,9 @@ const ForgotPass = () => {
   ] = useUpdateUserMutation();
 
   const [username, setUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPass, setShowNewPass] = useState(false);
+  const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
 
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const ForgotPass = () => {
   useEffect(() => {
     if (isUpdateSuccess) {
       setUsername("");
-      setNewPassword("");
+      setPassword("");
       setConfirmPassword("");
 
       toast.success("Password reset successful");
@@ -91,10 +91,10 @@ const ForgotPass = () => {
   };
 
   const handleUserInput = (e) => setUsername(e.target.value);
-  const handleNewPassInput = (e) => setNewPassword(e.target.value);
+  const handleNewPassInput = (e) => setPassword(e.target.value);
   const handleConfirmPassInput = (e) => setConfirmPassword(e.target.value);
 
-  const handleShowNewPass = () => setShowNewPass(!showNewPass);
+  const handleShowPass = () => setShowPass(!showPass);
   const handleShowConfirmPass = () => setShowConfirmPass(!showConfirmPass);
 
   const handleSubmit = async (e) => {
@@ -103,10 +103,10 @@ const ForgotPass = () => {
     if (!form.checkValidity()) {
       e.stopPropagation();
     } else {
-      if (newPassword === confirmPassword && !isUpdateLoading) {
+      if (password === confirmPassword && !isUpdateLoading) {
         await updateUser({
           ...users.entities[foundUser],
-          password: newPassword,
+          password: password,
         });
       }
     }
@@ -165,10 +165,10 @@ const ForgotPass = () => {
                 <Form.Label className="fw-semibold">New Password</Form.Label>
                 <InputGroup>
                   <Form.Control
-                    type={!showNewPass ? "password" : "text"}
+                    type={!showPass ? "password" : "text"}
                     placeholder="Enter New Password"
                     pattern={PWD_REGEX}
-                    value={newPassword}
+                    value={password}
                     onChange={handleNewPassInput}
                     required
                   />
@@ -176,11 +176,8 @@ const ForgotPass = () => {
                     Minimum of 8 characters. At least - 1 lowercase letter, 1
                     unique symbol, and 1 digit/number.
                   </Form.Control.Feedback>
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleShowNewPass()}
-                  >
-                    <FontAwesomeIcon icon={!showNewPass ? faEye : faEyeSlash} />
+                  <Button variant="secondary" onClick={() => handleShowPass()}>
+                    <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
                   </Button>
                 </InputGroup>
               </Form.Group>
@@ -227,8 +224,8 @@ const ForgotPass = () => {
         )}
         {/* <Row className="d-flex justify-content-center mb-3">
           <Form.Group as={Col} md={"auto"} className="mb-3">
-            <Link to="/forgotnewPassword" className="fst-italic">
-              Forgot newPassword?
+            <Link to="/forgotpassword" className="fst-italic">
+              Forgot password?
             </Link>
           </Form.Group>
         </Row> */}

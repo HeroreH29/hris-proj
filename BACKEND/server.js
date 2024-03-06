@@ -45,7 +45,6 @@ app.use("/leaves", require("./routes/leaveRoutes"));
 app.use("/leavecredits", require("./routes/leaveCreditRoutes"));
 app.use("/inactiveemps", require("./routes/inactiveEmpRoutes"));
 app.use("/emailsender", require("./routes/emailSenderRoutes"));
-app.use("/ipaddress", require("./routes/ipAddressRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

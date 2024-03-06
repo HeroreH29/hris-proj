@@ -45,6 +45,10 @@ const DashHeader = () => {
     notify();
   };
 
+  const toastDismisser = () => {
+    toast.dismiss();
+  };
+
   if (isError) return <p>Error: {error?.data?.message}</p>;
 
   const handleNavSelect = (e) => setActive(e);
@@ -54,6 +58,7 @@ const DashHeader = () => {
       collapseOnSelect={true}
       expand="lg"
       className="border-bottom border-dark-subtle bg-white"
+      onSelect={toastDismisser}
     >
       <Container>
         <Navbar.Brand id="logo">Via Mare HRIS</Navbar.Brand>
@@ -79,7 +84,7 @@ const DashHeader = () => {
             <Nav.Link eventKey="4" onClick={() => navigate("/leaves")}>
               Leaves
             </Nav.Link>
-            {(isHR || isAdmin || isOutletProcessor) && (
+            {(isHR || isAdmin) && (
               <Nav.Link eventKey="5" onClick={() => navigate("/users")}>
                 User Settings
               </Nav.Link>

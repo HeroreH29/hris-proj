@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
 import { useLoginMutation } from "./authApiSlice";
+import useAuthForm from "../../hooks/useAuthForm";
 
 import usePersist from "../../hooks/usePersist";
 const Login = () => {
@@ -26,18 +27,26 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { state, dispatch: stateDispatch } = useAuthForm();
+
   const [validated, setValidated] = useState(false);
   const [passInvalid, setPassInvalid] = useState(false);
   const [userInvalid, setUserInvalid] = useState(false);
 
-  const [login, { isLoading, isSuccess, isError, error }] = useLoginMutation();
+  const [login, { isLoading, isSuccess, isError }] = useLoginMutation();
 
+  // Login feedback
   useEffect(() => {
     if (isSuccess) {
       toast.success(`Welcome back ${username}!`);
+    } else if (isError) {
+      setPassInvalid(true);
+      setUserInvalid(true);
+      setUsername("");
+      setPassword("");
     }
     // eslint-disable-next-line
-  }, [isSuccess]);
+  }, [isSuccess, isError]);
 
   if (isLoading) return <Spinner animation="border" />;
 
@@ -55,19 +64,13 @@ const Login = () => {
         const { accessToken } = await login({ username, password }).unwrap();
         if (accessToken) {
           dispatch(setCredentials({ accessToken }));
-          setUsername("");
-          setPassword("");
-          setPassInvalid(false);
-          setUserInvalid(false);
           navigate("/dashboard");
         }
       } catch (error) {
-        if (error.status === 401 || error.status === 404) {
+        if (error.status === 401) {
           toast.warn("Username or password incorrect");
-          setPassInvalid(true);
-          setUserInvalid(true);
-          setUsername("");
-          setPassword("");
+        } else if (error.status === 404) {
+          toast.warn("No account found with username");
         }
       }
     }
@@ -97,8 +100,13 @@ const Login = () => {
               <Form.Control
                 type="text"
                 placeholder="Enter Username"
-                value={username}
-                onChange={handleUserInput}
+                value={state.username}
+                onChange={(e) => {
+                  stateDispatch({
+                    type: "input_username",
+                    username: e.target.value,
+                  });
+                }}
                 isInvalid={userInvalid}
                 autoFocus
                 required
@@ -110,15 +118,30 @@ const Login = () => {
               <Form.Label className="fw-semibold">Password</Form.Label>
               <InputGroup>
                 <Form.Control
-                  type={!showPass ? "password" : "text"}
+                  type={!state.showPass ? "password" : "text"}
                   placeholder="Enter Password"
-                  value={password}
-                  onChange={handlePassInput}
+                  value={state.password}
+                  onChange={(e) => {
+                    stateDispatch({
+                      type: "input_password",
+                      password: e.target.value,
+                    });
+                  }}
                   required
                   isInvalid={passInvalid}
                 />
-                <Button variant="secondary" onClick={() => handleShowPass()}>
-                  <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    stateDispatch({
+                      type: "show_password",
+                    });
+                    console.log(state.showPass);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={!state.showPass ? faEye : faEyeSlash}
+                  />
                 </Button>
               </InputGroup>
             </Form.Group>

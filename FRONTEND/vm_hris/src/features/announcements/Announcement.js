@@ -1,13 +1,9 @@
 import { useNavigate } from "react-router-dom";
-
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
-
 import React, { memo, useState } from "react";
 import { Card } from "react-bootstrap";
 
-import useAuth from "../../hooks/useAuth";
-
-const Announcement = ({ announcementId }) => {
+const Announcement = ({ announcementId, useAuth }) => {
   const { isHR, isAdmin, isOutletProcessor } = useAuth();
 
   // Variables below are used to simulate hover animation on card

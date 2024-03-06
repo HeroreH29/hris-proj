@@ -2,13 +2,11 @@ import React from "react";
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import Announcement from "./Announcement";
 import { Container } from "react-bootstrap";
-//import { useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const AnnouncementsList = () => {
-  const { isHR, isAdmin } = useAuth();
-  //const navigate = useNavigate();
+  const { isHR, isAdmin, isOutletProcessor } = useAuth();
 
   const {
     data: announcements,
@@ -30,7 +28,11 @@ const AnnouncementsList = () => {
 
     cardContent = ids?.length
       ? ids.map((announcementId) => (
-          <Announcement key={announcementId} announcementId={announcementId} />
+          <Announcement
+            key={announcementId}
+            announcementId={announcementId}
+            useAuth={useAuth}
+          />
         ))
       : null;
   }

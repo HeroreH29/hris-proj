@@ -1,16 +1,5 @@
 const WorkInfo = require("../models/WorkInfo");
-
-// Extra checking if EmployeeID are all numbers or not
-const isStringAllNumber = (EmployeeID) => {
-  // EmployeeID are all numbers
-  const isANumber = !isNaN(Number(EmployeeID));
-  if (isANumber) {
-    return EmployeeID * 1;
-  }
-
-  // Return unchanged if not
-  return EmployeeID;
-};
+const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
 // @desc Get all work infos
 // @route GET /workinfos
@@ -66,7 +55,7 @@ const createWorkInfo = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newEmployeeID = isStringAllNumber(EmployeeID);
+  const newEmployeeID = isStringAllNumbers(EmployeeID);
 
   // Will put duplicate checker if needed/necessary
 

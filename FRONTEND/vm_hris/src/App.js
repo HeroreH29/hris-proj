@@ -72,11 +72,7 @@ function App() {
                   <Route
                     element={
                       <RequireAuth
-                        allowedUserLevels={[
-                          USERLEVELS.Admin,
-                          USERLEVELS.HR,
-                          USERLEVELS.OutletProcessor,
-                        ]}
+                        allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
                       />
                     }
                   >

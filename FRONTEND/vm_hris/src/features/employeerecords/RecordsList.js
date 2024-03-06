@@ -67,13 +67,13 @@ const RecordsList = () => {
   } = useGetGeninfosQuery();
 
   useEffect(() => {
-    toast.clearWaitingQueue();
     if (geninfos?.ids?.length > 0) {
       const { ids: gids, entities: gentities } = geninfos;
 
       // For notifying HR/Admin or Outlet/Processor for employee regularization
       RegularizationNotifier(gids, gentities);
     }
+
     // eslint-disable-next-line
   }, [geninfos]);
 

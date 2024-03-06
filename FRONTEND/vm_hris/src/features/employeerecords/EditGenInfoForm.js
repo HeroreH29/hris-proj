@@ -180,6 +180,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
 
         let genInfoData = {
           EmployeeID: employeeId,
+          BioID: bioId,
           Prefix: prefix,
           FirstName: firstName,
           MiddleName: middleName,
@@ -224,7 +225,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
         // Send data to HR email if processed by outlet/branch
         if (isOutletProcessor && geninfo) {
           // Update record
-          sendEmail(
+          await sendEmail(
             generateEmailMsg(
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
@@ -235,11 +236,11 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           );
         } else if (isOutletProcessor) {
           // Add new record
-          sendEmail(
+          await sendEmail(
             generateEmailMsg(
               branch,
-              `${geninfo?.EmployeeID}-PersonalInfo.json`,
-              geninfo?.id,
+              `${geninfo?.EmployeeID}-GenInfo.json`,
+              "",
               genInfoData
             )
           );

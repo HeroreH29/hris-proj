@@ -4,7 +4,6 @@ const Dependent = require("../models/Dependent");
 const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 const Leave = require("../models/Leave");
-const LeaveCredit = require("../models/LeaveCredit");
 const InactiveEmp = require("../models/InactiveEmp");
 const {
   differenceInYears,
@@ -12,299 +11,11 @@ const {
   differenceInMonths,
   parse,
 } = require("date-fns");
-
-// Extra checking if EmployeeID are all numbers or not
-const isStringAllNumber = (EmployeeID) => {
-  // EmployeeID are all numbers
-  const isANumber = !isNaN(Number(EmployeeID));
-  if (isANumber) {
-    return EmployeeID * 1;
-  }
-
-  // Return unchanged if not
-  return EmployeeID;
-};
-
-// EmployeeID updater for other informations
-const UpdateEmployeeID = async (origEmployeeID, newEmployeeID) => {
-  // Fetch documents from other informations using EmployeeID
-  const personalinfo = await PersonalInfo.findOne({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const dependent = await Dependent.find({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const educinfo = await EducInfo.find({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const workinfo = await WorkInfo.find({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const leaveRecord = await Leave.find({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const leaveCreditRecord = await LeaveCredit.findOne({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  const inactiveEmpRecord = await InactiveEmp.findOne({
-    EmployeeID: origEmployeeID,
-  }).exec();
-
-  // Apply changes to other informations
-  if (personalinfo) {
-    personalinfo.EmployeeID = newEmployeeID;
-    await personalinfo.save();
-  }
-
-  if (dependent?.length) {
-    dependent.forEach(async (dep) => {
-      dep.EmployeeID = newEmployeeID;
-      await dep.save();
-    });
-  }
-
-  if (educinfo?.length) {
-    educinfo.forEach(async (educ) => {
-      educ.EmployeeID = newEmployeeID;
-      await educ.save();
-    });
-  }
-
-  if (workinfo?.length) {
-    workinfo.forEach(async (work) => {
-      work.EmployeeID = newEmployeeID;
-      await work.save();
-    });
-  }
-
-  if (leaveRecord?.length) {
-    leaveRecord.forEach(async (leave) => {
-      leave.EmployeeID = newEmployeeID;
-      await leave.save();
-    });
-  }
-
-  if (leaveCreditRecord) {
-    leaveCreditRecord.EmployeeID = newEmployeeID;
-    await leaveCreditRecord.save();
-  }
-
-  if (inactiveEmpRecord) {
-    inactiveEmpRecord.EmployeeID = newEmployeeID;
-    await inactiveEmpRecord.save();
-  }
-};
-
-// This is the leave credit inclusion and update
-const leaveCreditInclUpd = async (geninfos) => {
-  const existingLeaveCreditIds = await LeaveCredit.distinct("EmployeeID");
-
-  // Employees w/ 1-4 service years and no LeaveCredit records
-  const oneToFourWithoutLeaveCredit = geninfos
-    .filter((geninfo) => {
-      const parsedDate = parse(
-        geninfo?.DateEmployed,
-        "MMM dd, yyyy",
-        new Date()
-      );
-
-      const serviceYears = differenceInYears(new Date(), parsedDate);
-
-      // Check for service years and absence in LeaveCredit
-      return (
-        serviceYears >= 1 &&
-        serviceYears <= 4 &&
-        geninfo.EmployeeType === "Regular" &&
-        geninfo.EmpStatus === "Y" &&
-        !existingLeaveCreditIds.includes(geninfo.EmployeeID)
-      );
-    })
-    .map((geninfo) => geninfo.EmployeeID);
-
-  // Employees w/ 5-7 service years will have updated leave credits
-  const fiveToSevenWithLeaveCredit = geninfos
-    .filter((geninfo) => {
-      const parsedDate = parse(
-        geninfo?.DateEmployed,
-        "MMM dd, yyyy",
-        new Date()
-      );
-
-      const serviceYears = differenceInYears(new Date(), parsedDate);
-
-      // Check for service years and absence in LeaveCredit
-      return (
-        serviceYears >= 5 &&
-        serviceYears <= 7 &&
-        geninfo.EmployeeType === "Regular" &&
-        geninfo.EmpStatus === "Y" &&
-        existingLeaveCreditIds.includes(geninfo.EmployeeID)
-      );
-    })
-    .map((geninfo) => geninfo.EmployeeID);
-
-  // Employees w/ 8-10 service years will have updated leave credits
-  const eightToTenWithLeaveCredit = geninfos
-    .filter((geninfo) => {
-      const parsedDate = parse(
-        geninfo?.DateEmployed,
-        "MMM dd, yyyy",
-        new Date()
-      );
-
-      const serviceYears = differenceInYears(new Date(), parsedDate);
-
-      // Check for service years and absence in LeaveCredit
-      return (
-        serviceYears >= 8 &&
-        serviceYears <= 10 &&
-        geninfo.EmployeeType === "Regular" &&
-        geninfo.EmpStatus === "Y" &&
-        existingLeaveCreditIds.includes(geninfo.EmployeeID)
-      );
-    })
-    .map((geninfo) => geninfo.EmployeeID);
-
-  // Employees w/ 11-13 service years will have updated leave credits
-  const elevenToThirteenWithLeaveCredit = geninfos
-    .filter((geninfo) => {
-      const parsedDate = parse(
-        geninfo?.DateEmployed,
-        "MMM dd, yyyy",
-        new Date()
-      );
-
-      const serviceYears = differenceInYears(new Date(), parsedDate);
-
-      // Check for service years and absence in LeaveCredit
-      return (
-        serviceYears >= 11 &&
-        serviceYears <= 13 &&
-        geninfo.EmployeeType === "Regular" &&
-        geninfo.EmpStatus === "Y" &&
-        existingLeaveCreditIds.includes(geninfo.EmployeeID)
-      );
-    })
-    .map((geninfo) => geninfo.EmployeeID);
-
-  // Employees w/ 14-100 service years will have updated leave credits
-  const fourteenToHundredWithLeaveCredit = geninfos
-    .filter((geninfo) => {
-      const parsedDate = parse(
-        geninfo?.DateEmployed,
-        "MMM dd, yyyy",
-        new Date()
-      );
-
-      const serviceYears = differenceInYears(new Date(), parsedDate);
-
-      // Check for service years and absence in LeaveCredit
-      return (
-        serviceYears >= 14 &&
-        serviceYears <= 100 &&
-        geninfo.EmployeeType === "Regular" &&
-        geninfo.EmpStatus === "Y" &&
-        existingLeaveCreditIds.includes(geninfo.EmployeeID)
-      );
-    })
-    .map((geninfo) => geninfo.EmployeeID);
-
-  // Include eligible 0-4 service years employees to leavecredits database
-  if (oneToFourWithoutLeaveCredit?.length > 0) {
-    oneToFourWithoutLeaveCredit.forEach(async (employeeId) => {
-      await LeaveCredit.create({ EmployeeID: employeeId });
-    });
-  }
-
-  // Re-apply credit budget (necessary for new leavecredit data upload to database)
-
-  /* Leave credits increase and update for employee service greater than 4 years
-  (only occurs every 1st of January) */
-  const today = new Date();
-
-  if (today.getMonth() === 0 && today.getDate() === 1) {
-    if (fiveToSevenWithLeaveCredit?.length > 0) {
-      fiveToSevenWithLeaveCredit.forEach(async (employeeId) => {
-        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-          { EmployeeID: employeeId },
-          { SickLeave: 7, VacationLeave: 7, CreditBudget: 7 },
-          { new: true }
-        ).exec();
-
-        await updatedLeaveCredits.save();
-      });
-    }
-
-    if (eightToTenWithLeaveCredit?.length > 0) {
-      eightToTenWithLeaveCredit.forEach(async (employeeId) => {
-        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-          { EmployeeID: employeeId },
-          { SickLeave: 10, VacationLeave: 10, CreditBudget: 10 },
-          { new: true }
-        ).exec();
-
-        await updatedLeaveCredits.save();
-      });
-    }
-
-    if (elevenToThirteenWithLeaveCredit?.length > 0) {
-      elevenToThirteenWithLeaveCredit.forEach(async (employeeId) => {
-        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-          { EmployeeID: employeeId },
-          { SickLeave: 12, VacationLeave: 12, CreditBudget: 12 },
-          { new: true }
-        ).exec();
-
-        await updatedLeaveCredits.save();
-      });
-    }
-
-    if (fourteenToHundredWithLeaveCredit?.length > 0) {
-      fourteenToHundredWithLeaveCredit.forEach(async (employeeId) => {
-        const updatedLeaveCredits = await LeaveCredit.findOneAndUpdate(
-          { EmployeeID: employeeId },
-          { SickLeave: 15, VacationLeave: 15, CreditBudget: 15 },
-          { new: true }
-        ).exec();
-
-        await updatedLeaveCredits.save();
-      });
-    }
-  }
-};
-
-// Function to update records that are inactive or contract has ended
-const UpdateInactiveEmployees = async (geninfos) => {
-  geninfos
-    .filter((g) => {
-      const contractDateEnd = parse(
-        g?.ContractDateEnd,
-        "MMMM dd, yyyy",
-        new Date()
-      );
-      const dateToday = new Date();
-      const daysLeft = differenceInDays(dateToday, contractDateEnd);
-      return g.EmpStatus === "N" || daysLeft < 1;
-    })
-    .forEach(async (g) => {
-      await GenInfo.findOneAndUpdate(
-        { EmployeeID: g.EmployeeID },
-        {
-          DateEmployed: "",
-          DateProbationary: "",
-          RegDate: "",
-          EmpStatus: "N",
-          ContractDateEnd: "",
-        }
-      ).exec();
-    });
-};
+const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
+const { leaveCreditInclUpd } = require("../xtra_functions/leaveCreditInclUpd");
+const {
+  updateInactiveEmployees,
+} = require("../xtra_functions/updateInactiveEmployees");
 
 // @desc Get all geninfos
 // @route GET /geninfos
@@ -318,7 +29,7 @@ const getAllGenInfo = async (req, res) => {
   }
 
   leaveCreditInclUpd(geninfos);
-  UpdateInactiveEmployees(geninfos);
+  updateInactiveEmployees(geninfos);
 
   res.json(geninfos);
 };
@@ -359,7 +70,7 @@ const createGenInfo = async (req, res) => {
       .json({ message: `EmployeeID ${others?.EmployeeID} already exists` });
   }
 
-  const newEmployeeID = isStringAllNumber(others?.EmployeeID);
+  const newEmployeeID = isStringAllNumbers(others?.EmployeeID);
 
   // Create and store new geninfo
   const newGenInfo = { ...req.body, MI: MiddleName ?? "" };
@@ -380,7 +91,7 @@ const createGenInfo = async (req, res) => {
 const updateGenInfo = async (req, res) => {
   const { id, EmployeeID, BioID, ...others } = req.body;
 
-  const newEmployeeID = isStringAllNumber(EmployeeID);
+  const newEmployeeID = isStringAllNumbers(EmployeeID);
 
   // Confirm data
   if (!id) {
@@ -390,11 +101,14 @@ const updateGenInfo = async (req, res) => {
   const geninfo = await GenInfo.findById(id).exec();
 
   if (!geninfo) {
-    res
-      .status(400)
-      .json({ message: "Information not found. Creating new record..." });
+    res.json({ message: "Information not found. Creating new record..." });
 
-    const newGen = new GenInfo({ _id: id, EmployeeID, BioID, others });
+    const newGen = new GenInfo({
+      _id: id,
+      EmployeeID: EmployeeID,
+      BioID: BioID,
+      ...others,
+    });
     newGen.save();
     res.json({ message: "General info has been added" });
   } else {

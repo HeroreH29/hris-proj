@@ -10,7 +10,7 @@ import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 
-const EditAnnouncementForm = ({ users, announcement }) => {
+const EditAnnouncementForm = ({ announcement }) => {
   useTitle("Edit Announcement | Via Mare HRIS");
 
   // eslint-disable-next-line
@@ -27,14 +27,10 @@ const EditAnnouncementForm = ({ users, announcement }) => {
 
   /* VARIABLES */
   const [title, setTitle] = useState(announcement.title);
-  const [date, setDate] = useState(announcement.date);
   const [message, setMessage] = useState(announcement.message);
 
   useEffect(() => {
     if (isSuccess || isDelSuccess) {
-      setTitle("");
-      setDate("");
-      setMessage("");
       isSuccess && toast.success("Changes saved!");
       isDelSuccess && toast.info("Announcement deleted!");
       navigate("/dashboard");
@@ -43,7 +39,6 @@ const EditAnnouncementForm = ({ users, announcement }) => {
 
   /* HANDLERS */
   const onTitleChanged = (e) => setTitle(e.target.value);
-  const onDateChanged = (e) => setDate(e.target.value);
   const onMessageChanged = (e) => setMessage(e.target.value);
 
   /* SUBMIT FUNCTION */
@@ -56,7 +51,6 @@ const EditAnnouncementForm = ({ users, announcement }) => {
       await updateAnnouncement({
         id: announcement.id,
         title,
-        date,
         message,
       });
     } else {

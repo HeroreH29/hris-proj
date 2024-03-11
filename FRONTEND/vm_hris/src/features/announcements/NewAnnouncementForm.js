@@ -22,14 +22,10 @@ const NewAnnouncementForm = ({ users }) => {
 
   /* VARIABLES */
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (isSuccess) {
-      setTitle("");
-      setDate("");
-      setMessage("");
       toast.success("Announcement posted!");
       navigate("/dashboard");
     }
@@ -37,7 +33,6 @@ const NewAnnouncementForm = ({ users }) => {
 
   /* HANDLERS */
   const onTitleChanged = (e) => setTitle(e.target.value);
-  const onDateChanged = (e) => setDate(e.target.value);
   const onMessageChanged = (e) => setMessage(e.target.value);
 
   /* SUBMIT FUNCTION */

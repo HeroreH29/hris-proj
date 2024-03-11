@@ -1,19 +1,11 @@
-import { useGetPersonalinfosQuery } from "./pCelebrantsApiSlice";
-
 import React from "react";
 import { format } from "date-fns";
 
-const Celebrant = ({ personalInfoId, name }) => {
-  const { personalinfo } = useGetPersonalinfosQuery("celebrantsList", {
-    selectFromResult: ({ data }) => ({
-      personalinfo: data?.entities[personalInfoId],
-    }),
-  });
-
+const Celebrant = ({ birthday, name }) => {
   const currentDay = new Date().getDate();
 
   const checkCurrentCelebrant = () => {
-    const celebrantDay = new Date(personalinfo.Birthday).getDate();
+    const celebrantDay = new Date(birthday).getDate();
 
     if (currentDay === celebrantDay) {
       return "fw-bold table-success text-danger";
@@ -22,16 +14,12 @@ const Celebrant = ({ personalInfoId, name }) => {
     }
   };
 
-  if (personalinfo) {
-    // Uncomment line below if celebrant information editing is necessary
-    /* const handleEdit = () =>
-      navigate(`/dashboard/celebrants/${personalInfoId}`); */
-
+  if (birthday) {
     return (
       <tr>
         <td className={checkCurrentCelebrant()}>{name}</td>
         <td className={checkCurrentCelebrant()}>
-          {format(new Date([personalinfo.Birthday]), "MMMM dd")}
+          {format(new Date([birthday]), "MMMM dd")}
         </td>
       </tr>
     );

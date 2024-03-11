@@ -17,6 +17,7 @@ import {
 } from "../users/usersApiSlice";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
+import useAuthForm from "../../hooks/useAuthForm";
 
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
@@ -43,25 +44,14 @@ const ForgotPass = () => {
     },
   ] = useUpdateUserMutation();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const { state, dispatch: stateDispatch } = useAuthForm();
 
   const navigate = useNavigate();
 
-  const [validated, setValidated] = useState(false);
-
   const [foundUser, setFoundUser] = useState("");
-  const [userFound, setUserFound] = useState(undefined);
 
   useEffect(() => {
     if (isUpdateSuccess) {
-      setUsername("");
-      setPassword("");
-      setConfirmPassword("");
-
       toast.success("Password reset successful");
       navigate("/");
     }
@@ -73,45 +63,62 @@ const ForgotPass = () => {
     return <p className="text-danger">{error?.data?.message}</p>;
   }
 
-  const handleFindAccount = () => {
-    if (isSuccess) {
-      const { ids, entities } = users;
-
-      const foundUserId = ids?.length
-        ? ids.find((userId) => entities[userId]?.username === username)
-        : null;
-
-      if (foundUserId) {
-        setFoundUser(foundUserId);
-        setUserFound(true);
-      } else {
-        setUserFound(false);
-      }
-    }
+  const handleUserInput = (e) => {
+    stateDispatch({ type: "input_username", username: e.target.value });
+  };
+  const handleNewPassInput = (e) => {
+    stateDispatch({ type: "input_password", password: e.target.value });
+  };
+  const handleConfirmPassInput = (e) => {
+    stateDispatch({
+      type: "confirm_password",
+      confirmPassword: e.target.value,
+    });
   };
 
-  const handleUserInput = (e) => setUsername(e.target.value);
-  const handleNewPassInput = (e) => setPassword(e.target.value);
-  const handleConfirmPassInput = (e) => setConfirmPassword(e.target.value);
+  const handleShowPass = () => {
+    stateDispatch({ type: "show_password" });
+  };
 
-  const handleShowPass = () => setShowPass(!showPass);
-  const handleShowConfirmPass = () => setShowConfirmPass(!showConfirmPass);
+  const findAccount = () => {
+    if (!isSuccess) return false;
+
+    const { ids, entities } = users;
+    const foundUserId = ids?.find(
+      (userId) => entities[userId]?.username === state.username
+    );
+
+    if (foundUserId) {
+      setFoundUser(foundUserId);
+      stateDispatch({ type: "validated", validated: false });
+      return true;
+    } else {
+      stateDispatch({ type: "input_username", username: "" });
+      setFoundUser(null);
+      stateDispatch({ type: "validated", validated: true });
+      return false;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    if (!form.checkValidity()) {
+
+    const accountFound = findAccount();
+
+    if (!form.checkValidity() || !accountFound) {
       e.stopPropagation();
-    } else {
-      if (password === confirmPassword && !isUpdateLoading) {
-        await updateUser({
-          ...users.entities[foundUser],
-          password: password,
-        });
-      }
+      stateDispatch({ type: "validated", validated: true });
+      return;
     }
 
-    setValidated(true);
+    if (state.password === state.confirmPassword && !isUpdateLoading) {
+      await updateUser({
+        ...users.entities[foundUser],
+        password: state.password,
+      });
+    }
+    stateDispatch({ type: "validated", validated: false });
   };
 
   return (
@@ -123,10 +130,10 @@ const ForgotPass = () => {
       <Form
         id="forgotpassform"
         noValidate
-        validated={validated}
+        validated={state.validated}
         onSubmit={handleSubmit}
       >
-        {userFound === undefined || !userFound ? (
+        {!foundUser ? (
           <>
             <Row className="d-flex justify-content-center mb-3">
               <Form.Group as={Col} md={"auto"} className="mb-3">
@@ -134,14 +141,14 @@ const ForgotPass = () => {
                 <Form.Control
                   type="text"
                   placeholder="Enter Username"
-                  value={username}
+                  value={state.username}
                   onChange={handleUserInput}
                   autoFocus
                   required
                 />
-                {userFound !== undefined && (
-                  <p className="m-1 text-danger">Account not found!</p>
-                )}
+                <Form.Control.Feedback type="invalid">
+                  Account not found
+                </Form.Control.Feedback>
               </Form.Group>
             </Row>
             <Row
@@ -149,11 +156,7 @@ const ForgotPass = () => {
               as={Col}
               md={"auto"}
             >
-              <Button
-                type="button"
-                variant="primary"
-                onClick={handleFindAccount}
-              >
+              <Button type="button" variant="primary" onClick={handleSubmit}>
                 Find Account
               </Button>
             </Row>
@@ -165,20 +168,22 @@ const ForgotPass = () => {
                 <Form.Label className="fw-semibold">New Password</Form.Label>
                 <InputGroup>
                   <Form.Control
-                    type={!showPass ? "password" : "text"}
+                    type={!state.showPass ? "password" : "text"}
                     placeholder="Enter New Password"
                     pattern={PWD_REGEX}
-                    value={password}
+                    value={state.password}
                     onChange={handleNewPassInput}
                     required
                   />
+                  <Button variant="secondary" onClick={() => handleShowPass()}>
+                    <FontAwesomeIcon
+                      icon={!state.showPass ? faEye : faEyeSlash}
+                    />
+                  </Button>
                   <Form.Control.Feedback type="invalid">
                     Minimum of 8 characters. At least - 1 lowercase letter, 1
                     unique symbol, and 1 digit/number.
                   </Form.Control.Feedback>
-                  <Button variant="secondary" onClick={() => handleShowPass()}>
-                    <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
-                  </Button>
                 </InputGroup>
               </Form.Group>
             </Row>
@@ -189,25 +194,25 @@ const ForgotPass = () => {
                 </Form.Label>
                 <InputGroup>
                   <Form.Control
-                    type={!showConfirmPass ? "password" : "text"}
+                    type={!state.showPass ? "password" : "text"}
                     placeholder="Confirm Password"
                     pattern={PWD_REGEX}
-                    value={confirmPassword}
+                    value={state.confirmPassword}
                     onChange={handleConfirmPassInput}
                     required
                   />
-                  <Form.Control.Feedback type="invalid">
-                    Must match the new password!
-                  </Form.Control.Feedback>
                   <Button
                     variant="secondary"
                     type="button"
-                    onClick={handleShowConfirmPass}
+                    onClick={handleShowPass}
                   >
                     <FontAwesomeIcon
-                      icon={!showConfirmPass ? faEye : faEyeSlash}
+                      icon={!state.showPass ? faEye : faEyeSlash}
                     />
                   </Button>
+                  <Form.Control.Feedback type="invalid">
+                    Must match the new password!
+                  </Form.Control.Feedback>
                 </InputGroup>
               </Form.Group>
             </Row>
@@ -222,19 +227,19 @@ const ForgotPass = () => {
             </Row>
           </>
         )}
-        {/* <Row className="d-flex justify-content-center mb-3">
-          <Form.Group as={Col} md={"auto"} className="mb-3">
-            <Link to="/forgotpassword" className="fst-italic">
-              Forgot password?
-            </Link>
-          </Form.Group>
-        </Row> */}
         <Row
           className="d-flex justify-content-center mb-3"
           as={Col}
           md={"auto"}
         >
-          <Link to="/" className="fst-italic">
+          <Link
+            to="/"
+            className="fst-italic"
+            onClick={() => {
+              console.log(state.validated);
+              stateDispatch({ type: "validated", validated: false });
+            }}
+          >
             Back to login
           </Link>
         </Row>

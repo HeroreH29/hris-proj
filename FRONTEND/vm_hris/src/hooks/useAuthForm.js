@@ -1,4 +1,4 @@
-import { useEffect, useState, useReducer } from "react";
+import { useReducer } from "react";
 
 const useAuthForm = () => {
   const initialState = {
@@ -7,6 +7,7 @@ const useAuthForm = () => {
     showPass: false,
     confirmPassword: "",
     showConfirmPass: false,
+    validated: false,
   };
 
   const reducer = (state, action) => {
@@ -17,8 +18,14 @@ const useAuthForm = () => {
       case "input_password": {
         return { ...state, password: action.password };
       }
+      case "confirm_password": {
+        return { ...state, confirmPassword: action.confirmPassword };
+      }
       case "show_password": {
         return { ...state, showPass: !state.showPass };
+      }
+      case "validated": {
+        return { ...state, validated: action.validated };
       }
 
       default: {

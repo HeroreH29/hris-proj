@@ -1,21 +1,11 @@
 import React from "react";
-
 import { useParams } from "react-router-dom";
 import EditAnnouncementForm from "./EditAnnouncementForm";
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
-import { useGetUsersQuery } from "../users/usersApiSlice";
-import useAuth from "../../hooks/useAuth";
-import PulseLoader from "react-spinners/PulseLoader";
+import { Spinner } from "react-bootstrap";
 
 const EditAnnouncement = () => {
   const { id } = useParams();
-
-  // const announcement = useSelector((state) =>
-  //   selectAnnouncementById(state, id)
-  // );
-  // const users = useSelector(selectAllUsers);
-  // eslint-disable-next-line
-  const { username, isAdmin, isHR } = useAuth();
 
   const { announcement } = useGetAnnouncementsQuery("announcementsList", {
     selectFromResult: ({ data }) => ({
@@ -23,17 +13,9 @@ const EditAnnouncement = () => {
     }),
   });
 
-  const { users } = useGetUsersQuery("usersList", {
-    selectFromResult: ({ data }) => ({
-      users: data?.ids.map((id) => data?.entities[id]),
-    }),
-  });
+  if (!announcement) return <Spinner animation="border" />;
 
-  if (!announcement || !users?.length) return <PulseLoader color="#808080" />;
-
-  const content = (
-    <EditAnnouncementForm announcement={announcement} users={users} />
-  );
+  const content = <EditAnnouncementForm announcement={announcement} />;
 
   return content;
 };

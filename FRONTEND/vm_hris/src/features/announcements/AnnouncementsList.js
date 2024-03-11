@@ -6,7 +6,7 @@ import { Spinner } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const AnnouncementsList = () => {
-  const { isHR, isAdmin, isOutletProcessor } = useAuth();
+  const { isHR, isAdmin } = useAuth();
 
   const {
     data: announcements,
@@ -26,15 +26,17 @@ const AnnouncementsList = () => {
   if (isSuccess) {
     const { ids } = announcements;
 
-    cardContent = ids?.length
-      ? ids.map((announcementId) => (
-          <Announcement
-            key={announcementId}
-            announcementId={announcementId}
-            useAuth={useAuth}
-          />
-        ))
-      : null;
+    cardContent = ids?.length ? (
+      ids.map((announcementId) => (
+        <Announcement
+          key={announcementId}
+          announcementId={announcementId}
+          useAuth={useAuth}
+        />
+      ))
+    ) : (
+      <p className="fw-semibold text-center mt-2">No announcements yet...</p>
+    );
   }
 
   content = (
@@ -46,13 +48,7 @@ const AnnouncementsList = () => {
         <small className="text-muted">
           {(isHR || isAdmin) && <>Click an announcement to edit</>}
         </small>
-        {cardContent ? (
-          cardContent
-        ) : (
-          <p className="fw-semibold text-center mt-2">
-            No announcements yet...
-          </p>
-        )}
+        {cardContent}
       </Container>
     </>
   );

@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import React, { memo, useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Modal, Button } from "react-bootstrap";
 
 const Announcement = ({ announcementId, useAuth }) => {
-  const { isHR, isAdmin, isOutletProcessor } = useAuth();
+  const { isHR, isAdmin } = useAuth();
 
-  // Variables below are used to simulate hover animation on card
+  // Variable to simulate hover animation on card
   const [hovered, setHovered] = useState(false);
+
+  // Variable for announcement modal
+  const [showModal, setShowModal] = useState(false);
 
   const { announcement } = useGetAnnouncementsQuery("announcementsList", {
     selectFromResult: ({ data }) => ({
@@ -18,18 +21,13 @@ const Announcement = ({ announcementId, useAuth }) => {
   const navigate = useNavigate();
 
   if (announcement) {
-    const handleEdit = () => {
-      if (isHR || isAdmin || isOutletProcessor)
-        navigate(`/dashboard/announcements/${announcementId}`);
-    };
-
     return (
       <>
         <Card
           border="dark"
           className="text-center mt-2 mb-2"
-          bg={hovered ? "secondary" : ""}
-          onClick={handleEdit}
+          bg={hovered ? "secondary-subtle" : ""}
+          onClick={() => setShowModal(true)}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
@@ -38,26 +36,35 @@ const Announcement = ({ announcementId, useAuth }) => {
             <Card.Subtitle className="mb-2 text-muted">
               from: {announcement.user}
             </Card.Subtitle>
-            <Card.Text>
-              {
-                announcement.message /* .length > 30
-                ? announcement.message.slice(0, 30) + "..."
-                : announcement.message */
-              }
-            </Card.Text>
+            <Card.Text>{announcement.message}</Card.Text>
           </Card.Body>
           <Card.Footer className="text-muted">
             Date posted: {announcement.date}
           </Card.Footer>
         </Card>
+
+        {/* MODAL */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{announcement.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{announcement.message}</Modal.Body>
+          <Modal.Footer>
+            {(isHR || isAdmin) && (
+              <Button
+                variant="outline-primary"
+                onClick={() =>
+                  navigate(`/dashboard/announcements/${announcementId}`)
+                }
+              >
+                Edit
+              </Button>
+            )}
+          </Modal.Footer>
+        </Modal>
       </>
     );
-  } else
-    return (
-      <>
-        <p>There are no announcements yet...</p>
-      </>
-    );
+  }
 };
 
 const memoizedAnnouncement = memo(Announcement);

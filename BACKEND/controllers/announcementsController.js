@@ -49,6 +49,8 @@ const createAnnouncement = async (req, res) => {
   // Auto generate an expiry date for every new announcement created
   const expiryDate = new Date();
   const creationDate = parse(date, "Pp", new Date());
+
+  // Set expiry date to a month after creation date
   expiryDate.setMonth(creationDate.getMonth() + 1);
 
   // Create and store new announcement
@@ -75,7 +77,7 @@ const createAnnouncement = async (req, res) => {
 // @route PATCH /announcements
 // @access Private
 const updateAnnouncement = async (req, res) => {
-  const { id, title, date, message } = req.body;
+  const { id, title, message } = req.body;
 
   // Confirm data
   if (!id || !title || !message) {
@@ -102,13 +104,12 @@ const updateAnnouncement = async (req, res) => {
   }
 
   // Generate expiry date regardless if date changed or unchanged
-  const expiryDate = new Date();
-  expiryDate.setMonth(new Date(date).getMonth() + 1);
+  // const expiryDate = new Date();
+  // expiryDate.setMonth(new Date(date).getMonth() + 1);
 
   announcement.title = title;
   announcement.message = message;
-  announcement.date = date;
-  announcement.expiryDate = format(expiryDate, "yyyy-MM-dd");
+  // announcement.expiryDate = format(expiryDate, "yyyy-MM-dd");
 
   const updatedAnnouncement = await announcement.save();
 

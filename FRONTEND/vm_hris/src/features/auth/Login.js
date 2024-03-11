@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Row,
   Col,
@@ -16,51 +16,41 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
 import { useLoginMutation } from "./authApiSlice";
 import useAuthForm from "../../hooks/useAuthForm";
-
 import usePersist from "../../hooks/usePersist";
+
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
   const [persist, setPersist] = usePersist();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { state, dispatch: stateDispatch } = useAuthForm();
-
-  const [validated, setValidated] = useState(false);
-  const [passInvalid, setPassInvalid] = useState(false);
-  const [userInvalid, setUserInvalid] = useState(false);
-
-  const [login, { isLoading, isSuccess, isError }] = useLoginMutation();
+  const [login, { isLoading, isSuccess }] = useLoginMutation();
 
   // Login feedback
   useEffect(() => {
     if (isSuccess) {
-      toast.success(`Welcome back ${username}!`);
-    } else if (isError) {
-      setPassInvalid(true);
-      setUserInvalid(true);
-      setUsername("");
-      setPassword("");
+      toast.success(`Welcome back ${state.username}!`);
     }
     // eslint-disable-next-line
-  }, [isSuccess, isError]);
+  }, [isSuccess]);
 
   if (isLoading) return <Spinner animation="border" />;
 
-  const handleUserInput = (e) => setUsername(e.target.value);
-  const handlePassInput = (e) => setPassword(e.target.value);
   const handleToggle = () => setPersist((prev) => !prev);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const form = e.currentTarget;
+
     if (!form.checkValidity()) {
       e.stopPropagation();
     } else {
       try {
+        let username = state.username;
+        let password = state.password;
+
         const { accessToken } = await login({ username, password }).unwrap();
         if (accessToken) {
           dispatch(setCredentials({ accessToken }));
@@ -69,16 +59,20 @@ const Login = () => {
       } catch (error) {
         if (error.status === 401) {
           toast.warn("Username or password incorrect");
+          stateDispatch({ type: "input_username", username: "" });
+          stateDispatch({ type: "input_password", password: "" });
         } else if (error.status === 404) {
           toast.warn("No account found with username");
+          stateDispatch({ type: "input_username", username: "" });
         }
       }
     }
 
-    setValidated(true);
+    stateDispatch({
+      type: "validated",
+      validated: true,
+    });
   };
-
-  const handleShowPass = () => setShowPass(!showPass);
 
   const content = (
     <>
@@ -91,7 +85,7 @@ const Login = () => {
         <Form
           id="loginform"
           noValidate
-          validated={validated}
+          validated={state.validated}
           onSubmit={handleSubmit}
         >
           <Row className="d-flex justify-content-center mb-3">
@@ -107,7 +101,6 @@ const Login = () => {
                     username: e.target.value,
                   });
                 }}
-                isInvalid={userInvalid}
                 autoFocus
                 required
               />
@@ -128,7 +121,6 @@ const Login = () => {
                     });
                   }}
                   required
-                  isInvalid={passInvalid}
                 />
                 <Button
                   variant="secondary"

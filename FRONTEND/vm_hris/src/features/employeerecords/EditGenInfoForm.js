@@ -91,36 +91,11 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       const confirm = window.confirm("Proceed with these information?");
 
       if (confirm) {
-        let genInfoData = {
-          EmployeeID: genState.EmployeeID,
-          BioID: genState.BioID,
-          Prefix: genState.Prefix,
-          FirstName: genState.FirstName,
-          MiddleName: genState.MiddleName,
-          LastName: genState.LastName,
-          EmployeeType: genState.EmployeeType,
-          AssignedOutlet: genState.AssignedOutlet,
-          Department: genState.Department,
-          JobTitle: genState.JobTitle,
-          DateEmployed: genState.DateEmployed,
-          RegDate: genState.RegDate,
-          DateLeaved: genState.DateLeaved,
-          DateProbationary: genState.DateProbationary,
-          EmpStatus: genState.EmpStatus,
-          Notes: genState.Notes,
-          ATMnumber: genState.ATMnumber,
-          TINnumber: genState.TINnumber,
-          SSSnumber: genState.SSSnumber,
-          PHnumber: genState.PHnumber,
-          PInumber: genState.PInumber,
-          ContractDateEnd: genState.ContractDateEnd,
-        };
-
         // Check if user is adding or updating an employee record
         if (geninfo) {
-          await updateGeninfo({ id: geninfo?.id, ...genInfoData });
+          await updateGeninfo({ id: geninfo?.id, ...genState });
         } else {
-          await addGeninfo(genInfoData);
+          await addGeninfo(genState);
         }
 
         /* Include inactive employee record in inactive list.
@@ -143,7 +118,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
               geninfo?.id,
-              genInfoData,
+              genState,
               true
             )
           );
@@ -154,7 +129,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
               "",
-              genInfoData
+              genState
             )
           );
         }

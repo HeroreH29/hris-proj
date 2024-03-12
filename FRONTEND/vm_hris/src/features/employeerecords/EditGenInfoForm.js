@@ -91,11 +91,12 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       const confirm = window.confirm("Proceed with these information?");
 
       if (confirm) {
+        const { _id, __v, ...others } = genState;
         // Check if user is adding or updating an employee record
         if (geninfo) {
-          await updateGeninfo({ id: geninfo?.id, ...genState });
+          await updateGeninfo({ id: geninfo?.id, others });
         } else {
-          await addGeninfo(genState);
+          await addGeninfo(others);
         }
 
         /* Include inactive employee record in inactive list.
@@ -118,7 +119,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
               geninfo?.id,
-              genState,
+              others,
               true
             )
           );
@@ -129,7 +130,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
               "",
-              genState
+              others
             )
           );
         }

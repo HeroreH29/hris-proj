@@ -1,16 +1,4 @@
 const GenInfo = require("../models/GenInfo");
-const PersonalInfo = require("../models/PersonalInfo");
-const Dependent = require("../models/Dependent");
-const EducInfo = require("../models/EducInfo");
-const WorkInfo = require("../models/WorkInfo");
-const Leave = require("../models/Leave");
-const InactiveEmp = require("../models/InactiveEmp");
-const {
-  differenceInYears,
-  differenceInDays,
-  differenceInMonths,
-  parse,
-} = require("date-fns");
 const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 const { leaveCreditInclUpd } = require("../xtra_functions/leaveCreditInclUpd");
 const {

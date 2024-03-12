@@ -45,9 +45,6 @@ const AnnouncementsList = () => {
         className="border"
         style={{ maxHeight: "500px", overflowY: "scroll", maxWidth: "500px" }}
       >
-        <small className="text-muted">
-          {(isHR || isAdmin) && <>Click an announcement to edit</>}
-        </small>
         {cardContent}
       </Container>
     </>

@@ -43,6 +43,9 @@ const Welcome = () => {
               </>
             )}
           </h3>
+          <small className="text-muted">
+            {(isHR || isAdmin) && <>Click an announcement to edit</>}
+          </small>
           <AnnouncementsList />
         </Col>
         <Col>

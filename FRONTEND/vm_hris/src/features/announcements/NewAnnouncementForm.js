@@ -8,8 +8,9 @@ import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import useAnnouncementForm from "../../hooks/useAnnouncementForm";
 
-const NewAnnouncementForm = ({ users }) => {
+const NewAnnouncementForm = () => {
   useTitle("Create Announcement | Via Mare HRIS");
 
   // eslint-disable-next-line
@@ -21,8 +22,7 @@ const NewAnnouncementForm = ({ users }) => {
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
+  const { state, dispatch } = useAnnouncementForm();
 
   useEffect(() => {
     if (isSuccess) {
@@ -32,8 +32,10 @@ const NewAnnouncementForm = ({ users }) => {
   }, [isSuccess, navigate]);
 
   /* HANDLERS */
-  const onTitleChanged = (e) => setTitle(e.target.value);
-  const onMessageChanged = (e) => setMessage(e.target.value);
+  const onTitleChanged = (e) =>
+    dispatch({ type: "input_title", title: e.target.value });
+  const onMessageChanged = (e) =>
+    dispatch({ type: "input_message", message: e.target.value });
 
   /* SUBMIT FUNCTION */
   const onSaveAnnouncementClicked = async (e) => {
@@ -41,23 +43,21 @@ const NewAnnouncementForm = ({ users }) => {
 
     const form = e.currentTarget;
 
-    if (form.checkValidity() === true && !isLoading) {
+    if (form.checkValidity() && !isLoading) {
       const creationDate = format(new Date(), "Pp");
       await addNewAnnouncement({
         user: username,
-        title,
+        title: state.title,
         date: creationDate,
-        message,
+        message: state.message,
       });
     } else {
       e.stopPropagation();
     }
 
     // Show parts of the form that is valid or not
-    setValidated(true);
+    dispatch({ type: "validated", validated: true });
   };
-
-  const [validated, setValidated] = useState(false);
 
   const content = (
     <>
@@ -78,7 +78,7 @@ const NewAnnouncementForm = ({ users }) => {
         <Form
           className="p-3"
           noValidate
-          validated={validated}
+          validated={state.validated}
           onSubmit={onSaveAnnouncementClicked}
         >
           {/* Title and date */}

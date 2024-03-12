@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
+import useAnnouncementForm from "../../hooks/useAnnouncementForm";
 
 const EditAnnouncementForm = ({ announcement }) => {
   useTitle("Edit Announcement | Via Mare HRIS");
@@ -26,8 +27,7 @@ const EditAnnouncementForm = ({ announcement }) => {
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const [title, setTitle] = useState(announcement.title);
-  const [message, setMessage] = useState(announcement.message);
+  const { state, dispatch } = useAnnouncementForm();
 
   useEffect(() => {
     if (isSuccess || isDelSuccess) {
@@ -38,8 +38,10 @@ const EditAnnouncementForm = ({ announcement }) => {
   }, [isSuccess, isDelSuccess, navigate]);
 
   /* HANDLERS */
-  const onTitleChanged = (e) => setTitle(e.target.value);
-  const onMessageChanged = (e) => setMessage(e.target.value);
+  const onTitleChanged = (e) =>
+    dispatch({ type: "input_title", title: e.target.value });
+  const onMessageChanged = (e) =>
+    dispatch({ type: "input_message", message: e.target.value });
 
   /* SUBMIT FUNCTION */
   const onSaveAnnouncementClicked = async (e) => {
@@ -50,15 +52,15 @@ const EditAnnouncementForm = ({ announcement }) => {
     if (form.checkValidity() === true && !isLoading) {
       await updateAnnouncement({
         id: announcement.id,
-        title,
-        message,
+        title: state.title,
+        message: state.message,
       });
     } else {
       e.stopPropagation();
     }
 
     // Show parts of the form that is valid or not
-    setValidated(true);
+    dispatch({ type: "validated", validated: true });
   };
 
   /* DELETE FUNCTION */
@@ -68,8 +70,6 @@ const EditAnnouncementForm = ({ announcement }) => {
       await deleteAnnouncement({ id: announcement.id });
     }
   };
-
-  const [validated, setValidated] = useState(false);
 
   const content = (
     <>
@@ -90,7 +90,7 @@ const EditAnnouncementForm = ({ announcement }) => {
         <Form
           className="p-3"
           noValidate
-          validated={validated}
+          validated={state.validated}
           onSubmit={onSaveAnnouncementClicked}
         >
           {/* Title and date */}
@@ -103,7 +103,7 @@ const EditAnnouncementForm = ({ announcement }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="Title"
-                value={title}
+                value={state.title}
                 onChange={onTitleChanged}
               />
               <Form.Control.Feedback type="invalid">
@@ -121,7 +121,7 @@ const EditAnnouncementForm = ({ announcement }) => {
                 autoComplete="off"
                 rows={10}
                 placeholder="Message"
-                value={message}
+                value={state.message}
                 onChange={onMessageChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>

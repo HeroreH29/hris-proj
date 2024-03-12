@@ -4,7 +4,6 @@ import {
   useUpdateGeninfoMutation,
   useAddInactiveEmpMutation,
   useDeleteInactiveEmpMutation,
-  useGetGeninfosQuery,
 } from "./recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import {
@@ -25,20 +24,15 @@ import {
   DropdownButton,
   Dropdown,
 } from "react-bootstrap";
-import { format, parse, differenceInDays } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
-
-const NUMBER_REGEX = /^[0-9]*$/;
-const IDNUMS_REGEX = /^[0-9-]*$/;
-const ALPHANUM_REGEX = /^[A-z0-9]+$/;
+import useRecordForm from "../../hooks/useRecordForm";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const { username, isOutletProcessor, branch } = useAuth();
-
-  const { data: geninfos } = useGetGeninfosQuery();
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
@@ -55,74 +49,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
 
   const navigate = useNavigate();
 
-  const parsedDE = geninfo?.DateEmployed
-    ? parse(geninfo?.DateEmployed, "MMM dd, yyyy", new Date())
-    : "";
-  const parsedRD = geninfo?.RegDate
-    ? parse(geninfo?.RegDate, "MMMM dd, yyyy", new Date())
-    : "";
-  const parsedDL = geninfo?.DateLeaved
-    ? parse(geninfo?.DateLeaved, "MMM dd, yyyy", new Date())
-    : "";
-  const parsedDP = geninfo?.DateProbationary
-    ? parse(geninfo?.DateProbationary, "MMM dd, yyyy", new Date())
-    : "";
-  const parsedCD = geninfo?.ContractDateEnd
-    ? parse(geninfo?.ContractDateEnd, "MMMM dd, yyyy", new Date())
-    : "";
-
-  const incrementBioID = () => {
-    if (geninfos?.ids?.length > 0) {
-      const { ids, entities } = geninfos;
-
-      const latestBioId = [...ids]
-        .sort((a, b) => {
-          return entities[b].BioID - entities[a].BioID;
-        })
-        .map((id) => entities[id].BioID)[0];
-
-      return latestBioId;
-    }
-  };
-
   /* GEN INFO VARIABLES */
-  const [employeeId, setEmployeeId] = useState(geninfo?.EmployeeID ?? "");
-  const [bioId, setBioId] = useState(geninfo?.BioID ?? incrementBioID() + 1);
-  const [prefix, setPrefix] = useState(geninfo?.Prefix ?? "");
-  const [firstName, setFirstName] = useState(geninfo?.FirstName ?? "");
-  const [middleName, setMiddleName] = useState(geninfo?.MiddleName);
-  const [lastName, setLastName] = useState(geninfo?.LastName ?? "");
-  const [employeeType, setEmployeeType] = useState(geninfo?.EmployeeType ?? "");
-  const [assignedOutlet, setAssignedOutlet] = useState(
-    geninfo?.AssignedOutlet ?? ""
-  );
-  const [department, setDepartment] = useState(geninfo?.Department ?? "");
-  const [jobTitle, setJobTitle] = useState(geninfo?.JobTitle ?? "");
-  const [dateEmployed, setDateEmployed] = useState(
-    parsedDE ? format(parsedDE, "yyyy-MM-dd") : ""
-  );
-  const [regDate, setRegDate] = useState(
-    parsedRD ? format(parsedRD, "yyyy-MM-dd") : ""
-  );
-  const [dateLeaved, setDateLeaved] = useState(
-    parsedDL ? format(parsedDL, "yyyy-MM-dd") : ""
-  );
-  const [dateProbationary, setDateProbationary] = useState(
-    parsedDP ? format(parsedDP, "yyyy-MM-dd") : ""
-  );
-  const [empStatus, setEmpStatus] = useState(geninfo?.EmpStatus ?? "");
+  const { genState, genDispatch } = useRecordForm(geninfo);
   const [modeOfSeparation, setModeOfSeparation] = useState(
     inactiveEmp?.Mode_of_Separation ?? ""
   );
-  const [notes, setNotes] = useState(geninfo?.Notes);
-  const [tinnumber, setTINnumber] = useState(geninfo?.TINnumber ?? "");
-  const [sssnumber, setSSSnumber] = useState(geninfo?.SSSnumber ?? "");
-  const [phnumber, setPHnumber] = useState(geninfo?.PHnumber ?? "");
-  const [pinumber, setPInumber] = useState(geninfo?.PInumber ?? "");
-  const [atmnumber, setATMnumber] = useState(geninfo?.ATMnumber ?? "");
-  const [isContractual, setIsContractual] = useState(parsedCD ? true : false);
-  const [contractDateEnd, setContractDateEnd] = useState(
-    parsedCD ? format(parsedCD, "yyyy-MM-dd") : ""
+  const [isContractual, setIsContractual] = useState(
+    genState.ContractDateEnd ? true : false
   );
 
   useEffect(() => {
@@ -148,11 +81,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
     navigate,
   ]);
 
-  /* DATE REVERT */
-  const dateRevert = (dateString, formatString) => {
-    return format(parse(dateString, "yyyy-MM-dd", new Date()), formatString);
-  };
-
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
     e.preventDefault();
@@ -163,44 +91,29 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       const confirm = window.confirm("Proceed with these information?");
 
       if (confirm) {
-        // Revert dates
-        const revertedDE = dateEmployed
-          ? dateRevert(dateEmployed, "MMM dd, yyyy")
-          : "";
-        const revertedDP = dateProbationary
-          ? dateRevert(dateProbationary, "MMM dd, yyyy")
-          : "";
-        const revertedRD = regDate ? dateRevert(regDate, "MMMM dd, yyyy") : "";
-        const revertedDL = dateLeaved
-          ? dateRevert(dateLeaved, "MMM dd, yyyy")
-          : "";
-        const revertedCD = contractDateEnd
-          ? dateRevert(contractDateEnd, "MMMM dd, yyyy")
-          : "";
-
         let genInfoData = {
-          EmployeeID: employeeId,
-          BioID: bioId,
-          Prefix: prefix,
-          FirstName: firstName,
-          MiddleName: middleName,
-          LastName: lastName,
-          EmployeeType: employeeType,
-          AssignedOutlet: assignedOutlet,
-          Department: department,
-          JobTitle: jobTitle,
-          DateEmployed: revertedDE,
-          RegDate: revertedRD,
-          DateLeaved: revertedDL,
-          DateProbationary: revertedDP,
-          EmpStatus: empStatus,
-          Notes: notes,
-          ATMnumber: atmnumber,
-          TINnumber: tinnumber,
-          SSSnumber: sssnumber,
-          PHnumber: phnumber,
-          PInumber: pinumber,
-          ContractDateEnd: revertedCD,
+          EmployeeID: genState.EmployeeID,
+          BioID: genState.BioID,
+          Prefix: genState.Prefix,
+          FirstName: genState.FirstName,
+          MiddleName: genState.MiddleName,
+          LastName: genState.LastName,
+          EmployeeType: genState.EmployeeType,
+          AssignedOutlet: genState.AssignedOutlet,
+          Department: genState.Department,
+          JobTitle: genState.JobTitle,
+          DateEmployed: genState.DateEmployed,
+          RegDate: genState.RegDate,
+          DateLeaved: genState.DateLeaved,
+          DateProbationary: genState.DateProbationary,
+          EmpStatus: genState.EmpStatus,
+          Notes: genState.Notes,
+          ATMnumber: genState.ATMnumber,
+          TINnumber: genState.TINnumber,
+          SSSnumber: genState.SSSnumber,
+          PHnumber: genState.PHnumber,
+          PInumber: genState.PInumber,
+          ContractDateEnd: genState.ContractDateEnd,
         };
 
         // Check if user is adding or updating an employee record
@@ -212,13 +125,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
 
         /* Include inactive employee record in inactive list.
         Remove from inactive list if reverted back to active */
-        if (empStatus === "N") {
+        if (genState.EmpStatus === "N") {
           await addInactiveEmp({
-            EmployeeID: employeeId,
+            EmployeeID: genState.EmployeeID,
             Mode_of_Separation: modeOfSeparation,
             UserName: username,
           });
-        } else if (empStatus === "Y") {
+        } else if (genState.EmpStatus === "Y") {
           await deleteInactiveEmp({ id: inactiveEmp?.id });
         }
 
@@ -253,19 +166,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
     setValidated(true);
   };
 
-  /* USER INPUT CHANGE */
-  const userInputChange = (e, REGEX = RegExp | null, setStateVariable) => {
-    const inputValue = e.target.value;
-
-    if (REGEX) {
-      if (REGEX.test(inputValue) || inputValue === "") {
-        setStateVariable(inputValue);
-      }
-    } else {
-      setStateVariable(inputValue);
-    }
-  };
-
   /* DROPDOWN OPTIONS */
   const employeeTypeOptions = Object.entries(EMPLOYEETYPE).map(
     ([key, value]) => {
@@ -283,7 +183,9 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           key={key}
           value={value}
           as="option"
-          onClick={() => setAssignedOutlet(value)}
+          onClick={() =>
+            genDispatch({ type: "assigned_outlet", AssignedOutlet: value })
+          }
         >
           {key}
         </Dropdown.Item>
@@ -341,9 +243,12 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 autoFocus
                 autoComplete="off"
                 type="text"
-                value={employeeId}
+                value={genState.EmployeeID}
                 onChange={(e) =>
-                  userInputChange(e, ALPHANUM_REGEX, setEmployeeId)
+                  genDispatch({
+                    type: "employee_id",
+                    EmployeeID: e.target.value,
+                  })
                 }
               />
               <Form.Control.Feedback type="invalid">
@@ -357,8 +262,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 autoComplete="off"
                 required
                 disabled
-                value={bioId}
-                onChange={(e) => userInputChange(e, NUMBER_REGEX, setBioId)}
+                defaultValue={genState.BioID}
               />
               <Form.Control.Feedback type="invalid">
                 This field is required
@@ -370,8 +274,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Prefix</Form.Label>
               <Form.Select
-                value={prefix}
-                onChange={(e) => setPrefix(e.target.value)}
+                value={genState.Prefix}
+                onChange={(e) =>
+                  genDispatch({ type: "prefix", Prefix: e.target.value })
+                }
               >
                 {prefixOptions}
               </Form.Select>
@@ -382,8 +288,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 required
                 type="text"
                 autoComplete="off"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                value={genState.FirstName}
+                onChange={(e) =>
+                  genDispatch({ type: "first_name", FirstName: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group as={Col}>
@@ -392,8 +300,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 type="text"
                 autoComplete="off"
                 placeholder="(Optional)"
-                value={middleName}
-                onChange={(e) => setMiddleName(e.target.value)}
+                value={genState.MiddleName}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "middle_name",
+                    MiddleName: e.target.value,
+                  })
+                }
               />
             </Form.Group>
             <Form.Group as={Col}>
@@ -402,22 +315,29 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 required
                 type="text"
                 autoComplete="off"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                value={genState.LastName}
+                onChange={(e) =>
+                  genDispatch({ type: "last_name", LastName: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Employee type, contract date (if applicable), and assigned outlet */}
+          {/* Employee type & assigned outlet */}
           <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employee Type</Form.Label>
               <Form.Select
                 required
-                value={employeeType}
-                onChange={(e) => setEmployeeType(e.target.value)}
+                value={genState.EmployeeType}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "employee_type",
+                    EmployeeType: e.target.value,
+                  })
+                }
               >
                 {employeeTypeOptions}
               </Form.Select>
@@ -431,8 +351,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 <Form.Control
                   required
                   type="text"
-                  value={assignedOutlet}
-                  onChange={(e) => setAssignedOutlet(e.target.value)}
+                  value={genState.AssignedOutlet}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "assigned_outlet",
+                      AssignedOutlet: e.target.value,
+                    })
+                  }
                 />
                 <DropdownButton variant="outline-secondary" title="Options">
                   {assignedOutletOptions}
@@ -449,8 +374,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Department</Form.Label>
               <Form.Select
                 required
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                value={genState.Department}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "department",
+                    Department: e.target.value,
+                  })
+                }
               >
                 {departmentOptions}
               </Form.Select>
@@ -463,8 +393,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 type="text"
                 required
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
+                value={genState.JobTitle}
+                onChange={(e) =>
+                  genDispatch({ type: "job_title", JobTitle: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -479,8 +411,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 required
                 autoComplete="off"
                 type="date"
-                value={dateEmployed}
-                onChange={(e) => setDateEmployed(e.target.value)}
+                value={genState.DateEmployed}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "date_employed",
+                    DateEmployed: e.target.value,
+                  })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -494,7 +431,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 label={isContractual ? "Yes" : "No"}
                 onChange={() => {
                   setIsContractual(!isContractual);
-                  setContractDateEnd("");
+                  genDispatch({
+                    type: "contract_date_end",
+                    ContractDateEnd: "",
+                  });
                 }}
               />
             </Form.Group>
@@ -507,16 +447,19 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                   <Form.Control
                     type="date"
                     required
-                    value={contractDateEnd}
+                    value={genState.ContractDateEnd}
                     onChange={(e) => {
                       // Checking if the contract date is after the employed date
                       const daysDiff = differenceInDays(
                         new Date(e.target.value),
-                        new Date(dateEmployed)
+                        new Date(genState.DateEmployed)
                       );
 
                       if (daysDiff > 0) {
-                        setContractDateEnd(e.target.value);
+                        genDispatch({
+                          type: "contract_date_end",
+                          ContractDateEnd: e.target.value,
+                        });
                       } else {
                         toast.error(
                           "Contract date must be greater than employed date"
@@ -535,8 +478,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 disabled={isContractual}
                 type="date"
-                value={dateProbationary}
-                onChange={(e) => setDateProbationary(e.target.value)}
+                value={genState.DateProbationary}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "date_probationary",
+                    DateProbationary: e.target.value,
+                  })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -552,8 +500,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 type="date"
                 disabled={isContractual}
-                value={regDate}
-                onChange={(e) => setRegDate(e.target.value)}
+                value={genState.RegDate}
+                onChange={(e) =>
+                  genDispatch({ type: "reg_date", RegDate: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -566,8 +516,13 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 type="date"
                 disabled={isContractual}
-                value={dateLeaved}
-                onChange={(e) => setDateLeaved(e.target.value)}
+                value={genState.DateLeaved}
+                onChange={(e) =>
+                  genDispatch({
+                    type: "date_leaved",
+                    DateLeaved: e.target.value,
+                  })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -579,8 +534,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employment Status</Form.Label>
               <Form.Select
-                onChange={(e) => setEmpStatus(e.target.value)}
-                value={empStatus}
+                onChange={(e) =>
+                  genDispatch({ type: "emp_status", EmpStatus: e.target.value })
+                }
+                value={genState.EmpStatus}
               >
                 {empStatusOptions}
               </Form.Select>
@@ -588,7 +545,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
-            {empStatus === "N" && (
+            {genState.EmpStatus === "N" && (
               <>
                 <Form.Group as={Col} md="auto">
                   <Form.Label className="fw-semibold">
@@ -613,20 +570,24 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 type="text"
                 as="textarea"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                value={genState.Notes}
+                onChange={(e) =>
+                  genDispatch({ type: "notes", Notes: e.target.value })
+                }
               />
             </Form.Group>
           </Row>
-          {/* TIN number, SSS number, PH number, PI number, ATM number */}
+          {/* TIN number, SSS number, and PH number */}
           <Row className="mb-3 pt-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">TIN Number</Form.Label>
               <Form.Control
                 required
                 type="text"
-                value={tinnumber}
-                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setTINnumber)}
+                value={genState.TINnumber}
+                onChange={(e) =>
+                  genDispatch({ type: "tin_number", TINnumber: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group as={Col} md="auto">
@@ -634,8 +595,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 required
                 type="text"
-                value={sssnumber}
-                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setSSSnumber)}
+                value={genState.SSSnumber}
+                onChange={(e) =>
+                  genDispatch({ type: "sss_number", SSSnumber: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group as={Col} md="auto">
@@ -643,19 +606,24 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 required
                 type="text"
-                value={phnumber}
-                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPHnumber)}
+                value={genState.PHnumber}
+                onChange={(e) =>
+                  genDispatch({ type: "ph_number", PHnumber: e.target.value })
+                }
               />
             </Form.Group>
           </Row>
+          {/* PI number & ATM number */}
           <Row className="mb-3 pb-5 border-bottom">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">PI Number</Form.Label>
               <Form.Control
                 required
                 type="text"
-                value={pinumber}
-                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setPInumber)}
+                value={genState.PInumber}
+                onChange={(e) =>
+                  genDispatch({ type: "pi_number", PInumber: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group as={Col} md="4">
@@ -663,8 +631,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Control
                 type="text"
                 placeholder="(Optional for confidentiality)"
-                value={atmnumber}
-                onChange={(e) => userInputChange(e, IDNUMS_REGEX, setATMnumber)}
+                value={genState.ATMnumber}
+                onChange={(e) =>
+                  genDispatch({ type: "atm_number", ATMnumber: e.target.value })
+                }
               />
             </Form.Group>
           </Row>

@@ -36,7 +36,7 @@ const useContractNotif = (geninfos, isSuccess, useAuth) => {
 
           daysLeft < 1 &&
             toast.warning(
-              `Contract of "${employee?.EmployeeID}" already ended. Change it ASAP!`,
+              `Contract of "${employee?.EmployeeID}" already ended. System will inactivate this record.`,
               {
                 toastId: employee.EmployeeID,
                 onClick: () => {

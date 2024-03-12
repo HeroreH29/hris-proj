@@ -1,8 +1,7 @@
 import React from "react";
 import NewAnnouncementForm from "./NewAnnouncementForm";
-
 import { useGetUsersQuery } from "../users/usersApiSlice";
-import PulseLoader from "react-spinners/PulseLoader";
+import { Spinner } from "react-bootstrap";
 
 const NewAnnouncement = () => {
   const { users } = useGetUsersQuery("usersList", {
@@ -12,9 +11,9 @@ const NewAnnouncement = () => {
   });
 
   if (users) {
-    return <NewAnnouncementForm users={users} />;
+    return <NewAnnouncementForm />;
   } else {
-    return <PulseLoader color="#808080" />;
+    return <Spinner animation="border" />;
   }
 };
 

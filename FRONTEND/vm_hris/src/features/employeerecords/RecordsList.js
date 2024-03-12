@@ -22,24 +22,17 @@ import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 import { toast } from "react-toastify";
 import { parse, differenceInDays, differenceInMonths } from "date-fns";
 import useAuth from "../../hooks/useAuth";
+import useTableSettings from "../../hooks/useTableSettings";
 
 const RecordsList = () => {
   const navigate = useNavigate();
 
-  const { isOutletProcessor, branch } = useAuth();
+  const { isOutletProcessor } = useAuth();
 
   useTitle("Employee Records | Via Mare HRIS");
 
-  const [sliceStart, setSliceStart] = useState(0);
-  const [sliceEnd, setSliceEnd] = useState(10);
-  const [nameSort, setNameSort] = useState(false);
-
-  const [searchValue, setSearchValue] = useState("");
-
-  const [outletFilter, setOutletFilter] = useState(
-    isOutletProcessor ? branch : ""
-  );
-  const [statusFilter, setStatusFilter] = useState("Y");
+  // VARIABLES
+  const { state, dispatch } = useTableSettings();
 
   const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
     ([key, value]) => {
@@ -83,7 +76,8 @@ const RecordsList = () => {
         let match = true;
 
         if (isOutletProcessor) {
-          match = match && gentities[gid]?.AssignedOutlet === branch;
+          match =
+            match && gentities[gid]?.AssignedOutlet === state.outletFilter;
         }
 
         return match;
@@ -152,24 +146,24 @@ const RecordsList = () => {
       const geninfo = gentities[id];
       let matches = true;
 
-      const searchLowerCase = searchValue.toLowerCase();
-      const outletFilterLowerCase = outletFilter.toLowerCase();
-      const statusFilterLowerCase = statusFilter.toLowerCase();
+      const searchLowerCase = state.searchValue.toLowerCase();
+      const outletFilterLowerCase = state.outletFilter.toLowerCase();
+      const statusFilterLowerCase = state.statusFilter.toLowerCase();
 
-      if (searchValue !== "") {
+      if (state.searchValue !== "") {
         matches =
           (matches &&
             geninfo.LastName.toLowerCase().includes(searchLowerCase)) ||
           geninfo.FirstName.toLowerCase().includes(searchLowerCase);
       }
 
-      if (outletFilter !== "") {
+      if (state.outletFilter !== "") {
         matches =
           matches &&
           geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
       }
 
-      if (statusFilter !== "") {
+      if (state.statusFilter !== "") {
         matches =
           matches && geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
       }
@@ -178,16 +172,16 @@ const RecordsList = () => {
     });
 
     // Passing geninfo ids as table content
-    const tableContent = gids?.length
-      ? [...filteredIds]
-          .sort((a, b) => {
-            return !nameSort
-              ? gentities[a].LastName.localeCompare(gentities[b].LastName)
-              : gentities[b].LastName.localeCompare(gentities[a].LastName);
-          })
-          .slice(sliceStart, sliceEnd)
-          .map((geninfoId) => <Record key={geninfoId} geninfoId={geninfoId} />)
-      : null;
+    const tableContent =
+      gids?.length &&
+      [...filteredIds]
+        .sort((a, b) => {
+          return !state.nameSort
+            ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+            : gentities[b].LastName.localeCompare(gentities[a].LastName);
+        })
+        .slice(state.sliceStart, state.sliceEnd)
+        .map((geninfoId) => <Record key={geninfoId} geninfoId={geninfoId} />);
 
     return (
       <Container>
@@ -211,11 +205,11 @@ const RecordsList = () => {
           <thead className="align-middle">
             <tr>
               <th scope="col">Employee ID</th>
-              <th scope="col" onClick={() => setNameSort(!nameSort)}>
+              <th scope="col" onClick={() => dispatch({ type: "name_sort" })}>
                 Name{" "}
                 <FontAwesomeIcon
                   className="float-end"
-                  icon={nameSort ? faArrowDownAZ : faArrowUpAZ}
+                  icon={state.nameSort ? faArrowDownAZ : faArrowUpAZ}
                 />
               </th>
               <th scope="col">Assigned Outlet</th>
@@ -232,11 +226,12 @@ const RecordsList = () => {
                   <Form.Control
                     type="text"
                     placeholder="Search by Name"
-                    value={searchValue}
+                    value={state.searchValue}
                     onChange={(e) => {
-                      setSearchValue(e.target.value);
-                      setSliceStart(0);
-                      setSliceEnd(10);
+                      dispatch({
+                        type: "search_value",
+                        searchValue: e.target.value,
+                      });
                     }}
                   />
                 </Form>
@@ -245,11 +240,12 @@ const RecordsList = () => {
                 <Form>
                   <Form.Select
                     disabled={isOutletProcessor}
-                    value={outletFilter}
+                    value={state.outletFilter}
                     onChange={(e) => {
-                      setOutletFilter(e.target.value);
-                      setSliceStart(0);
-                      setSliceEnd(10);
+                      dispatch({
+                        type: "outlet_filter",
+                        outletFilter: e.target.value,
+                      });
                     }}
                   >
                     {assignedOutletOptions}
@@ -260,11 +256,12 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
-                    value={statusFilter}
+                    value={state.statusFilter}
                     onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setSliceStart(0);
-                      setSliceEnd(10);
+                      dispatch({
+                        type: "status_filter",
+                        statusFilter: e.target.value,
+                      });
                     }}
                   >
                     {empStatusOptions}
@@ -276,25 +273,15 @@ const RecordsList = () => {
               <td colSpan={5}>
                 <Button
                   variant="outline-primary float-end"
-                  disabled={
-                    filteredIds?.length
-                      ? sliceEnd >= filteredIds?.length
-                      : sliceEnd >= gids?.length
-                  }
-                  onClick={() => {
-                    setSliceStart((prev) => prev + 10);
-                    setSliceEnd((prev) => prev + 10);
-                  }}
+                  disabled={state.sliceEnd >= filteredIds?.length}
+                  onClick={() => dispatch({ type: "slice_inc" })}
                 >
                   Next
                 </Button>
                 <Button
                   variant="outline-primary float-end me-3"
-                  disabled={sliceStart === 0}
-                  onClick={() => {
-                    setSliceStart((prev) => prev - 10);
-                    setSliceEnd((prev) => prev - 10);
-                  }}
+                  disabled={state.sliceStart === 0}
+                  onClick={() => dispatch({ type: "slice_dec" })}
                 >
                   Prev
                 </Button>

@@ -20,6 +20,11 @@ const getAllAnnouncements = async (req, res) => {
     deleteExpiredAnnouncements(announcement);
   });
 
+  // Sort announcements by creation date
+  announcements.sort(
+    (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf()
+  );
+
   res.json(announcements);
 };
 

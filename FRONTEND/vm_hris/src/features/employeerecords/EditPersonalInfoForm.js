@@ -15,16 +15,11 @@ import {
   DropdownButton,
   Dropdown,
 } from "react-bootstrap";
-import { format, parse } from "date-fns";
 import { toast } from "react-toastify";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import useAuth from "../../hooks/useAuth";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
-
-const ZIPCODE_REGEX = /^[0-9]{1,4}$/;
-const NUMERIC_REGEX = /^[0-9.]{1,5}$/;
-const ALPHA_REGEX = /^[a-zA-Z. ]*$/;
-const PHONEMOBILE_REGEX = /^[0-9+ -]*$/;
+import useRecordForm from "../../hooks/useRecordForm";
 
 const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   const { isOutletProcessor, branch } = useAuth();
@@ -49,33 +44,12 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   const [disablePermAdd, setDisablePermAdd] = useState(true);
 
   const navigate = useNavigate();
-  const parsedBD = personalinfo?.Birthday
-    ? parse(personalinfo?.Birthday, "MM/dd/yyyy", new Date())
-    : null;
 
   /* PERSONAL INFO VARIABLES */
-  const [birthday, setBirthday] = useState(
-    parsedBD ? format(parsedBD, "yyyy-MM-dd") : ""
-  );
-  const [presentAddress, setPresentAddress] = useState(
-    personalinfo?.PresentAddress || personalinfo?.Address
-  );
-  const [permanentAddress, setPermanentAddress] = useState(
-    personalinfo?.PermanentAddress
-  );
-  const [zipCode, setZipCode] = useState(personalinfo?.ZipCode);
-  const [email, setEmail] = useState(personalinfo?.Email);
-  const [gender, setGender] = useState(personalinfo?.Gender);
-  const [civilStatus, setCivilStatus] = useState(personalinfo?.CivilStatus);
-  const [height, setHeight] = useState(personalinfo?.Height);
-  const [weight, setWeight] = useState(personalinfo?.Weight);
-  const [phone, setPhone] = useState(personalinfo?.Phone);
-  const [mobile, setMobile] = useState(personalinfo?.Mobile);
-  const [spouse, setSpouse] = useState(personalinfo?.Spouse);
-  const [fatherName, setFatherName] = useState(personalinfo?.FatherName);
-  const [foccupation, setFoccupation] = useState(personalinfo?.Foccupation);
-  const [motherName, setMotherName] = useState(personalinfo?.MotherName);
-  const [moccupation, setMoccupation] = useState(personalinfo?.Moccupation);
+  const { persState, persDispatch } = useRecordForm(null, {
+    EmployeeID: employeeId,
+    ...personalinfo,
+  });
 
   useEffect(() => {
     if (addSuccess || updateSuccess) {
@@ -96,41 +70,23 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
 
     if (confirm && form.checkValidity() && (!updateLoading || !addLoading)) {
       // Revert birthday format to MM/DD/YYYY
-      const revertedBday = format(
-        parse(birthday, "yyyy-MM-dd", new Date()),
+      /* const revertedBday = format(
+        parse(persState.Birthday, "yyyy-MM-dd", new Date()),
         "MM/dd/yyyy"
-      );
+      ); */
 
-      let personalInfoData = {
-        EmployeeID: personalinfo?.EmployeeID ?? employeeId,
-        Birthday: revertedBday,
-        PresentAddress: presentAddress,
-        PermanentAddress: presentAddress
-          ? "(Same as present address)"
-          : permanentAddress,
-        ZipCode: zipCode,
-        Email: email,
-        Gender: gender,
-        CivilStatus: civilStatus,
-        Height: height,
-        Weight: weight,
-        Phone: phone,
-        Mobile: mobile,
-        Spouse: spouse,
-        FatherName: fatherName,
-        Foccupation: foccupation,
-        MotherName: motherName,
-        Moccupation: moccupation,
-      };
+      const { _id, __v, ...others } = persState;
 
       if (personalinfo) {
-        await updatePersonalinfo({ id: personalinfo?.id, ...personalInfoData });
+        await updatePersonalinfo({
+          id: personalinfo?.id,
+          ...others,
+        });
       } else {
-        await addPersonalinfo(personalInfoData);
+        await addPersonalinfo(others);
       }
 
       // Send data to HR email if processed by outlet/branch
-
       if (isOutletProcessor && personalinfo) {
         // Update record
         await sendEmail(
@@ -138,7 +94,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             branch,
             `${personalinfo?.EmployeeID}-PersonalInfo.json`,
             personalinfo?.id,
-            personalInfoData,
+            others,
             true
           )
         );
@@ -149,7 +105,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             branch,
             `${personalinfo?.EmployeeID}-PersonalInfo.json`,
             personalinfo?.id,
-            personalInfoData
+            others
           )
         );
       }
@@ -158,15 +114,6 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
     }
 
     setValidated(true);
-  };
-
-  /* USER INPUT PATTERN VALIDATION */
-  const userInputChange = (e, REGEX, setStateVariable) => {
-    const inputValue = e.target.value;
-
-    if (REGEX.test(inputValue) || inputValue === "") {
-      setStateVariable(inputValue);
-    }
   };
 
   /* DROPDOWN OPTIONS */
@@ -196,7 +143,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
           validated={validated}
           onSubmit={onSaveInfoClicked}
         >
-          {/* Birthday */}
+          {/* Birthday & Email */}
           <Row className="mb-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Birthday</Form.Label>
@@ -204,8 +151,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
                 required
                 autoFocus
                 type="date"
-                value={birthday}
-                onChange={(e) => setBirthday(e.target.value)}
+                value={persState.Birthday}
+                onChange={(e) =>
+                  persDispatch({ type: "birthday", Birthday: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -215,10 +164,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Label className="fw-semibold">Email</Form.Label>
               <Form.Control
                 type="text"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
+                value={persState.Email}
+                onChange={(e) =>
+                  persDispatch({ type: "email", Email: e.target.value })
+                }
               />
             </Form.Group>
           </Row>
@@ -229,8 +178,13 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Control
                 required
                 type="text"
-                value={presentAddress}
-                onChange={(e) => setPresentAddress(e.target.value)}
+                value={persState.PresentAddress ?? persState.Address}
+                onChange={(e) =>
+                  persDispatch({
+                    type: "present_address",
+                    PresentAddress: e.target.value,
+                  })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
@@ -240,10 +194,16 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Label className="fw-semibold">Permanent Address</Form.Label>
               <InputGroup>
                 <Form.Control
+                  isInvalid={persState.PermanentAddress === ""}
                   type="text"
-                  value={permanentAddress}
+                  value={persState.PermanentAddress}
                   disabled={disablePermAdd}
-                  onChange={(e) => setPermanentAddress(e.target.value)}
+                  onChange={(e) =>
+                    persDispatch({
+                      type: "permanent_address",
+                      PermanentAddress: e.target.value,
+                    })
+                  }
                 />
                 <DropdownButton
                   variant="outline-secondary"
@@ -254,13 +214,19 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
                     as="option"
                     onClick={() => {
                       setDisablePermAdd(false);
-                      setPermanentAddress("");
+                      persDispatch({
+                        type: "permanent_address",
+                        PermanentAddress: "",
+                      });
                     }}
                   >{`(Input address)`}</Dropdown.Item>
                   <Dropdown.Item
                     as="option"
                     onClick={() => {
-                      setPermanentAddress("(Same as present address)");
+                      persDispatch({
+                        type: "permanent_address",
+                        PermanentAddress: "(Same as present address)",
+                      });
                       setDisablePermAdd(true);
                     }}
                   >{`(Same as present address)`}</Dropdown.Item>
@@ -275,8 +241,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Control
                 required
                 type="text"
-                value={zipCode}
-                onChange={(e) => userInputChange(e, ZIPCODE_REGEX, setZipCode)}
+                value={persState.ZipCode}
+                onChange={(e) =>
+                  persDispatch({ type: "zip_code", ZipCode: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field required!
@@ -289,8 +257,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Label className="fw-semibold">Gender</Form.Label>
               <Form.Select
                 required
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                value={persState.Gender}
+                onChange={(e) =>
+                  persDispatch({ type: "gender", Gender: e.target.value })
+                }
               >
                 {genderOptions}
               </Form.Select>
@@ -302,8 +272,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Label className="fw-semibold">Height</Form.Label>
               <Form.Control
                 required
-                value={height}
-                onChange={(e) => userInputChange(e, NUMERIC_REGEX, setHeight)}
+                value={persState.Height}
+                onChange={(e) =>
+                  persDispatch({ type: "height", Height: e.target.value })
+                }
               />
 
               <Form.Control.Feedback type="invalid">
@@ -314,21 +286,29 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Label className="fw-semibold">Weight</Form.Label>
               <Form.Control
                 required
-                value={weight}
-                onChange={(e) => userInputChange(e, NUMERIC_REGEX, setWeight)}
+                value={persState.Weight}
+                onChange={(e) =>
+                  persDispatch({ type: "weight", Weight: e.target.value })
+                }
               />
               <Form.Control.Feedback type="invalid">
                 This field is required!
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
+          {/* Civil status and spouse */}
           <Row className="mb-3">
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Civil Status</Form.Label>
               <Form.Select
                 required
-                value={civilStatus}
-                onChange={(e) => setCivilStatus(e.target.value)}
+                value={persState.CivilStatus}
+                onChange={(e) =>
+                  persDispatch({
+                    type: "civil_status",
+                    CivilStatus: e.target.value,
+                  })
+                }
               >
                 {civilStatusOptions}
               </Form.Select>
@@ -339,11 +319,12 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Spouse</Form.Label>
               <Form.Control
-                disabled={civilStatus === "Single"}
+                disabled={persState.CivilStatus !== "Married"}
                 type="text"
-                placeholder="(Optional)"
-                value={spouse}
-                onChange={(e) => userInputChange(e, ALPHA_REGEX, setSpouse)}
+                value={persState.Spouse}
+                onChange={(e) =>
+                  persDispatch({ type: "spouse", Spouse: e.target.value })
+                }
               />
             </Form.Group>
           </Row>
@@ -355,9 +336,9 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="(Optional)"
-                value={phone}
+                value={persState.Phone}
                 onChange={(e) =>
-                  userInputChange(e, PHONEMOBILE_REGEX, setPhone)
+                  persDispatch({ type: "phone", Phone: e.target.value })
                 }
               />
             </Form.Group>
@@ -366,9 +347,9 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               <Form.Control
                 required
                 type="text"
-                value={mobile}
+                value={persState.Mobile}
                 onChange={(e) =>
-                  userInputChange(e, PHONEMOBILE_REGEX, setMobile)
+                  persDispatch({ type: "mobile", Mobile: e.target.value })
                 }
               />
               <Form.Control.Feedback type="invalid">
@@ -384,14 +365,22 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               </InputGroup.Text>
               <Form.Control
                 type="text"
-                value={fatherName}
-                onChange={(e) => userInputChange(e, ALPHA_REGEX, setFatherName)}
+                value={persState.FatherName}
+                onChange={(e) =>
+                  persDispatch({
+                    type: "father_name",
+                    FatherName: e.target.value,
+                  })
+                }
               />
               <Form.Control
                 type="text"
-                value={foccupation}
+                value={persState.Foccupation}
                 onChange={(e) =>
-                  userInputChange(e, ALPHA_REGEX, setFoccupation)
+                  persDispatch({
+                    type: "foccupation",
+                    Foccupation: e.target.value,
+                  })
                 }
               />
             </InputGroup>
@@ -401,14 +390,22 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
               </InputGroup.Text>
               <Form.Control
                 type="text"
-                value={motherName}
-                onChange={(e) => userInputChange(e, ALPHA_REGEX, setMotherName)}
+                value={persState.MotherName}
+                onChange={(e) =>
+                  persDispatch({
+                    type: "mother_name",
+                    MotherName: e.target.value,
+                  })
+                }
               />
               <Form.Control
                 type="text"
-                value={moccupation}
+                value={persState.Moccupation}
                 onChange={(e) =>
-                  userInputChange(e, ALPHA_REGEX, setMoccupation)
+                  persDispatch({
+                    type: "moccupation",
+                    Moccupation: e.target.value,
+                  })
                 }
               />
             </InputGroup>

@@ -4,8 +4,9 @@ import { format } from "date-fns";
 
 const ALPHA_REGEX = /^[a-zA-Z\s]+$/;
 const ALPHANUM_REGEX = /^[a-zA-Z0-9]+$/;
-//const NUMBER_REGEX = /^\d+$/;
-const IDNUMS_REGEX = /^-?\d+$/;
+const NUMBERWDECIMAL_REGEX = /^\d+\.?\d*$/;
+const NUMBER_REGEX = /^\d+$/;
+const IDNUMS_REGEX = /^\d+-?\d*-?\d*$/;
 
 const useRecordForm = (geninfo = null, personalinfo = null) => {
   const { data: geninfos } = useGetGeninfosQuery();
@@ -66,15 +67,32 @@ const useRecordForm = (geninfo = null, personalinfo = null) => {
   const personalinfoInitialState = !personalinfo
     ? {
         Birthday: "",
+        Email: "",
+        PresentAddress: "",
+        PermanentAddress: "",
+        Address: "",
+        ZipCode: "",
+        Gender: "",
+        Height: "",
+        Weight: "",
+        CivilStatis: "",
+        Spouse: "",
+        Phone: "",
+        Mobile: "",
+        FatherName: "",
+        Foccupation: "",
+        MotherName: "",
+        Moccupation: "",
       }
-    : {};
+    : { ...personalinfo, Birthday: dateFormatter(personalinfo.Birthday) };
 
   const inputRegExpTest = (inputValue = "", REGEX = new RegExp()) => {
-    if (REGEX.test(inputValue)) {
+    const isMatch = REGEX.test(inputValue);
+    if (isMatch) {
       return inputValue;
     }
 
-    return inputValue.trim();
+    return "";
   };
 
   const geninfoReducer = (state, action) => {
@@ -212,12 +230,113 @@ const useRecordForm = (geninfo = null, personalinfo = null) => {
     }
   };
 
+  const personalinfoReducer = (state, action) => {
+    switch (action.type) {
+      case "birthday": {
+        return { ...state, Birthday: action.Birthday };
+      }
+
+      case "email": {
+        return { ...state, Email: action.Email };
+      }
+
+      case "present_address": {
+        return { ...state, PresentAddress: action.PresentAddress };
+      }
+
+      case "permanent_address": {
+        return { ...state, PermanentAddress: action.PermanentAddress };
+      }
+
+      case "zip_code": {
+        return {
+          ...state,
+          ZipCode: inputRegExpTest(action.ZipCode, NUMBER_REGEX),
+        };
+      }
+
+      case "gender": {
+        return { ...state, Gender: action.Gender };
+      }
+
+      case "height": {
+        return {
+          ...state,
+          Height: inputRegExpTest(action.Height, NUMBERWDECIMAL_REGEX),
+        };
+      }
+
+      case "weight": {
+        return {
+          ...state,
+          Weight: inputRegExpTest(action.Weight, NUMBERWDECIMAL_REGEX),
+        };
+      }
+
+      case "civil_status": {
+        return { ...state, CivilStatus: action.CivilStatus };
+      }
+
+      case "spouse": {
+        return { ...state, Spouse: action.Spouse };
+      }
+
+      case "phone": {
+        return { ...state, Phone: inputRegExpTest(action.Phone, NUMBER_REGEX) };
+      }
+
+      case "mobile": {
+        return {
+          ...state,
+          Mobile: inputRegExpTest(action.Mobile, NUMBER_REGEX),
+        };
+      }
+
+      case "father_name": {
+        return {
+          ...state,
+          FatherName: inputRegExpTest(action.FatherName, ALPHA_REGEX),
+        };
+      }
+
+      case "foccupation": {
+        return {
+          ...state,
+          Foccupation: inputRegExpTest(action.Foccupation, ALPHA_REGEX),
+        };
+      }
+
+      case "mother_name": {
+        return {
+          ...state,
+          MotherName: inputRegExpTest(action.MotherName, ALPHA_REGEX),
+        };
+      }
+
+      case "moccupation": {
+        return {
+          ...state,
+          Moccupation: inputRegExpTest(action.Moccupation, ALPHA_REGEX),
+        };
+      }
+
+      default: {
+        throw Error("Unknown action: " + action.type);
+      }
+    }
+  };
+
   const [genState, genDispatch] = useReducer(
     geninfoReducer,
     geninfoInitialState
   );
 
-  return { genState, genDispatch };
+  const [persState, persDispatch] = useReducer(
+    personalinfoReducer,
+    personalinfoInitialState
+  );
+
+  return { genState, genDispatch, persState, persDispatch };
 };
 
 export default useRecordForm;

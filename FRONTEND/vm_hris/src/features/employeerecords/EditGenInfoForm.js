@@ -24,7 +24,7 @@ import {
   DropdownButton,
   Dropdown,
 } from "react-bootstrap";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
@@ -94,7 +94,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
         const { _id, __v, ...others } = genState;
         // Check if user is adding or updating an employee record
         if (geninfo) {
-          await updateGeninfo({ id: geninfo?.id, others });
+          await updateGeninfo({ id: geninfo?.id, ...others });
         } else {
           await addGeninfo(others);
         }

@@ -18,16 +18,17 @@ import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+import useRecordForm from "../../hooks/useRecordForm";
 
 const DependentsList = ({ dependents, employeeId }) => {
   const { isOutletProcessor, branch } = useAuth();
 
-  const [deps, setDeps] = useState([]);
+  /* const [deps, setDeps] = useState([]);
 
   useEffect(() => {
     setDeps(dependents);
     // eslint-disable-next-line
-  }, []);
+  }, []); */
 
   // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
@@ -39,6 +40,7 @@ const DependentsList = ({ dependents, employeeId }) => {
   const [validated, setValidated] = useState(false);
 
   /* VARIABLES */
+  const { depState, depDispatch } = useRecordForm({});
   const [names, setNames] = useState("");
   const [dep, setDep] = useState("");
   const [birthday, setBirthday] = useState("");
@@ -57,22 +59,14 @@ const DependentsList = ({ dependents, employeeId }) => {
 
     const form = e.currentTarget;
     // Revert dates
-    const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
+    //const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
-    let dependentData = {
-      EmployeeID: employeeId,
-      Names: names,
-      Dependent: dep,
-      Birthday: revertedBD,
-      Status: status,
-      Relationship: relationship,
-      Covered: covered,
-    };
+    let dependentData = { EmployeeID: employeeId, ...depState };
 
     if (form.checkValidity() && !isLoading) {
       await addDependent(dependentData);
 
-      setDeps((prev) => [...prev, dependentData]);
+      /* setDeps((prev) => [...prev, dependentData]); */
 
       if (isOutletProcessor) {
         await sendEmail(
@@ -116,8 +110,8 @@ const DependentsList = ({ dependents, employeeId }) => {
     );
   });
 
-  const tableContent = deps?.length
-    ? deps
+  const tableContent = dependents?.length
+    ? dependents
         .sort((a, b) => new Date(a.Birthday) - new Date(b.Birthday))
         .map((dep, index) => (
           <Dependent
@@ -201,8 +195,10 @@ const DependentsList = ({ dependents, employeeId }) => {
                   autoFocus
                   autoComplete="off"
                   type="text"
-                  value={names}
-                  onChange={(e) => setNames(e.target.value)}
+                  value={depState.Names}
+                  onChange={(e) =>
+                    depDispatch({ type: "names", Names: e.target.value })
+                  }
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -213,8 +209,10 @@ const DependentsList = ({ dependents, employeeId }) => {
                 <Form.Control
                   required
                   type="date"
-                  value={birthday}
-                  onChange={(e) => setBirthday(e.target.value)}
+                  value={depState.Birthday}
+                  onChange={(e) =>
+                    depDispatch({ type: "birthday", Birthday: e.target.value })
+                  }
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -227,13 +225,19 @@ const DependentsList = ({ dependents, employeeId }) => {
                 <Form.Label className="fw-semibold">Dependent</Form.Label>
                 <Form.Control
                   disabled={
-                    relationship === "Mother" || relationship === "Father"
+                    depState.Relationship === "Mother" ||
+                    depState.Relationship === "Father"
                   }
                   autoComplete="off"
                   type="text"
-                  value={dep}
+                  value={depState.Dependent}
                   placeholder="e.g. 1st/2nd/3rd/etc..."
-                  onChange={(e) => setDep(e.target.value)}
+                  onChange={(e) =>
+                    depDispatch({
+                      type: "dependent",
+                      Dependent: e.target.value,
+                    })
+                  }
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -243,8 +247,10 @@ const DependentsList = ({ dependents, employeeId }) => {
                 <Form.Label className="fw-semibold">Status</Form.Label>
                 <Form.Select
                   required
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  value={depState.Status}
+                  onChange={(e) =>
+                    depDispatch({ type: "status", Status: e.target.value })
+                  }
                 >
                   {statusOptions}
                 </Form.Select>
@@ -260,9 +266,16 @@ const DependentsList = ({ dependents, employeeId }) => {
                 <Form.Select
                   required
                   value={
-                    relationship === "Daugther" ? "Daughter" : relationship
+                    depState.Relationship === "Daugther"
+                      ? "Daughter"
+                      : depState.Relationship
                   }
-                  onChange={(e) => setRelationship(e.target.value)}
+                  onChange={(e) =>
+                    depDispatch({
+                      type: "relationship",
+                      Relationship: e.target.value,
+                    })
+                  }
                 >
                   {relationshipOptions}
                 </Form.Select>
@@ -274,8 +287,10 @@ const DependentsList = ({ dependents, employeeId }) => {
                 <Form.Label className="fw-semibold">Covered</Form.Label>
                 <Form.Select
                   required
-                  value={covered}
-                  onChange={(e) => setCovered(e.target.value)}
+                  value={depState.Covered}
+                  onChange={(e) =>
+                    depDispatch({ type: "covered", Covered: e.target.value })
+                  }
                 >
                   {coveredOptions}
                 </Form.Select>

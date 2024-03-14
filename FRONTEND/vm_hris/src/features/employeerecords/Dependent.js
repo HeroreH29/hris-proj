@@ -8,6 +8,7 @@ import {
 } from "./recordsApiSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import useRecordForm from "../../hooks/useRecordForm";
 
 const Dependent = ({
   dependent,
@@ -30,18 +31,13 @@ const Dependent = ({
   ] = useDeleteDependentMutation();
 
   // Parse and format the birthday to make it editable through date input
-  const parsFormBD = format(
+  /* const parsFormBD = format(
     parse(dependent?.Birthday, "M/d/yyyy", new Date()),
     "yyyy-MM-dd"
-  );
+  ); */
 
   /* VARIABLES */
-  const [names, setNames] = useState(dependent?.Names);
-  const [dep, setDep] = useState(dependent?.Dependent);
-  const [birthday, setBirthday] = useState(parsFormBD);
-  const [status, setStatus] = useState(dependent?.Status);
-  const [relationship, setRelationship] = useState(dependent?.Relationship);
-  const [covered, setCovered] = useState(dependent?.Covered);
+  const { depState, depDispatch } = useRecordForm({ dependent });
 
   /* DROPDOWN OPTIONS */
   const statusOptions = Object.entries(STATUS).map(([key, value]) => {
@@ -81,9 +77,6 @@ const Dependent = ({
   }, [isSuccess, isDelSuccess, navigate, dependent?.EmployeeID]);
 
   /* DATE REVERT */
-  const dateRevert = (dateString, formatString) => {
-    return format(parse(dateString, "yyyy-MM-dd", new Date()), formatString);
-  };
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -93,28 +86,19 @@ const Dependent = ({
 
     if (form.checkValidity() && !isLoading) {
       // Revert dates
-      const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
+      //const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
-      let dependentData = {
-        id: dependent.id,
-        EmployeeID: dependent.EmployeeID,
-        Names: names,
-        Dependent: dep,
-        Birthday: revertedBD,
-        Relationship: relationship,
-        Status: status,
-        Covered: covered,
-      };
+      const { _id, __v, ...others } = depState;
 
-      await updateDependent(dependentData);
+      await updateDependent(others);
 
       if (isOutletProcessor) {
         await sendEmail(
           generateEmailMsg(
             branch,
-            `${dependent.EmployeeID}-Dependent.json`,
-            dependent.id,
-            dependentData,
+            `${depState.EmployeeID}-Dependent.json`,
+            depState.id,
+            others,
             true
           )
         );
@@ -130,7 +114,9 @@ const Dependent = ({
   const onDeleteDependentClicked = async (e) => {
     e.preventDefault();
 
-    const isConfirmed = window.confirm(`Proceed deletion of "${names}"?`);
+    const isConfirmed = window.confirm(
+      `Proceed deletion of "${depState.Names}"?`
+    );
     if (isConfirmed) {
       await deleteDependent({ id: dependent.id });
     } else {
@@ -148,12 +134,16 @@ const Dependent = ({
             setShowModal(true);
           }}
         >
-          <td>{names}</td>
-          <td>{dep}</td>
-          <td>{dependent.Birthday}</td>
-          <td>{status}</td>
-          <td>{relationship === "Daugther" ? "Daughter" : relationship}</td>
-          <td>{covered === 1 ? "Yes" : "No"}</td>
+          <td>{depState.Names}</td>
+          <td>{depState.Dependent}</td>
+          <td>{format(new Date(depState.Birthday), "MMM dd, yyyy")}</td>
+          <td>{depState.Status}</td>
+          <td>
+            {depState.Relationship === "Daugther"
+              ? "Daughter"
+              : depState.Relationship}
+          </td>
+          <td>{depState.Covered === 1 ? "Yes" : "No"}</td>
         </tr>
 
         {/* View edit dependent modal */}
@@ -165,7 +155,7 @@ const Dependent = ({
           scrollable
         >
           <Modal.Header closeButton>
-            <Modal.Title>{`Edit ${dep} Dependent`}</Modal.Title>
+            <Modal.Title>{`Edit ${depState.Dependent} Dependent`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form noValidate validated={validated} onSubmit={onSaveInfoClicked}>
@@ -178,8 +168,10 @@ const Dependent = ({
                     autoFocus
                     autoComplete="off"
                     type="text"
-                    value={names}
-                    onChange={(e) => setNames(e.target.value)}
+                    value={depState.Names}
+                    onChange={(e) =>
+                      depDispatch({ type: "names", Names: e.target.value })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
@@ -190,8 +182,13 @@ const Dependent = ({
                   <Form.Control
                     required
                     type="date"
-                    value={birthday}
-                    onChange={(e) => setBirthday(e.target.value)}
+                    value={depState.Birthday}
+                    onChange={(e) =>
+                      depDispatch({
+                        type: "birthday",
+                        Birthday: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
@@ -206,8 +203,13 @@ const Dependent = ({
                     required
                     autoComplete="off"
                     type="text"
-                    value={dep}
-                    onChange={(e) => setDep(e.target.value)}
+                    value={depState.Dependent}
+                    onChange={(e) =>
+                      depDispatch({
+                        type: "dependent",
+                        Dependent: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
@@ -217,8 +219,10 @@ const Dependent = ({
                   <Form.Label className="fw-semibold">Status</Form.Label>
                   <Form.Select
                     required
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
+                    value={depState.Status}
+                    onChange={(e) =>
+                      depDispatch({ type: "status", Status: e.target.value })
+                    }
                   >
                     {statusOptions}
                   </Form.Select>
@@ -234,9 +238,16 @@ const Dependent = ({
                   <Form.Select
                     required
                     value={
-                      relationship === "Daugther" ? "Daughter" : relationship
+                      depState.Relationship === "Daugther"
+                        ? "Daughter"
+                        : depState.Relationship
                     }
-                    onChange={(e) => setRelationship(e.target.value)}
+                    onChange={(e) =>
+                      depDispatch({
+                        type: "relationship",
+                        Relationship: e.target.value,
+                      })
+                    }
                   >
                     {relationshipOptions}
                   </Form.Select>
@@ -248,8 +259,10 @@ const Dependent = ({
                   <Form.Label className="fw-semibold">Covered</Form.Label>
                   <Form.Select
                     required
-                    value={covered}
-                    onChange={(e) => setCovered(e.target.value)}
+                    value={depState.Covered}
+                    onChange={(e) =>
+                      depDispatch({ type: "covered", Covered: e.target.value })
+                    }
                   >
                     {coveredOptions}
                   </Form.Select>

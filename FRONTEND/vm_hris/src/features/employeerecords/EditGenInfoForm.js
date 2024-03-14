@@ -50,7 +50,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const navigate = useNavigate();
 
   /* GEN INFO VARIABLES */
-  const { genState, genDispatch } = useRecordForm(geninfo);
+  const { genState, genDispatch } = useRecordForm({ geninfo });
   const [modeOfSeparation, setModeOfSeparation] = useState(
     inactiveEmp?.Mode_of_Separation ?? ""
   );

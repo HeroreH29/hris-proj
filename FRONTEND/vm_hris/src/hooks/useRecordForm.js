@@ -8,7 +8,13 @@ const NUMBERWDECIMAL_REGEX = /^\d+\.?\d*$/;
 const NUMBER_REGEX = /^\d+$/;
 const IDNUMS_REGEX = /^\d+-?\d*-?\d*$/;
 
-const useRecordForm = (geninfo = null, personalinfo = null) => {
+const useRecordForm = ({
+  geninfo = null,
+  personalinfo = null,
+  dependent = null,
+  educinfo = null,
+  workinfo = null,
+}) => {
   const { data: geninfos } = useGetGeninfosQuery();
 
   // Auto increments BioID based on the latest existing BioID
@@ -85,6 +91,20 @@ const useRecordForm = (geninfo = null, personalinfo = null) => {
         Moccupation: "",
       }
     : { ...personalinfo, Birthday: dateFormatter(personalinfo.Birthday) };
+
+  const dependentinfoInitialState = !dependent
+    ? {
+        Names: "",
+        Dependent: "",
+        Birthday: "",
+        Status: "",
+        Relationship: "",
+        Covered: 0,
+      }
+    : {
+        ...dependent,
+        Birthday: dateFormatter(dependent.Birthday),
+      };
 
   const inputRegExpTest = (inputValue = "", REGEX = new RegExp()) => {
     const isMatch = REGEX.test(inputValue);
@@ -326,6 +346,36 @@ const useRecordForm = (geninfo = null, personalinfo = null) => {
     }
   };
 
+  const dependentinfoReducer = (state, action) => {
+    switch (action.type) {
+      case "names": {
+        return { ...state, Names: inputRegExpTest(action.Names, ALPHA_REGEX) };
+      }
+      case "dependent": {
+        return {
+          ...state,
+          Dependent: inputRegExpTest(action.Dependent, ALPHANUM_REGEX),
+        };
+      }
+      case "birthday": {
+        return { ...state, Birthday: action.Birthday };
+      }
+      case "status": {
+        return { ...state, Status: action.Status };
+      }
+      case "relationship": {
+        return { ...state, Relationship: action.Relationship };
+      }
+      case "covered": {
+        return { ...state, Covered: action.Covered };
+      }
+
+      default: {
+        throw Error("Unknown action: " + action.type);
+      }
+    }
+  };
+
   const [genState, genDispatch] = useReducer(
     geninfoReducer,
     geninfoInitialState
@@ -336,7 +386,19 @@ const useRecordForm = (geninfo = null, personalinfo = null) => {
     personalinfoInitialState
   );
 
-  return { genState, genDispatch, persState, persDispatch };
+  const [depState, depDispatch] = useReducer(
+    dependentinfoReducer,
+    dependentinfoInitialState
+  );
+
+  return {
+    genState,
+    genDispatch,
+    persState,
+    persDispatch,
+    depState,
+    depDispatch,
+  };
 };
 
 export default useRecordForm;

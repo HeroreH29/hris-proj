@@ -46,9 +46,8 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
   const navigate = useNavigate();
 
   /* PERSONAL INFO VARIABLES */
-  const { persState, persDispatch } = useRecordForm(null, {
-    EmployeeID: employeeId,
-    ...personalinfo,
+  const { persState, persDispatch } = useRecordForm({
+    personalinfo: { EmployeeID: employeeId, ...personalinfo },
   });
 
   useEffect(() => {

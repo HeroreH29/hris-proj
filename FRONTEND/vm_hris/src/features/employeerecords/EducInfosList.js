@@ -16,21 +16,12 @@ import { useAddEducinfoMutation } from "./recordsApiSlice";
 import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
-import {
-  sendEmailApiSlice,
-  useSendEmailMutation,
-} from "../emailSender/sendEmailApiSlice";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import useRecordForm from "../../hooks/useRecordForm";
 
 const EducInfoList = ({ educinfos, employeeId }) => {
   const { branch, isOutletProcessor } = useAuth();
-
-  const [educs, setEducs] = useState([]);
-
-  useEffect(() => {
-    setEducs(educinfos);
-    // eslint-disable-next-line
-  }, []);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -43,15 +34,7 @@ const EducInfoList = ({ educinfos, employeeId }) => {
   const [sendEmail] = useSendEmailMutation();
 
   /* VARIABLES */
-  const [institutionName, setInstitutionName] = useState("");
-  const [address, setAddress] = useState("");
-  const [level, setLevel] = useState("");
-  const [degree, setDegree] = useState("");
-  const [yrStart, setYrStart] = useState("");
-  const [yrGraduated, setYrGraduated] = useState("");
-  const [fieldOfStudy, setFieldOfStudy] = useState("");
-  const [major, setMajor] = useState("");
-  const employeeID = employeeId;
+  const { educState, educDispatch } = useRecordForm({});
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -59,22 +42,15 @@ const EducInfoList = ({ educinfos, employeeId }) => {
 
     const form = e.currentTarget;
 
+    const { __v, _id, ...others } = educState;
+
     let educInfoData = {
-      Institution_Name: institutionName,
-      Address: address,
-      Degree: degree,
-      Level: level,
-      yrStart: yrStart,
-      yrGraduated: yrGraduated,
-      Field_of_Study: fieldOfStudy,
-      Major: major,
-      EmployeeID: employeeID,
+      ...others,
+      EmployeeID: employeeId,
     };
 
     if (form.checkValidity() && !isLoading) {
       const payload = await addEducinfo(educInfoData);
-
-      setEducs((prev) => [...prev, educInfoData]);
 
       if (isOutletProcessor && payload) {
         await sendEmail(
@@ -106,24 +82,16 @@ const EducInfoList = ({ educinfos, employeeId }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setInstitutionName("");
-      setAddress("");
-      setLevel("");
-      setDegree("");
-      setYrStart("");
-      setYrGraduated("");
-      setFieldOfStudy("");
-      setMajor("");
       setShowModal(false);
       setValidated(false);
       toast.success("Educational information added!");
 
-      //window.location.reload();
+      window.location.reload();
     }
   }, [isSuccess]);
 
-  const tableContent = educs?.length
-    ? educs
+  const tableContent = educinfos?.length
+    ? educinfos
         .sort((a, b) => {
           return b.yrStart - a.yrStart;
         })
@@ -199,8 +167,13 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   autoFocus
                   autoComplete="off"
                   type="text"
-                  value={institutionName}
-                  onChange={(e) => setInstitutionName(e.target.value)}
+                  value={educState.Institution_Name}
+                  onChange={(e) =>
+                    educDispatch({
+                      type: "institution_name",
+                      Institution_Name: e.target.value,
+                    })
+                  }
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -212,8 +185,13 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   required
                   autoComplete="off"
                   type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  value={educState.Address}
+                  onChange={(e) =>
+                    educDispatch({
+                      type: "address",
+                      Address: e.target.value,
+                    })
+                  }
                 />
                 <Form.Control.Feedback type="invalid">
                   This field is required!
@@ -230,15 +208,25 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="text"
                     placeholder="Enter Course (Field)"
-                    value={fieldOfStudy}
-                    onChange={(e) => setFieldOfStudy(e.target.value)}
+                    value={educState.Field_of_Study}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "field_of_study",
+                        Field_of_Study: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                   <Form.Select
-                    value={degree}
-                    onChange={(e) => setDegree(e.target.value)}
+                    value={educState.Degree}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "degree",
+                        Degree: e.target.value,
+                      })
+                    }
                   >
                     {degreeOptions}
                   </Form.Select>
@@ -248,15 +236,25 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                   <Form.Control
                     type="text"
                     placeholder="Enter Strand (Major)"
-                    value={major}
-                    onChange={(e) => setMajor(e.target.value)}
+                    value={educState.Major}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "major",
+                        Major: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                   <Form.Select
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value)}
+                    value={educState.Level}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "level",
+                        Level: e.target.value,
+                      })
+                    }
                   >
                     {levelOptions}
                   </Form.Select>
@@ -269,19 +267,29 @@ const EducInfoList = ({ educinfos, employeeId }) => {
                 <Form.Label className="fw-semibold">Year Attended</Form.Label>
                 <InputGroup>
                   <Form.Control
-                    type="number"
+                    type="text"
                     placeholder="Year Started"
-                    value={yrStart}
-                    onChange={(e) => setYrStart(e.target.value)}
+                    value={educState.yrStart}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "yr_start",
+                        yrStart: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                   <Form.Control
-                    type="number"
+                    type="text"
                     placeholder="Year Graduated"
-                    value={yrGraduated}
-                    onChange={(e) => setYrGraduated(e.target.value)}
+                    value={educState.yrGraduated}
+                    onChange={(e) =>
+                      educDispatch({
+                        type: "yr_graduated",
+                        yrGraduated: e.target.value,
+                      })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     This field is required!

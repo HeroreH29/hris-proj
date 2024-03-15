@@ -16,22 +16,24 @@ const getAllEducInfos = async (req, res) => {
 // @route POST /educinfos
 // @access Private
 const createEducInfo = async (req, res) => {
-  const reqBody = req.body;
+  const { Major, Field_of_Study, Degree, ...others } = req.body;
+
+  const othersHasValues = Object.values(others).every(
+    (value) => value !== "" && value !== null
+  );
 
   // Confirm data
-  for (const field in reqBody) {
-    if (!reqBody[field]) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
+  if (!othersHasValues) {
+    return res.status(400).json({ message: "All fields are required" });
   }
 
-  const newEmployeeID = isStringAllNumbers(reqBody.EmployeeID);
-  reqBody.EmployeeID = newEmployeeID;
+  const newEmployeeID = isStringAllNumbers(req.body.EmployeeID);
+  req.body.EmployeeID = newEmployeeID;
 
   // Will put duplicate checker if needed/necessary
 
   // Create and store new info
-  const educ = await Educ.create(reqBody);
+  const educ = await Educ.create(req.body);
 
   if (educ) {
     res.status(201).json({ message: `New education info created` });
@@ -74,14 +76,14 @@ const updateEducInfo = async (req, res) => {
 // @route DELETE /educinfos
 // @access Private
 const deleteEducInfo = async (req, res) => {
-  const reqBodyId = req.body.id;
+  const othersId = req.body.id;
 
-  if (!reqBodyId) {
+  if (!othersId) {
     return res.status(400).json({ message: "ID required" });
   }
 
   // Check if info exists to delete
-  const educ = await Educ.findById(reqBodyId).exec();
+  const educ = await Educ.findById(othersId).exec();
 
   if (!educ) {
     return res.status(400).json({ message: "Info not found" });

@@ -37,6 +37,7 @@ const useRecordForm = ({
     return dateString ? format(new Date(dateString), dateFormat) : "";
   };
 
+  /* INITAL STATES */
   const geninfoInitialState = !geninfo
     ? {
         EmployeeID: "",
@@ -69,7 +70,6 @@ const useRecordForm = ({
         DateLeaved: dateFormatter(geninfo?.DateLeaved),
         ContractDateEnd: dateFormatter(geninfo?.ContractDateEnd),
       };
-
   const personalinfoInitialState = !personalinfo
     ? {
         Birthday: "",
@@ -91,7 +91,6 @@ const useRecordForm = ({
         Moccupation: "",
       }
     : { ...personalinfo, Birthday: dateFormatter(personalinfo.Birthday) };
-
   const dependentinfoInitialState = !dependent
     ? {
         Names: "",
@@ -105,6 +104,18 @@ const useRecordForm = ({
         ...dependent,
         Birthday: dateFormatter(dependent.Birthday),
       };
+  const educinfoInitialState = !educinfo
+    ? {
+        Institution_Name: "",
+        Address: "",
+        Level: "",
+        Degree: "",
+        yrStart: "",
+        yrGraduated: "",
+        Field_of_Study: "",
+        Major: "",
+      }
+    : educinfo;
 
   const inputRegExpTest = (inputValue = "", REGEX = new RegExp()) => {
     const isMatch = REGEX.test(inputValue);
@@ -115,6 +126,7 @@ const useRecordForm = ({
     return "";
   };
 
+  /* REDUCER FUNCTIONS */
   const geninfoReducer = (state, action) => {
     switch (action.type) {
       case "employee_id": {
@@ -249,7 +261,6 @@ const useRecordForm = ({
       }
     }
   };
-
   const personalinfoReducer = (state, action) => {
     switch (action.type) {
       case "birthday": {
@@ -345,7 +356,6 @@ const useRecordForm = ({
       }
     }
   };
-
   const dependentinfoReducer = (state, action) => {
     switch (action.type) {
       case "names": {
@@ -375,20 +385,73 @@ const useRecordForm = ({
       }
     }
   };
+  const educinfoReducer = (state, action) => {
+    switch (action.type) {
+      case "institution_name": {
+        return {
+          ...state,
+          Institution_Name: inputRegExpTest(
+            action.Institution_Name,
+            ALPHA_REGEX
+          ),
+        };
+      }
+      case "address": {
+        return { ...state, Address: action.Address };
+      }
+      case "level": {
+        return { ...state, Level: action.Level };
+      }
+      case "degree": {
+        return { ...state, Degree: action.Degree };
+      }
+      case "yr_start": {
+        return {
+          ...state,
+          yrStart: inputRegExpTest(action.yrStart, NUMBER_REGEX),
+        };
+      }
+      case "yr_graduated": {
+        return {
+          ...state,
+          yrGraduated: inputRegExpTest(action.yrGraduated, NUMBER_REGEX),
+        };
+      }
+      case "field_of_study": {
+        return {
+          ...state,
+          Field_of_Study: inputRegExpTest(action.Field_of_Study, ALPHA_REGEX),
+        };
+      }
+      case "major": {
+        return {
+          ...state,
+          Major: inputRegExpTest(action.Major, ALPHA_REGEX),
+        };
+      }
 
+      default: {
+        throw Error("Unknown action: " + action.type);
+      }
+    }
+  };
+
+  /* REDUCER HOOKS */
   const [genState, genDispatch] = useReducer(
     geninfoReducer,
     geninfoInitialState
   );
-
   const [persState, persDispatch] = useReducer(
     personalinfoReducer,
     personalinfoInitialState
   );
-
   const [depState, depDispatch] = useReducer(
     dependentinfoReducer,
     dependentinfoInitialState
+  );
+  const [educState, educDispatch] = useReducer(
+    educinfoReducer,
+    educinfoInitialState
   );
 
   return {
@@ -398,6 +461,8 @@ const useRecordForm = ({
     persDispatch,
     depState,
     depDispatch,
+    educState,
+    educDispatch,
   };
 };
 

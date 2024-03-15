@@ -11,7 +11,6 @@ import {
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPersonCirclePlus } from "@fortawesome/free-solid-svg-icons";
-import { format, parse } from "date-fns";
 import { useAddDependentMutation } from "./recordsApiSlice";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
 import { toast } from "react-toastify";
@@ -22,13 +21,6 @@ import useRecordForm from "../../hooks/useRecordForm";
 
 const DependentsList = ({ dependents, employeeId }) => {
   const { isOutletProcessor, branch } = useAuth();
-
-  /* const [deps, setDeps] = useState([]);
-
-  useEffect(() => {
-    setDeps(dependents);
-    // eslint-disable-next-line
-  }, []); */
 
   // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
@@ -41,32 +33,17 @@ const DependentsList = ({ dependents, employeeId }) => {
 
   /* VARIABLES */
   const { depState, depDispatch } = useRecordForm({});
-  const [names, setNames] = useState("");
-  const [dep, setDep] = useState("");
-  const [birthday, setBirthday] = useState("");
-  const [status, setStatus] = useState("");
-  const [relationship, setRelationship] = useState("");
-  const [covered, setCovered] = useState("");
-
-  /* DATE REVERT */
-  const dateRevert = (dateString, formatString) => {
-    return format(parse(dateString, "yyyy-MM-dd", new Date()), formatString);
-  };
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
     e.preventDefault();
 
     const form = e.currentTarget;
-    // Revert dates
-    //const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
 
     let dependentData = { EmployeeID: employeeId, ...depState };
 
     if (form.checkValidity() && !isLoading) {
       await addDependent(dependentData);
-
-      /* setDeps((prev) => [...prev, dependentData]); */
 
       if (isOutletProcessor) {
         await sendEmail(
@@ -127,16 +104,12 @@ const DependentsList = ({ dependents, employeeId }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setNames("");
-      setDep("");
-      setBirthday("");
-      setStatus("");
-      setRelationship("");
-      setCovered("");
       setShowModal(false);
       setValidated(false);
 
       toast.success("Dependent successfully addded!");
+
+      window.location.reload();
     }
   }, [isSuccess]);
 

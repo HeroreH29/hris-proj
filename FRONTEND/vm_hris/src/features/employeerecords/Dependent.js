@@ -1,6 +1,6 @@
 import React, { useState, memo, useEffect } from "react";
 import { Button, Modal, Form, Col, Row } from "react-bootstrap";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { STATUS, RELATIONSHIP, COVERED } from "../../config/depOptions";
 import {
   useUpdateDependentMutation,
@@ -29,12 +29,6 @@ const Dependent = ({
     // eslint-disable-next-line
     { isSuccess: isDelSuccess, isError: isDelError },
   ] = useDeleteDependentMutation();
-
-  // Parse and format the birthday to make it editable through date input
-  /* const parsFormBD = format(
-    parse(dependent?.Birthday, "M/d/yyyy", new Date()),
-    "yyyy-MM-dd"
-  ); */
 
   /* VARIABLES */
   const { depState, depDispatch } = useRecordForm({ dependent });
@@ -72,7 +66,9 @@ const Dependent = ({
       isSuccess && toast.info("Dependent information updated!");
       isDelSuccess && toast.info("Dependent successfully deleted!");
 
-      navigate(`/employeerecords/${dependent?.EmployeeID}`);
+      //navigate(`/employeerecords/${dependent?.EmployeeID}`);
+
+      window.location.reload();
     }
   }, [isSuccess, isDelSuccess, navigate, dependent?.EmployeeID]);
 

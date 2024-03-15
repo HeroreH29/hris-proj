@@ -7,6 +7,7 @@ import {
 import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import useRecordForm from "../../hooks/useRecordForm";
 
 const EducInfo = ({
   educinfo,
@@ -33,35 +34,26 @@ const EducInfo = ({
   ] = useDeleteEducinfoMutation();
 
   /* VARIABLES */
-  const [educInfoJson, setEducInfoJson] = useState({
-    Institution_Name: educinfo?.Institution_Name,
-    Address: educinfo?.Address,
-    Level: educinfo?.Level,
-    Degree: educinfo?.Degree,
-    yrStart: educinfo?.yrStart,
-    yrGraduated: educinfo?.yrGraduated,
-    Field_of_Study: educinfo?.Field_of_Study,
-    Major: educinfo?.Major,
-    id: educinfo?.id,
-    EmployeeID: educinfo?.EmployeeID,
-  });
+  const { educState, educDispatch } = useRecordForm({ educinfo });
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
     e.preventDefault();
 
+    const { __v, _id, ...others } = educState;
+
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
-      const payload = await updateEducinfo(educInfoJson);
+      const payload = await updateEducinfo(others);
 
       if (isOutletProcessor && payload) {
         await sendEmail(
           generateEmailMsg(
             branch,
             `${educinfo?.EmployeeID}-EducInfo.json`,
-            educinfo?.id,
-            educInfoJson,
+            educState.id,
+            educState,
             true
           )
         );
@@ -79,7 +71,7 @@ const EducInfo = ({
 
     const isConfirmed = window.confirm(`Proceed deletion of this info?`);
     if (isConfirmed) {
-      await deleteEducinfo(educInfoJson);
+      await deleteEducinfo(educState);
     } else {
       console.log("Deletion cancelled");
     }
@@ -109,9 +101,10 @@ const EducInfo = ({
       isSuccess && toast.info("Educational attainment updated!");
       isDelSuccess && toast.info("Educational attainment deleted!");
 
-      navigate(`/employeerecords/${educinfo?.EmployeeID}`);
+      //navigate(`/employeerecords/${educState.EmployeeID}`);
+      window.location.reload();
     }
-  }, [isSuccess, navigate, educinfo?.EmployeeID, isDelSuccess]);
+  }, [isSuccess, navigate, educState.EmployeeID, isDelSuccess]);
 
   if (educinfo) {
     return (
@@ -121,10 +114,10 @@ const EducInfo = ({
             setShowModal(true);
           }}
         >
-          <td>{educInfoJson.Institution_Name}</td>
-          <td>{educInfoJson.Address}</td>
-          <td>{`${educInfoJson.Field_of_Study} | ${educInfoJson.Degree} | ${educInfoJson.Major} (${educInfoJson.Level})`}</td>
-          <td>{`${educInfoJson.yrStart} - ${educInfoJson.yrGraduated}`}</td>
+          <td>{educState.Institution_Name}</td>
+          <td>{educState.Address}</td>
+          <td>{`${educState.Field_of_Study} | ${educState.Degree} | ${educState.Major} (${educState.Level})`}</td>
+          <td>{`${educState.yrStart} - ${educState.yrGraduated}`}</td>
         </tr>
 
         {/* View edit educ info modal */}
@@ -157,12 +150,12 @@ const EducInfo = ({
                     autoFocus
                     autoComplete="off"
                     type="text"
-                    value={educInfoJson.Institution_Name}
+                    value={educState.Institution_Name}
                     onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
+                      educDispatch({
+                        type: "institution_name",
                         Institution_Name: e.target.value,
-                      }))
+                      })
                     }
                   />
                   <Form.Control.Feedback type="invalid">
@@ -175,12 +168,12 @@ const EducInfo = ({
                     required
                     autoComplete="off"
                     type="text"
-                    value={educInfoJson.Address}
+                    value={educState.Address}
                     onChange={(e) =>
-                      setEducInfoJson((prev) => ({
-                        ...prev,
+                      educDispatch({
+                        type: "address",
                         Address: e.target.value,
-                      }))
+                      })
                     }
                   />
                   <Form.Control.Feedback type="invalid">
@@ -188,7 +181,7 @@ const EducInfo = ({
                   </Form.Control.Feedback>
                 </Form.Group>
               </Row>
-              {/* Course, Degree, and Strand */}
+              {/* Course, Degree, Strand, and Level*/}
               <Row className="mb-3">
                 <Form.Group as={Col} md="auto" className="mb-3">
                   <Form.Label className="fw-semibold">
@@ -198,24 +191,24 @@ const EducInfo = ({
                     <Form.Control
                       type="text"
                       placeholder="Enter Course (Field)"
-                      value={educInfoJson.Field_of_Study}
+                      value={educState.Field_of_Study}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "field_of_study",
                           Field_of_Study: e.target.value,
-                        }))
+                        })
                       }
                     />
                     <Form.Control.Feedback type="invalid">
                       This field is required!
                     </Form.Control.Feedback>
                     <Form.Select
-                      value={educInfoJson.Degree}
+                      value={educState.Degree}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "degree",
                           Degree: e.target.value,
-                        }))
+                        })
                       }
                     >
                       {degreeOptions}
@@ -226,24 +219,24 @@ const EducInfo = ({
                     <Form.Control
                       type="text"
                       placeholder="Enter Strand (Major)"
-                      value={educInfoJson.Major}
+                      value={educState.Major}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "major",
                           Major: e.target.value,
-                        }))
+                        })
                       }
                     />
                     <Form.Control.Feedback type="invalid">
                       This field is required!
                     </Form.Control.Feedback>
                     <Form.Select
-                      value={educInfoJson.Level}
+                      value={educState.Level}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "level",
                           Level: e.target.value,
-                        }))
+                        })
                       }
                     >
                       {levelOptions}
@@ -259,12 +252,12 @@ const EducInfo = ({
                     <Form.Control
                       type="number"
                       placeholder="Year Started"
-                      value={educInfoJson.yrStart}
+                      value={educState.yrStart}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "yr_start",
                           yrStart: e.target.value,
-                        }))
+                        })
                       }
                     />
                     <Form.Control.Feedback type="invalid">
@@ -273,12 +266,12 @@ const EducInfo = ({
                     <Form.Control
                       type="number"
                       placeholder="Year Graduated"
-                      value={educInfoJson.yrGraduated}
+                      value={educState.yrGraduated}
                       onChange={(e) =>
-                        setEducInfoJson((prev) => ({
-                          ...prev,
+                        educDispatch({
+                          type: "yr_graduated",
                           yrGraduated: e.target.value,
-                        }))
+                        })
                       }
                     />
                     <Form.Control.Feedback type="invalid">
@@ -287,6 +280,7 @@ const EducInfo = ({
                   </InputGroup>
                 </Form.Group>
               </Row>
+              {/* Save and Delete buttons */}
               <Row className="mb-3 float-end">
                 <Col>
                   <Button

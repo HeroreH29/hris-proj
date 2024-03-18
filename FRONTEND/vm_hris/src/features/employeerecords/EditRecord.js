@@ -316,6 +316,7 @@ const EditRecord = () => {
                 ? personalinfo?.PresentAddress
                 : personalinfo?.Address
             );
+            element.setFontSize(fontSize - element.getText().length * 0.3);
           } else if (e === "PermanentAddress") {
             element.setText(
               personalinfo.PermanentAddress ? personalinfo.PermanentAddress : ""

@@ -25,24 +25,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
+import useTableSettings from "../../hooks/useTableSettings";
+import AttendanceModal from "../../modals/AttendanceModal";
+import getDatesInBetween from "./getDatesInBetween";
+import useAttModalSettings from "../../hooks/useAttModalSettings";
 
 const Attendances = () => {
-  const { isOutletProcessor, branch } = useAuth();
+  const { isOutletProcessor } = useAuth();
   useTitle("Attendances | Via Mare HRIS");
+
+  const { tableState, tableDispatch } = useTableSettings();
+  const { attModalState, attModalDispatch } = useAttModalSettings();
 
   const [showModal, setShowModal] = useState(false);
   const [validated, setValidated] = useState(false);
 
   const [attList, setAttList] = useState([]);
   const [attlogData, setAttlogData] = useState(undefined);
-
-  const [startSlice, setStartSlice] = useState(0);
-  const [endSlice, setEndSlice] = useState(20);
-
-  const [outletFilter, setOutletFilter] = useState(
-    isOutletProcessor ? branch : ""
-  );
-  const [empTypeFilter, setEmpTypeFilter] = useState("");
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -141,8 +140,7 @@ const Attendances = () => {
 
   useEffect(() => {
     if (addattError || updateattError) {
-      console.log(addatterr);
-      console.log(updateatterr);
+      toast.error(addatterr ?? updateatterr);
     }
   }, [addattError, addatterr, updateattError, updateatterr]);
 
@@ -198,56 +196,15 @@ const Attendances = () => {
     }
   };
 
-  const filteredList = attList?.filter((att) => {
-    let matches = true;
-
-    if (outletFilter !== "") {
-      matches = matches && att?.outlet === outletFilter;
-    }
-
-    if (empTypeFilter !== "") {
-      matches = matches && att?.empType === empTypeFilter;
-    }
-
-    return matches;
-  });
-
-  const tableContent = filteredList
-    ?.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    })
-    .slice(startSlice, endSlice)
-    .map((att) => (
-      <Attendance key={att.bioId} att={att} attlogData={attlogData} />
-    ));
-
   const handleNextPage = () => {
-    setStartSlice((prev) => prev + 20);
-    setEndSlice((prev) => prev + 20);
+    tableDispatch({ type: "slice_inc" });
   };
 
   const handlePrevPage = () => {
-    setStartSlice((prev) => prev - 20);
-    setEndSlice((prev) => prev - 20);
+    tableDispatch({ type: "slice_dec" });
   };
 
-  // Generation of dates for attendance printing
-  const GetDatesInBetween = (date1, date2) => {
-    const dateFrom = new Date(date1);
-    const dateTo = new Date(date2);
-
-    const dates = [];
-    let currentDate = new Date(dateFrom);
-
-    while (currentDate <= dateTo) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  };
-
-  const processAttData = async (att) => {
+  const ProcessAttData = async (att) => {
     const tempAttData = [];
 
     try {
@@ -319,7 +276,7 @@ const Attendances = () => {
           }
         });
     } catch (error) {
-      console.error(`processAttData Error: ${error}`);
+      console.error(`ProcessAttData Error: ${error}`);
     }
 
     // For filtering attendance (if date range has been set by user)
@@ -346,12 +303,12 @@ const Attendances = () => {
       )
       .map((id) => geninfos.entities[id])[0];
 
-    const generatedPdf = await generatePdf(geninfo, filteredAtt);
+    const generatedPdf = await GeneratePDF(geninfo, filteredAtt);
 
     return generatedPdf;
   };
 
-  const generatePdf = async (geninfo, filteredAtt) => {
+  const GeneratePDF = async (geninfo, filteredAtt) => {
     let filename;
 
     // Determine if the employee type is regular/probationary or casual to change which document to pull
@@ -428,7 +385,7 @@ const Attendances = () => {
       );
 
       // Copy of dates array returned from GetDatesInBetween()
-      const dateArr = GetDatesInBetween(startDate, endDate);
+      const dateArr = getDatesInBetween(startDate, endDate);
 
       // Check if document requested is appropriate based on employee type and length of dateArr
       if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
@@ -531,7 +488,7 @@ const Attendances = () => {
       if (filteredList && filteredList.length > 0) {
         await Promise.all(
           filteredList.map(async (att) => {
-            const generatedPdf = await processAttData(att);
+            const generatedPdf = await ProcessAttData(att);
             generatedPdfs.push(generatedPdf);
           })
         );
@@ -564,8 +521,32 @@ const Attendances = () => {
     setValidated(true);
   };
 
+  const filteredList = attList?.filter((att) => {
+    let matches = true;
+
+    if (tableState.outletFilter !== "") {
+      matches = matches && att?.outlet === tableState.outletFilter;
+    }
+
+    if (tableState.empTypeFilter !== "") {
+      matches = matches && att?.empType === tableState.empTypeFilter;
+    }
+
+    return matches;
+  });
+
+  const tableContent = filteredList
+    ?.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    })
+    .slice(tableState.sliceStart, tableState.sliceEnd)
+    .map((att) => (
+      <Attendance key={att.bioId} att={att} attlogData={attlogData} />
+    ));
+
   return (
     <Container>
+      {/* Title and attendance load button */}
       <Row>
         <Col>
           <h3>Attendances</h3>
@@ -580,6 +561,7 @@ const Attendances = () => {
           </Button>
         </Col>
       </Row>
+      {/* File upload area */}
       <Row className="p-2">
         <Form.Group className="mb-3">
           <Form.Label>Upload attlog file here:</Form.Label>
@@ -589,6 +571,7 @@ const Attendances = () => {
           />
         </Form.Group>
       </Row>
+      {/* Table */}
       <Row className="p-1">
         <Table
           bordered
@@ -606,17 +589,19 @@ const Attendances = () => {
           <tbody>{tableContent}</tbody>
         </Table>
       </Row>
+      {/* Outlet and employee type filter */}
       <Row className="p-2">
         <Form.Group as={Col}>
           <Form.Select
             disabled={attList?.length === 0 || isOutletProcessor}
             onChange={(e) => {
-              setOutletFilter(e.target.value);
-              setStartSlice(0);
-              setEndSlice(20);
+              tableDispatch({
+                type: "outlet_filter",
+                outletFilter: e.target.value,
+              });
             }}
             placeholder="Select outlet..."
-            value={outletFilter}
+            value={tableState.outletFilter}
           >
             {outletOptions}
           </Form.Select>
@@ -625,24 +610,25 @@ const Attendances = () => {
           <Form.Select
             disabled={attList?.length === 0}
             onChange={(e) => {
-              setEmpTypeFilter(e.target.value);
-              setStartSlice(0);
-              setEndSlice(20);
+              tableDispatch({
+                type: "emptype_filter",
+                empTypeFilter: e.target.value,
+              });
             }}
             placeholder="Select type..."
-            value={empTypeFilter}
+            value={tableState.empTypeFilter}
           >
             {empTypeOptions}
           </Form.Select>
         </Form.Group>
-        {outletFilter && empTypeFilter && (
+        {tableState.outletFilter && tableState.empTypeFilter && (
           <Col md="auto">
             <Button
               className="float-end"
               variant="outline-success"
-              onClick={() => setShowModal(true)}
+              onClick={() => attModalDispatch({ type: "show_modal" })}
             >
-              {`Print ${outletFilter} (${empTypeFilter}) -> `}
+              {`Print ${tableState.outletFilter} (${tableState.empTypeFilter}) -> `}
               <FontAwesomeIcon icon={faPrint} />
             </Button>
           </Col>
@@ -651,14 +637,14 @@ const Attendances = () => {
           <Button
             variant="outline-primary float-end"
             onClick={handleNextPage}
-            disabled={endSlice >= filteredList?.length}
+            disabled={tableState.sliceEnd >= filteredList?.length}
           >
             Next
           </Button>
           <Button
             variant="outline-primary float-end me-3"
             onClick={handlePrevPage}
-            disabled={startSlice === 0}
+            disabled={tableState.sliceStart === 0}
           >
             Prev
           </Button>
@@ -666,66 +652,18 @@ const Attendances = () => {
       </Row>
 
       {/* Branch attendance date range printing modal */}
-      <Modal
-        show={showModal}
-        onHide={() => {
-          setShowModal(false);
-          setStartDate("");
-          setEndDate("");
-          setValidated(false);
-        }}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>{`Print ${outletFilter} (${empTypeFilter}) Attendance`}</Modal.Title>
-        </Modal.Header>
-        <Form
-          noValidate
-          validated={validated}
-          onSubmit={handlePrintBranchAttendance}
-        >
-          <Modal.Body>
-            <Form.Group className="mb-2" as={Col}>
-              <Form.Label className="fw-semibold">Date from:</Form.Label>
-              <Form.Control
-                type="date"
-                required
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">
-                Choose a date
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group className="mb-2" as={Col}>
-              <Form.Label className="fw-semibold">Date until:</Form.Label>
-              <Form.Control
-                type="date"
-                required
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">
-                Choose a date
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="outline-warning"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="outline-success"
-              type="submit"
-              onClick={handlePrintBranchAttendance}
-            >
-              Proceed
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      <AttendanceModal
+        attModalState={attModalState}
+        attModalDispatch={attModalDispatch}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        setValidated={setValidated}
+        tableState={tableState}
+        validated={validated}
+        handlePrintBranchAttendance={handlePrintBranchAttendance}
+      />
     </Container>
   );
 };

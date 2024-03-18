@@ -66,8 +66,6 @@ const Dependent = ({
       isSuccess && toast.info("Dependent information updated!");
       isDelSuccess && toast.info("Dependent successfully deleted!");
 
-      //navigate(`/employeerecords/${dependent?.EmployeeID}`);
-
       window.location.reload();
     }
   }, [isSuccess, isDelSuccess, navigate, dependent?.EmployeeID]);
@@ -81,9 +79,6 @@ const Dependent = ({
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
-      // Revert dates
-      //const revertedBD = birthday ? dateRevert(birthday, "M/d/yyyy") : "";
-
       const { _id, __v, ...others } = depState;
 
       await updateDependent(others);

@@ -116,6 +116,25 @@ const useRecordForm = ({
         Major: "",
       }
     : educinfo;
+  const workinfoInitialState = !workinfo
+    ? {
+        Position_Title: "",
+        Company_Name: "",
+        JoinedFR_M: "",
+        JoinedFR_Y: 0,
+        JoinedTO_M: "",
+        JoinedTO_Y: 0,
+        Specialization: "",
+        Role: "",
+        Country: "",
+        State: "",
+        Industry: "",
+        Position: "",
+        Salary: "",
+        Work_Description: "",
+        ToPresent: 0,
+      }
+    : workinfo;
 
   const inputRegExpTest = (inputValue = "", REGEX = new RegExp()) => {
     const isMatch = REGEX.test(inputValue);
@@ -436,6 +455,107 @@ const useRecordForm = ({
     }
   };
 
+  const workinfoReducer = (state, action) => {
+    switch (action.type) {
+      case "position_title": {
+        return {
+          ...state,
+          Position_Title: inputRegExpTest(action.Position_Title, ALPHA_REGEX),
+        };
+      }
+      case "company_name": {
+        return {
+          ...state,
+          Company_Name: inputRegExpTest(action.Company_Name, ALPHA_REGEX),
+        };
+      }
+      case "joinedFR_M": {
+        return {
+          ...state,
+          JoinedFR_M: inputRegExpTest(action.JoinedFR_M, ALPHA_REGEX),
+        };
+      }
+      case "joinedFR_Y": {
+        return {
+          ...state,
+          JoinedFR_Y: inputRegExpTest(action.JoinedFR_Y, NUMBER_REGEX),
+        };
+      }
+      case "joinedTO_M": {
+        return {
+          ...state,
+          JoinedTO_M: inputRegExpTest(action.JoinedTO_M, ALPHA_REGEX),
+        };
+      }
+      case "joinedTO_Y": {
+        return {
+          ...state,
+          JoinedTO_Y: inputRegExpTest(action.JoinedTO_Y, NUMBER_REGEX),
+        };
+      }
+      case "specialization": {
+        return {
+          ...state,
+          Specialization: inputRegExpTest(action.Specialization, ALPHA_REGEX),
+        };
+      }
+      case "role": {
+        return {
+          ...state,
+          Role: inputRegExpTest(action.Role, ALPHA_REGEX),
+        };
+      }
+      case "country": {
+        return {
+          ...state,
+          Country: inputRegExpTest(action.Country, ALPHA_REGEX),
+        };
+      }
+      case "state": {
+        return {
+          ...state,
+          State: action.State,
+        };
+      }
+      case "industry": {
+        return {
+          ...state,
+          Industry: inputRegExpTest(action.Industry, ALPHA_REGEX),
+        };
+      }
+      case "position": {
+        return {
+          ...state,
+          Position: inputRegExpTest(action.Position, ALPHA_REGEX),
+        };
+      }
+      case "salary": {
+        return {
+          ...state,
+          Salary: inputRegExpTest(action.Salary, ALPHANUM_REGEX),
+        };
+      }
+      case "work_description": {
+        return {
+          ...state,
+          Work_Description: inputRegExpTest(
+            action.Work_Description,
+            ALPHA_REGEX
+          ),
+        };
+      }
+      case "toPresent": {
+        return {
+          ...state,
+          ToPresent: inputRegExpTest(action.ToPresent ? 1 : 0, NUMBER_REGEX),
+        };
+      }
+
+      default:
+        throw Error("Unknown action: " + action.type);
+    }
+  };
+
   /* REDUCER HOOKS */
   const [genState, genDispatch] = useReducer(
     geninfoReducer,
@@ -453,6 +573,10 @@ const useRecordForm = ({
     educinfoReducer,
     educinfoInitialState
   );
+  const [workState, workDispatch] = useReducer(
+    workinfoReducer,
+    workinfoInitialState
+  );
 
   return {
     genState,
@@ -463,6 +587,8 @@ const useRecordForm = ({
     depDispatch,
     educState,
     educDispatch,
+    workState,
+    workDispatch,
   };
 };
 

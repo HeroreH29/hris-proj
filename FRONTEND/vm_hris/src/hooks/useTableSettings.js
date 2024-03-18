@@ -11,6 +11,7 @@ const useTableSettings = () => {
     searchValue: "",
     outletFilter: branch,
     statusFilter: "Y",
+    empTypeFilter: "",
   };
 
   const reducer = (state, action) => {
@@ -56,6 +57,14 @@ const useTableSettings = () => {
           sliceEnd: 10,
         };
       }
+      case "emptype_filter": {
+        return {
+          ...state,
+          empTypeFilter: action.empTypeFilter,
+          sliceStart: 0,
+          sliceEnd: 10,
+        };
+      }
 
       default: {
         throw Error("Unknown action: " + action.type);
@@ -63,9 +72,9 @@ const useTableSettings = () => {
     }
   };
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [tableState, tableDispatch] = useReducer(reducer, initialState);
 
-  return { state, dispatch };
+  return { tableState, tableDispatch };
 };
 
 export default useTableSettings;

@@ -9,8 +9,14 @@ import {
 } from "../employeerecords/recordsApiSlice";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { toast } from "react-toastify";
+import AttendanceModal from "../../modals/AttendanceModal";
+import getDatesInBetween from "./getDatesInBetween";
+import useAttModalSettings from "../../hooks/useAttModalSettings";
+import useTableSettings from "../../hooks/useTableSettings";
 
 const Attendance = ({ att, attlogData }) => {
+  const { state, dispatch } = useAttModalSettings();
+  const { state: tableState, dispatch: tableDispatch } = useTableSettings();
   const [dateTo, setDateTo] = useState("");
   const [dateFrom, setDateFrom] = useState("");
 
@@ -34,35 +40,10 @@ const Attendance = ({ att, attlogData }) => {
 
   const [matchingAtt, setMatchingAtt] = useState([]);
 
-  const [show, setShow] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const [startSlice, setStartSlice] = useState(0);
   const [endSlice, setEndSlice] = useState(10);
-
-  // Modal close event
-  const handleClose = () => {
-    setShow(false);
-    setDateFrom("");
-    setDateTo("");
-    setStartSlice(0);
-    setEndSlice(10);
-  };
-
-  // Generation of dates for attendance printing
-  const GetDatesInBetween = (date1, date2) => {
-    const dateFrom = new Date(date1);
-    const dateTo = new Date(date2);
-
-    const dates = [];
-    let currentDate = new Date(dateFrom);
-
-    while (currentDate <= dateTo) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  };
 
   // Printing attendance function
   const handlePrintAtt = async () => {
@@ -140,7 +121,7 @@ const Attendance = ({ att, attlogData }) => {
       );
 
       // Copy of dates array returned from GetDatesInBetween()
-      const dateArr = GetDatesInBetween(dateFrom, dateTo);
+      const dateArr = getDatesInBetween(dateFrom, dateTo);
 
       // Check if document requested is appropriate based on employee type and length of dateArr
       if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
@@ -341,7 +322,7 @@ const Attendance = ({ att, attlogData }) => {
       console.error(`handleShowModal Error: ${error}`);
     }
     setMatchingAtt(tempAttData);
-    setShow(true);
+    setShowModal(true);
   };
 
   // Check if attendance data is present
@@ -353,97 +334,19 @@ const Attendance = ({ att, attlogData }) => {
           <td>{att.name}</td>
         </tr>
         <>
-          <Modal show={show} onHide={handleClose} scrollable size="lg">
-            <Modal.Header closeButton>
-              {att.name}'s Attendance{" "}
-              <span className="ms-1 fw-semibold">{` (${geninfo?.EmployeeType})`}</span>{" "}
-            </Modal.Header>
-            <Modal.Body>
-              <Table striped bordered hover>
-                <caption>{`(Pick date range before proceeding in printing)`}</caption>
-                <thead>
-                  <tr className="align-middle">
-                    <th>Date</th>
-                    <th>Time-In</th>
-                    <th>Break-In</th>
-                    <th>Break-Out</th>
-                    <th>Time-Out</th>
-                  </tr>
-                </thead>
-                <tbody>{tableContent}</tbody>
-                <tfoot>
-                  <tr>
-                    <td className="fw-bold" colSpan={1}>
-                      Filter by Date:
-                    </td>
-                    <td colSpan={2}>
-                      <Form>
-                        <Form.Group>
-                          <Form.Label className="fw-bold">Date From</Form.Label>
-                          <Form.Control
-                            type="date"
-                            value={dateFrom}
-                            onChange={(e) => {
-                              setDateFrom(e.target.value);
-                              setStartSlice(0);
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </td>
-                    <td colSpan={2}>
-                      <Form>
-                        <Form.Group>
-                          <Form.Label className="fw-bold">Date To</Form.Label>
-                          <Form.Control
-                            type="date"
-                            value={dateTo}
-                            onChange={(e) => {
-                              setDateTo(e.target.value);
-                              setEndSlice(10);
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </td>
-                  </tr>
-                </tfoot>
-              </Table>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="outline-primary"
-                onClick={handlePrintAtt}
-                disabled={dateTo === "" || dateFrom === ""}
-              >
-                <FontAwesomeIcon icon={faPrint} />
-              </Button>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setStartSlice((prev) => prev - 10);
-                  setEndSlice((prev) => prev - 10);
-                }}
-                disabled={startSlice === 0}
-              >
-                Prev
-              </Button>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setStartSlice((prev) => prev + 10);
-                  setEndSlice((prev) => prev + 10);
-                }}
-                disabled={
-                  filteredAtt?.length
-                    ? endSlice >= filteredAtt?.length
-                    : endSlice >= matchingAtt?.length
-                }
-              >
-                Next
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <AttendanceModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+            attModalState={state}
+            attModalDispatch={dispatch}
+            tableContent={tableContent}
+            handlePrintAtt={handlePrintAtt}
+            tableState={tableState}
+            tableDispatch={tableDispatch}
+            filteredAtt={filteredAtt}
+            matchingAtt={matchingAtt}
+            att={att}
+          />
         </>
       </>
     );

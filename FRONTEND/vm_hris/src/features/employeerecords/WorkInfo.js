@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
-import {
-  Button,
-  Modal,
-  Form,
-  Col,
-  Row,
-  InputGroup,
-  Dropdown,
-  DropdownButton,
-} from "react-bootstrap";
 import {
   useDeleteWorkinfoMutation,
   useUpdateWorkinfoMutation,
 } from "./recordsApiSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+import useRecordForm from "../../hooks/useRecordForm";
+import WorkInfoModal from "../../modals/WorkInfoModal";
 const WorkInfo = ({
   workinfo,
   branch,
@@ -43,23 +33,7 @@ const WorkInfo = ({
   ] = useDeleteWorkinfoMutation();
 
   /* VARIABLES */
-  const [positionTitle, setPositionTitle] = useState(workinfo?.Position_Title);
-  const [companyName, setCompanyName] = useState(workinfo?.Company_Name);
-  const [joinedFRM, setJoinedFRM] = useState(workinfo?.JoinedFR_M);
-  const [joinedFRY, setJoinedFRY] = useState(workinfo?.JoinedFR_Y);
-  const [joinedTOM, setJoinedTOM] = useState(workinfo?.JoinedTO_M);
-  const [joinedTOY, setJoinedTOY] = useState(workinfo?.JoinedTO_Y);
-  const [specialization, setSpecialization] = useState(
-    workinfo?.Specialization
-  );
-  const [role, setRole] = useState(workinfo?.Role);
-  const [country, setCountry] = useState(workinfo?.Country);
-  const [region, setRegion] = useState(workinfo?.State); // aka State
-  const [industry, setIndustry] = useState(workinfo?.Industry);
-  const [position, setPosition] = useState(workinfo?.Position);
-  const [salary, setSalary] = useState(workinfo?.Salary);
-  const [workDesc, setWorkDesc] = useState(workinfo?.Work_Description);
-  const [toPresent, setToPresent] = useState(workinfo?.ToPresent);
+  const { workState, workDispatch } = useRecordForm({ workinfo });
 
   /* SUBMIT FUNCTION */
   const onSaveInfoClicked = async (e) => {
@@ -67,25 +41,7 @@ const WorkInfo = ({
 
     const form = e.currentTarget;
 
-    let workInfoData = {
-      id: workinfo.id,
-      EmployeeID: workinfo.EmployeeID,
-      Position_Title: positionTitle,
-      Company_Name: companyName,
-      JoinedFR_M: joinedFRM,
-      JoinedFR_Y: joinedFRY,
-      JoinedTO_M: joinedTOM,
-      JoinedTO_Y: joinedTOY,
-      Specialization: specialization,
-      Role: role,
-      Country: country,
-      State: region,
-      Industry: industry,
-      Position: position,
-      Salary: salary,
-      Work_Description: workDesc,
-      ToPresent: toPresent,
-    };
+    let workInfoData = workState;
 
     if (form.checkValidity() && !isLoading) {
       await updateWorkinfo(workInfoData);
@@ -94,8 +50,8 @@ const WorkInfo = ({
         await sendEmail(
           generateEmailMsg(
             branch,
-            `${workinfo.EmployeeID}-WorkInfo.json`,
-            workinfo.id,
+            `${workState.EmployeeID}-WorkInfo.json`,
+            workState.id,
             workInfoData,
             true
           )
@@ -114,7 +70,7 @@ const WorkInfo = ({
 
     const isConfirmed = window.confirm(`Proceed deletion of this info?`);
     if (isConfirmed) {
-      await deleteWorkinfo({ id: workinfo.id });
+      await deleteWorkinfo({ id: workState.id });
     } else {
       console.log("Deletion cancelled");
     }
@@ -128,9 +84,9 @@ const WorkInfo = ({
       isSuccess && toast.info("Employment history updated!");
       isDelSuccess && toast.info("Employment history deleted!");
 
-      navigate(`/employeerecords/${workinfo?.EmployeeID}`);
+      window.location.reload();
     }
-  }, [isSuccess, isDelSuccess, navigate, workinfo?.EmployeeID]);
+  }, [isSuccess, isDelSuccess, navigate]);
 
   if (workinfo) {
     return (
@@ -140,309 +96,39 @@ const WorkInfo = ({
             setShowModal(true);
           }}
         >
-          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>
-            {positionTitle}
+          <td className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}>
+            {workState.Position_Title}
           </td>
-          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>
-            {companyName}
+          <td className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}>
+            {workState.Company_Name}
           </td>
           <td
-            className={toPresent === 1 ? "bg-success-subtle" : ""}
-          >{`${region}, ${country}`}</td>
+            className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}
+          >{`${workState.State}, ${workState.Country}`}</td>
           <td
-            className={toPresent === 1 ? "bg-success-subtle" : ""}
-          >{`${joinedFRM}, ${joinedFRY}`}</td>
-          <td className={toPresent === 1 ? "bg-success-subtle" : ""}>{`${
-            joinedTOM !== "" ? joinedTOM + "," : ""
-          } ${joinedTOY !== 0 ? joinedTOY : ""}`}</td>
+            className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}
+          >{`${workState.JoinedFR_M} ${workState.JoinedFR_Y}`}</td>
+          <td
+            className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}
+          >{`${workState.JoinedTO_M} ${
+            workState.JoinedTO_Y === 0 ? "" : workState.JoinedTO_Y
+          }`}</td>
         </tr>
 
         {/* View edit work info modal */}
-        <Modal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          size="lg"
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Work Info</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form
-              className="p-3"
-              noValidate
-              validated={validated}
-              onSubmit={onSaveInfoClicked}
-            >
-              {/* Job Title, Company Name, and Company Address */}
-              <Row className="mb-3">
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Job Title</Form.Label>
-                  <Form.Control
-                    required
-                    autoFocus
-                    autoComplete="off"
-                    type="text"
-                    value={positionTitle}
-                    onChange={(e) => setPositionTitle(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Company Name</Form.Label>
-                  <Form.Control
-                    required
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Address</Form.Label>
-                  <InputGroup>
-                    {showRegion ? (
-                      <RegionDropdown
-                        classes="dropdown-toggle show form-select"
-                        defaultOptionLabel="Select State"
-                        country={country}
-                        value={region}
-                        onChange={(e) => setRegion(e)}
-                      />
-                    ) : (
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter State"
-                        value={region}
-                        onChange={(e) => setRegion(e.target.value)}
-                      />
-                    )}
-                    <DropdownButton title="" variant="outline-secondary">
-                      <Dropdown.Item
-                        as={"option"}
-                        onClick={() => setShowRegion(false)}
-                      >
-                        Enter State
-                      </Dropdown.Item>
-                      <Dropdown.Item
-                        as={"option"}
-                        onClick={() => setShowRegion(true)}
-                      >
-                        Select State
-                      </Dropdown.Item>
-                    </DropdownButton>
-                    {showCountry ? (
-                      <CountryDropdown
-                        classes="form-select"
-                        value={country}
-                        onChange={(e) => setCountry(e)}
-                      />
-                    ) : (
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter Country"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                      />
-                    )}
-                    <DropdownButton title="" variant="outline-secondary">
-                      <Dropdown.Item
-                        as={"option"}
-                        onClick={() => setShowCountry(false)}
-                      >
-                        Enter Country
-                      </Dropdown.Item>
-                      <Dropdown.Item
-                        as={"option"}
-                        onClick={() => setShowCountry(true)}
-                      >
-                        Select Country
-                      </Dropdown.Item>
-                    </DropdownButton>
-                  </InputGroup>
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Row>
-              {/* Start, End Work, and Present Job */}
-              <Row className="mb-3">
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    Job Start Month | Year
-                  </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      required
-                      type="text"
-                      value={joinedFRM}
-                      onChange={(e) => setJoinedFRM(e.target.value)}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      This field is required!
-                    </Form.Control.Feedback>
-                    <Form.Control
-                      required
-                      type="number"
-                      value={joinedFRY}
-                      onChange={(e) => setJoinedFRY(e.target.value)}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      This field is required!
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    Job End Month | Year
-                  </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      disabled={toPresent === 1}
-                      required={toPresent !== 1}
-                      type="text"
-                      value={joinedTOM}
-                      onChange={(e) => setJoinedTOM(e.target.value)}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      This field is required!
-                    </Form.Control.Feedback>
-
-                    <Form.Control
-                      disabled={toPresent === 1}
-                      required={toPresent !== 1}
-                      type="number"
-                      value={joinedTOY}
-                      onChange={(e) => setJoinedTOY(e.target.value)}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      This field is required!
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-                <Form.Group>
-                  <Form.Check
-                    type="checkbox"
-                    label="Present Job"
-                    checked={toPresent === 1 ? true : false}
-                    onChange={(e) => setToPresent(e.target.checked ? 1 : 0)}
-                  />
-                </Form.Group>
-              </Row>
-              {/* Specialization, Role, Industry, Position Level */}
-              <Row className="mb-3">
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    Specialization
-                  </Form.Label>
-                  <Form.Control
-                    required
-                    autoComplete="off"
-                    type="text"
-                    value={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Role</Form.Label>
-                  <Form.Control
-                    required
-                    autoComplete="off"
-                    type="text"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Industry</Form.Label>
-                  <Form.Control
-                    required
-                    autoComplete="off"
-                    type="text"
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    Position Level
-                  </Form.Label>
-                  <Form.Control
-                    required
-                    autoComplete="off"
-                    type="text"
-                    value={position}
-                    onChange={(e) => setPosition(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Row>
-              {/* Salary and Work Description */}
-              <Row className="mb-3">
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">Salary</Form.Label>
-                  <Form.Control
-                    autoComplete="off"
-                    type="text"
-                    value={salary}
-                    onChange={(e) => setSalary(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="auto" className="mb-3">
-                  <Form.Label className="fw-semibold">
-                    Work Description
-                  </Form.Label>
-                  <Form.Control
-                    required
-                    autoComplete="off"
-                    as="textarea"
-                    value={workDesc}
-                    onChange={(e) => setWorkDesc(e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    This field is required!
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Row>
-              <Row className="mb-3 float-end">
-                <Col md="auto">
-                  <Button type="submit" variant="outline-success">
-                    Save Changes
-                  </Button>
-                </Col>
-                <Col md="auto">
-                  {/* Enable if dependent deletion is required */}
-                  <Button
-                    disabled
-                    type="button"
-                    onClick={onDeleteWorkInfoClicked}
-                    variant="outline-danger"
-                  >
-                    Delete Info
-                  </Button>
-                </Col>
-              </Row>
-            </Form>
-          </Modal.Body>
-        </Modal>
+        <WorkInfoModal
+          workState={workState}
+          workDispatch={workDispatch}
+          showModal={showModal}
+          setShowModal={setShowModal}
+          validated={validated}
+          onSaveInfoClicked={onSaveInfoClicked}
+          onDeleteWorkInfoClicked={onDeleteWorkInfoClicked}
+          showRegion={showRegion}
+          setShowRegion={setShowRegion}
+          showCountry={showCountry}
+          setShowCountry={setShowCountry}
+        />
       </>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Container,
   Row,
@@ -108,10 +108,6 @@ const LeavesList = () => {
   const handleSortIconChange = () => {
     tableDispatch({ type: "datesort" });
   };
-
-  const [startSlice, setStartSlice] = useState(0);
-  const [endSlice, setEndSlice] = useState(10);
-
   const handleNext = () => {
     tableDispatch({ type: "slice_inc" });
   };

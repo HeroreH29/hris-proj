@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import useTitle from "../../hooks/useTitle";
+import useUserForm from "../../hooks/useUserForm";
 
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
@@ -30,28 +31,10 @@ const EditUserForm = ({ user }) => {
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const [username, setUsername] = useState(user.username);
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastname] = useState(user.lastName);
-  const [employeeId, setEmployeeId] = useState(user.employeeId);
-
-  const [userLevel, setUserLevel] = useState(user.userLevel);
-  const [userGroup, setUserGroup] = useState(user.userGroup);
-  const [branch, setBranch] = useState(user.branch);
-  const [active, setActive] = useState(user.active);
+  const { userState, userDispatch } = useUserForm({ user });
 
   useEffect(() => {
     if (isSuccess || isDelSuccess) {
-      setUsername("");
-      setPassword("");
-      setFirstName("");
-      setLastname("");
-      setBranch("");
-      setEmployeeId("");
-      setUserLevel("");
-
       isSuccess && toast.success("User changes saved!");
       isDelSuccess && toast.success("User deleted!");
       navigate("/users");
@@ -59,16 +42,25 @@ const EditUserForm = ({ user }) => {
   }, [isSuccess, isDelSuccess, navigate]);
 
   /* HANDLERS */
-  const onUsernameChanged = (e) => setUsername(e.target.value);
-  const onPasswordChanged = (e) => setPassword(e.target.value);
-  const onFirstNameChanged = (e) => setFirstName(e.target.value);
-  const onLastnameChanged = (e) => setLastname(e.target.value);
-  const onEmployeeIdChanged = (e) => setEmployeeId(e.target.value);
+  const onUsernameChanged = (e) =>
+    userDispatch({ type: "username", username: e.target.value });
+  const onPasswordChanged = (e) =>
+    userDispatch({ type: "password", password: e.target.value });
+  const onShowPassword = () => userDispatch({ type: "showpass" });
+  const onFirstNameChanged = (e) =>
+    userDispatch({ type: "firstName", firstName: e.target.value });
+  const onLastnameChanged = (e) =>
+    userDispatch({ type: "lastName", lastName: e.target.value });
+  const onEmployeeIdChanged = (e) =>
+    userDispatch({ type: "employeeId", employeeId: e.target.value });
 
-  const onUserLevelChanged = (e) => setUserLevel(e.target.value);
-  const onUserGroupChanged = (e) => setUserGroup(e.target.value);
-  const onBranchChanged = (e) => setBranch(e.target.value);
-  const onActiveChanged = () => setActive((prev) => !prev);
+  const onUserLevelChanged = (e) =>
+    userDispatch({ type: "userLevel", userLevel: e.target.value });
+  const onUserGroupChanged = (e) =>
+    userDispatch({ type: "userGroup", userGroup: e.target.value });
+  const onBranchChanged = (e) =>
+    userDispatch({ type: "branch", branch: e.target.value });
+  const onActiveChanged = () => userDispatch({ type: "active" });
 
   /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
@@ -76,33 +68,17 @@ const EditUserForm = ({ user }) => {
 
     const form = e.currentTarget;
 
+    const { __v, _id, password, ...others } = userState;
+
     if (form.checkValidity() === true && !isLoading) {
       if (password) {
         // If password is included in the form, update the password
         await updateUser({
-          id: user.id,
-          username,
           password,
-          firstName,
-          lastName,
-          branch,
-          employeeId,
-          userLevel,
-          userGroup,
-          active,
+          ...others,
         });
       } else {
-        await updateUser({
-          id: user.id,
-          username,
-          firstName,
-          lastName,
-          branch,
-          employeeId,
-          userLevel,
-          userGroup,
-          active,
-        });
+        await updateUser(others);
       }
     } else {
       e.stopPropagation();
@@ -114,10 +90,12 @@ const EditUserForm = ({ user }) => {
 
   /* DELETE FUNCTION */
   const onDeleteUserClicked = async (e) => {
-    if (!active) {
-      const isConfirmed = window.confirm(`Proceed deletion of "${username}"?`);
+    if (!userState.active) {
+      const isConfirmed = window.confirm(
+        `Proceed deletion of "${userState.username}"?`
+      );
       if (isConfirmed) {
-        await deleteUser({ id: user.id, active: active });
+        await deleteUser({ id: user.id });
       } else {
         console.log("Deletion cancelled");
       }
@@ -184,7 +162,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="Username"
-                value={username}
+                value={userState.username}
                 onChange={onUsernameChanged}
               />
               <Form.Control.Feedback type="invalid">
@@ -196,17 +174,16 @@ const EditUserForm = ({ user }) => {
               <small>{` [empty field = no change]`}</small>
               <InputGroup>
                 <Form.Control
-                  type={!showPass ? "password" : "text"}
+                  type={!userState.showPass ? "password" : "text"}
                   autoComplete="off"
                   pattern={PWD_REGEX}
                   placeholder="Password"
                   onChange={onPasswordChanged}
                 />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowPass(!showPass)}
-                >
-                  <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
+                <Button variant="outline-secondary" onClick={onShowPassword}>
+                  <FontAwesomeIcon
+                    icon={!userState.showPass ? faEye : faEyeSlash}
+                  />
                 </Button>
                 <Form.Control.Feedback type="invalid">
                   Minimum of 8 characters. At least - 1 lowercase letter, 1
@@ -225,7 +202,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 placeholder="First Name"
                 disabled
-                value={firstName}
+                value={userState.firstName}
                 onChange={onFirstNameChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
@@ -238,7 +215,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 placeholder="Last Name"
                 disabled
-                value={lastName}
+                value={userState.lastName}
                 onChange={onLastnameChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
@@ -251,7 +228,7 @@ const EditUserForm = ({ user }) => {
               <Form.Select
                 disabled
                 required
-                value={branch}
+                value={userState.branch}
                 onChange={onBranchChanged}
               >
                 {branchOptions}
@@ -264,7 +241,7 @@ const EditUserForm = ({ user }) => {
               <Form.Label className="fw-semibold">User Group</Form.Label>
               <Form.Select
                 required
-                value={userGroup}
+                value={userState.userGroup}
                 onChange={onUserGroupChanged}
               >
                 {userGroupOptions}
@@ -284,7 +261,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="Employee ID"
-                value={employeeId}
+                value={userState.employeeId}
                 onChange={onEmployeeIdChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
@@ -293,7 +270,7 @@ const EditUserForm = ({ user }) => {
               <Form.Label className="fw-semibold">User Level</Form.Label>
               <Form.Select
                 required
-                value={userLevel}
+                value={userState.userLevel}
                 onChange={onUserLevelChanged}
               >
                 {userLevelOptions}
@@ -309,8 +286,8 @@ const EditUserForm = ({ user }) => {
               <Form.Label className="fw-semibold">User Status</Form.Label>
               <Form.Check
                 type="switch"
-                label={active ? "Active" : "Inactive"}
-                checked={active}
+                label={userState.active ? "Active" : "Inactive"}
+                checked={userState.active}
                 onChange={onActiveChanged}
               />
             </Form.Group>

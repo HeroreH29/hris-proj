@@ -170,7 +170,6 @@ const NewLeaveForm = () => {
 
   useEffect(() => {
     if (addSuccess) {
-      handleResetFields();
       toast.success("Leave filed!");
       navigate("/leaves");
     }

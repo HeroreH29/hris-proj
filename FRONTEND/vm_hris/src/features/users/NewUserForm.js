@@ -21,8 +21,9 @@ import {
 import { toast } from "react-toastify";
 import useTitle from "../../hooks/useTitle";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
+import useUserForm from "../../hooks/useUserForm";
 
-const USER_REGEX = "[A-z0-9.,_-]{3,20}";
+//const USER_REGEX = "[A-z0-9.,_-]{3,20}";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const NewUserForm = () => {
@@ -31,73 +32,52 @@ const NewUserForm = () => {
   const [addNewUser, { isLoading, isSuccess, isError, error }] =
     useAddNewUserMutation();
 
-  const {
-    data: geninfos,
-    isSuccess: genSuccess,
-    isLoading: genLoading,
-  } = useGetGeninfosQuery();
+  const { data: geninfos, isSuccess: genSuccess } = useGetGeninfosQuery();
 
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastname] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
+  const { userState, userDispatch } = useUserForm({});
 
-  const [userLevel, setUserLevel] = useState("");
-  const [userGroup, setUserGroup] = useState("");
-  const [branch, setBranch] = useState("");
-
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState("");
   const [selectedResult, setSelectedResult] = useState("");
 
   useEffect(() => {
     if (isSuccess) {
-      setUsername("");
-      setPassword("");
-      setFirstName("");
-      setLastname("");
-      setBranch("");
-      setEmployeeId("");
-      setUserLevel("");
-      setUserGroup("");
-
       toast.success("New user added!");
       navigate("/users");
     }
   }, [isSuccess, navigate]);
 
   /* HANDLERS */
-  const onUsernameChanged = (e) => setUsername(e.target.value);
-  const onPasswordChanged = (e) => setPassword(e.target.value);
-  const onFirstNameChanged = (e) => setFirstName(e.target.value);
-  const onLastnameChanged = (e) => setLastname(e.target.value);
-  const onEmployeeIdChanged = (e) => setEmployeeId(e.target.value);
+  const onUsernameChanged = (e) =>
+    userDispatch({ type: "username", username: e.target.value });
+  const onPasswordChanged = (e) =>
+    userDispatch({ type: "password", password: e.target.value });
+  const onShowPassword = () => userDispatch({ type: "showpass" });
+  const onFirstNameChanged = (e) =>
+    userDispatch({ type: "firstName", firstName: e.target.value });
+  const onLastnameChanged = (e) =>
+    userDispatch({ type: "lastName", lastName: e.target.value });
+  const onEmployeeIdChanged = (e) =>
+    userDispatch({ type: "employeeId", employeeId: e.target.value });
 
-  const onUserLevelChanged = (e) => setUserLevel(e.target.value);
-  const onBranchChanged = (e) => setBranch(e.target.value);
-  const onUserGroupChanged = (e) => setUserGroup(e.target.value);
+  const onUserLevelChanged = (e) =>
+    userDispatch({ type: "userLevel", userLevel: e.target.value });
+  const onUserGroupChanged = (e) =>
+    userDispatch({ type: "userGroup", userGroup: e.target.value });
+  const onBranchChanged = (e) =>
+    userDispatch({ type: "branch", branch: e.target.value });
 
   /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
     e.preventDefault();
 
     const form = e.currentTarget;
+    const { showPass, active, ...others } = userState;
 
     if (form.checkValidity() === true && !isLoading) {
-      await addNewUser({
-        username,
-        password,
-        firstName,
-        lastName,
-        branch,
-        employeeId,
-        userLevel,
-        userGroup,
-      });
+      await addNewUser(others);
     } else {
       e.stopPropagation();
     }
@@ -158,13 +138,16 @@ const NewUserForm = () => {
   };
 
   const searchResultClick = (employee) => {
-    setSearchResults([]);
+    setSearchResults("");
     setSelectedResult(`${employee.FirstName} ${employee.LastName}`);
     if (genSuccess) {
-      setFirstName(employee.FirstName);
-      setLastname(employee.LastName);
-      setBranch(employee.AssignedOutlet);
-      setEmployeeId(employee.EmployeeID);
+      userDispatch({
+        type: "employeeSelect",
+        firstName: employee.FirstName,
+        lastName: employee.LastName,
+        branch: employee.AssignedOutlet,
+        employeeId: employee.EmployeeID,
+      });
     }
   };
 
@@ -206,17 +189,20 @@ const NewUserForm = () => {
                 <FontAwesomeIcon icon={faSearch} />
               </Button>
             </InputGroup>
-            <ListGroup>
-              {searchResults.map((employee) => (
-                <ListGroup.Item
-                  action
-                  key={employee.EmployeeID}
-                  onClick={() => searchResultClick(employee)}
-                >
-                  {employee.FirstName} {employee.LastName}
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+            {searchResults?.length > 0 && (
+              <ListGroup>
+                {searchResults.map((employee) => (
+                  <ListGroup.Item
+                    action
+                    href="#"
+                    key={employee.EmployeeID}
+                    onClick={() => searchResultClick(employee)}
+                  >
+                    {employee.FirstName} {employee.LastName}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            )}
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Username</Form.Label>
               <Form.Control
@@ -235,17 +221,16 @@ const NewUserForm = () => {
               <Form.Label className="fw-semibold">Password</Form.Label>
               <InputGroup>
                 <Form.Control
-                  type={!showPass ? "password" : "text"}
+                  type={!userState.showPass ? "password" : "text"}
                   autoComplete="off"
                   pattern={PWD_REGEX}
                   placeholder="Password"
                   onChange={onPasswordChanged}
                 />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowPass(!showPass)}
-                >
-                  <FontAwesomeIcon icon={!showPass ? faEye : faEyeSlash} />
+                <Button variant="outline-secondary" onClick={onShowPassword}>
+                  <FontAwesomeIcon
+                    icon={!userState.showPass ? faEye : faEyeSlash}
+                  />
                 </Button>
                 <Form.Control.Feedback type="invalid">
                   Minimum of 8 characters. At least - 1 lowercase letter, 1
@@ -264,7 +249,7 @@ const NewUserForm = () => {
                 disabled
                 autoComplete="off"
                 placeholder="First Name"
-                value={firstName}
+                value={userState.firstName}
                 onChange={onFirstNameChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
@@ -277,7 +262,7 @@ const NewUserForm = () => {
                 disabled
                 autoComplete="off"
                 placeholder="Last Name"
-                value={lastName}
+                value={userState.lastName}
                 onChange={onLastnameChanged}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
@@ -290,7 +275,7 @@ const NewUserForm = () => {
               <Form.Select
                 disabled
                 required
-                value={branch}
+                value={userState.branch}
                 onChange={onBranchChanged}
               >
                 <option value="">Select branch...</option>
@@ -302,7 +287,11 @@ const NewUserForm = () => {
             </Form.Group>
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">User Group</Form.Label>
-              <Form.Select required onChange={onUserGroupChanged}>
+              <Form.Select
+                required
+                value={userState.userGroup}
+                onChange={onUserGroupChanged}
+              >
                 <option value="">Select group...</option>
                 {userGroupOptions}
               </Form.Select>
@@ -320,7 +309,7 @@ const NewUserForm = () => {
                 autoComplete="off"
                 disabled
                 type="text"
-                value={employeeId}
+                value={userState.employeeId}
                 placeholder="Employee ID"
                 onChange={onEmployeeIdChanged}
               />
@@ -328,7 +317,11 @@ const NewUserForm = () => {
             </Form.Group>
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">User Level</Form.Label>
-              <Form.Select required onChange={onUserLevelChanged}>
+              <Form.Select
+                required
+                value={userState.userLevel}
+                onChange={onUserLevelChanged}
+              >
                 <option value="">Select level...</option>
                 {userLevelOptions}
               </Form.Select>

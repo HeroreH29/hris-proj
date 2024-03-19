@@ -7,7 +7,6 @@ import {
   Button,
   Form,
   Spinner,
-  Modal,
 } from "react-bootstrap";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import Attendance from "./Attendance";
@@ -37,14 +36,10 @@ const Attendances = () => {
   const { tableState, tableDispatch } = useTableSettings();
   const { attModalState, attModalDispatch } = useAttModalSettings();
 
-  const [showModal, setShowModal] = useState(false);
   const [validated, setValidated] = useState(false);
 
   const [attList, setAttList] = useState([]);
   const [attlogData, setAttlogData] = useState(undefined);
-
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
   const outletOptions = Object.entries(ASSIGNEDOUTLET).map(([key, value]) => {
     return (
@@ -281,14 +276,14 @@ const Attendances = () => {
 
     // For filtering attendance (if date range has been set by user)
     const filteredAtt =
-      startDate !== "" && endDate !== ""
+      attModalState.dateFrom !== "" && attModalState.dateTo !== ""
         ? tempAttData.filter((att) => {
             const dateToCompare = new Date(att.date).valueOf();
             const formattedFrom = new Date(
-              format(new Date(startDate), "MM/dd/yyyy")
+              format(new Date(attModalState.dateFrom), "MM/dd/yyyy")
             ).valueOf();
             const formattedTo = new Date(
-              format(new Date(endDate), "MM/dd/yyyy")
+              format(new Date(attModalState.dateTo), "MM/dd/yyyy")
             ).valueOf();
 
             return (
@@ -378,14 +373,17 @@ const Attendances = () => {
       Position.updateAppearances(helveticaBold);
       PrintDateTime.setText(format(new Date(), "eeee, MMMM dd, yyyy @ pp"));
       PeriodCovered.setText(
-        `${format(new Date(startDate), "MMM dd")} - ${format(
-          new Date(endDate),
+        `${format(new Date(attModalState.dateFrom), "MMM dd")} - ${format(
+          new Date(attModalState.dateTo),
           "MMM dd yyyy"
         )}`
       );
 
       // Copy of dates array returned from GetDatesInBetween()
-      const dateArr = getDatesInBetween(startDate, endDate);
+      const dateArr = getDatesInBetween(
+        attModalState.dateFrom,
+        attModalState.dateTo
+      );
 
       // Check if document requested is appropriate based on employee type and length of dateArr
       if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
@@ -655,10 +653,6 @@ const Attendances = () => {
       <AttendanceModal
         attModalState={attModalState}
         attModalDispatch={attModalDispatch}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
         setValidated={setValidated}
         tableState={tableState}
         validated={validated}

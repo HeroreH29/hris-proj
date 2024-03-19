@@ -1,5 +1,4 @@
 import { useReducer } from "react";
-import useAuth from "./useAuth";
 
 const useAttModalSettings = () => {
   const initialState = {

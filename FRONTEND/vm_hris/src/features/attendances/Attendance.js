@@ -1,8 +1,5 @@
 import React, { memo, useState } from "react";
 import { format, parse } from "date-fns";
-import { Button, Modal, Table, Form } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import {
   useGetDocumentsQuery,
   useGetGeninfosQuery,
@@ -15,10 +12,8 @@ import useAttModalSettings from "../../hooks/useAttModalSettings";
 import useTableSettings from "../../hooks/useTableSettings";
 
 const Attendance = ({ att, attlogData }) => {
-  const { state, dispatch } = useAttModalSettings();
-  const { state: tableState, dispatch: tableDispatch } = useTableSettings();
-  const [dateTo, setDateTo] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
+  const { attModalState, attModalDispatch } = useAttModalSettings();
+  const { tableState, tableDispatch } = useTableSettings();
 
   // Fetch document using document name (filename)
   const { documents } = useGetDocumentsQuery("recordsList", {
@@ -39,11 +34,6 @@ const Attendance = ({ att, attlogData }) => {
   });
 
   const [matchingAtt, setMatchingAtt] = useState([]);
-
-  const [showModal, setShowModal] = useState(false);
-
-  const [startSlice, setStartSlice] = useState(0);
-  const [endSlice, setEndSlice] = useState(10);
 
   // Printing attendance function
   const handlePrintAtt = async () => {
@@ -114,14 +104,17 @@ const Attendance = ({ att, attlogData }) => {
       Position.updateAppearances(helveticaBold);
       PrintDateTime.setText(format(new Date(), "eeee, MMMM dd, yyyy @ pp"));
       PeriodCovered.setText(
-        `${format(new Date(dateFrom), "MMM dd")} - ${format(
-          new Date(dateTo),
+        `${format(new Date(attModalState.dateFrom), "MMM dd")} - ${format(
+          new Date(attModalState.dateTo),
           "MMM dd yyyy"
         )}`
       );
 
       // Copy of dates array returned from GetDatesInBetween()
-      const dateArr = getDatesInBetween(dateFrom, dateTo);
+      const dateArr = getDatesInBetween(
+        attModalState.dateFrom,
+        attModalState.dateTo
+      );
 
       // Check if document requested is appropriate based on employee type and length of dateArr
       if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
@@ -183,9 +176,15 @@ const Attendance = ({ att, attlogData }) => {
           // Time in and time out rows set text
           if (filteredAtt[attIndex].checkIn !== "" && TimeInRow) {
             TimeInRow.setText(`${filteredAtt[attIndex].checkIn}`);
+            if (TimeInRow.getText().length > 15) {
+              TimeInRow.setFontSize(8);
+            }
           }
           if (filteredAtt[attIndex].checkOut !== "" && TimeOutRow) {
             TimeOutRow.setText(`${filteredAtt[attIndex].checkOut}`);
+            if (TimeOutRow.getText().length > 15) {
+              TimeOutRow.setFontSize(8);
+            }
           }
 
           // Break in and break out rows set text
@@ -211,14 +210,14 @@ const Attendance = ({ att, attlogData }) => {
 
   // For filtering attendance (if date range has been set by user)
   const filteredAtt =
-    dateFrom !== "" && dateTo !== ""
+    attModalState.dateFrom !== "" && attModalState.dateTo !== ""
       ? matchingAtt.filter((att) => {
           const dateToCompare = new Date(att.date).valueOf();
           const formattedFrom = new Date(
-            format(new Date(dateFrom), "MM/dd/yyyy")
+            format(new Date(attModalState.dateFrom), "MM/dd/yyyy")
           ).valueOf();
           const formattedTo = new Date(
-            format(new Date(dateTo), "MM/dd/yyyy")
+            format(new Date(attModalState.dateTo), "MM/dd/yyyy")
           ).valueOf();
 
           return dateToCompare >= formattedFrom && dateToCompare <= formattedTo;
@@ -235,7 +234,7 @@ const Attendance = ({ att, attlogData }) => {
 
         return dateB - dateA;
       })
-      .slice(startSlice, endSlice)
+      .slice(tableState.sliceStart, tableState.sliceEnd)
       .map((att, index) => (
         <tr key={index}>
           <td>{att.date}</td>
@@ -322,7 +321,7 @@ const Attendance = ({ att, attlogData }) => {
       console.error(`handleShowModal Error: ${error}`);
     }
     setMatchingAtt(tempAttData);
-    setShowModal(true);
+    attModalDispatch({ type: "show_modal" });
   };
 
   // Check if attendance data is present
@@ -335,10 +334,8 @@ const Attendance = ({ att, attlogData }) => {
         </tr>
         <>
           <AttendanceModal
-            showModal={showModal}
-            setShowModal={setShowModal}
-            attModalState={state}
-            attModalDispatch={dispatch}
+            attModalState={attModalState}
+            attModalDispatch={attModalDispatch}
             tableContent={tableContent}
             handlePrintAtt={handlePrintAtt}
             tableState={tableState}
@@ -346,6 +343,7 @@ const Attendance = ({ att, attlogData }) => {
             filteredAtt={filteredAtt}
             matchingAtt={matchingAtt}
             att={att}
+            geninfo={geninfo}
           />
         </>
       </>

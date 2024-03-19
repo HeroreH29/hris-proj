@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useGetGeninfosQuery } from "./recordsApiSlice";
 import Record from "./Record";
 import {
@@ -32,7 +32,7 @@ const RecordsList = () => {
   useTitle("Employee Records | Via Mare HRIS");
 
   // VARIABLES
-  const { state, dispatch } = useTableSettings();
+  const { tableState, tableDispatch } = useTableSettings();
 
   const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
     ([key, value]) => {
@@ -77,7 +77,7 @@ const RecordsList = () => {
 
         if (isOutletProcessor) {
           match =
-            match && gentities[gid]?.AssignedOutlet === state.outletFilter;
+            match && gentities[gid]?.AssignedOutlet === tableState.outletFilter;
         }
 
         return match;
@@ -146,24 +146,24 @@ const RecordsList = () => {
       const geninfo = gentities[id];
       let matches = true;
 
-      const searchLowerCase = state.searchValue.toLowerCase();
-      const outletFilterLowerCase = state.outletFilter.toLowerCase();
-      const statusFilterLowerCase = state.statusFilter.toLowerCase();
+      const searchLowerCase = tableState.searchValue.toLowerCase();
+      const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
+      const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
 
-      if (state.searchValue !== "") {
+      if (tableState.searchValue !== "") {
         matches =
           (matches &&
             geninfo.LastName.toLowerCase().includes(searchLowerCase)) ||
           geninfo.FirstName.toLowerCase().includes(searchLowerCase);
       }
 
-      if (state.outletFilter !== "") {
+      if (tableState.outletFilter !== "") {
         matches =
           matches &&
           geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
       }
 
-      if (state.statusFilter !== "") {
+      if (tableState.statusFilter !== "") {
         matches =
           matches && geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
       }
@@ -176,11 +176,11 @@ const RecordsList = () => {
       gids?.length &&
       [...filteredIds]
         .sort((a, b) => {
-          return !state.nameSort
+          return !tableState.nameSort
             ? gentities[a].LastName.localeCompare(gentities[b].LastName)
             : gentities[b].LastName.localeCompare(gentities[a].LastName);
         })
-        .slice(state.sliceStart, state.sliceEnd)
+        .slice(tableState.sliceStart, tableState.sliceEnd)
         .map((geninfoId) => <Record key={geninfoId} geninfoId={geninfoId} />);
 
     return (
@@ -205,11 +205,14 @@ const RecordsList = () => {
           <thead className="align-middle">
             <tr>
               <th scope="col">Employee ID</th>
-              <th scope="col" onClick={() => dispatch({ type: "name_sort" })}>
+              <th
+                scope="col"
+                onClick={() => tableDispatch({ type: "name_sort" })}
+              >
                 Name{" "}
                 <FontAwesomeIcon
                   className="float-end"
-                  icon={state.nameSort ? faArrowDownAZ : faArrowUpAZ}
+                  icon={tableState.nameSort ? faArrowDownAZ : faArrowUpAZ}
                 />
               </th>
               <th scope="col">Assigned Outlet</th>
@@ -226,9 +229,9 @@ const RecordsList = () => {
                   <Form.Control
                     type="text"
                     placeholder="Search by Name"
-                    value={state.searchValue}
+                    value={tableState.searchValue}
                     onChange={(e) => {
-                      dispatch({
+                      tableDispatch({
                         type: "search_value",
                         searchValue: e.target.value,
                       });
@@ -240,9 +243,9 @@ const RecordsList = () => {
                 <Form>
                   <Form.Select
                     disabled={isOutletProcessor}
-                    value={state.outletFilter}
+                    value={tableState.outletFilter}
                     onChange={(e) => {
-                      dispatch({
+                      tableDispatch({
                         type: "outlet_filter",
                         outletFilter: e.target.value,
                       });
@@ -256,9 +259,9 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
-                    value={state.statusFilter}
+                    value={tableState.statusFilter}
                     onChange={(e) => {
-                      dispatch({
+                      tableDispatch({
                         type: "status_filter",
                         statusFilter: e.target.value,
                       });
@@ -273,15 +276,15 @@ const RecordsList = () => {
               <td colSpan={5}>
                 <Button
                   variant="outline-primary float-end"
-                  disabled={state.sliceEnd >= filteredIds?.length}
-                  onClick={() => dispatch({ type: "slice_inc" })}
+                  disabled={tableState.sliceEnd >= filteredIds?.length}
+                  onClick={() => tableDispatch({ type: "slice_inc" })}
                 >
                   Next
                 </Button>
                 <Button
                   variant="outline-primary float-end me-3"
-                  disabled={state.sliceStart === 0}
-                  onClick={() => dispatch({ type: "slice_dec" })}
+                  disabled={tableState.sliceStart === 0}
+                  onClick={() => tableDispatch({ type: "slice_dec" })}
                 >
                   Prev
                 </Button>

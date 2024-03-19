@@ -4,36 +4,28 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 
 const AttendanceModal = ({
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
-  setValidated,
-  state,
   validated,
   handlePrintBranchAttendance,
   handlePrintAtt,
   geninfo,
-  dateFrom,
-  dateTo,
   attModalState,
   attModalDispatch,
   tableState,
   tableDispatch,
   tableContent,
-  filteredAtt = null,
-  att = null,
-  matchingAtt = null,
+  filteredAtt,
+  att,
+  matchingAtt,
 }) => {
   const ByBranchPrintModal = (
     <Modal
-      show={attModalState.showModal}
+      show={attModalState?.showModal}
       onHide={() => {
         attModalDispatch({ type: "close_modal" });
       }}
     >
       <Modal.Header closeButton>
-        <Modal.Title>{`Print ${tableState.outletFilter} (${tableState.empTypeFilter}) Attendance`}</Modal.Title>
+        <Modal.Title>{`Print ${tableState?.outletFilter} (${tableState?.empTypeFilter}) Attendance`}</Modal.Title>
       </Modal.Header>
       <Form
         noValidate
@@ -46,8 +38,13 @@ const AttendanceModal = ({
             <Form.Control
               type="date"
               required
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              value={attModalState.dateFrom}
+              onChange={(e) =>
+                attModalDispatch({
+                  type: "date_from",
+                  dateFrom: e.target.value,
+                })
+              }
             />
             <Form.Control.Feedback type="invalid">
               Choose a date
@@ -58,8 +55,13 @@ const AttendanceModal = ({
             <Form.Control
               type="date"
               required
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              value={attModalState.dateTo}
+              onChange={(e) =>
+                attModalDispatch({
+                  type: "date_from",
+                  dateFrom: e.target.value,
+                })
+              }
             />
             <Form.Control.Feedback type="invalid">
               Choose a date
@@ -83,13 +85,13 @@ const AttendanceModal = ({
 
   const ByEmployeePrintModal = (
     <Modal
-      show={attModalState.showModal}
+      show={attModalState?.showModal}
       onHide={() => attModalDispatch({ type: "close_modal" })}
       scrollable
       size="lg"
     >
       <Modal.Header closeButton>
-        {filteredAtt.name}'s Attendance{" "}
+        {att?.name}'s Attendance{" "}
         <span className="ms-1 fw-semibold">{` (${geninfo?.EmployeeType})`}</span>{" "}
       </Modal.Header>
       <Modal.Body>
@@ -116,7 +118,7 @@ const AttendanceModal = ({
                     <Form.Label className="fw-bold">Date From</Form.Label>
                     <Form.Control
                       type="date"
-                      value={attModalState.dateFrom}
+                      value={attModalState?.dateFrom}
                       onChange={(e) =>
                         attModalDispatch({
                           type: "date_from",
@@ -133,7 +135,7 @@ const AttendanceModal = ({
                     <Form.Label className="fw-bold">Date To</Form.Label>
                     <Form.Control
                       type="date"
-                      value={attModalState.dateTo}
+                      value={attModalState?.dateTo}
                       onChange={(e) =>
                         attModalDispatch({
                           type: "date_to",
@@ -152,7 +154,9 @@ const AttendanceModal = ({
         <Button
           variant="outline-primary"
           onClick={handlePrintAtt}
-          disabled={dateTo === "" || dateFrom === ""}
+          disabled={
+            attModalState.dateTo === "" || attModalState.dateFrom === ""
+          }
         >
           <FontAwesomeIcon icon={faPrint} />
         </Button>
@@ -161,7 +165,7 @@ const AttendanceModal = ({
           onClick={() => {
             tableDispatch({ type: "slice_dec" });
           }}
-          disabled={tableState.sliceStart === 0}
+          disabled={tableState?.sliceStart === 0}
         >
           Prev
         </Button>
@@ -172,8 +176,8 @@ const AttendanceModal = ({
           }}
           disabled={
             filteredAtt?.length
-              ? tableState.sliceEnd >= filteredAtt?.length
-              : tableState.sliceEnd >= matchingAtt?.length
+              ? tableState?.sliceEnd >= filteredAtt?.length
+              : tableState?.sliceEnd >= matchingAtt?.length
           }
         >
           Next
@@ -181,7 +185,7 @@ const AttendanceModal = ({
       </Modal.Footer>
     </Modal>
   );
-  return !filteredAtt && !att ? ByBranchPrintModal : ByEmployeePrintModal;
+  return !filteredAtt || !att ? ByBranchPrintModal : ByEmployeePrintModal;
 };
 
 export default AttendanceModal;

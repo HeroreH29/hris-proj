@@ -1,8 +1,14 @@
 import { useReducer } from "react";
 import useAuth from "./useAuth";
+import {
+  faSortNumericAsc,
+  faSortNumericDesc,
+} from "@fortawesome/free-solid-svg-icons";
 
 const useTableSettings = () => {
   const { branch } = useAuth();
+
+  const dateSortIconArr = [faSortNumericDesc, faSortNumericAsc];
 
   const initialState = {
     sliceStart: 0,
@@ -12,6 +18,11 @@ const useTableSettings = () => {
     outletFilter: branch,
     statusFilter: "Y",
     empTypeFilter: "",
+    name: "",
+    year: "2024",
+    month: new Date().toLocaleString("default", { month: "short" }),
+    dateSort: false,
+    dateSortIcon: dateSortIconArr[1],
   };
 
   const reducer = (state, action) => {
@@ -63,6 +74,22 @@ const useTableSettings = () => {
           empTypeFilter: action.empTypeFilter,
           sliceStart: 0,
           sliceEnd: 10,
+        };
+      }
+      case "name": {
+        return { ...state, name: action.name, sliceStart: 0, sliceENd: 10 };
+      }
+      case "month": {
+        return { ...state, month: action.month, sliceStart: 0, sliceENd: 10 };
+      }
+      case "year": {
+        return { ...state, year: action.year, sliceStart: 0, sliceENd: 10 };
+      }
+      case "datesort": {
+        return {
+          ...state,
+          dateSort: !state.dateSort,
+          dateSortIcon: dateSortIconArr[state.dateSort ? 1 : 0],
         };
       }
 

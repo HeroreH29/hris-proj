@@ -46,7 +46,9 @@ const createLeave = async (req, res) => {
   } = req.body;
 
   // Check if other properties of the request body has values
-  const othersHasValues = Object.values(others).every((value) => value);
+  const othersHasValues = Object.values(others).every(
+    (value) => value || value !== null
+  );
 
   // Some values are missing
   if (!othersHasValues) {

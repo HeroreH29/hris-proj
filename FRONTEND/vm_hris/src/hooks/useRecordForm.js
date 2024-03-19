@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 import { useGetGeninfosQuery } from "../features/employeerecords/recordsApiSlice";
-import { format } from "date-fns";
+import DateFormatter from "../xtra_functions/DateFormatter";
 
 const ALPHA_REGEX = /^[a-zA-Z\s]+$/;
 const ALPHANUM_REGEX = /^[a-zA-Z0-9]+$/;
@@ -32,11 +32,6 @@ const useRecordForm = ({
     }
   };
 
-  // Date formatter
-  const dateFormatter = (dateString, dateFormat = "yyyy-MM-dd") => {
-    return dateString ? format(new Date(dateString), dateFormat) : "";
-  };
-
   /* INITAL STATES */
   const geninfoInitialState = !geninfo
     ? {
@@ -64,11 +59,11 @@ const useRecordForm = ({
       }
     : {
         ...geninfo,
-        RegDate: dateFormatter(geninfo?.RegDate),
-        DateEmployed: dateFormatter(geninfo?.DateEmployed),
-        DateProbationary: dateFormatter(geninfo?.DateProbationary),
-        DateLeaved: dateFormatter(geninfo?.DateLeaved),
-        ContractDateEnd: dateFormatter(geninfo?.ContractDateEnd),
+        RegDate: DateFormatter(geninfo?.RegDate),
+        DateEmployed: DateFormatter(geninfo?.DateEmployed),
+        DateProbationary: DateFormatter(geninfo?.DateProbationary),
+        DateLeaved: DateFormatter(geninfo?.DateLeaved),
+        ContractDateEnd: DateFormatter(geninfo?.ContractDateEnd),
       };
   const personalinfoInitialState = !personalinfo
     ? {
@@ -90,7 +85,7 @@ const useRecordForm = ({
         MotherName: "",
         Moccupation: "",
       }
-    : { ...personalinfo, Birthday: dateFormatter(personalinfo.Birthday) };
+    : { ...personalinfo, Birthday: DateFormatter(personalinfo.Birthday) };
   const dependentinfoInitialState = !dependent
     ? {
         Names: "",
@@ -102,7 +97,7 @@ const useRecordForm = ({
       }
     : {
         ...dependent,
-        Birthday: dateFormatter(dependent.Birthday),
+        Birthday: DateFormatter(dependent.Birthday),
       };
   const educinfoInitialState = !educinfo
     ? {

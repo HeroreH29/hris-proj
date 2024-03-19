@@ -10,6 +10,7 @@ import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import useTitle from "../../hooks/useTitle";
+import useLeaveForm from "../../hooks/useLeaveForm";
 
 const NewLeaveForm = () => {
   useTitle("Leave Filing | Via Mare HRIS");
@@ -19,12 +20,7 @@ const NewLeaveForm = () => {
   const { user, employeeId, isAdmin, isHR, isOutletProcessor, branch } =
     useAuth();
 
-  const [leaveType, setLeaveType] = useState("");
-  const [leaveFrom, setLeaveFrom] = useState("");
-  const [leaveUntil, setLeaveUntil] = useState("");
-  const [reason, setReason] = useState("");
-  const [dayTime, setDayTime] = useState("");
-  const [halfDay, setHalfDay] = useState(false);
+  const { leaveState, leaveDispatch } = useLeaveForm();
   const [validated, setValidated] = useState(false);
 
   const { data: geninfos } = useGetGeninfosQuery();
@@ -38,6 +34,7 @@ const NewLeaveForm = () => {
   const [searchResults, setSearchResults] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState("");
 
+  // For searching employees
   const handleSearch = (e) => {
     const { ids, entities } = geninfos;
 
@@ -71,6 +68,7 @@ const NewLeaveForm = () => {
     }
   };
 
+  // For selecting searched employee
   const handleSearchResultClick = (result) => {
     setSearchQuery(
       `${result.LastName}, ${result.FirstName} ${result.MI}. (${result.EmployeeID})`
@@ -97,23 +95,33 @@ const NewLeaveForm = () => {
     if (form.checkValidity()) {
       const confirm = window.confirm("Proceed with this information?");
 
+      // For calculating no. of leave days
+      const CalcuNoOfDays = () => {
+        let days = 0;
+        if (leaveState.DayTime) {
+          days = 0.5;
+        } else {
+          days =
+            differenceInDays(
+              new Date(leaveState.Lto),
+              new Date(leaveState.Lfrom)
+            ) + 1;
+        }
+
+        console.log(days);
+        return days;
+      };
+
       if (confirm) {
         const leaveJson = {
           EmployeeID: selectedEmployee ? selectedEmployee : employeeId,
           DateOfFilling: format(new Date(), "MMM dd, yyyy"),
-          NoOfDays: dayTime
-            ? 0.5
-            : leaveFrom && leaveUntil
-            ? differenceInDays(new Date(leaveUntil), new Date(leaveFrom)) + 1
-            : 0,
-          DayTime: dayTime,
-          Ltype: leaveType,
-          Lfrom: format(new Date(leaveFrom), "MMM dd, yyyy"),
-          Lto:
-            leaveUntil !== ""
-              ? format(new Date(leaveUntil), "MMM dd, yyyy")
-              : format(new Date(leaveFrom), "MMM dd, yyyy"),
-          Reason: reason,
+          NoOfDays: CalcuNoOfDays(),
+          DayTime: leaveState.DayTime,
+          Ltype: leaveState.Ltype,
+          Lfrom: format(new Date(leaveState.Lfrom), "MMM dd, yyyy"),
+          Lto: format(new Date(leaveState.Lto), "MMM dd, yyyy"),
+          Reason: leaveState.Reason,
           User: user,
         };
 
@@ -132,13 +140,8 @@ const NewLeaveForm = () => {
   };
 
   const handleResetFields = () => {
+    leaveDispatch({ type: "resetform" });
     setSelectedEmployee("");
-    setLeaveType("");
-    setLeaveFrom("");
-    setLeaveUntil("");
-    setHalfDay(false);
-    setDayTime("");
-    setReason("");
     setSearchQuery("");
     setSearchResults("");
     setValidated(false);
@@ -194,59 +197,60 @@ const NewLeaveForm = () => {
         className="p-3"
         onSubmit={handleSubmit}
       >
-        {isAdmin ||
-          isHR ||
-          (isOutletProcessor && (
-            <>
-              <Row className="mb-3">
-                <Form.Group as={Col} md="4">
-                  <Form.Label className="fw-semibold">File for...</Form.Label>
-                  <Form.Control
-                    required
-                    autoFocus
-                    className="fw-semibold"
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                    placeholder="Search Employee..."
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Field required
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} className="p-2 border">
-                  <Form.Label className="fw-semibold">
-                    ...or Upload a leave application
-                  </Form.Label>
-                  <Form.Control
-                    type="file"
-                    size="sm"
-                    onChange={(e) => LeaveApplicationUpload(e.target.files[0])}
-                  />
-                </Form.Group>
-                {searchResults?.length > 0 && searchQuery.length > 0 && (
-                  <ListGroup>
-                    {searchResults.map((result) => (
-                      <ListGroup.Item
-                        action
-                        href={`#`}
-                        key={result.id}
-                        onClick={() => handleSearchResultClick(result)}
-                      >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                )}
-              </Row>
-            </>
-          ))}
+        {(isAdmin || isHR || isOutletProcessor) && (
+          <>
+            <Row className="mb-3">
+              <Form.Group as={Col} md="4">
+                <Form.Label className="fw-semibold">File for...</Form.Label>
+                <Form.Control
+                  required
+                  autoFocus
+                  className="fw-semibold"
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  placeholder="Search Employee..."
+                />
+                <Form.Control.Feedback type="invalid">
+                  Field required
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group as={Col} className="p-2 border">
+                <Form.Label className="fw-semibold">
+                  ...or Upload a leave application
+                </Form.Label>
+                <Form.Control
+                  type="file"
+                  size="sm"
+                  onChange={(e) => LeaveApplicationUpload(e.target.files[0])}
+                />
+              </Form.Group>
+              {searchResults?.length > 0 && searchQuery.length > 0 && (
+                <ListGroup>
+                  {searchResults.map((result) => (
+                    <ListGroup.Item
+                      action
+                      href={`#`}
+                      key={result.id}
+                      onClick={() => handleSearchResultClick(result)}
+                    >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
+                  ))}
+                </ListGroup>
+              )}
+            </Row>
+          </>
+        )}
+        {/* Leave type, half day, day time, leave from, leave until */}
         <Row className="align-items-center mb-3">
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Leave Type</Form.Label>
             <Form.Select
               disabled={selectedEmployee === ""}
               required
-              value={leaveType}
-              onChange={(e) => setLeaveType(e.target.value)}
+              value={leaveState.Ltype}
+              onChange={(e) =>
+                leaveDispatch({ type: "ltype", Ltype: e.target.value })
+              }
             >
               <option value="">Select type</option>
               {leaveTypeDropdown}
@@ -261,12 +265,9 @@ const NewLeaveForm = () => {
               <Form.Check
                 className="ms-3 float-end"
                 type="checkbox"
-                checked={halfDay}
-                disabled={selectedEmployee === ""}
-                onChange={(e) => {
-                  setHalfDay(e.target.checked);
-                  setDayTime("");
-                }}
+                checked={leaveState.HalfDay}
+                disabled={!selectedEmployee}
+                onChange={() => leaveDispatch({ type: "halfday" })}
               />
             </Form.Label>
           </Form.Group>
@@ -274,9 +275,11 @@ const NewLeaveForm = () => {
             <Form.Label className="fw-semibold">Day Time</Form.Label>
             <Form.Select
               required
-              disabled={!halfDay}
-              value={dayTime}
-              onChange={(e) => setDayTime(e.target.value)}
+              disabled={!leaveState.HalfDay}
+              value={leaveState.DayTime}
+              onChange={(e) =>
+                leaveDispatch({ type: "daytime", DayTime: e.target.value })
+              }
             >
               <option value="">Select...</option>
               <option value="AM">AM</option>
@@ -290,10 +293,12 @@ const NewLeaveForm = () => {
             <Form.Label className="fw-semibold">From</Form.Label>
             <Form.Control
               required
-              disabled={selectedEmployee === ""}
+              disabled={!selectedEmployee}
               type="date"
-              value={leaveFrom}
-              onChange={(e) => setLeaveFrom(e.target.value)}
+              value={leaveState.Lfrom}
+              onChange={(e) =>
+                leaveDispatch({ type: "lfrom", Lfrom: e.target.value })
+              }
             />
             <Form.Control.Feedback type="invalid">
               Field is required
@@ -304,24 +309,29 @@ const NewLeaveForm = () => {
             <Form.Control
               required
               type="date"
-              value={leaveUntil}
-              disabled={halfDay || selectedEmployee === ""}
-              onChange={(e) => setLeaveUntil(e.target.value)}
+              value={leaveState.Lto}
+              disabled={leaveState.HalfDay || !selectedEmployee}
+              onChange={(e) =>
+                leaveDispatch({ type: "lto", Lto: e.target.value })
+              }
             />
             <Form.Control.Feedback type="invalid">
               Field is required
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+        {/* Reason */}
         <Row className="mb-3">
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Reason</Form.Label>
             <Form.Control
-              required={leaveType === "Sick Leave"}
+              required={leaveState.Ltype === "Sick Leave"}
               as={"textarea"}
-              value={reason}
-              disabled={selectedEmployee === ""}
-              onChange={(e) => setReason(e.target.value)}
+              value={leaveState.Reason}
+              disabled={!selectedEmployee}
+              onChange={(e) =>
+                leaveDispatch({ type: "reason", Reason: e.target.value })
+              }
             />
             <Form.Control.Feedback type="invalid">
               Field is STRICTLY required

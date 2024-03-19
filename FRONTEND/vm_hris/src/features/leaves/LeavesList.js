@@ -9,11 +9,7 @@ import {
   Form,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFileAlt,
-  faSortNumericAsc,
-  faSortNumericDesc,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFileAlt } from "@fortawesome/free-solid-svg-icons";
 import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -24,6 +20,7 @@ import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { FONTS } from "../../config/fontBase64";
+import useTableSettings from "../../hooks/useTableSettings";
 
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
@@ -85,9 +82,7 @@ const LeavesList = () => {
     }
   };
 
-  const [name, setName] = useState("");
-  const [year, setYear] = useState("2024");
-  const [month, setMonth] = useState("");
+  const { tableState, tableDispatch } = useTableSettings();
   const start = new Date().getFullYear();
   const yearsArr = Array.from({ length: start - 2018 + 1 }, (_, i) => 2018 + i);
   const monthsArr = Array.from({ length: 12 }, (_, index) => index).map(
@@ -110,22 +105,18 @@ const LeavesList = () => {
     );
   });
 
-  const sortIconArr = [faSortNumericDesc, faSortNumericAsc];
-  const [sortIcon, setSortIcon] = useState(0);
-
-  const handleSortIconChange = () =>
-    setSortIcon((prev) => (prev === 0 ? prev + 1 : prev - 1));
+  const handleSortIconChange = () => {
+    tableDispatch({ type: "datesort" });
+  };
 
   const [startSlice, setStartSlice] = useState(0);
   const [endSlice, setEndSlice] = useState(10);
 
   const handleNext = () => {
-    setStartSlice((prev) => prev + 10);
-    setEndSlice((prev) => prev + 10);
+    tableDispatch({ type: "slice_inc" });
   };
   const handlePrev = () => {
-    setStartSlice((prev) => prev - 10);
-    setEndSlice((prev) => prev - 10);
+    tableDispatch({ type: "slice_dec" });
   };
 
   /* Function to execute when detailed/summary print leave button is clicked */
@@ -692,11 +683,6 @@ const LeavesList = () => {
     window.open(blobUrl, "_blank");
   };
 
-  useEffect(() => {
-    setStartSlice(0);
-    setEndSlice(10);
-  }, [month, name]);
-
   let content;
 
   if (isLoading && !leaves) content = <Spinner animation="border" />;
@@ -722,17 +708,18 @@ const LeavesList = () => {
           matches = matches && leave?.EmployeeID === employeeId;
         }
 
-        if (name !== "") {
+        if (tableState.name !== "") {
           matches =
-            matches && leave.EmpName.toLowerCase().includes(name.toLowerCase());
+            matches &&
+            leave.EmpName.toLowerCase().includes(tableState.name.toLowerCase());
         }
 
-        if (month !== "") {
-          matches = matches && leave.DateOfFilling?.includes(month);
+        if (tableState.month !== "") {
+          matches = matches && leave.DateOfFilling?.includes(tableState.month);
         }
 
-        if (year !== "") {
-          matches = matches && leave.DateOfFilling?.includes(year);
+        if (tableState.year !== "") {
+          matches = matches && leave.DateOfFilling?.includes(tableState.year);
         }
 
         return matches;
@@ -747,9 +734,9 @@ const LeavesList = () => {
     overallLeavesContent = filteredIds?.length
       ? filteredIds
           .sort(() => {
-            return sortIcon === 0 ? 1 : -1;
+            return tableState.dateSort ? 1 : -1;
           })
-          .slice(startSlice, endSlice)
+          .slice(tableState.sliceStart, tableState.sliceEnd)
           .map((leaveId) => (
             <Leave
               key={leaveId}
@@ -792,7 +779,7 @@ const LeavesList = () => {
                     Date Filed{" "}
                     <FontAwesomeIcon
                       className="float-end"
-                      icon={sortIconArr[sortIcon]}
+                      icon={tableState.dateSortIcon}
                     />
                   </th>
                   <th scope="col">From</th>
@@ -809,18 +796,22 @@ const LeavesList = () => {
                     <Form>
                       <Form.Control
                         type="text"
-                        value={name}
+                        value={tableState.name}
                         placeholder="Enter name"
                         disabled={userLevel !== "Admin" /* true */}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) =>
+                          tableDispatch({ type: "name", name: e.target.value })
+                        }
                       />
                     </Form>
                   </td>
                   <td className="bg-secondary-subtle" colSpan={2}>
                     <Form>
                       <Form.Select
-                        value={year}
-                        onChange={(e) => setYear(e.target.value)}
+                        value={tableState.year}
+                        onChange={(e) =>
+                          tableDispatch({ type: "year", year: e.target.value })
+                        }
                       >
                         <option value={""}>Year</option>
                         {yearDropdown}
@@ -830,8 +821,13 @@ const LeavesList = () => {
                   <td className="bg-secondary-subtle" colSpan={2}>
                     <Form>
                       <Form.Select
-                        value={month}
-                        onChange={(e) => setMonth(e.target.value)}
+                        value={tableState.month}
+                        onChange={(e) =>
+                          tableDispatch({
+                            type: "month",
+                            month: e.target.value,
+                          })
+                        }
                       >
                         <option value={""}>Month</option>
                         {monthDropdown}
@@ -843,7 +839,7 @@ const LeavesList = () => {
                       className="float-end ms-2"
                       variant="outline-primary"
                       onClick={handleNext}
-                      disabled={endSlice > filteredIds?.length}
+                      disabled={tableState.sliceEnd > filteredIds?.length}
                     >
                       Next
                     </Button>
@@ -851,7 +847,7 @@ const LeavesList = () => {
                       className="float-end"
                       variant="outline-primary"
                       onClick={handlePrev}
-                      disabled={startSlice === 0}
+                      disabled={!tableState.sliceStart}
                     >
                       Prev
                     </Button>

@@ -9,13 +9,15 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 
 const Dependent = ({
   dependent,
   isOutletProcessor,
   branch,
   sendEmail,
-  generateEmailMsg,
+  AssignedOutlet,
+  employeeId,
 }) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -83,15 +85,19 @@ const Dependent = ({
 
       await updateDependent(others);
 
-      if (isOutletProcessor) {
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+        //const updateRecord = isOutletProcessor && dependent;
+        //const id = updateRecord ? dependent?.id : "";
+
         await sendEmail(
-          generateEmailMsg(
+          generateEmailMsg({
             branch,
-            `${depState.EmployeeID}-Dependent.json`,
-            depState.id,
-            others,
-            true
-          )
+            filename: `${employeeId}-Dependent.json`,
+            id: dependent?.id,
+            compiledInfo: others,
+            update: true,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {

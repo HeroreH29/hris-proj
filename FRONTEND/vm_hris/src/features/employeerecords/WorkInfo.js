@@ -7,12 +7,15 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
 import WorkInfoModal from "../../modals/WorkInfoModal";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+
 const WorkInfo = ({
   workinfo,
   branch,
   isOutletProcessor,
   sendEmail,
-  generateEmailMsg,
+  AssignedOutlet,
+  employeeId,
 }) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -46,15 +49,16 @@ const WorkInfo = ({
     if (form.checkValidity() && !isLoading) {
       await updateWorkinfo(workInfoData);
 
-      if (isOutletProcessor) {
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         await sendEmail(
-          generateEmailMsg(
+          generateEmailMsg({
             branch,
-            `${workState.EmployeeID}-WorkInfo.json`,
-            workState.id,
-            workInfoData,
-            true
-          )
+            filename: `${employeeId}-WorkInfo.json`,
+            id: workinfo?.id,
+            compiledInfo: workInfoData,
+            update: true,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {

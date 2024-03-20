@@ -21,7 +21,7 @@ import useAuth from "../../hooks/useAuth";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
-const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
+const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
   const { isOutletProcessor, branch } = useAuth();
 
   // eslint-disable-next-line
@@ -85,7 +85,24 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
         await addPersonalinfo(others);
       }
 
-      // Send data to HR email if processed by outlet/branch
+      // Send data to HR email if processed by outlet/branch (and vice versa)
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+        const updateRecord = isOutletProcessor && personalinfo;
+        const id = updateRecord ? personalinfo?.id : "";
+
+        await sendEmail(
+          generateEmailMsg({
+            branch,
+            filename: `${employeeId}-PersonalInfo.json`,
+            id,
+            compiledInfo: others,
+            updateRecord,
+            assignedOutlet: AssignedOutlet,
+          })
+        );
+      }
+
+      /* // Send data to HR email if processed by outlet/branch
       if (isOutletProcessor && personalinfo) {
         // Update record
         await sendEmail(
@@ -107,7 +124,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo }) => {
             others
           )
         );
-      }
+      } */
     } else {
       e.stopPropagation();
     }

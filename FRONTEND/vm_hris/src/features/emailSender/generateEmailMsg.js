@@ -1,12 +1,13 @@
 import { OUTLET_EMAILS } from "../../config/outletEmailOptions";
 
-export const generateEmailMsg = (
-  branch,
-  filename,
+export const generateEmailMsg = ({
+  branch = "",
+  filename = "",
   id = "",
-  compiledInfo,
-  update = false
-) => {
+  compiledInfo = {},
+  update = false,
+  assignedOutlet = "",
+}) => {
   let content = update
     ? {
         id: id,
@@ -16,36 +17,29 @@ export const generateEmailMsg = (
         ...compiledInfo,
       };
 
-  let emails = "";
+  let emails = "hero.viamare@gmail.com";
+  let subj = `${branch} Employee Record Modification`;
+  let msg = `Good day,\n\nThis email contains new/modified employee record from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`;
 
   // Generate email for HR dept
   if (branch !== "Head Office") {
-    console.log(OUTLET_EMAILS[compiledInfo.AssignedOutlet].join(", "));
-    emails = /* OUTLET_EMAILS["Head Office"] */ "hero.viamare@gmail.com";
+    console.log("outlet has modified a record");
+    //emails = /* OUTLET_EMAILS["Head Office"] */ "hero.viamare@gmail.com";
   } else {
-    if (Array.isArray(OUTLET_EMAILS[compiledInfo.AssignedOutlet])) {
-      emails = OUTLET_EMAILS[compiledInfo.AssignedOutlet].join(",");
-    } else {
-      emails = OUTLET_EMAILS[compiledInfo.AssignedOutlet];
-    }
-    /* return {
-      email: emails,
-      subject: `${branch} Employee Record Modification`,
-      message: `Good day,\n\nThis email contains new/modified employee record from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
-      attachments: [
-        {
-          filename,
-          content: JSON.stringify(content),
-          contentType: "application/json",
-        },
-      ],
-    }; */
+    // if (Array.isArray(OUTLET_EMAILS[compiledInfo.AssignedOutlet])) {
+    //   emails = OUTLET_EMAILS[compiledInfo.AssignedOutlet].join(",");
+    // } else {
+    //   emails = OUTLET_EMAILS[compiledInfo.AssignedOutlet];
+    // }
+
+    subj = "Outlet Record Modification";
+    msg = `Good day,\n\nThis email contains new/modified employee record for '${assignedOutlet}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`;
   }
 
   return {
     email: emails,
-    subject: `${branch} Employee Record Modification`,
-    message: `Good day,\n\nThis email contains new/modified employee record from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
+    subject: subj,
+    message: msg,
     attachments: [
       {
         filename,

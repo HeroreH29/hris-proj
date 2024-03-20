@@ -19,7 +19,7 @@ import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import useRecordForm from "../../hooks/useRecordForm";
 
-const DependentsList = ({ dependents, employeeId }) => {
+const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
   const { isOutletProcessor, branch } = useAuth();
 
   // eslint-disable-next-line
@@ -45,14 +45,18 @@ const DependentsList = ({ dependents, employeeId }) => {
     if (form.checkValidity() && !isLoading) {
       await addDependent(dependentData);
 
-      if (isOutletProcessor) {
+      // Send data to HR email if processed by outlet/branch (and vice versa)
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+        //const updateRecord = isOutletProcessor && dependents;
+        //const id = updateRecord ? geninfo?.id : "";
+
         await sendEmail(
-          generateEmailMsg(
+          generateEmailMsg({
             branch,
-            `${employeeId}-Dependent.json`,
-            "",
-            dependentData
-          )
+            filename: `${employeeId}-Dependent.json`,
+            compiledInfo: dependentData,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {
@@ -97,7 +101,8 @@ const DependentsList = ({ dependents, employeeId }) => {
             isOutletProcessor={isOutletProcessor}
             branch={branch}
             sendEmail={sendEmail}
-            generateEmailMsg={generateEmailMsg}
+            AssignedOutlet={AssignedOutlet}
+            employeeId={employeeId}
           />
         ))
     : null;

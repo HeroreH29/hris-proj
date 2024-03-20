@@ -574,6 +574,7 @@ const EditRecord = () => {
         >
           <EditPersonalInfoForm
             employeeId={employeeId}
+            AssignedOutlet={geninfo?.AssignedOutlet}
             personalinfo={personalinfo}
           />
         </Tab>
@@ -583,7 +584,11 @@ const EditRecord = () => {
           unmountOnExit={true}
           disabled={!employeeId}
         >
-          <DependentsList dependents={dependents} employeeId={employeeId} />
+          <DependentsList
+            dependents={dependents}
+            AssignedOutlet={geninfo?.AssignedOutlet}
+            employeeId={employeeId}
+          />
         </Tab>
         <Tab
           eventKey="educinfo"
@@ -591,7 +596,11 @@ const EditRecord = () => {
           unmountOnExit={true}
           disabled={!employeeId}
         >
-          <EducInfoList educinfos={educinfos} employeeId={employeeId} />
+          <EducInfoList
+            AssignedOutlet={geninfo?.AssignedOutlet}
+            educinfos={educinfos}
+            employeeId={employeeId}
+          />
         </Tab>
         <Tab
           eventKey="workinfo"
@@ -599,14 +608,17 @@ const EditRecord = () => {
           unmountOnExit={true}
           disabled={!employeeId}
         >
-          <WorkInfosList workinfos={workinfos} employeeId={employeeId} />
+          <WorkInfosList
+            AssignedOutlet={geninfo?.AssignedOutlet}
+            workinfos={workinfos}
+            employeeId={employeeId}
+          />
         </Tab>
         <Tab
           title="Print record"
           disabled={!employeeId || !personalinfo}
           eventKey={"printrecord"}
           unmountOnExit={true}
-          onSelect={() => console.log("first")}
         >
           <div className="text-center">
             <Button

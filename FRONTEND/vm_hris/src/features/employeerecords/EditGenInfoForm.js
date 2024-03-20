@@ -32,7 +32,7 @@ import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
-  const { username, isOutletProcessor, branch, isHR } = useAuth();
+  const { username, isOutletProcessor, branch } = useAuth();
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
@@ -117,13 +117,14 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           const id = updateRecord ? geninfo?.id : "";
 
           await sendEmail(
-            generateEmailMsg(
+            generateEmailMsg({
               branch,
-              `${geninfo?.EmployeeID}-GenInfo.json`,
+              filename: `${geninfo?.EmployeeID}-GenInfo.json`,
               id,
-              others,
-              updateRecord
-            )
+              compiledInfo: others,
+              updateRecord,
+              assignedOutlet: others.AssignedOutlet,
+            })
           );
         }
       }

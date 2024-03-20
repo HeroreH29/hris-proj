@@ -11,7 +11,7 @@ import useAuth from "../../hooks/useAuth";
 import useRecordForm from "../../hooks/useRecordForm";
 import WorkInfoModal from "../../modals/WorkInfoModal";
 
-const WorkInfosList = ({ workinfos, employeeId }) => {
+const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
   const { isOutletProcessor, branch } = useAuth();
 
   const [sendEmail] = useSendEmailMutation();
@@ -44,14 +44,16 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
     if (form.checkValidity() && !isLoading) {
       await addWorkinfo(workInfoData);
 
-      if (isOutletProcessor) {
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+        //const updateRecord = isOutletProcessor && payload;
+        //const id = updateRecord ? geninfo?.id : "";
         await sendEmail(
-          generateEmailMsg(
+          generateEmailMsg({
             branch,
-            `${employeeId}-WorkInfo.json`,
-            "",
-            workInfoData
-          )
+            filename: `${employeeId}-WorkInfo.json`,
+            workInfoData,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {
@@ -83,7 +85,8 @@ const WorkInfosList = ({ workinfos, employeeId }) => {
             branch={branch}
             isOutletProcessor={isOutletProcessor}
             sendEmail={sendEmail}
-            generateEmailMsg={generateEmailMsg}
+            AssignedOutlet={AssignedOutlet}
+            employeeId={employeeId}
           />
         ))
     : null;

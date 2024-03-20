@@ -8,13 +8,15 @@ import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
+import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 
 const EducInfo = ({
   educinfo,
   branch,
   isOutletProcessor,
   sendEmail,
-  generateEmailMsg,
+  AssignedOutlet,
+  employeeId,
 }) => {
   const navigate = useNavigate();
   const formRef = useRef();
@@ -45,17 +47,18 @@ const EducInfo = ({
     const form = e.currentTarget;
 
     if (form.checkValidity() && !isLoading) {
-      const payload = await updateEducinfo(others);
+      await updateEducinfo(others);
 
-      if (isOutletProcessor && payload) {
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         await sendEmail(
-          generateEmailMsg(
+          generateEmailMsg({
             branch,
-            `${educinfo?.EmployeeID}-EducInfo.json`,
-            educState.id,
-            educState,
-            true
-          )
+            filename: `${employeeId}-EducInfo.json`,
+            id: educinfo?.id,
+            compiledInfo: others,
+            update: true,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {

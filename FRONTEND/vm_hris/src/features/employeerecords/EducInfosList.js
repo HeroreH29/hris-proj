@@ -20,7 +20,7 @@ import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
-const EducInfoList = ({ educinfos, employeeId }) => {
+const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
   const { branch, isOutletProcessor } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
@@ -50,11 +50,18 @@ const EducInfoList = ({ educinfos, employeeId }) => {
     };
 
     if (form.checkValidity() && !isLoading) {
-      const payload = await addEducinfo(educInfoData);
+      await addEducinfo(educInfoData);
 
-      if (isOutletProcessor && payload) {
+      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+        //const updateRecord = isOutletProcessor && payload;
+        //const id = updateRecord ? geninfo?.id : "";
         await sendEmail(
-          generateEmailMsg(branch, `${branch}-EducInfo.json`, "", educInfoData)
+          generateEmailMsg({
+            branch,
+            filename: `${employeeId}-EducInfo.json`,
+            educInfoData,
+            assignedOutlet: AssignedOutlet,
+          })
         );
       }
     } else {
@@ -102,7 +109,8 @@ const EducInfoList = ({ educinfos, employeeId }) => {
             branch={branch}
             isOutletProcessor={isOutletProcessor}
             sendEmail={sendEmail}
-            generateEmailMsg={generateEmailMsg}
+            AssignedOutlet={AssignedOutlet}
+            employeeId={employeeId}
           />
         ))
     : null;

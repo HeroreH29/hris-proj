@@ -22,7 +22,7 @@ const useAuthForm = () => {
         return { ...state, confirmPassword: action.confirmPassword };
       }
       case "show_password": {
-        return { ...state, showPass: !state.showPass };
+        return { ...state, showPass: action.showPass ?? !state.showPass };
       }
       case "validated": {
         return { ...state, validated: action.validated };

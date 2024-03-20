@@ -58,13 +58,14 @@ const Login = () => {
         }
       } catch (error) {
         if (error.status === 401) {
-          toast.warn("Username or password incorrect");
+          toast.warn(error.data.message);
           stateDispatch({ type: "input_username", username: "" });
-          stateDispatch({ type: "input_password", password: "" });
         } else if (error.status === 404) {
-          toast.warn("No account found with username");
+          toast.warn(error.data.message);
           stateDispatch({ type: "input_username", username: "" });
         }
+        stateDispatch({ type: "input_password", password: "" });
+        stateDispatch({ type: "show_password", showPass: false });
       }
     }
 
@@ -128,7 +129,6 @@ const Login = () => {
                     stateDispatch({
                       type: "show_password",
                     });
-                    console.log(state.showPass);
                   }}
                 >
                   <FontAwesomeIcon

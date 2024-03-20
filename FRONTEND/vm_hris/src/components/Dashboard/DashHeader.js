@@ -5,9 +5,10 @@ import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
+import { useUpdateUserMutation } from "../../features/users/usersApiSlice";
 
 const DashHeader = () => {
-  const { isHR, isAdmin, isOutletProcessor } = useAuth();
+  const { isHR, isAdmin, isOutletProcessor, username } = useAuth();
 
   const toastId = useRef(null);
 
@@ -20,7 +21,7 @@ const DashHeader = () => {
     toast.update(toastId.current, {
       render: "Logged out",
       type: "success",
-      autoClose: 3000,
+      autoClose: 2000,
     });
 
   // eslint-disable-next-line
@@ -31,6 +32,16 @@ const DashHeader = () => {
   const [sendLogout, { isLoading, isSuccess, isError, error }] =
     useSendLogoutMutation();
 
+  const [
+    updateUser,
+    {
+      isLoading: userLoading,
+      isSuccess: userSuccess,
+      isError: userError,
+      error: usererr,
+    },
+  ] = useUpdateUserMutation();
+
   useEffect(() => {
     if (isSuccess) {
       // Update toast when logged out successfully
@@ -39,8 +50,8 @@ const DashHeader = () => {
     }
   }, [isSuccess, navigate]);
 
-  const onLogoutClicked = () => {
-    sendLogout();
+  const onLogoutClicked = async () => {
+    sendLogout({ username });
 
     notify();
   };

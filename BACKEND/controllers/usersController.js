@@ -93,24 +93,14 @@ const createNewUser = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-  const {
-    id,
-    username,
-    password,
-    firstName,
-    lastName,
-    branch,
-    userLevel,
-    userGroup,
-    active,
-  } = req.body;
+  const { id, username, password, userLevel, userGroup } = req.body;
 
   // Confirm data
   if (!id || !username || !userLevel || !userGroup) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const user = await User.findById(id).exec();
+  let user = await User.findById(id).exec();
 
   if (!user) {
     return res.status(400).json({ message: "User not found" });
@@ -127,18 +117,13 @@ const updateUser = async (req, res) => {
     return res.status(409).json({ message: "Username already taken" });
   }
 
-  user.username = username;
-  user.firstName = firstName;
-  user.lastName = lastName;
-  user.branch = branch;
-  user.userLevel = userLevel;
-  user.active = active;
-  user.userGroup = userGroup;
-
+  // For changing password
   if (password) {
     // Hash password
     user.password = await bcrypt.hash(password, 10); // salt rounds
   }
+
+  user = req.body;
 
   const updatedUser = await user.save();
 

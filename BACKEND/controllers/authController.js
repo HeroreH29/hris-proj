@@ -31,10 +31,14 @@ const login = async (req, res) => {
     return res.status(404).json({ message: "User does not exist" });
   }
 
+  // Check if user logging in is currently online. If not, update online status to TRUE
   if (foundUser.online) {
     return res
       .status(401)
       .json({ message: "This account is currently logged in" });
+  } else {
+    foundUser.online = true;
+    await foundUser.save();
   }
 
   const match = await bcrypt.compare(password, foundUser.password);
@@ -116,7 +120,14 @@ const refresh = async (req, res) => {
 const logout = async (req, res) => {
   const cookies = req.cookies;
 
-  // Revert online status of user to FALSE
+  const { username } = req.body;
+
+  const user = await User.findOne({ username }).exec();
+
+  if (user) {
+    user.online = false;
+    await user.save();
+  }
 
   if (!cookies?.jwt) return res.sendStatus(204); // No content
   res.clearCookie("jwt", logoutCookie);

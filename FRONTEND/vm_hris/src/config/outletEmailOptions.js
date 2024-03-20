@@ -1,0 +1,17 @@
+export const OUTLET_EMAILS = {
+  "Greenbelt 1": "gb1.viamare@gmail.com",
+  PICC: "picc@viamare.com.ph",
+  Landmark: ["marivic.viamare@gmail.com", "marivic.rono@gmail.com"],
+  "Head Office": "hr@viamare.com.ph",
+  Commissary: "commissary.viamare@gmail.com",
+  ICTSI: "ictsi.viamare@gmail.com",
+  "LM Trinoma": "landmarktrinom@viamare.com.ph",
+  "St. Lukes": "stlukesbgc@viamare.com.ph",
+  "EDSA Shangri-La": "shangrila@viamare.com.ph",
+  "Manila Golf": "mark.gonzales@viamare.com.ph",
+  "LM Alabang": "landmarkalabang@viamare.com.ph",
+  "NAIA-T3": ["antonio.viamare@gmail.com", "naiat3.viamare@gmail.com"],
+  "Ayala North Exchange": "ane.viamare@gmail.com",
+  "Celebrity Club": "celebrity.viamare@gmail.com",
+  "Araneta Gateway": "araneta2.viamare@gmail.com",
+};

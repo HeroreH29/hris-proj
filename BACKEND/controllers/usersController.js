@@ -93,37 +93,41 @@ const createNewUser = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-  const { id, username, password, userLevel, userGroup } = req.body;
+  const { id, ...others } = req.body;
+
+  const othersHasValues = Object.values(others).every(
+    (value) => value || value !== null
+  );
 
   // Confirm data
-  if (!id || !username || !userLevel || !userGroup) {
+  if (!othersHasValues) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  let user = await User.findById(id).exec();
+  // Check duplicate
+  const duplicate = await User.findOne({ username: others.username })
+    .collation({ locale: "en", strength: 2 })
+    .lean()
+    .exec();
+
+  // Allow username updates to the original user
+  if (duplicate && duplicate?._id.toString() !== id) {
+    return res.status(409).json({ message: "Username already taken" });
+  }
+
+  const user = await User.findByIdAndUpdate(id, others, {
+    new: true,
+  }).exec();
 
   if (!user) {
     return res.status(400).json({ message: "User not found" });
   }
 
-  // Check duplicate
-  const duplicate = await User.findOne({ username })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
-
-  // Allow updates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "Username already taken" });
-  }
-
   // For changing password
-  if (password) {
+  if (others.password) {
     // Hash password
-    user.password = await bcrypt.hash(password, 10); // salt rounds
+    user.password = await bcrypt.hash(others.password, 10); // salt rounds
   }
-
-  user = req.body;
 
   const updatedUser = await user.save();
 

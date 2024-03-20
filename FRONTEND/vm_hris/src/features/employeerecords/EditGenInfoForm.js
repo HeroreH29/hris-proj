@@ -32,7 +32,7 @@ import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
-  const { username, isOutletProcessor, branch } = useAuth();
+  const { username, isOutletProcessor, branch, isHR } = useAuth();
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
@@ -111,26 +111,18 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           await deleteInactiveEmp({ id: inactiveEmp?.id });
         }
 
-        // Send data to HR email if processed by outlet/branch
-        if (isOutletProcessor && geninfo) {
-          // Update record
+        // Send data to HR email if processed by outlet/branch (and vice versa)
+        if (isOutletProcessor || others.AssignedOutlet !== "Head Office") {
+          const updateRecord = isOutletProcessor && geninfo;
+          const id = updateRecord ? geninfo?.id : "";
+
           await sendEmail(
             generateEmailMsg(
               branch,
               `${geninfo?.EmployeeID}-GenInfo.json`,
-              geninfo?.id,
+              id,
               others,
-              true
-            )
-          );
-        } else if (isOutletProcessor) {
-          // Add new record
-          await sendEmail(
-            generateEmailMsg(
-              branch,
-              `${geninfo?.EmployeeID}-GenInfo.json`,
-              "",
-              others
+              updateRecord
             )
           );
         }

@@ -25,7 +25,11 @@ const User = ({ userId }) => {
 
     const userLevelString = String(user.userLevel);
     const userActiveString = user.active ? "Active" : "Inactive";
+    const userOnlineString = user.online ? "Online" : "Offline";
     const activeStringClr = user.active
+      ? "fw-semibold text-success"
+      : "fw-semibold text-danger";
+    const onlineStringClr = user.online
       ? "fw-semibold text-success"
       : "fw-semibold text-danger";
 
@@ -34,6 +38,7 @@ const User = ({ userId }) => {
         <td>{user.username}</td>
         <td>{userLevelString}</td>
         <td className={activeStringClr}>{userActiveString}</td>
+        <td className={onlineStringClr}>{userOnlineString}</td>
         {(isHR || isAdmin) && (
           <td>
             <Button variant="outline-primary" onClick={handleEdit}>

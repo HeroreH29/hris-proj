@@ -58,18 +58,13 @@ const UsersList = () => {
             </Col>
           )}
         </Row>
-        <Table
-          responsive
-          bordered
-          striped
-          hover
-          className="align-middle ms-3 mt-3 mb-3"
-        >
+        <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>
             <tr>
               <th scope="col">Username</th>
               <th scope="col">User level</th>
-              <th scope="col">Status</th>
+              <th scope="col">Account Status</th>
+              <th scope="col">Online Status</th>
               {(isHR || isAdmin) && <th scope="col">Edit</th>}
             </tr>
           </thead>

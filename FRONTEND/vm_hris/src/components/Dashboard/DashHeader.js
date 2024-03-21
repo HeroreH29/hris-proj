@@ -5,7 +5,6 @@ import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
-import { useUpdateUserMutation } from "../../features/users/usersApiSlice";
 
 const DashHeader = () => {
   const { isHR, isAdmin, isOutletProcessor, username } = useAuth();
@@ -29,18 +28,7 @@ const DashHeader = () => {
 
   const navigate = useNavigate();
 
-  const [sendLogout, { isLoading, isSuccess, isError, error }] =
-    useSendLogoutMutation();
-
-  const [
-    updateUser,
-    {
-      isLoading: userLoading,
-      isSuccess: userSuccess,
-      isError: userError,
-      error: usererr,
-    },
-  ] = useUpdateUserMutation();
+  const [sendLogout, { isSuccess, isError, error }] = useSendLogoutMutation();
 
   useEffect(() => {
     if (isSuccess) {

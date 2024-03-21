@@ -31,6 +31,12 @@ const login = async (req, res) => {
     return res.status(404).json({ message: "User does not exist" });
   }
 
+  const match = await bcrypt.compare(password, foundUser.password);
+
+  if (!match) {
+    return res.status(401).json({ message: "Wrong password" });
+  }
+
   // Check if user logging in is currently online. If not, update online status to TRUE
   if (foundUser.online) {
     return res
@@ -39,12 +45,6 @@ const login = async (req, res) => {
   } else {
     foundUser.online = true;
     await foundUser.save();
-  }
-
-  const match = await bcrypt.compare(password, foundUser.password);
-
-  if (!match) {
-    return res.status(401).json({ message: "Wrong password" });
   }
 
   const accessToken = jwt.sign(

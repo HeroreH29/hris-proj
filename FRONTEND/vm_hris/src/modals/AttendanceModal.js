@@ -58,8 +58,8 @@ const AttendanceModal = ({
               value={attModalState.dateTo}
               onChange={(e) =>
                 attModalDispatch({
-                  type: "date_from",
-                  dateFrom: e.target.value,
+                  type: "date_to",
+                  dateTo: e.target.value,
                 })
               }
             />

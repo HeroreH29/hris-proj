@@ -61,6 +61,7 @@ const EditUserForm = ({ user }) => {
   const onBranchChanged = (e) =>
     userDispatch({ type: "branch", branch: e.target.value });
   const onActiveChanged = () => userDispatch({ type: "active" });
+  const onOnlineChanged = () => userDispatch({ type: "online" });
 
   /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
@@ -68,9 +69,11 @@ const EditUserForm = ({ user }) => {
 
     const form = e.currentTarget;
 
+    console.log(form.checkValidity());
+
     const { __v, _id, password, ...others } = userState;
 
-    if (form.checkValidity() === true && !isLoading) {
+    if (form.checkValidity() && !isLoading) {
       if (password) {
         // If password is included in the form, update the password
         await updateUser({
@@ -289,6 +292,21 @@ const EditUserForm = ({ user }) => {
                 label={userState.active ? "Active" : "Inactive"}
                 checked={userState.active}
                 onChange={onActiveChanged}
+              />
+            </Form.Group>
+            <Form.Group as={Col} md={"4"}>
+              <Form.Label className="fw-semibold">Online Status</Form.Label>
+              <Form.Check
+                disabled={!userState.online}
+                type="switch"
+                label={
+                  userState.online
+                    ? "Online (click to logout this user)"
+                    : "Offline"
+                }
+                className={userState.online ? "text-success" : "text-danger"}
+                checked={userState.online}
+                onChange={onOnlineChanged}
               />
             </Form.Group>
           </Row>

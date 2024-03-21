@@ -13,6 +13,7 @@ const useUserForm = ({ user }) => {
         active: false,
         showPass: false,
         employeeId: undefined,
+        online: false,
       }
     : user;
 
@@ -44,6 +45,9 @@ const useUserForm = ({ user }) => {
       }
       case "active": {
         return { ...state, active: !state.active };
+      }
+      case "online": {
+        return { ...state, online: !state.online };
       }
       case "showpass": {
         return { ...state, showPass: !state.showPass };

@@ -6,8 +6,6 @@ import { Spinner } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const AnnouncementsList = () => {
-  const { isHR, isAdmin } = useAuth();
-
   const {
     data: announcements,
     isLoading,

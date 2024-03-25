@@ -1,5 +1,3 @@
-import React from "react";
-
 const getDatesInBetween = (date1, date2) => {
   // Generation of dates for attendance printing
 

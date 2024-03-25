@@ -38,8 +38,10 @@ const PersistLogin = () => {
   }, []);
 
   let content;
+
+  /* Check if user trusts the current device */
   if (!persist) {
-    console.log("no persist");
+    console.log("no persist"); // User does not trust device. Will force redirect eh user to login page
     content = <Outlet />;
   } else if (isLoading) {
     console.log("loading");

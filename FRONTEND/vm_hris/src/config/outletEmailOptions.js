@@ -14,4 +14,5 @@ export const OUTLET_EMAILS = {
   "Ayala North Exchange": "ane.viamare@gmail.com",
   "Celebrity Club": "celebrity.viamare@gmail.com",
   "Araneta Gateway": "araneta2.viamare@gmail.com",
+  admin: "hero.viamare@gmail.com",
 };

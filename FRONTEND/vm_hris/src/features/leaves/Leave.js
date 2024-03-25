@@ -17,10 +17,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
   const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
   const navigate = useNavigate();
 
-  const [
-    sendEmail,
-    { isSuccess: emailSuccess, isError: emailError, error: emailerr },
-  ] = useSendEmailMutation();
+  const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
 
   const { leave } = useGetLeavesQuery("leavesList", {
     selectFromResult: ({ data }) => ({

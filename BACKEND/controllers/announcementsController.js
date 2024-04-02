@@ -1,5 +1,5 @@
 const Announcement = require("../models/Announcement");
-//const User = require("../models/User");
+const User = require("../models/User");
 const format = require("date-fns/format");
 const parse = require("date-fns/parse");
 const {
@@ -10,7 +10,10 @@ const {
 // @route GET /announcements
 // @access Private
 const getAllAnnouncements = async (req, res) => {
-  const announcements = await Announcement.find().lean();
+  const announcements = await Announcement.find()
+    .sort({ date: 1 })
+    .populate("user")
+    .exec();
   if (!announcements?.length) {
     console.error("No announcements found...");
   }

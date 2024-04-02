@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
 
-const announcementSchema = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const announcementSchema = new Schema(
   {
     user: {
-      type: String,
-      default: "Unknown",
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     title: {
       type: String,

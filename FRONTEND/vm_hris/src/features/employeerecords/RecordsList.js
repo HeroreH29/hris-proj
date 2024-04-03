@@ -165,7 +165,8 @@ const RecordsList = () => {
 
       if (tableState.statusFilter !== "") {
         matches =
-          matches && geninfo.EmpStatus.toLowerCase() === statusFilterLowerCase;
+          matches &&
+          geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
       }
 
       return matches;

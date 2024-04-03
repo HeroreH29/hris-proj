@@ -41,13 +41,18 @@ const NewUserForm = () => {
 
   const [searchResults, setSearchResults] = useState("");
   const [selectedResult, setSelectedResult] = useState("");
+  const [searchBar, setSearchBar] = useState("");
 
   useEffect(() => {
     if (isSuccess) {
       toast.success("New user added!");
       navigate("/users");
     }
-  }, [isSuccess, navigate]);
+
+    if (isError) {
+      toast.error(error.data.message);
+    }
+  }, [isSuccess, isError, error, navigate]);
 
   /* HANDLERS */
   const onUsernameChanged = (e) =>
@@ -55,19 +60,10 @@ const NewUserForm = () => {
   const onPasswordChanged = (e) =>
     userDispatch({ type: "password", password: e.target.value });
   const onShowPassword = () => userDispatch({ type: "showpass" });
-  const onFirstNameChanged = (e) =>
-    userDispatch({ type: "firstName", firstName: e.target.value });
-  const onLastnameChanged = (e) =>
-    userDispatch({ type: "lastName", lastName: e.target.value });
-  const onEmployeeIdChanged = (e) =>
-    userDispatch({ type: "employeeId", employeeId: e.target.value });
-
   const onUserLevelChanged = (e) =>
     userDispatch({ type: "userLevel", userLevel: e.target.value });
   const onUserGroupChanged = (e) =>
     userDispatch({ type: "userGroup", userGroup: e.target.value });
-  const onBranchChanged = (e) =>
-    userDispatch({ type: "branch", branch: e.target.value });
 
   /* SUBMIT FUNCTION */
   const onSaveUserClicked = async (e) => {
@@ -94,15 +90,6 @@ const NewUserForm = () => {
       </option>
     );
   });
-
-  const branchOptions = Object.entries(BRANCHES).map(([key, value]) => {
-    return (
-      <option key={value} value={value}>
-        {key}
-      </option>
-    );
-  });
-
   const userGroupOptions = Object.entries(USERGROUPS).map(([key, value]) => {
     return (
       <option key={value} value={value}>
@@ -114,7 +101,7 @@ const NewUserForm = () => {
   const [validated, setValidated] = useState(false);
 
   const handleSearchEmployees = (searchTxt) => {
-    setSelectedResult(searchTxt);
+    setSearchBar(searchTxt);
     if (genSuccess) {
       const { ids, entities } = geninfos;
 
@@ -138,15 +125,13 @@ const NewUserForm = () => {
   };
 
   const searchResultClick = (employee) => {
+    setSearchBar(`${employee.FirstName} ${employee.LastName}`);
     setSearchResults("");
-    setSelectedResult(`${employee.FirstName} ${employee.LastName}`);
+    setSelectedResult(employee);
     if (genSuccess) {
       userDispatch({
         type: "employeeSelect",
-        firstName: employee.FirstName,
-        lastName: employee.LastName,
-        branch: employee.AssignedOutlet,
-        employeeId: employee.EmployeeID,
+        employee: employee.id,
       });
     }
   };
@@ -176,13 +161,13 @@ const NewUserForm = () => {
           validated={validated}
           onSubmit={onSaveUserClicked}
         >
-          {/* Username and password */}
+          {/* Search bar */}
           <Row className="mb-3">
             <Form.Label className="fw-semibold">Create account for:</Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
                 type="text"
-                value={selectedResult}
+                value={searchBar}
                 onChange={(e) => handleSearchEmployees(e.target.value)}
               />
               <Button variant="outline-secondary" disabled>
@@ -195,7 +180,7 @@ const NewUserForm = () => {
                   <ListGroup.Item
                     action
                     href="#"
-                    key={employee.EmployeeID}
+                    key={employee.id}
                     onClick={() => searchResultClick(employee)}
                   >
                     {employee.FirstName} {employee.LastName}
@@ -203,6 +188,7 @@ const NewUserForm = () => {
                 ))}
               </ListGroup>
             )}
+            {/* Username */}
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Username</Form.Label>
               <Form.Control
@@ -217,6 +203,7 @@ const NewUserForm = () => {
                 Please put valid username
               </Form.Control.Feedback>
             </Form.Group>
+            {/* Password */}
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Password</Form.Label>
               <InputGroup>
@@ -249,8 +236,7 @@ const NewUserForm = () => {
                 disabled
                 autoComplete="off"
                 placeholder="First Name"
-                value={userState.firstName}
-                onChange={onFirstNameChanged}
+                value={selectedResult.FirstName}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
@@ -262,25 +248,21 @@ const NewUserForm = () => {
                 disabled
                 autoComplete="off"
                 placeholder="Last Name"
-                value={userState.lastName}
-                onChange={onLastnameChanged}
+                value={selectedResult.LastName}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Branch and user group */}
+          {/* Branch/outlet and user group */}
           <Row className="mb-3">
             <Form.Group as={Col} md={"4"}>
-              <Form.Label className="fw-semibold">Branch</Form.Label>
-              <Form.Select
+              <Form.Label className="fw-semibold">Branch/Outlet</Form.Label>
+              <Form.Control
                 disabled
                 required
-                value={userState.branch}
-                onChange={onBranchChanged}
-              >
-                <option value="">Select branch...</option>
-                {branchOptions}
-              </Form.Select>
+                value={selectedResult.AssignedOutlet}
+                placeholder="Branch/Outlet"
+              />
               <Form.Control.Feedback type="invalid">
                 Select an option
               </Form.Control.Feedback>
@@ -309,9 +291,8 @@ const NewUserForm = () => {
                 autoComplete="off"
                 disabled
                 type="text"
-                value={userState.employeeId}
                 placeholder="Employee ID"
-                onChange={onEmployeeIdChanged}
+                value={selectedResult.EmployeeID}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>

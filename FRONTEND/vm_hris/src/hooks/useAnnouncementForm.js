@@ -1,11 +1,13 @@
 import { useReducer } from "react";
 
-const useAnnouncementForm = () => {
-  const initialState = {
-    title: "",
-    message: "",
-    validated: false,
-  };
+const useAnnouncementForm = ({ announcement }) => {
+  const initialState = !announcement
+    ? {
+        title: "",
+        message: "",
+        validated: false,
+      }
+    : announcement;
 
   const reducer = (state, action) => {
     switch (action.type) {

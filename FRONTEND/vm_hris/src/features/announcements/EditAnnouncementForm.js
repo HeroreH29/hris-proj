@@ -27,7 +27,7 @@ const EditAnnouncementForm = ({ announcement }) => {
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const { state, dispatch } = useAnnouncementForm();
+  const { state, dispatch } = useAnnouncementForm({ announcement });
 
   useEffect(() => {
     if (isSuccess || isDelSuccess) {

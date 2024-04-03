@@ -19,13 +19,12 @@ const EditUserForm = ({ user }) => {
   useTitle("Edit User | Via Mare HRIS");
 
   // eslint-disable-next-line
-  const [updateUser, { isLoading, isSuccess, isError, error }] =
-    useUpdateUserMutation();
+  const [updateUser, { isLoading, isSuccess }] = useUpdateUserMutation();
 
   const [
     deleteUser,
     // eslint-disable-next-line
-    { isSuccess: isDelSuccess, isError: isDelError, error: delerror },
+    { isSuccess: isDelSuccess },
   ] = useDeleteUserMutation();
 
   const navigate = useNavigate();
@@ -47,19 +46,10 @@ const EditUserForm = ({ user }) => {
   const onPasswordChanged = (e) =>
     userDispatch({ type: "password", password: e.target.value });
   const onShowPassword = () => userDispatch({ type: "showpass" });
-  const onFirstNameChanged = (e) =>
-    userDispatch({ type: "firstName", firstName: e.target.value });
-  const onLastnameChanged = (e) =>
-    userDispatch({ type: "lastName", lastName: e.target.value });
-  const onEmployeeIdChanged = (e) =>
-    userDispatch({ type: "employeeId", employeeId: e.target.value });
-
   const onUserLevelChanged = (e) =>
     userDispatch({ type: "userLevel", userLevel: e.target.value });
   const onUserGroupChanged = (e) =>
     userDispatch({ type: "userGroup", userGroup: e.target.value });
-  const onBranchChanged = (e) =>
-    userDispatch({ type: "branch", branch: e.target.value });
   const onActiveChanged = () => userDispatch({ type: "active" });
   const onOnlineChanged = () => userDispatch({ type: "online" });
 
@@ -205,8 +195,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 placeholder="First Name"
                 disabled
-                value={userState.firstName}
-                onChange={onFirstNameChanged}
+                value={userState.employee.FirstName}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
@@ -218,8 +207,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 placeholder="Last Name"
                 disabled
-                value={userState.lastName}
-                onChange={onLastnameChanged}
+                value={userState.employee.LastName}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>
@@ -228,14 +216,11 @@ const EditUserForm = ({ user }) => {
           <Row className="mb-3">
             <Form.Group as={Col} md={"4"}>
               <Form.Label className="fw-semibold">Branch</Form.Label>
-              <Form.Select
+              <Form.Control
                 disabled
                 required
-                value={userState.branch}
-                onChange={onBranchChanged}
-              >
-                {branchOptions}
-              </Form.Select>
+                value={userState.employee.AssignedOutlet}
+              />
               <Form.Control.Feedback type="invalid">
                 Select an option
               </Form.Control.Feedback>
@@ -264,8 +249,7 @@ const EditUserForm = ({ user }) => {
                 autoComplete="off"
                 type="text"
                 placeholder="Employee ID"
-                value={userState.employeeId}
-                onChange={onEmployeeIdChanged}
+                value={userState.employee.EmployeeID}
               />
               <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
             </Form.Group>

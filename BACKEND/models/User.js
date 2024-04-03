@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -9,24 +11,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  branch: {
-    type: String,
-    required: true,
-  },
   userGroup: {
     type: String,
-    required: true,
-  },
-  employeeId: {
-    type: Object,
     required: true,
   },
   userLevel: {
@@ -40,6 +26,10 @@ const userSchema = new mongoose.Schema({
   online: {
     type: Boolean,
     default: false,
+  },
+  employee: {
+    type: Schema.Types.ObjectId,
+    ref: "GenInfo",
   },
 });
 

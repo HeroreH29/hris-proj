@@ -25,7 +25,9 @@ const login = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const foundUser = await User.findOne({ username }).exec();
+  const foundUser = await User.findOne({ username })
+    .populate("employee")
+    .exec();
 
   if (!foundUser || !foundUser.active) {
     return res.status(404).json({ message: "User does not exist" });
@@ -52,9 +54,9 @@ const login = async (req, res) => {
       UserInfo: {
         username: foundUser.username,
         userLevel: foundUser.userLevel,
-        branch: foundUser.branch,
-        user: `${foundUser.lastName}, ${foundUser.firstName}`,
-        employeeId: foundUser.employeeId,
+        branch: foundUser.employee.AssignedOutlet,
+        user: `${foundUser.employee.FirstName}, ${foundUser.employee.LastName}`,
+        employeeId: foundUser.employee.EmployeeID,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -92,7 +94,9 @@ const refresh = async (req, res) => {
     async (err, decoded) => {
       if (err) return res.status(403).json({ message: "Forbidden" });
 
-      const foundUser = await User.findOne({ username: decoded.username });
+      const foundUser = await User.findOne({ username: decoded.username })
+        .populate("employee")
+        .exec();
 
       if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
 
@@ -101,9 +105,9 @@ const refresh = async (req, res) => {
           UserInfo: {
             username: foundUser.username,
             userLevel: foundUser.userLevel,
-            branch: foundUser.branch,
-            user: `${foundUser.lastName}, ${foundUser.firstName}`,
-            employeeId: foundUser.employeeId,
+            branch: foundUser.employee.AssignedOutlet,
+            user: `${foundUser.employee.FirstName}, ${foundUser.employee.LastName}`,
+            employeeId: foundUser.employee.EmployeeID,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,

@@ -3,7 +3,7 @@ import { useGetAnnouncementsQuery } from "./announcementsApiSlice";
 import React, { memo, useState } from "react";
 import { Card, Modal, Button } from "react-bootstrap";
 
-const Announcement = ({ announcementId, useAuth }) => {
+const Announcement = ({ announcementId, useAuth, username }) => {
   const { isHR, isAdmin } = useAuth();
 
   // Variable to simulate hover animation on card
@@ -34,7 +34,7 @@ const Announcement = ({ announcementId, useAuth }) => {
           <Card.Body>
             <Card.Title>{announcement.title}</Card.Title>
             <Card.Subtitle className="mb-2 text-muted">
-              from: {announcement.user}
+              from: {username}
             </Card.Subtitle>
             <Card.Text>{announcement.message}</Card.Text>
           </Card.Body>

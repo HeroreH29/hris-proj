@@ -5,37 +5,22 @@ const useUserForm = ({ user }) => {
     ? {
         username: "",
         password: "",
-        firstName: "",
-        lastName: "",
-        branch: "",
         userGroup: "",
         userLevel: "",
         active: false,
         showPass: false,
-        employeeId: undefined,
         online: false,
+        employee: "",
       }
     : user;
 
   const reducer = (state, action) => {
     switch (action.type) {
-      case "employeeId": {
-        return { ...state, employeeId: action.employeeId };
-      }
       case "username": {
         return { ...state, username: action.username };
       }
       case "password": {
         return { ...state, password: action.password };
-      }
-      case "firstName": {
-        return { ...state, firstName: action.firstName };
-      }
-      case "lastName": {
-        return { ...state, lastName: action.lastName };
-      }
-      case "branch": {
-        return { ...state, branch: action.branch };
       }
       case "userGroup": {
         return { ...state, userGroup: action.userGroup };
@@ -55,10 +40,7 @@ const useUserForm = ({ user }) => {
       case "employeeSelect": {
         return {
           ...state,
-          firstName: action.firstName,
-          lastName: action.lastName,
-          branch: action.branch,
-          employeeId: action.employeeId,
+          employee: action.employee,
         };
       }
 

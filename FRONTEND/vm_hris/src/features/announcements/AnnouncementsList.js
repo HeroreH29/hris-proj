@@ -22,7 +22,7 @@ const AnnouncementsList = () => {
 
   let cardContent;
   if (isSuccess) {
-    const { ids } = announcements;
+    const { ids, entities } = announcements;
 
     cardContent = ids?.length ? (
       ids.map((announcementId) => (
@@ -30,6 +30,7 @@ const AnnouncementsList = () => {
           key={announcementId}
           announcementId={announcementId}
           useAuth={useAuth}
+          username={entities[announcementId].user.username}
         />
       ))
     ) : (

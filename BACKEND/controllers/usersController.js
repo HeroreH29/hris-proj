@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const GenInfo = require("../models/GenInfo");
 const bcrypt = require("bcrypt");
 const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
@@ -6,7 +7,10 @@ const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 // @route GET /users
 // @access Private
 const getAllUsers = async (req, res) => {
-  const users = await User.find().select("-password").lean();
+  const users = await User.find()
+    .populate("employee")
+    .select("-password")
+    .lean();
   if (!users?.length) {
     return res.status(400).json({ message: "No users found" });
   }
@@ -17,73 +21,34 @@ const getAllUsers = async (req, res) => {
 // @route POST /users
 // @access Private
 const createNewUser = async (req, res) => {
-  const {
-    username,
-    password,
-    firstName,
-    lastName,
-    branch,
-    employeeId,
-    userLevel,
-    userGroup,
-  } = req.body;
+  const { username, password, userLevel, userGroup } = req.body;
 
   // Confirm data
-  if (
-    !username ||
-    !password ||
-    !firstName ||
-    !lastName ||
-    !branch ||
-    !employeeId ||
-    !userLevel ||
-    !userGroup
-  ) {
+  if (!username || !password || !userLevel || !userGroup) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // Check duplicates (same username lowercase or uppercase is considered)
-  const duplicate = await User.findOne({ employeeId })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
-  if (duplicate) {
+  // Check duplicates (same id)
+  const duplicate = await User.find({ employee: req.body.employee }).exec();
+  if (duplicate.length) {
     return res
       .status(409)
-      .json({ message: "User account with Employee ID already exist" });
+      .json({ message: "User account with selected employee already exist" });
   }
 
   // Hash password
   const hashedPwd = await bcrypt.hash(password, 10); // Salt rounds
 
-  const newEmployeeID = isStringAllNumbers(employeeId);
-
-  const userObject = !userLevel
-    ? {
-        username,
-        password: hashedPwd,
-        firstName,
-        lastName,
-        branch,
-        userGroup,
-        employeeId: newEmployeeID,
-      }
-    : {
-        username,
-        password: hashedPwd,
-        firstName,
-        lastName,
-        branch,
-        userGroup,
-        employeeId: newEmployeeID,
-        userLevel,
-      };
+  const userObject = {
+    ...req.body,
+    password: hashedPwd,
+  };
 
   // Create and store new user
   const user = await User.create(userObject);
 
   if (user) {
-    res.status(201).json({ message: `New user ${username} created` });
+    res.status(201).json({ message: `User account created` });
   } else {
     res.status(500).json({ message: "Invalid user data received" });
   }

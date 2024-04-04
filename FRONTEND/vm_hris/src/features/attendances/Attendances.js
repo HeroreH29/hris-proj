@@ -28,6 +28,7 @@ import useTableSettings from "../../hooks/useTableSettings";
 import AttendanceModal from "../../modals/AttendanceModal";
 import getDatesInBetween from "./getDatesInBetween";
 import useAttModalSettings from "../../hooks/useAttModalSettings";
+import GenerateTimeSheet from "./GenerateTimeSheet";
 
 const Attendances = () => {
   const { isOutletProcessor } = useAuth();
@@ -298,7 +299,7 @@ const Attendances = () => {
       )
       .map((id) => geninfos.entities[id])[0];
 
-    const generatedPdf = await GeneratePDF(geninfo, filteredAtt);
+    const generatedPdf = await GenerateTimeSheet(geninfo, filteredAtt);
 
     return generatedPdf;
   };

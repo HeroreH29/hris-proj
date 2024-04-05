@@ -197,7 +197,12 @@ const Attendance = ({ att, attlogData }) => {
     //     DAYSRow.updateAppearances(helveticaBold);
     //   });
 
-    const pdfBytes = await GenerateTimeSheet({ geninfo });
+    const pdfBytes = await GenerateTimeSheet({
+      geninfo,
+      filteredAtt,
+      dateFrom: attModalState.dateFrom,
+      dateTo: attModalState.dateTo,
+    });
 
     const modifiedPdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
     const modifiedPdfUrl = URL.createObjectURL(modifiedPdfBlob);
@@ -296,8 +301,8 @@ const Attendance = ({ att, attlogData }) => {
                   val2 * 1 === 0 ? `${formattedDate} ${formattedTime}` : "",
                 checkOut:
                   val2 * 1 === 1 ? `${formattedDate} ${formattedTime}` : "",
-                breakIn: val2 * 1 === 2 ? formattedTime : "",
-                breakOut: val2 * 1 === 3 ? formattedTime : "",
+                breakOut: val2 * 1 === 2 ? formattedTime : "",
+                breakIn: val2 * 1 === 3 ? formattedTime : "",
               });
             }
           } else {

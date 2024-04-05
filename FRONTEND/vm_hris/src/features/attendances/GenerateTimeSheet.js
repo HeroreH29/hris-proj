@@ -2,8 +2,15 @@ import React from "react";
 import { PDFDocument, rgb, StandardFonts, PageSizes } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { FONTS } from "../../config/fontBase64";
+import getDatesInBetween from "./getDatesInBetween";
+import { format } from "date-fns";
 
-const GenerateTimeSheet = async ({ geninfo = null, filteredAtt = null }) => {
+const GenerateTimeSheet = async ({
+  geninfo = null,
+  filteredAtt = null,
+  dateFrom = "",
+  dateTo = "",
+}) => {
   // Create a document
   const pdfDoc = await PDFDocument.create();
 
@@ -151,7 +158,7 @@ const GenerateTimeSheet = async ({ geninfo = null, filteredAtt = null }) => {
     page.drawText(geninfo.JobTitle, {
       x: width * 0.65,
       y: height - 8.2 * baseFontSize,
-      size: baseFontSize - String(geninfo.JobTitle).length * 0.7,
+      size: baseFontSize - String(geninfo.JobTitle).length * 0.3,
       font: workSansRegular,
     });
     page.drawLine({
@@ -161,19 +168,172 @@ const GenerateTimeSheet = async ({ geninfo = null, filteredAtt = null }) => {
 
     // Reminders section
     page.drawText(
-      "1. If an employee fails to clock in and/or out on a specific date, they will be marked as absent.",
+      "1. If an employee fails to clock in and/or out on a specific date, they will be marked as absent.\n2. Employees are responsible for completing their timesheets, which must then be endorsed by both their Supervisor and Operations Manager.\n3. Any falsification of information on this form constitutes grounds for DISMISSAL (Company Rule 1, Section 1a).\n4. Timesheets must reach the Human Resource Department within two working days after the cut-off date;\nlate submissions will be processed in the subsequent payroll cycle.\n5. Night differentials and overtime payments are calculated strictly on an hourly basis.",
       {
         x: width * 0.05,
         y: height - 10.2 * baseFontSize,
         size: baseFontSize - 6,
         font: workSansRegular,
+        lineHeight: 10,
       }
     );
   };
-  const pageBody = () => {};
+  const pageBody = () => {
+    const bodyFontSize = baseFontSize - 6;
+    // Table header top border
+    page.drawLine({
+      start: { x: width * 0.02, y: height * 0.73 },
+      end: { x: width * 0.98, y: height * 0.73 },
+    });
+
+    // Col names row
+    const colNames = [
+      "DAYS", // 0
+      "TIME-IN", // 1
+      "BREAK-OUT", // 2
+      "BREAK-IN", // 3
+      "TIME-OUT", // 4
+      "REG", // 5
+      "UT", // 6
+      "ROT", // 7
+      "ND", // 8
+      "SOT", // 9
+      "LHOT", // 10
+      "SHOT", // 11
+      "REMARKS", // 12
+    ];
+
+    // Spacing variables
+    let space = width * 0.042;
+    let colSpace = width * 0.02;
+    let rowSpace = height * 0.7;
+
+    colNames.forEach((name, index) => {
+      if (index === 0) space -= 5;
+      if (index === 2) space -= 20;
+      if (index === 3) space -= 25;
+      if (index === 4) space -= 23;
+      if (index === 5) space -= 10;
+      if (index === 7) space += 5;
+      if (index === 9) space += 5;
+      page.drawText(name, {
+        font: workSansBold,
+        x: space,
+        y: height * 0.72,
+        size: bodyFontSize,
+      });
+
+      if (space < width) space += width * ((name.length * 1.7) / 100);
+    });
+
+    // Table header bottom border
+    page.drawLine({
+      start: { x: width * 0.02, y: height * 0.715 },
+      end: { x: width * 0.98, y: height * 0.715 },
+    });
+
+    // Attendance data
+    const dateArr = getDatesInBetween(dateFrom, dateTo);
+
+    /* Check if document requested is appropriate based on employee type and length of dateArr */
+    if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
+      alert(
+        `Most # of days required for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Double check your dates!`
+      );
+      return;
+    }
+
+    /* Plot attendance data to the table */
+    dateArr.forEach((date, index) => {
+      const attIndex = filteredAtt.findIndex(
+        (att) =>
+          new Date(att.date).valueOf() ===
+          new Date(format(date, "MM/dd/yyyy")).valueOf()
+      );
+
+      // Destructured attendance data
+      const {
+        date: attDate,
+        checkIn,
+        checkOut,
+        breakIn,
+        breakOut,
+      } = filteredAtt[attIndex] || {};
+
+      // Day
+      page.drawText(
+        attIndex !== -1
+          ? format(new Date(attDate), "dd-eee")
+          : format(new Date(date), "dd-eee"),
+        {
+          x: width * 0.03,
+          y: rowSpace,
+          font: workSansBold,
+          size: bodyFontSize,
+        }
+      );
+
+      // Time-in
+      page.drawText(attIndex !== -1 ? format(new Date(checkIn), "p") : "", {
+        x: width * 0.105,
+        y: rowSpace,
+        font: workSansRegular,
+        size: bodyFontSize,
+      });
+
+      // Time-out
+      /* Also check if time out has the same day to time in. If not, indicate that time out is on different date */
+      if (new Date(checkOut).getDate() !== new Date(checkIn).getDate()) {
+        page.drawText(
+          attIndex !== -1 && checkOut
+            ? format(new Date(checkOut), "p (MMM dd)")
+            : "",
+          {
+            x: width * 0.39,
+            y: rowSpace,
+            font: workSansRegular,
+            size: bodyFontSize,
+          }
+        );
+      } else {
+        page.drawText(
+          attIndex !== -1 && checkOut ? format(new Date(checkOut), "p") : "",
+          {
+            x: width * 0.41,
+            y: rowSpace,
+            font: workSansRegular,
+            size: bodyFontSize,
+          }
+        );
+      }
+      rowSpace -= 22;
+    });
+
+    // Table column dividers
+    for (let x = 0; x < 14; x++) {
+      if (x === 1) colSpace += 5;
+      if (x === 2) colSpace -= 7;
+      if (x === 3) colSpace -= 22;
+      if (x === 4) colSpace -= 15;
+      if (x === 6) colSpace += 10;
+      if (x === 7) colSpace += 5;
+      if (x === 8) colSpace += 5;
+      if (x === 9) colSpace += 5;
+      if (x === 10) colSpace += 10;
+      if (x === 13) colSpace += 4;
+
+      page.drawLine({
+        start: { x: colSpace, y: height * 0.73 },
+        end: { x: colSpace, y: rowSpace + 12 },
+      });
+
+      colSpace += width * ((colNames?.[x]?.length * 1.5) / 100);
+    }
+  };
 
   // Process page parts
   pageTitle();
+  pageBody();
 
   const pdfBytes = await pdfDoc.save();
 

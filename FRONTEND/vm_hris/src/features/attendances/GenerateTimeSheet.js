@@ -1,5 +1,4 @@
-import React from "react";
-import { PDFDocument, rgb, StandardFonts, PageSizes } from "pdf-lib";
+import { PDFDocument, PageSizes } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { FONTS } from "../../config/fontBase64";
 import getDatesInBetween from "./getDatesInBetween";
@@ -10,7 +9,9 @@ const GenerateTimeSheet = async ({
   filteredAtt = null,
   dateFrom = "",
   dateTo = "",
+  casualrates = null,
 }) => {
+  console.log(casualrates?.dailyRate);
   // Create a document
   const pdfDoc = await PDFDocument.create();
 
@@ -39,11 +40,13 @@ const GenerateTimeSheet = async ({
   //     return form.getTextField(rowName);
   //   };
 
+  // Attendance data
+  const dateArr = getDatesInBetween(dateFrom, dateTo);
+
   // Page setup
   let page = pdfDoc.addPage(PageSizes.Letter);
   let { width, height } = page.getSize();
   const baseFontSize = 14;
-  let contentEnd = 0;
 
   const getCenterX = (text = "", fontSize = 0) => {
     const pageMidpoint = width / 2;
@@ -51,6 +54,11 @@ const GenerateTimeSheet = async ({
 
     return pageMidpoint - textWidth;
   };
+
+  // Spacing variables
+  let space = width * 0.042;
+  let colSpace = width * 0.02;
+  let rowSpace = height * 0.7;
 
   // Page parts
   const pageTitle = () => {
@@ -66,8 +74,11 @@ const GenerateTimeSheet = async ({
       size: baseFontSize - 5,
       font: workSansRegular,
     });
-    page.drawText("(Regular/Probationary)", {
-      x: getCenterX("(Regular/Probationary)", baseFontSize - 5),
+    page.drawText(`(for ${geninfo.EmployeeType} Employees)`, {
+      x: getCenterX(
+        `(for ${geninfo.EmployeeType} Employees)`,
+        baseFontSize - 5
+      ),
       y: height - 4 * baseFontSize,
       size: baseFontSize - 5,
       font: workSansRegular,
@@ -81,7 +92,9 @@ const GenerateTimeSheet = async ({
       font: workSansBold,
     });
     page.drawText(
-      `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}. - (${geninfo.BioID})`,
+      `${geninfo.LastName ?? ""}, ${geninfo.FirstName ?? ""} ${
+        geninfo.MI ?? ""
+      }. - (${geninfo.BioID})`,
       {
         x: width * 0.13,
         y: height - 7 * baseFontSize,
@@ -158,7 +171,7 @@ const GenerateTimeSheet = async ({
     page.drawText(geninfo.JobTitle, {
       x: width * 0.65,
       y: height - 8.2 * baseFontSize,
-      size: baseFontSize - String(geninfo.JobTitle).length * 0.3,
+      size: baseFontSize - 4,
       font: workSansRegular,
     });
     page.drawLine({
@@ -203,11 +216,6 @@ const GenerateTimeSheet = async ({
       "REMARKS", // 12
     ];
 
-    // Spacing variables
-    let space = width * 0.042;
-    let colSpace = width * 0.02;
-    let rowSpace = height * 0.7;
-
     colNames.forEach((name, index) => {
       if (index === 0) space -= 5;
       if (index === 2) space -= 20;
@@ -231,17 +239,6 @@ const GenerateTimeSheet = async ({
       start: { x: width * 0.02, y: height * 0.715 },
       end: { x: width * 0.98, y: height * 0.715 },
     });
-
-    // Attendance data
-    const dateArr = getDatesInBetween(dateFrom, dateTo);
-
-    /* Check if document requested is appropriate based on employee type and length of dateArr */
-    if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
-      alert(
-        `Most # of days required for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Double check your dates!`
-      );
-      return;
-    }
 
     /* Plot attendance data to the table */
     dateArr.forEach((date, index) => {
@@ -274,12 +271,15 @@ const GenerateTimeSheet = async ({
       );
 
       // Time-in
-      page.drawText(attIndex !== -1 ? format(new Date(checkIn), "p") : "", {
-        x: width * 0.105,
-        y: rowSpace,
-        font: workSansRegular,
-        size: bodyFontSize,
-      });
+      page.drawText(
+        attIndex !== -1 && checkIn ? format(new Date(checkIn), "p") : "",
+        {
+          x: width * 0.105,
+          y: rowSpace,
+          font: workSansRegular,
+          size: bodyFontSize,
+        }
+      );
 
       // Time-out
       /* Also check if time out has the same day to time in. If not, indicate that time out is on different date */
@@ -289,7 +289,7 @@ const GenerateTimeSheet = async ({
             ? format(new Date(checkOut), "p (MMM dd)")
             : "",
           {
-            x: width * 0.39,
+            x: width * 0.38,
             y: rowSpace,
             font: workSansRegular,
             size: bodyFontSize,
@@ -306,6 +306,30 @@ const GenerateTimeSheet = async ({
           }
         );
       }
+
+      // Break-out & Break-in
+      /* Check if break-out on current row exist */
+      if (breakOut) {
+        page.drawText(breakOut, {
+          font: workSansRegular,
+          size: bodyFontSize,
+          x: width * 0.205,
+          y: rowSpace,
+        });
+        page.drawText(breakIn, {
+          font: workSansRegular,
+          size: bodyFontSize,
+          x: width * 0.305,
+          y: rowSpace,
+        });
+      }
+
+      // Table row dividers
+      page.drawLine({
+        start: { x: width * 0.02, y: rowSpace - 10 },
+        end: { x: width * 0.98, y: rowSpace - 10 },
+      });
+
       rowSpace -= 22;
     });
 
@@ -330,20 +354,202 @@ const GenerateTimeSheet = async ({
       colSpace += width * ((colNames?.[x]?.length * 1.5) / 100);
     }
   };
+  const pageFooter = () => {
+    page.drawText(`"WE CERTIFY THE ACCURACY OF THE ATTENDANCE RECORDS ABOVE"`, {
+      font: workSansBoldItalic,
+      size: baseFontSize - 4,
+      x:
+        getCenterX(
+          `"WE CERTIFY THE ACCURACY OF THE ATTENDANCE RECORDS ABOVE"`,
+          baseFontSize - 4
+        ) - 20,
+      y: rowSpace - 20,
+    });
+
+    // Employee signature
+    page.drawLine({
+      start: { x: width * 0.05, y: rowSpace - 50 },
+      end: { x: width * 0.3, y: rowSpace - 50 },
+    });
+    page.drawText("Employee", {
+      x: width * 0.13,
+      y: rowSpace - 60,
+      font: workSansBold,
+      size: baseFontSize - 4,
+    });
+
+    // Supervisor signature
+    page.drawLine({
+      start: { x: width * 0.35, y: rowSpace - 50 },
+      end: { x: width * 0.65, y: rowSpace - 50 },
+    });
+    page.drawText("Supervisor", {
+      x: width * 0.448,
+      y: rowSpace - 60,
+      font: workSansBold,
+      size: baseFontSize - 4,
+    });
+
+    // Operations Manager signature
+    page.drawLine({
+      start: { x: width * 0.7, y: rowSpace - 50 },
+      end: { x: width * 0.95, y: rowSpace - 50 },
+    });
+    page.drawText("Operations Manager", {
+      x: width * 0.75,
+      y: rowSpace - 60,
+      font: workSansBold,
+      size: baseFontSize - 4,
+    });
+
+    // DIVIDER
+    let divLine = "-";
+    let divLineX = width * 0.02;
+
+    page.drawText("DO NOT FILL BELOW THIS LINE", {
+      font: workSansBoldItalic,
+      size: baseFontSize - 4,
+      x: width * 0.37,
+      y: rowSpace - 80,
+      opacity: 0.5,
+    });
+
+    do {
+      if (divLineX < width * 0.35 || divLineX > width * 0.63)
+        page.drawText(divLine, {
+          x: divLineX,
+          y: rowSpace - 80,
+          font: workSansBold,
+          size: baseFontSize - 4,
+          opacity: 0.5,
+        });
+
+      divLineX += 10;
+    } while (divLineX < width * 0.98);
+
+    let fillFormSpace = rowSpace - 100;
+    // Change fill form based on employee type
+    if (geninfo.EmployeeType !== "Casual") {
+      const TBFilledArr1 = [
+        "No. of Days: __________",
+        "Night Diff.: __________",
+        "Regular OT: __________",
+        "Sunday OT: __________",
+      ];
+      const TBFilledArr2 = [
+        "Absences: __________",
+        "Undertime: __________",
+        "Legal Hol.: __________",
+        "Special Hol.: __________",
+      ];
+
+      let arr1Row = width * 0.028;
+      TBFilledArr1.forEach((val) => {
+        page.drawText(val, {
+          x: arr1Row,
+          y: fillFormSpace,
+          font: workSansBold,
+          size: baseFontSize - 4,
+        });
+        arr1Row += 150;
+      });
+
+      fillFormSpace -= 20;
+
+      let arr2Row = width * 0.028;
+      TBFilledArr2.forEach((val) => {
+        page.drawText(val, {
+          x: arr2Row,
+          y: fillFormSpace,
+          font: workSansBold,
+          size: baseFontSize - 4,
+        });
+        arr2Row += 150;
+      });
+
+      fillFormSpace -= 20;
+    } else {
+      const casualFillFormArr = [
+        "No of Days",
+        "ND",
+        "ROT",
+        "SOT",
+        "ExSOT",
+        "LHOT",
+        "ExLHOT",
+        "SHOT",
+        "ExSHOT",
+        "UT",
+      ];
+
+      casualFillFormArr.forEach((val) => {
+        let rateTxt = "";
+        if (val === "No of Days") {
+          rateTxt = "x daily rate";
+        } else {
+          rateTxt = "hrs x hourly rate";
+        }
+
+        page.drawText(
+          val +
+            `: __________ - ${rateTxt} - P ${
+              val !== "No of Days" ? casualrates[val] : casualrates?.dailyRate
+            } = ____________________`,
+          {
+            size: baseFontSize - 4,
+            font: workSansBold,
+            x: width * 0.23,
+            y: fillFormSpace,
+          }
+        );
+
+        fillFormSpace -= 20;
+      });
+    }
+
+    page.drawText("Processed for HRD by: ______________________________", {
+      font: workSansBold,
+      size: baseFontSize - 4,
+      x: width * 0.028,
+      y: fillFormSpace - 20,
+    });
+    page.drawText("Checked by: ______________________________", {
+      font: workSansBold,
+      size: baseFontSize - 4,
+      x: width * 0.6,
+      y: fillFormSpace - 20,
+    });
+
+    page.drawText(`Print Date/Time: ${format(new Date(), "PPPP pp")}`, {
+      font: workSansBold,
+      size: baseFontSize - 4,
+      x: width * 0.028,
+      y: fillFormSpace - 50,
+      opacity: 0.5,
+    });
+    page.drawText(
+      `Period Covered: ${format(new Date(dateFrom), "MMM dd")} - ${format(
+        new Date(dateTo),
+        "PP"
+      )}`,
+      {
+        font: workSansBold,
+        size: baseFontSize - 4,
+        x: width * 0.6,
+        y: fillFormSpace - 50,
+        opacity: 0.5,
+      }
+    );
+  };
 
   // Process page parts
   pageTitle();
   pageBody();
+  pageFooter();
 
   const pdfBytes = await pdfDoc.save();
 
   return pdfBytes;
-
-  //   const blobUrl = URL.createObjectURL(
-  //     new Blob([pdfBytes], { type: "application/pdf" })
-  //   );
-
-  //   window.open(blobUrl, "_blank");
 };
 
 export default GenerateTimeSheet;

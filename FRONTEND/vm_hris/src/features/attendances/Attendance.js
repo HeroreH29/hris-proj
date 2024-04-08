@@ -1,27 +1,17 @@
 import React, { memo, useState } from "react";
 import { format, parse } from "date-fns";
-import {
-  useGetDocumentsQuery,
-  useGetGeninfosQuery,
-} from "../employeerecords/recordsApiSlice";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { toast } from "react-toastify";
 import AttendanceModal from "../../modals/AttendanceModal";
-import getDatesInBetween from "./getDatesInBetween";
 import useAttModalSettings from "../../hooks/useAttModalSettings";
 import useTableSettings from "../../hooks/useTableSettings";
 import GenerateTimeSheet from "./GenerateTimeSheet";
+import getDatesInBetween from "./getDatesInBetween";
+import { useGetCasualRatesQuery } from "./attendancesApiSlice";
 
 const Attendance = ({ att, attlogData }) => {
   const { attModalState, attModalDispatch } = useAttModalSettings();
   const { tableState, tableDispatch } = useTableSettings();
-
-  // Fetch document using document name (filename)
-  const { documents } = useGetDocumentsQuery("recordsList", {
-    selectFromResult: ({ data }) => ({
-      documents: data?.ids?.map((id) => data?.entities[id]),
-    }),
-  });
 
   // Fetch general info using Bio ID
   const { geninfo } = useGetGeninfosQuery("recordsList", {
@@ -34,174 +24,37 @@ const Attendance = ({ att, attlogData }) => {
     }),
   });
 
+  // Casual rate data
+  const { data: casualrates, error } = useGetCasualRatesQuery();
+
   const [matchingAtt, setMatchingAtt] = useState([]);
 
   // Printing attendance function
   const handlePrintAtt = async () => {
-    // let filename;
+    /* Check if document requested is appropriate based on employee type and length of dateArr */
+    if (
+      geninfo.EmployeeType === "Casual" &&
+      getDatesInBetween(attModalState.dateFrom, attModalState.dateTo)?.length >
+        7
+    ) {
+      toast.error(
+        `Most # of days required for Casual Time Sheet is 7 days. Requested is ${
+          getDatesInBetween(attModalState.dateFrom, attModalState.dateTo)
+            ?.length
+        } days. Double check your dates!`
+      );
+      return;
+    }
 
-    // // Determine if the employee type is regular/probationary or casual to change which document to pull
-    // if (geninfo.EmployeeType !== "Casual") {
-    //   filename = "reg-probi_time_sheet";
-    // } else {
-    //   filename = "casual_time_sheet";
-    // }
-
-    // // Find the specific document from the fetched documents data from the database
-    // const doc = documents.find((document) => document.filename === filename);
-
-    // // Proceed in generating the document with the employee and attendance data
-    // try {
-    //   const formUrl = `data:application/pdf;base64,${doc?.data}`;
-    //   const formPdfBytes = await fetch(formUrl).then((res) =>
-    //     res.arrayBuffer()
-    //   );
-    //   const pdfDoc = await PDFDocument.load(formPdfBytes);
-    //   const form = pdfDoc.getForm();
-    //   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    //   const fontSize = 8.5;
-
-    //   // Function to find fields on the document
-    //   const FieldFinder = (fieldName, altFieldName) => {
-    //     let row = form.getFieldMaybe(fieldName);
-    //     if (!row) {
-    //       row = form.getField(altFieldName);
-    //     }
-    //     let rowName = row.getName();
-    //     return form.getTextField(rowName);
-    //   };
-
-    //   const EmployeeName = FieldFinder(
-    //     "EmployeeName",
-    //     "undefined.EmployeeName"
-    //   );
-    //   const BioID = FieldFinder("BioID", "undefined.BioID");
-    //   const DepartmentBranch = FieldFinder(
-    //     "DepartmentBranch",
-    //     "undefined.DepartmentBranch"
-    //   );
-    //   const Position = FieldFinder("Position", "undefined.Position");
-    //   const PrintDateTime = FieldFinder(
-    //     "PrintDateTime",
-    //     "undefined.PrintDateTime"
-    //   );
-    //   const PeriodCovered = FieldFinder(
-    //     "PeriodCovered",
-    //     "undefined.PeriodCovered"
-    //   );
-
-    //   // Set value to text fields
-    //   EmployeeName.setText(
-    //     `${geninfo.LastName}, ${geninfo.FirstName} ${geninfo.MI}`
-    //   );
-    //   EmployeeName.updateAppearances(helveticaBold);
-    //   BioID.setText(`(${geninfo.BioID.toString()})`);
-    //   BioID.updateAppearances(helveticaBold);
-    //   DepartmentBranch.setText(
-    //     `${geninfo.Department} - ${geninfo.AssignedOutlet}`
-    //   );
-    //   DepartmentBranch.updateAppearances(helveticaBold);
-    //   Position.setText(geninfo.JobTitle);
-    //   Position.updateAppearances(helveticaBold);
-    //   PrintDateTime.setText(format(new Date(), "eeee, MMMM dd, yyyy @ pp"));
-    //   PeriodCovered.setText(
-    //     `${format(new Date(attModalState.dateFrom), "MMM dd")} - ${format(
-    //       new Date(attModalState.dateTo),
-    //       "MMM dd yyyy"
-    //     )}`
-    //   );
-
-    //   // Copy of dates array returned from GetDatesInBetween()
-    //   const dateArr = getDatesInBetween(
-    //     attModalState.dateFrom,
-    //     attModalState.dateTo
-    //   );
-
-    //   // Check if document requested is appropriate based on employee type and length of dateArr
-    //   if (geninfo.EmployeeType === "Casual" && dateArr?.length > 7) {
-    //     alert(
-    //       `Most # of days required for Casual Time Sheet is 7 days. Requested is ${dateArr?.length} days. Double check your dates!`
-    //     );
-    //     return;
-    //   }
-
-    //   dateArr.forEach((date, index) => {
-    //     /* NOTE: the text field names suddenly had 'undefined' included before
-    //     actual field name after editing in Nitro Pro 9 so i created
-    //     FieldFinder() to fix that issue somehow */
-
-    //     // For finding specific index of the filtered attendance data
-    //     const attIndex = filteredAtt.findIndex(
-    //       (att) =>
-    //         new Date(att.date).valueOf() ===
-    //         new Date(format(date, "MM/dd/yyyy")).valueOf()
-    //     );
-
-    //     const DAYSRow = FieldFinder(
-    //       `DAYSRow${index + 1}`,
-    //       `undefined.DAYSRow${index + 1}`
-    //     );
-    //     DAYSRow.setFontSize(fontSize - 1);
-
-    //     const TimeInRow = FieldFinder(
-    //       `Time InRow${index + 1}`,
-    //       `undefined.Time InRow${index + 1}`
-    //     );
-    //     TimeInRow.setFontSize(fontSize);
-
-    //     const TimeOutRow = FieldFinder(
-    //       `Time OutRow${index + 1}`,
-    //       `undefined.Time OutRow${index + 1}`
-    //     );
-    //     TimeOutRow.setFontSize(fontSize);
-
-    //     const BreakInRow = FieldFinder(
-    //       `Break InRow${index + 1}`,
-    //       `undefined.Break InRow${index + 1}`
-    //     );
-    //     BreakInRow.setFontSize(fontSize);
-
-    //     const BreakOutRow = FieldFinder(
-    //       `Break OutRow${index + 1}`,
-    //       `undefined.Break OutRow${index + 1}`
-    //     );
-    //     BreakOutRow.setFontSize(fontSize);
-
-    //     // If an index is found...
-    //     if (attIndex !== -1) {
-    //       // Days rows set text
-    //       DAYSRow.setText(
-    //         format(new Date(filteredAtt[attIndex].date), "dd-eee")
-    //       );
-
-    //       // Time in and time out rows set text
-    //       if (filteredAtt[attIndex].checkIn !== "" && TimeInRow) {
-    //         TimeInRow.setText(`${filteredAtt[attIndex].checkIn}`);
-    //         if (TimeInRow.getText().length > 15) {
-    //           TimeInRow.setFontSize(8);
-    //         }
-    //       }
-    //       if (filteredAtt[attIndex].checkOut !== "" && TimeOutRow) {
-    //         TimeOutRow.setText(`${filteredAtt[attIndex].checkOut}`);
-    //         if (TimeOutRow.getText().length > 15) {
-    //           TimeOutRow.setFontSize(8);
-    //         }
-    //       }
-
-    //       // Break in and break out rows set text
-    //       BreakInRow.setText(filteredAtt[attIndex].breakIn);
-    //       BreakOutRow.setText(filteredAtt[attIndex].breakOut);
-    //     } else {
-    //       DAYSRow.setText(format(new Date(date), "dd-eee"));
-    //     }
-    //     DAYSRow.updateAppearances(helveticaBold);
-    //   });
+    const { ids, entities } = casualrates;
+    const currentCasRates = ids.map((id) => entities[id])[0];
 
     const pdfBytes = await GenerateTimeSheet({
       geninfo,
       filteredAtt,
       dateFrom: attModalState.dateFrom,
       dateTo: attModalState.dateTo,
+      casualrates: currentCasRates,
     });
 
     const modifiedPdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -245,8 +98,8 @@ const Attendance = ({ att, attlogData }) => {
         <tr key={index}>
           <td>{att.date}</td>
           <td>{att.checkIn}</td>
-          <td>{att.breakIn}</td>
           <td>{att.breakOut}</td>
+          <td>{att.breakIn}</td>
           <td>{att.checkOut}</td>
         </tr>
       ));

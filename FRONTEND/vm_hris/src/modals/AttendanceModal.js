@@ -101,8 +101,8 @@ const AttendanceModal = ({
             <tr className="align-middle">
               <th>Date</th>
               <th>Time-In</th>
-              <th>Break-In</th>
               <th>Break-Out</th>
+              <th>Break-In</th>
               <th>Time-Out</th>
             </tr>
           </thead>

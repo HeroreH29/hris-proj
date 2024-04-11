@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const genInfoSchema = new mongoose.Schema({
+const genInfoSchema = new Schema({
   EmployeeID: {
     type: Object,
     required: true,

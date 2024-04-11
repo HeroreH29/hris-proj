@@ -11,7 +11,6 @@ const GenerateTimeSheet = async ({
   dateTo = "",
   casualrates = null,
 }) => {
-  console.log(casualrates?.dailyRate);
   // Create a document
   const pdfDoc = await PDFDocument.create();
 
@@ -20,13 +19,13 @@ const GenerateTimeSheet = async ({
 
   // Gazpacho font
   const gazpachoBlack = await pdfDoc.embedFont(FONTS.GazpachoBlack);
-  const gazpachoRegularItalic = await pdfDoc.embedFont(
-    FONTS.GazpachoRegularItalic
-  );
+  // const gazpachoRegularItalic = await pdfDoc.embedFont(
+  //   FONTS.GazpachoRegularItalic
+  // );
 
   // Work Sans font
   const workSansRegular = await pdfDoc.embedFont(FONTS.WorkSansRegular);
-  const workSansItalic = await pdfDoc.embedFont(FONTS.WorkSansItalic);
+  //const workSansItalic = await pdfDoc.embedFont(FONTS.WorkSansItalic);
   const workSansBold = await pdfDoc.embedFont(FONTS.WorkSansBold);
   const workSansBoldItalic = await pdfDoc.embedFont(FONTS.WorkSansBoldItalic);
 

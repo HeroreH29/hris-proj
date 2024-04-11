@@ -1,6 +1,6 @@
 {
   "name": "hris",
-  "version": "1.0.39",
+  "version": "1.0.41",
   "description": "backend for vm hris web application",
   "main": "server.js",
   "scripts": {

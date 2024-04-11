@@ -62,9 +62,8 @@ const Attendance = ({ att, attlogData }) => {
 
     toast.success("Time sheet generated!");
     window.open(modifiedPdfUrl, "_blank");
-    // } catch (error) {
-    //   console.error("handlePrintAtt error - ", error);
-    // }
+
+    attModalDispatch({ type: "close_modal" });
   };
 
   // For filtering attendance (if date range has been set by user)
@@ -180,6 +179,7 @@ const Attendance = ({ att, attlogData }) => {
     } catch (error) {
       console.error(`handleShowModal Error: ${error}`);
     }
+
     setMatchingAtt(tempAttData);
     attModalDispatch({ type: "show_modal" });
   };

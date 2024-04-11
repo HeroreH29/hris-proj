@@ -29,7 +29,7 @@ const useAttModalSettings = () => {
         return { ...state, showModal: true };
       }
       case "close_modal": {
-        return { ...state, showModal: false };
+        return { ...state, showModal: false, dateTo: "", dateFrom: "" };
       }
 
       default: {

@@ -22,7 +22,7 @@ const NewAnnouncementForm = () => {
   const navigate = useNavigate();
 
   /* VARIABLES */
-  const { state, dispatch } = useAnnouncementForm();
+  const { state, dispatch } = useAnnouncementForm({});
 
   useEffect(() => {
     if (isSuccess) {

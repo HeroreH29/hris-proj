@@ -9,7 +9,7 @@ import {
   useGetPersonalinfosQuery,
   useGetWorkinfosQuery,
   useGetInactiveEmpsQuery,
-  useUpdateGeninfoMutation,
+  /* useUpdateGeninfoMutation,
   useUpdatePersonalinfoMutation,
   useUpdateDependentMutation,
   useUpdateEducinfoMutation,
@@ -18,7 +18,7 @@ import {
   useAddPersonalinfoMutation,
   useAddDependentMutation,
   useAddEducinfoMutation,
-  useAddWorkinfoMutation,
+  useAddWorkinfoMutation, */
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -28,7 +28,7 @@ import {
   Row,
   Col,
   Button,
-  Form,
+  /* Form, */
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong, faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -42,7 +42,7 @@ import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 import { FONTS } from "../../config/fontBase64";
 import fontkit from "@pdf-lib/fontkit";
-import uploadData from "../uploaddata/uploadData";
+//import uploadData from "../uploaddata/uploadData";
 
 const refetchInterval = 15000;
 
@@ -142,7 +142,7 @@ const EditRecord = () => {
   });
 
   // Create and Update API's for employee record file upload
-  const [createGenInfo] = useAddGeninfoMutation();
+  /*  const [createGenInfo] = useAddGeninfoMutation();
   const [createPersonalInfo] = useAddPersonalinfoMutation();
   const [createDependent] = useAddDependentMutation();
   const [createEducInfo] = useAddEducinfoMutation();
@@ -152,7 +152,7 @@ const EditRecord = () => {
   const [updatePersonalInfo] = useUpdatePersonalinfoMutation();
   const [updateDependents] = useUpdateDependentMutation();
   const [updateEducInfo] = useUpdateEducinfoMutation();
-  const [updateWorkInfo] = useUpdateWorkinfoMutation();
+  const [updateWorkInfo] = useUpdateWorkinfoMutation(); */
 
   let content;
 
@@ -316,7 +316,11 @@ const EditRecord = () => {
                 ? personalinfo?.PresentAddress
                 : personalinfo?.Address
             );
-            element.setFontSize(fontSize - element.getText().length * 0.3);
+            const newFontSize = Math.max(
+              fontSize - element.getText().length,
+              10
+            );
+            element.setFontSize(newFontSize);
           } else if (e === "PermanentAddress") {
             element.setText(
               personalinfo.PermanentAddress ? personalinfo.PermanentAddress : ""
@@ -459,7 +463,7 @@ const EditRecord = () => {
     }
   };
 
-  const handleEmployeeRecordUpload = async (file) => {
+  /* const handleEmployeeRecordUpload = async (file) => {
     if (!file.type.startsWith("application/json")) {
       toast.error("Invalid file type. Please upload a '.json' file");
     }
@@ -518,7 +522,7 @@ const EditRecord = () => {
     };
 
     reader.readAsText(file);
-  };
+  }; */
 
   content = (
     <Container>
@@ -545,7 +549,7 @@ const EditRecord = () => {
             )}
           </div>
         </Col>
-        {!employeeId && (
+        {/* {!employeeId && (
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">
               Or upload a record file here...
@@ -556,7 +560,7 @@ const EditRecord = () => {
               onChange={(e) => handleEmployeeRecordUpload(e.target.files[0])}
             />
           </Form.Group>
-        )}
+        )} */}
       </Row>
       <Tabs
         className="p-3 mb-3"

@@ -46,11 +46,7 @@ const LeavesList = () => {
     isSuccess: creditsSuccess,
     isError: creditsError,
     error: credserr,
-  } = useGetLeaveCreditsQuery(undefined, {
-    pollingInterval: 15000,
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  });
+  } = useGetLeaveCreditsQuery();
 
   const {
     data: leaves,
@@ -215,7 +211,7 @@ const LeavesList = () => {
         size: fontSize - 6,
         font: workSansBold,
       });
-      page.drawText("UserLevel", {
+      page.drawText("Status", {
         x: width * 0.75,
         y: height * 0.855,
         size: fontSize - 6,
@@ -782,7 +778,7 @@ const LeavesList = () => {
                   <th scope="col">Until</th>
                   <th scope="col"># of Days</th>
                   <th scope="col">Type</th>
-                  <th scope="col">UserLevel</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>{overallLeavesContent}</tbody>
@@ -870,7 +866,7 @@ const LeavesList = () => {
               </caption>
               <thead>
                 <tr>
-                  <th>Leave Type</th>
+                  <th>Type</th>
                   <th>Amount</th>
                   <th>Used</th>
                   <th>Balance</th>

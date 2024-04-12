@@ -5,7 +5,7 @@ const Dependent = require("../models/Dependent");
 const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 
-const PopulateEmployeeRecord = async () => {
+const PopulateEmployeeRecord = async (res) => {
   const geninfo = await GenInfo.aggregate().project("_id EmployeeID");
 
   // Transform the data to match EmployeeRecord Schema
@@ -24,31 +24,30 @@ const PopulateEmployeeRecord = async () => {
     // Find all WorkInfo documents
     const wid = await WorkInfo.find({ EmployeeID: employeeID }).exec();
 
-    // If all the required documents exist, construct the EmployeeRecord
-    if (pid && did && eid && wid) {
-      return {
-        GenInfo: doc._id,
-        PersonalInfo: pid._id,
-        Dependent: did.map((dependent) => dependent._id),
-        EducInfo: eid.map((educ) => educ._id),
-        WorkInfo: wid.map((work) => work._id),
-      };
-    } else {
-      // If any data is missing, you may handle it differently based on your requirements
-      return null;
-    }
+    return {
+      GenInfo: doc?._id,
+      PersonalInfo: pid?._id,
+      Dependent: did.map((dependent) => dependent?._id),
+      EducInfo: eid.map((educ) => educ?._id),
+      WorkInfo: wid.map((work) => work?._id),
+    };
   });
 
-  const employeerecords = (await Promise.all(employeerecordsPromises)).filter(
+  const employeerecord = (await Promise.all(employeerecordsPromises)).filter(
     (record) => record
   );
 
-  console.log(employeerecords);
+  employeerecord.forEach(async (record) => {
+    await EmployeeRecord(record).save();
+  });
+
+  return res.json({ message: "Collection populated" });
 };
 
 // GET
 const getEmployeeRecords = async (req, res) => {
-  await PopulateEmployeeRecord();
+  await PopulateEmployeeRecord(res);
+  //console.log(employeerecord);
 };
 
 module.exports = { getEmployeeRecords };

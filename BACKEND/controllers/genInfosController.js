@@ -16,7 +16,7 @@ const getAllGenInfo = async (req, res) => {
     return res.status(400).json({ message: "No general infos found" });
   }
 
-  leaveCreditInclUpd(geninfos);
+  //leaveCreditInclUpd(geninfos);
   updateInactiveEmployees(geninfos);
 
   res.json(geninfos);

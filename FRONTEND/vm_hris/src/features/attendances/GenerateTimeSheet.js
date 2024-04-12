@@ -490,10 +490,7 @@ const GenerateTimeSheet = async ({
         }
 
         page.drawText(
-          val +
-            `: __________ - ${rateTxt} - P ${
-              val !== "No of Days" ? casualrates[val] : casualrates?.dailyRate
-            } = ____________________`,
+          val + `: __________ - ${rateTxt} = ____________________`,
           {
             size: baseFontSize - 4,
             font: workSansBold,

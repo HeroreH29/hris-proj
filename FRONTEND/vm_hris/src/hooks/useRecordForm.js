@@ -6,7 +6,7 @@ const ALPHA_REGEX = /^[a-zA-Z\s]+$/;
 const ALPHANUM_REGEX = /^[a-zA-Z0-9]+$/;
 const NUMBERWDECIMAL_REGEX = /^\d+\.?\d*$/;
 const NUMBER_REGEX = /^\d+$/;
-const IDNUMS_REGEX = /^\d+-?\d*-?\d*$/;
+//const IDNUMS_REGEX = /^\d+-?\d*-?\d*$/;
 
 const useRecordForm = ({
   geninfo = null,
@@ -32,6 +32,18 @@ const useRecordForm = ({
     }
   };
 
+  // Number splitter
+  const idNumberSplitter = (str) => {
+    const splitStr = str.split("-");
+    return splitStr;
+  };
+
+  /* // Number joined
+  const idNumberJoiner = (str) => {
+    const joinStr = str.join("-");
+    return joinStr;
+  }; */
+
   /* INITAL STATES */
   const geninfoInitialState = !geninfo
     ? {
@@ -51,11 +63,11 @@ const useRecordForm = ({
         DateLeaved: "",
         EmpStatus: "",
         Notes: "",
-        TINnumber: "",
-        SSSnumber: "",
-        PHnumber: "",
-        PInumber: "",
-        ATMnumber: "",
+        TINnumber: [],
+        SSSnumber: [],
+        PHnumber: [],
+        PInumber: [],
+        ATMnumber: [],
       }
     : {
         ...geninfo,
@@ -64,6 +76,11 @@ const useRecordForm = ({
         DateProbationary: DateFormatter(geninfo?.DateProbationary),
         DateLeaved: DateFormatter(geninfo?.DateLeaved),
         ContractDateEnd: DateFormatter(geninfo?.ContractDateEnd),
+        PInumber: idNumberSplitter(geninfo?.PInumber),
+        ATMnumber: idNumberSplitter(geninfo?.ATMnumber),
+        TINnumber: idNumberSplitter(geninfo?.TINnumber),
+        SSSnumber: idNumberSplitter(geninfo?.SSSnumber),
+        PHnumber: idNumberSplitter(geninfo?.PHnumber),
       };
   const personalinfoInitialState = !personalinfo
     ? {
@@ -240,33 +257,39 @@ const useRecordForm = ({
         };
       }
       case "tin_number": {
+        // Apply the updated part to the current one
+        state.TINnumber[action.index] = action.TINnumber;
         return {
           ...state,
-          TINnumber: inputRegExpTest(action.TINnumber, IDNUMS_REGEX),
         };
       }
       case "sss_number": {
+        // Apply the updated part to the current one
+        state.SSSnumber[action.index] = action.SSSnumber;
         return {
           ...state,
-          SSSnumber: inputRegExpTest(action.SSSnumber, IDNUMS_REGEX),
         };
       }
       case "ph_number": {
+        // Apply the updated part to the current one
+        state.PHnumber[action.index] = action.PHnumber;
         return {
           ...state,
-          PHnumber: inputRegExpTest(action.PHnumber, IDNUMS_REGEX),
         };
       }
       case "pi_number": {
+        // Apply the updated part to the current one
+        state.PInumber[action.index] = action.PInumber;
+
         return {
           ...state,
-          PInumber: inputRegExpTest(action.PInumber, IDNUMS_REGEX),
         };
       }
       case "atm_number": {
+        // Apply the updated part to the current one
+        state.ATMnumber[action.index] = action.ATMnumber;
         return {
           ...state,
-          ATMnumber: inputRegExpTest(action.ATMnumber, IDNUMS_REGEX),
         };
       }
 

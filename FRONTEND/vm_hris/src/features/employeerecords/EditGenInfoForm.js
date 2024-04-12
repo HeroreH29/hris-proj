@@ -27,21 +27,16 @@ import {
 import { differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
-import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
-import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
-  const { username, isOutletProcessor, branch } = useAuth();
+  const { username /* , isOutletProcessor, branch */ } = useAuth();
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
 
   const [addGeninfo, { isSuccess: addSuccess, isError: addError }] =
     useAddGeninfoMutation();
-
-  const [sendEmail, { isSuccess: emailSuccess, isError: emailError }] =
-    useSendEmailMutation();
 
   const [addInactiveEmp] = useAddInactiveEmpMutation();
 
@@ -66,18 +61,18 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       toast.error("Record saving error!");
     }
 
-    if (emailSuccess) {
+    /* if (emailSuccess) {
       toast.success("Record sent to HR!");
     } else if (emailError) {
       toast.error("Failed to send record to HR!");
-    }
+    } */
   }, [
     addSuccess,
     updateSuccess,
     addError,
     updateError,
-    emailSuccess,
-    emailError,
+    /* emailSuccess,
+    emailError, */
     navigate,
   ]);
 
@@ -91,12 +86,36 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       const confirm = window.confirm("Proceed with these information?");
 
       if (confirm) {
-        const { _id, __v, ...others } = genState;
+        const {
+          _id,
+          __v,
+          TINnumber,
+          SSSnumber,
+          PHnumber,
+          PInumber,
+          ATMnumber,
+          ...others
+        } = genState;
         // Check if user is adding or updating an employee record
         if (geninfo) {
-          await updateGeninfo({ id: geninfo?.id, ...others });
+          await updateGeninfo({
+            id: geninfo?.id,
+            TINnumber: TINnumber.join("-"),
+            SSSnumber: SSSnumber.join("-"),
+            PHnumber: PHnumber.join("-"),
+            PInumber: PInumber.join("-"),
+            ATMnumber: ATMnumber.join("-"),
+            ...others,
+          });
         } else {
-          await addGeninfo(others);
+          await addGeninfo({
+            TINnumber: TINnumber.join("-"),
+            SSSnumber: SSSnumber.join("-"),
+            PHnumber: PHnumber.join("-"),
+            PInumber: PInumber.join("-"),
+            ATMnumber: ATMnumber.join("-"),
+            ...others,
+          });
         }
 
         /* Include inactive employee record in inactive list.
@@ -109,23 +128,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           });
         } else if (genState.EmpStatus === "Y") {
           await deleteInactiveEmp({ id: inactiveEmp?.id });
-        }
-
-        // Send data to HR email if processed by outlet/branch (and vice versa)
-        if (isOutletProcessor || others.AssignedOutlet !== "Head Office") {
-          const updateRecord = isOutletProcessor && geninfo;
-          const id = updateRecord ? geninfo?.id : "";
-
-          await sendEmail(
-            generateEmailMsg({
-              branch,
-              filename: `${geninfo?.EmployeeID}-GenInfo.json`,
-              id,
-              compiledInfo: others,
-              updateRecord,
-              assignedOutlet: others.AssignedOutlet,
-            })
-          );
         }
       }
     } else {
@@ -548,63 +550,228 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           </Row>
           {/* TIN number, SSS number, and PH number */}
           <Row className="mb-3 pt-3">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">TIN Number</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={genState.TINnumber}
-                onChange={(e) =>
-                  genDispatch({ type: "tin_number", TINnumber: e.target.value })
-                }
-              />
+            <Form.Group as={Col} md="5">
+              <Form.Label className="fw-semibold">TIN #</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  value={genState.TINnumber[0]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "tin_number",
+                      TINnumber: e.target.value,
+                      index: 0,
+                    })
+                  }
+                  type="number"
+                  placeholder="###"
+                  maxLength={3}
+                />
+                <Form.Control
+                  value={genState.TINnumber[1]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "tin_number",
+                      TINnumber: e.target.value,
+                      index: 1,
+                    })
+                  }
+                  type="number"
+                  placeholder="###"
+                  maxLength={3}
+                />
+                <Form.Control
+                  value={genState.TINnumber[2]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "tin_number",
+                      TINnumber: e.target.value,
+                      index: 2,
+                    })
+                  }
+                  type="number"
+                  placeholder="###"
+                  maxLength={3}
+                />
+              </InputGroup>
             </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">SSS Number</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={genState.SSSnumber}
-                onChange={(e) =>
-                  genDispatch({ type: "sss_number", SSSnumber: e.target.value })
-                }
-              />
+            <Form.Group as={Col} md="5">
+              <Form.Label className="fw-semibold">SSS #</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  value={genState.SSSnumber[0]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "sss_number",
+                      SSSnumber: e.target.value,
+                      index: 0,
+                    })
+                  }
+                  type="number"
+                  placeholder="##"
+                  maxLength={2}
+                />
+                <Form.Control
+                  value={genState.SSSnumber[1]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "sss_number",
+                      SSSnumber: e.target.value,
+                      index: 1,
+                    })
+                  }
+                  type="number"
+                  placeholder="#######"
+                  maxLength={7}
+                />
+                <Form.Control
+                  value={genState.SSSnumber[2]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "sss_number",
+                      SSSnumber: e.target.value,
+                      index: 2,
+                    })
+                  }
+                  type="number"
+                  placeholder="#"
+                  maxLength={1}
+                />
+              </InputGroup>
             </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">PH Number</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={genState.PHnumber}
-                onChange={(e) =>
-                  genDispatch({ type: "ph_number", PHnumber: e.target.value })
-                }
-              />
+            <Form.Group as={Col} md="5">
+              <Form.Label className="fw-semibold">PH #</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  value={genState.PHnumber[0]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "ph_number",
+                      PHnumber: e.target.value,
+                      index: 0,
+                    })
+                  }
+                  type="number"
+                  placeholder="##"
+                  maxLength={2}
+                />
+                <Form.Control
+                  value={genState.PHnumber[1]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "ph_number",
+                      PHnumber: e.target.value,
+                      index: 1,
+                    })
+                  }
+                  type="number"
+                  placeholder="#########"
+                  maxLength={9}
+                />
+                <Form.Control
+                  value={genState.PHnumber[2]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "ph_number",
+                      PHnumber: e.target.value,
+                      index: 2,
+                    })
+                  }
+                  type="number"
+                  placeholder="#"
+                  maxLength={1}
+                />
+              </InputGroup>
             </Form.Group>
           </Row>
-          {/* PI number & ATM number */}
+          {/* Pag-IBIG # & ATM # */}
           <Row className="mb-3 pb-5 border-bottom">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">PI Number</Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={genState.PInumber}
-                onChange={(e) =>
-                  genDispatch({ type: "pi_number", PInumber: e.target.value })
-                }
-              />
+            <Form.Group as={Col} md="4">
+              <Form.Label className="fw-semibold">Pag-IBIG #</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  value={genState.PInumber[0]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "pi_number",
+                      PInumber: e.target.value,
+                      index: 0,
+                    })
+                  }
+                  type="number"
+                  placeholder="####"
+                  maxLength={4}
+                />
+                <Form.Control
+                  value={genState.PInumber[1]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "pi_number",
+                      PInumber: e.target.value,
+                      index: 1,
+                    })
+                  }
+                  type="number"
+                  placeholder="####"
+                  maxLength={4}
+                />
+                <Form.Control
+                  value={genState.PInumber[2]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "pi_number",
+                      PInumber: e.target.value,
+                      index: 2,
+                    })
+                  }
+                  type="number"
+                  placeholder="####"
+                  maxLength={4}
+                />
+              </InputGroup>
             </Form.Group>
             <Form.Group as={Col} md="4">
-              <Form.Label className="fw-semibold">ATM Number</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="(Optional for confidentiality)"
-                value={genState.ATMnumber}
-                onChange={(e) =>
-                  genDispatch({ type: "atm_number", ATMnumber: e.target.value })
-                }
-              />
+              <Form.Label className="fw-semibold">ATM #</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  value={genState.ATMnumber[0]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "atm_number",
+                      ATMnumber: e.target.value,
+                      index: 0,
+                    })
+                  }
+                  type="number"
+                  placeholder="####"
+                  maxLength={4}
+                />
+                <Form.Control
+                  value={genState.ATMnumber[1]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "atm_number",
+                      ATMnumber: e.target.value,
+                      index: 1,
+                    })
+                  }
+                  type="number"
+                  placeholder="###"
+                  maxLength={3}
+                />
+                <Form.Control
+                  value={genState.ATMnumber[2]}
+                  onChange={(e) =>
+                    genDispatch({
+                      type: "atm_number",
+                      ATMnumber: e.target.value,
+                      index: 2,
+                    })
+                  }
+                  type="number"
+                  placeholder="###"
+                  maxLength={3}
+                />
+              </InputGroup>
             </Form.Group>
           </Row>
           <Row className="pt-3">

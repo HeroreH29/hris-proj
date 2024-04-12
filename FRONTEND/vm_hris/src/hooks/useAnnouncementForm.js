@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 
-const useAnnouncementForm = ({ announcement }) => {
+const useAnnouncementForm = ({ announcement = null }) => {
   const initialState = !announcement
     ? {
         title: "",

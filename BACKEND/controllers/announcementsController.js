@@ -61,9 +61,13 @@ const createAnnouncement = async (req, res) => {
   // Set expiry date to a month after creation date
   expiryDate.setMonth(creationDate.getMonth() + 1);
 
+  // Fetch user id of the announcement author
+  const userid = await User.findOne({ username: user }).exec();
+  //await userid.aggregate().project("_id");
+
   // Create and store new announcement
   const announcement = await Announcement.create({
-    user,
+    user: userid,
     title,
     date,
     message,

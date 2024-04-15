@@ -19,7 +19,13 @@ const getAllGenInfo = async (req, res) => {
   //leaveCreditInclUpd(geninfos);
   updateInactiveEmployees(geninfos);
 
-  res.json(geninfos);
+  res.json(
+    geninfos.map((info) => {
+      const fullname = `${info.LastName}, ${info.FirstName} ${info.MI}.`;
+
+      return { FullName: fullname, ...info };
+    })
+  );
 };
 
 // @desc Create new geninfo

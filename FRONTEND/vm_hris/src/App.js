@@ -21,6 +21,7 @@ import LeavesList from "./features/leaves/LeavesList";
 import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
 import { ToastContainer } from "react-toastify";
+import IncreaseCredits from "./features/leaves/IncreaseCredits";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -119,6 +120,18 @@ function App() {
                     <Route index element={<LeavesList />} />
                     {/* Include more routes if necessary */}
                     <Route path="new" element={<NewLeaveForm />} />
+                    <Route
+                      element={
+                        <RequireAuth
+                          allowedUserLevels={[USERLEVELS.Admin, USERLEVELS.HR]}
+                        />
+                      }
+                    >
+                      <Route
+                        path="increasecredits"
+                        element={<IncreaseCredits />}
+                      />
+                    </Route>
                   </Route>
                 </Route>
               </Route>

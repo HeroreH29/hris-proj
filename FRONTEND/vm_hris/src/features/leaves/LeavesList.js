@@ -7,9 +7,11 @@ import {
   Button,
   Spinner,
   Form,
+  Stack,
+  OverlayTrigger,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileAlt } from "@fortawesome/free-solid-svg-icons";
+import { faFileAlt, faLevelUp } from "@fortawesome/free-solid-svg-icons";
 import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -21,6 +23,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { FONTS } from "../../config/fontBase64";
 import useTableSettings from "../../hooks/useTableSettings";
+import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
 
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
@@ -746,13 +749,31 @@ const LeavesList = () => {
             <h3>Leaves</h3>
           </Col>
           <Col>
-            <Button
-              className="float-end"
-              variant="outline-primary"
-              onClick={() => navigate("/leaves/new")}
-            >
-              <FontAwesomeIcon icon={faFileAlt} />
-            </Button>
+            <Stack direction="horizontal" gap={1}>
+              <OverlayTrigger
+                overlay={TooltipRenderer({ tip: "File new leave" })}
+              >
+                <Button
+                  className="ms-auto"
+                  variant="outline-primary"
+                  onClick={() => navigate("/leaves/new")}
+                >
+                  <FontAwesomeIcon icon={faFileAlt} />
+                </Button>
+              </OverlayTrigger>
+              {(isHR || isAdmin) && (
+                <OverlayTrigger
+                  overlay={TooltipRenderer({ tip: "Increase credits" })}
+                >
+                  <Button
+                    variant="outline-success"
+                    onClick={() => navigate("/leaves/increasecredits")}
+                  >
+                    <FontAwesomeIcon icon={faLevelUp} />
+                  </Button>
+                </OverlayTrigger>
+              )}
+            </Stack>
           </Col>
         </Row>
         <Row>

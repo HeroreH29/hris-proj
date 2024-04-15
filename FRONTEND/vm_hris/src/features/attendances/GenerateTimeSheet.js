@@ -489,15 +489,12 @@ const GenerateTimeSheet = async ({
           rateTxt = "hrs x hourly rate";
         }
 
-        page.drawText(
-          val + `: __________ - ${rateTxt} = ____________________`,
-          {
-            size: baseFontSize - 4,
-            font: workSansBold,
-            x: width * 0.23,
-            y: fillFormSpace,
-          }
-        );
+        page.drawText(val + `: __________ ${rateTxt} = ____________________`, {
+          size: baseFontSize - 4,
+          font: workSansBold,
+          x: width * 0.25,
+          y: fillFormSpace,
+        });
 
         fillFormSpace -= 20;
       });

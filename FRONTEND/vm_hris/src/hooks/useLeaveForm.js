@@ -1,4 +1,5 @@
 import { useReducer } from "react";
+import { toast } from "react-toastify";
 
 const useLeaveForm = () => {
   const initialState = {
@@ -41,6 +42,14 @@ const useLeaveForm = () => {
         return { ...state, HalfDay: !state.HalfDay, DayTime: "" };
       }
       case "reason": {
+        const disallowedWords = ["not feeling well", "nfw"];
+        for (const word of disallowedWords) {
+          if (action.Reason.includes(word) && state.Ltype === "Sick Leave") {
+            toast.error("This reason is not allowed!");
+            action.Reason = "";
+            break;
+          }
+        }
         return { ...state, Reason: action.Reason };
       }
       case "resetform": {

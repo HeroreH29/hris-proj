@@ -1,4 +1,5 @@
 const LeaveCredit = require("../models/LeaveCredit");
+const EmployeeRecord = require("../models/EmployeeRecord");
 const {
   reApplyCreditBudget,
 } = require("../xtra_functions/reApplyCreditBudget");
@@ -10,15 +11,62 @@ const {
 // @route GET /leavecredits
 // @access Private
 const getAllLeaveCredits = async (req, res) => {
-  const leavecredits = await LeaveCredit.find().lean();
+  const leavecredits = await LeaveCredit.find().populate({
+    path: "Employee",
+    select: "GenInfo",
+    populate: {
+      path: "GenInfo",
+      select: "EmployeeID FirstName MI LastName DateEmployed EmpStatus",
+      match: {
+        EmpStatus: "Y",
+      },
+    },
+  });
+
   if (!leavecredits?.length) {
     return res.status(400).json({ message: "No leave credits found" });
   }
 
+  // Add Employee field
+  const addEmployeeField = async () => {
+    // Find all EmployeeRecords and populate the GenInfo field with EmployeeID
+    const records = await EmployeeRecord.find().populate(
+      "GenInfo",
+      "EmployeeID"
+    );
+
+    // Iterate through each leave credit
+    for (const credit of leavecredits) {
+      // Find the record that matches the EmployeeID in leave credits
+      const record = records.find(
+        (record) => record.GenInfo.EmployeeID === credit.EmployeeID
+      );
+
+      // If a matching record is found
+      if (record) {
+        // Find the leave credit document in the database
+        const leaveCreditDocument = await LeaveCredit.findOne({
+          EmployeeID: credit.EmployeeID,
+        });
+
+        // Update the Employee field in the leave credit document
+        if (leaveCreditDocument) {
+          leaveCreditDocument.Employee = record._id;
+
+          // Save the updated leave credit document back to the database
+          await leaveCreditDocument.save();
+        }
+      }
+    }
+  };
+
+  // Deactivate/Activate if needed
+  //await addEmployeeField();
+
   reApplyCreditBudget(leavecredits);
   reUpdateLeaveCredits(leavecredits);
 
-  res.json(leavecredits);
+  res.json(leavecredits.filter((credit) => credit.Employee?.GenInfo !== null));
 };
 
 // desc Create new leave credit

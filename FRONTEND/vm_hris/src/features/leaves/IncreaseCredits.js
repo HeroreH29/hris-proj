@@ -18,6 +18,7 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
+import { useGetLeaveCreditsQuery } from "../leaves/leavesApiSlice";
 import useTitle from "../../hooks/useTitle";
 import { differenceInYears } from "date-fns";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
@@ -28,11 +29,34 @@ const IncreaseCredits = () => {
 
   const { geninfos } = useGetGeninfosQuery("", {
     selectFromResult: ({ data }) => ({
-      geninfos: data?.ids?.map((id) => data?.entities[id]),
+      geninfos: data?.ids
+        ?.filter((id) => {
+          return (
+            data?.entities[id].EmpStatus === "Y" &&
+            data?.entities[id].EmployeeType === "Regular"
+          );
+        })
+        .map((id) => data?.entities[id]),
     }),
   });
 
-  const [searchResults, setSearchResults] = useState([]);
+  const { leavecredits } = useGetLeaveCreditsQuery("", {
+    selectFromResult: ({ data }) => ({
+      leavecredits: data?.ids?.map((id) => data?.entities[id]),
+    }),
+  });
+
+  const [content, setContent] = useState([]);
+
+  // Initialize data
+  useEffect(() => {
+    if (!content?.length) {
+      setContent(leavecredits?.map((credit) => credit.Employee?.GenInfo));
+    }
+
+    console.log(content);
+    // eslint-disable-next-line
+  }, [geninfos]);
 
   const searchEmployee = (searchTxt = "") => {
     const filteredInfos = geninfos.filter((info) => {
@@ -40,24 +64,21 @@ const IncreaseCredits = () => {
 
       matches =
         matches &&
-        info.EmpStatus === "Y" &&
-        info.EmployeeType === "Regular" &&
-        differenceInYears(new Date(), new Date(info.DateEmployed)) >= 1 &&
         (info.LastName.toLowerCase().includes(searchTxt.toLowerCase()) ||
           info.FirstName.toLowerCase().includes(searchTxt.toLowerCase()));
 
       return matches;
     });
 
-    setSearchResults(filteredInfos);
+    setContent(filteredInfos);
   };
 
-  const tableContent = searchResults
-    .slice(searchResults && 0, searchResults && 20)
-    .map((result) => {
+  const tableContent =
+    content?.length &&
+    content.slice(0, 20).map((info) => {
       const srvcYrs = differenceInYears(
         new Date(),
-        new Date(result.DateEmployed)
+        new Date(info.DateEmployed)
       );
       let currCred = 0;
 
@@ -87,9 +108,9 @@ const IncreaseCredits = () => {
       getCred();
 
       return (
-        <tr>
-          <td>{result.EmployeeID}</td>
-          <td>{`${result.LastName}, ${result.FirstName}`}</td>
+        <tr key={info._id}>
+          <td>{info.EmployeeID}</td>
+          <td>{`${info.LastName}, ${info.FirstName}`}</td>
           <td>{srvcYrs}</td>
           <td>{currCred}</td>
           <td>
@@ -113,11 +134,6 @@ const IncreaseCredits = () => {
         </tr>
       );
     });
-
-  // Get initial table content
-  useEffect(() => {
-    searchEmployee();
-  }, []);
 
   return (
     <Container>

@@ -6,6 +6,7 @@ const {
 const {
   reUpdateLeaveCredits,
 } = require("../xtra_functions/reUpdateLeaveCredits");
+const { differenceInYears } = require("date-fns");
 
 // desc Get all leavecredits
 // @route GET /leavecredits
@@ -16,57 +17,93 @@ const getAllLeaveCredits = async (req, res) => {
     select: "GenInfo",
     populate: {
       path: "GenInfo",
-      select: "EmployeeID FirstName MI LastName DateEmployed EmpStatus",
+      select:
+        "EmployeeID FirstName MI LastName DateEmployed EmpStatus EmployeeType",
       match: {
         EmpStatus: "Y",
       },
     },
   });
 
-  if (!leavecredits?.length) {
-    return res.status(400).json({ message: "No leave credits found" });
-  }
-
   // Add Employee field
-  const addEmployeeField = async () => {
+  const populateCollection = async () => {
     // Find all EmployeeRecords and populate the GenInfo field with EmployeeID
-    const records = await EmployeeRecord.find().populate(
-      "GenInfo",
-      "EmployeeID"
-    );
+    const records = await EmployeeRecord.find().populate({
+      path: "GenInfo",
+      select: "EmpStatus EmployeeType DateEmployed",
+      match: { EmpStatus: "Y", EmployeeType: "Regular" },
+    });
 
-    // Iterate through each leave credit
-    for (const credit of leavecredits) {
-      // Find the record that matches the EmployeeID in leave credits
-      const record = records.find(
-        (record) => record.GenInfo.EmployeeID === credit.EmployeeID
-      );
+    const filteredRecords = records.filter((record) => record.GenInfo);
 
-      // If a matching record is found
-      if (record) {
-        // Find the leave credit document in the database
-        const leaveCreditDocument = await LeaveCredit.findOne({
-          EmployeeID: credit.EmployeeID,
+    const getLeaveCreditData = (srvcYrs) => {
+      if (srvcYrs >= 1 && srvcYrs <= 4) {
+        return {};
+      } else if (srvcYrs >= 5 && srvcYrs <= 7) {
+        return { CreditBudget: 7, SickLeave: 7, VacationLeave: 7 };
+      } else if (srvcYrs >= 8 && srvcYrs <= 10) {
+        return { CreditBudget: 10, SickLeave: 10, VacationLeave: 10 };
+      } else if (srvcYrs >= 11 && srvcYrs <= 13) {
+        return { CreditBudget: 12, SickLeave: 12, VacationLeave: 12 };
+      } else if (srvcYrs >= 14) {
+        return { CreditBudget: 15, SickLeave: 15, VacationLeave: 15 };
+      }
+      return null;
+    };
+
+    const processRecords = async (filteredRecords) => {
+      // Store all create operations to run as a batch
+      const createOperations = [];
+
+      // Iterate through filtered records
+      for (const record of filteredRecords) {
+        // Check if a credit record exists for the current record
+        const creditRecord = await LeaveCredit.findOne({
+          Employee: record._id,
         });
 
-        // Update the Employee field in the leave credit document
-        if (leaveCreditDocument) {
-          leaveCreditDocument.Employee = record._id;
+        // If it exists, skip iteration
+        if (creditRecord) {
+          continue;
+        }
 
-          // Save the updated leave credit document back to the database
-          await leaveCreditDocument.save();
+        // Calculate service years
+        const srvcYrs = differenceInYears(
+          new Date(),
+          new Date(record.GenInfo?.DateEmployed)
+        );
+
+        // Get leave credit data based on service years
+        const leaveCreditData = getLeaveCreditData(srvcYrs);
+
+        // If leave credit data is available, create a LeaveCredit record
+        if (leaveCreditData) {
+          createOperations.push(
+            LeaveCredit.create({
+              Employee: record._id,
+              ...leaveCreditData,
+            })
+          );
         }
       }
-    }
+
+      // Run all create operations as a batch
+      await Promise.all(createOperations);
+    };
+    processRecords(filteredRecords);
   };
 
-  // Deactivate/Activate if needed
-  //await addEmployeeField();
+  if (!leavecredits?.length) {
+    await populateCollection();
+  }
 
-  reApplyCreditBudget(leavecredits);
-  reUpdateLeaveCredits(leavecredits);
+  // Comment/Uncomment if needed
+  res.json(leavecredits);
 
-  res.json(leavecredits.filter((credit) => credit.Employee?.GenInfo !== null));
+  //reApplyCreditBudget(leavecredits);
+  //reUpdateLeaveCredits(leavecredits);
+
+  //res.json(leavecredits.filter((credit) => credit.Employee?.GenInfo !== null));
 };
 
 // desc Create new leave credit
@@ -103,7 +140,7 @@ const createLeaveCredit = async (req, res) => {
 // @route PATCH /leavecredits
 // @access Private
 const updateLeaveCredit = async (req, res) => {
-  const { id, ...others } = req.body;
+  const { id, GenInfo, ...others } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "Leave credit 'id' is required" });

@@ -17,115 +17,161 @@ import {
   OverlayTrigger,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
-import { useGetLeaveCreditsQuery } from "../leaves/leavesApiSlice";
+import {
+  useGetLeaveCreditsQuery,
+  useUpdateLeaveCreditMutation,
+} from "../leaves/leavesApiSlice";
 import useTitle from "../../hooks/useTitle";
 import { differenceInYears } from "date-fns";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
+import { toast } from "react-toastify";
 
 const IncreaseCredits = () => {
   const navigate = useNavigate();
+
   useTitle("Increase Credits | Via Mare HRIS");
 
-  const { geninfos } = useGetGeninfosQuery("", {
+  const { leavecredits } = useGetLeaveCreditsQuery("", {
     selectFromResult: ({ data }) => ({
-      geninfos: data?.ids
-        ?.filter((id) => {
+      leavecredits: data?.ids
+        .filter((id) => {
           return (
-            data?.entities[id].EmpStatus === "Y" &&
-            data?.entities[id].EmployeeType === "Regular"
+            data?.entities[id].Employee?.GenInfo?.EmpStatus === "Y" &&
+            data?.entities[id].Employee?.GenInfo?.EmployeeType === "Regular"
           );
         })
         .map((id) => data?.entities[id]),
     }),
   });
 
-  const { leavecredits } = useGetLeaveCreditsQuery("", {
-    selectFromResult: ({ data }) => ({
-      leavecredits: data?.ids?.map((id) => data?.entities[id]),
-    }),
-  });
+  const [updateLeaveCredit, { isSuccess, isLoading, isError, error }] =
+    useUpdateLeaveCreditMutation();
 
   const [content, setContent] = useState([]);
 
   // Initialize data
   useEffect(() => {
     if (!content?.length) {
-      setContent(leavecredits?.map((credit) => credit.Employee?.GenInfo));
+      setContent(leavecredits);
     }
 
-    console.log(content);
     // eslint-disable-next-line
-  }, [geninfos]);
+  }, [leavecredits]);
 
   const searchEmployee = (searchTxt = "") => {
-    const filteredInfos = geninfos.filter((info) => {
-      let matches = true;
+    // Filter content based on searchTxt
+    const filteredInfos = leavecredits.filter((data) => {
+      const info = data.Employee?.GenInfo;
 
-      matches =
-        matches &&
-        (info.LastName.toLowerCase().includes(searchTxt.toLowerCase()) ||
-          info.FirstName.toLowerCase().includes(searchTxt.toLowerCase()));
-
-      return matches;
+      return (
+        info?.LastName.toLowerCase().includes(searchTxt.toLowerCase()) ||
+        info?.FirstName.toLowerCase().includes(searchTxt.toLowerCase())
+      );
     });
 
+    // Update the state with filtered results
     setContent(filteredInfos);
   };
 
+  const increaseCredit = async ({ data = {} }) => {
+    // Check credit budget if it can be decreased
+    const budget = data.CreditBudget;
+
+    if (budget === 5 || budget === 10) {
+      await updateLeaveCredit({ ...data, CreditBudget: budget + 2 });
+    } else {
+      await updateLeaveCredit({ ...data, CreditBudget: budget + 3 });
+    }
+  };
+
+  const decreaseCredit = async ({ data = {} }) => {
+    // Check credit budget if it can be decreased
+    const budget = data.CreditBudget;
+
+    if (budget === 12 || budget === 7) {
+      await updateLeaveCredit({ ...data, CreditBudget: budget - 2 });
+    } else {
+      await updateLeaveCredit({ ...data, CreditBudget: budget - 3 });
+    }
+  };
+
+  // For enabling/disabling increase button
+  const creditChecker = ({ srvcYrs = 0, data = {} }) => {
+    const conditions = [
+      { years: [1, 4], maxCredit: 5 },
+      { years: [5, 7], maxCredit: 7 },
+      { years: [8, 10], maxCredit: 10 },
+      { years: [11, 13], maxCredit: 12 },
+      { years: [14, Infinity], maxCredit: 15 },
+    ];
+
+    // Check eligibility based on service years and current credit budget
+    for (const condition of conditions) {
+      const [start, end] = condition.years;
+      if (
+        srvcYrs >= start &&
+        srvcYrs <= end &&
+        data.CreditBudget < condition.maxCredit
+      ) {
+        return false; // Enable button
+      }
+    }
+
+    // Disable button
+    return true;
+  };
+
+  // Leave credit update checker
+  useEffect(() => {
+    if (isLoading) {
+      toast.loading("Saving changes...");
+    } else if (isError) {
+      toast.error(error);
+    } else if (isSuccess) {
+      // Remove loading toast
+      toast.dismiss();
+      toast.success("Leave credit budget changed");
+      navigate("/leaves");
+    }
+  }, [isSuccess, isLoading, isError, error, navigate]);
+
   const tableContent =
     content?.length &&
-    content.slice(0, 20).map((info) => {
+    content.slice(0, 20).map((data) => {
+      const info = data.Employee?.GenInfo;
       const srvcYrs = differenceInYears(
         new Date(),
         new Date(info.DateEmployed)
       );
-      let currCred = 0;
-
-      const getCred = () => {
-        switch (true) {
-          case srvcYrs >= 14:
-            currCred = 15;
-            break;
-          case srvcYrs >= 11:
-            currCred = 12;
-            break;
-          case srvcYrs >= 8:
-            currCred = 10;
-            break;
-          case srvcYrs >= 5:
-            currCred = 7;
-            break;
-          case srvcYrs >= 1:
-            currCred = 5;
-            break;
-          default:
-            currCred = 0;
-            break;
-        }
-      };
-
-      getCred();
-
       return (
         <tr key={info._id}>
           <td>{info.EmployeeID}</td>
           <td>{`${info.LastName}, ${info.FirstName}`}</td>
           <td>{srvcYrs}</td>
-          <td>{currCred}</td>
+          <td>{data.CreditBudget}</td>
           <td>
             <Stack direction="horizontal" gap={1}>
               <OverlayTrigger
                 overlay={TooltipRenderer({ tip: "Increase credit" })}
               >
-                <Button variant="outline-success" size="sm">
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  disabled={creditChecker({ srvcYrs, data })}
+                  onClick={() => increaseCredit({ srvcYrs, data })}
+                >
                   <FontAwesomeIcon icon={faAdd} />
                 </Button>
               </OverlayTrigger>
               <OverlayTrigger
                 overlay={TooltipRenderer({ tip: "Decrease credit" })}
               >
-                <Button variant="outline-warning" size="sm">
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  disabled={data.CreditBudget === 0}
+                  onClick={() => decreaseCredit({ data })}
+                >
                   <FontAwesomeIcon icon={faMinus} />
                 </Button>
               </OverlayTrigger>
@@ -171,7 +217,7 @@ const IncreaseCredits = () => {
               <th>Employee ID</th>
               <th>Name</th>
               <th># of Service Years</th>
-              <th>Current Credits</th>
+              <th>Credit Budget</th>
               <th>Increase/Decrease</th>
             </tr>
           </thead>

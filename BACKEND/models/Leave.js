@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const leaveSchema = new mongoose.Schema({
-  DateOfFilling: {
+const leaveSchema = new Schema({
+  DateFiled: {
     type: String,
     required: true,
   },
@@ -37,17 +38,17 @@ const leaveSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  User: {
-    type: String,
-    required: true,
+  FiledBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
   ModifiedDate: {
     type: String,
     default: "",
   },
-  EmployeeID: {
-    type: Object,
-    required: true,
+  Employee: {
+    type: Schema.Types.ObjectId,
+    ref: "Employee",
   },
   Credited: {
     type: Boolean,

@@ -6,28 +6,34 @@ const { format } = require("date-fns");
 // @route GET /leaves
 // @access Private
 const getAllLeaves = async (req, res) => {
-  const leaves = await Leave.find().lean();
-  if (!leaves?.length) {
-    return res.status(400).json({ message: "No leaves found" });
-  }
+  const leaves = await Leave.find();
 
-  const geninfos = await Geninfo.find().lean();
-
-  const newLeaves = leaves.map((leave) => {
-    const match = geninfos.find(
-      (geninfo) => geninfo.EmployeeID === leave.EmployeeID
-    );
-
-    return (leave = {
-      ...leave,
-      EmpName: `${match?.LastName ?? ""}, ${match?.FirstName ?? ""} ${
-        match?.MI ?? ""
-      }.`,
-      Branch: match?.AssignedOutlet,
-    });
+  leaves.forEach(async (leave) => {
+    if (leave.Approve === 1) {
+      await Leave.findByIdAndUpdate(leave._id, { ...leaves, Credited: true });
+    }
   });
+  // if (!leaves?.length) {
+  //   return res.status(400).json({ message: "No leaves found" });
+  // }
 
-  res.json(newLeaves);
+  // const geninfos = await Geninfo.find().lean();
+
+  // const newLeaves = leaves.map((leave) => {
+  //   const match = geninfos.find(
+  //     (geninfo) => geninfo.EmployeeID === leave.EmployeeID
+  //   );
+
+  //   return (leave = {
+  //     ...leave,
+  //     EmpName: `${match?.LastName ?? ""}, ${match?.FirstName ?? ""} ${
+  //       match?.MI ?? ""
+  //     }.`,
+  //     Branch: match?.AssignedOutlet,
+  //   });
+  // });
+
+  // res.json(newLeaves);
 };
 
 // desc Create new leave

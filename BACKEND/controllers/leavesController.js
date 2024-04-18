@@ -1,39 +1,59 @@
 const Leave = require("../models/Leave");
-const Geninfo = require("../models/GenInfo");
+const EmployeeRecord = require("../models/EmployeeRecord");
 const { format } = require("date-fns");
 
 // desc Get all leaves
 // @route GET /leaves
 // @access Private
 const getAllLeaves = async (req, res) => {
-  const leaves = await Leave.find();
+  // Fetch all leaves and employees
+  const [leaves, employees] = await Promise.all([
+    Leave.find().populate({
+      path: "FiledFor",
+      populate: {
+        path: "GenInfo",
+        select: "FirstName MI LastName DateEmployed EmployeeID", // Specify any nested fields you want to populate
+      },
+    }),
+    EmployeeRecord.find().populate("GenInfo", "EmployeeID").lean(),
+  ]);
 
-  leaves.forEach(async (leave) => {
-    if (leave.Approve === 1) {
-      await Leave.findByIdAndUpdate(leave._id, { ...leaves, Credited: true });
-    }
+  // Create a map of employees for faster lookup
+  const employeeMap = new Map();
+  employees.forEach((employee) => {
+    employeeMap.set(employee.GenInfo.EmployeeID, employee);
   });
-  // if (!leaves?.length) {
-  //   return res.status(400).json({ message: "No leaves found" });
-  // }
 
-  // const geninfos = await Geninfo.find().lean();
+  // Array to store update operations for batch update
+  const updateOperations = [];
 
-  // const newLeaves = leaves.map((leave) => {
-  //   const match = geninfos.find(
-  //     (geninfo) => geninfo.EmployeeID === leave.EmployeeID
-  //   );
+  // Process leaves
+  leaves.forEach((leave) => {
+    // Determine credited status based on approve field
+    leave.Credited = leave.Approve === 1;
 
-  //   return (leave = {
-  //     ...leave,
-  //     EmpName: `${match?.LastName ?? ""}, ${match?.FirstName ?? ""} ${
-  //       match?.MI ?? ""
-  //     }.`,
-  //     Branch: match?.AssignedOutlet,
-  //   });
-  // });
+    // Find the corresponding employee
+    const employee = employeeMap.get(leave.EmployeeID);
+    if (employee) {
+      leave.FiledFor = employee._id;
+    }
 
-  // res.json(newLeaves);
+    // Add update operation
+    updateOperations.push({
+      updateOne: {
+        filter: { _id: leave._id },
+        update: leave,
+      },
+    });
+  });
+
+  // Perform batch update
+  if (updateOperations.length > 0) {
+    await Leave.bulkWrite(updateOperations);
+  }
+
+  // Respond with populated leaves
+  res.json(leaves);
 };
 
 // desc Create new leave

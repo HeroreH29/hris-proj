@@ -31,10 +31,10 @@ const getAllLeaveCredits = async (req, res) => {
     const records = await EmployeeRecord.find().populate({
       path: "GenInfo",
       select: "EmpStatus EmployeeType DateEmployed",
-      match: { EmpStatus: "Y", EmployeeType: "Regular" },
+      match: { EmployeeType: "Regular" },
     });
 
-    const filteredRecords = records.filter((record) => record.GenInfo);
+    const filteredRecords = records.filter((record) => record.GenInfo !== null);
 
     const getLeaveCreditData = (srvcYrs) => {
       if (srvcYrs >= 1 && srvcYrs <= 4) {
@@ -48,7 +48,13 @@ const getAllLeaveCredits = async (req, res) => {
       } else if (srvcYrs >= 14) {
         return { CreditBudget: 15, SickLeave: 15, VacationLeave: 15 };
       }
-      return null;
+      return {
+        CreditBudget: 0,
+        SickLeave: 0,
+        VacationLeave: 0,
+        BirthdayLeave: 0,
+        CreditBudget: 0,
+      };
     };
 
     const processRecords = async (filteredRecords) => {

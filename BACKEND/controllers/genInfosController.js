@@ -10,7 +10,7 @@ const {
 // @access Private
 // Includes leave credit inclusion and update, and automated employee regularization
 const getAllGenInfo = async (req, res) => {
-  const geninfos = await GenInfo.find().lean();
+  const geninfos = await GenInfo.find();
 
   if (!geninfos?.length) {
     return res.status(400).json({ message: "No general infos found" });
@@ -19,13 +19,7 @@ const getAllGenInfo = async (req, res) => {
   //leaveCreditInclUpd(geninfos);
   updateInactiveEmployees(geninfos);
 
-  res.json(
-    geninfos.map((info) => {
-      const fullname = `${info.LastName}, ${info.FirstName} ${info.MI}.`;
-
-      return { FullName: fullname, ...info };
-    })
-  );
+  res.json(geninfos);
 };
 
 // @desc Create new geninfo

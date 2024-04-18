@@ -128,8 +128,7 @@ const IncreaseCredits = () => {
     } else if (isError) {
       toast.error(error);
     } else if (isSuccess) {
-      // Remove loading toast
-      toast.dismiss();
+      toast.dismiss(); // Remove loading toast
       toast.success("Leave credit budget changed");
       navigate("/leaves");
     }

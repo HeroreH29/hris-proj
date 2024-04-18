@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileAlt, faLevelUp } from "@fortawesome/free-solid-svg-icons";
-import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
+import { useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
@@ -43,41 +43,36 @@ const LeavesList = () => {
   const [leaveCredit, setLeaveCredit] = useState("");
   const [empId, setEmpId] = useState(undefined);
 
-  const {
-    data: leavecredits,
-    isLoading: creditsLoading,
-    isSuccess: creditsSuccess,
-    isError: creditsError,
-    error: credserr,
-  } = useGetLeaveCreditsQuery();
+  // const {
+  //   data: leaves,
+  //   isLoading,
+  //   isSuccess,
+  //   isError,
+  //   error,
+  // } = useGetLeavesQuery();
 
-  const {
-    data: leaves,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetLeavesQuery();
+  const { leaves } = useGetLeavesQuery("", {
+    selectFromResult: ({ data }) => ({
+      leaves: data?.ids
+        // /* .filter((id) => {
+        //   return (
+        //     data?.entities[id].Employee?.GenInfo?.EmpStatus === "Y" &&
+        //     data?.entities[id].Employee?.GenInfo?.EmployeeType === "Regular"
+        //   );
+        // }) */
+        .sort((a, b) => a.StartingYear - b.StartingYear)
+        .map((id) => data?.entities[id]),
+    }),
+  });
 
   const { data: geninfos } = useGetGeninfosQuery();
 
   const handleHover = (empId) => {
     setEmpId(empId);
-
-    if (creditsSuccess && !creditsLoading && !creditsError) {
-      const { ids, entities } = leavecredits;
-
-      const leavecredit = ids?.length
-        ? ids
-            .filter((id) => {
-              return entities[id]?.EmployeeID === empId;
-            })
-            .map((id) => entities[id])[0]
-        : "";
-
-      setLeaveCredit(leavecredit);
-    } else {
-      console.error(credserr?.data?.message);
+    try {
+      setLeaveCredit(leaves?.Credits);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -140,22 +135,20 @@ const LeavesList = () => {
     let contentEnd = 0;
 
     // Necessary data setup
-    const { ids, entities } = geninfos;
-    const employeeName = ids
-      .filter((id) => entities[id]?.EmployeeID === empId)
-      .map(
-        (id) =>
-          `${entities[id].LastName}, ${entities[id].FirstName} ${entities[id].MI}.`
-      )[0];
-    const leaveData = leaves.ids
-      .filter((id) => leaves.entities[id]?.EmployeeID === empId)
+    const employeeName = leaves.FiledFor.filter(
+      (employee) => employee.GenInfo.EmployeeID === empId
+    ).map((employee) => employee.GenInfo.FullName);
+
+    const leaveData = leaves
+      .filter((leave) => leave.EmployeeID === empId)
       .sort(() => {
         return -1;
       })
-      .map((id) => leaves.entities[id]);
-    const leaveCredit = leavecredits.ids
-      .filter((id) => leavecredits.entities[id]?.EmployeeID === empId)
-      .map((id) => leavecredits.entities[id])[0];
+      .map((leave) => leave);
+
+    const leaveCredit = leaves
+      .filter((leave) => leave.EmployeeID === empId)
+      .map((leave) => leave);
 
     // Page parts
     const pageTitle = () => {

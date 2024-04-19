@@ -1,11 +1,8 @@
 import React, { memo, useEffect, useState } from "react";
 import {
-  useGetLeavesQuery,
   useUpdateLeaveMutation,
   useUpdateLeaveCreditMutation,
 } from "./leavesApiSlice";
-
-import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
@@ -13,19 +10,11 @@ import useAuth from "../../hooks/useAuth";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { toast } from "react-toastify";
 
-const Leave = ({ leaveId, handleHover, leaveCredit }) => {
+const Leave = ({ leave, handleHover, leaveCredit }) => {
   const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
   const navigate = useNavigate();
 
   const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
-
-  const { leave } = useGetLeavesQuery("leavesList", {
-    selectFromResult: ({ data }) => ({
-      leave: data?.entities[leaveId],
-    }),
-  });
-
-  const { data: geninfos } = useGetGeninfosQuery();
 
   const [updateLeave, { isSuccess: updateSuccess }] = useUpdateLeaveMutation();
 
@@ -155,27 +144,17 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
         break;
     }
 
-    // Get the actual name of the employee based on obtained EmployeeID
-    const { ids, entities } = geninfos;
-
-    const foundRecord = ids?.length
-      ? ids
-          .filter((id) => entities[id]?.EmployeeID === leave?.EmployeeID)
-          .map((id) => id)
-      : null;
-
     return (
       <>
         <tr
-          key={leaveId}
-          onMouseEnter={() => handleHover(leave?.EmployeeID)}
+          key={leave.id}
           onClick={() => {
             handleSetValues(leave);
             setShowModal(true);
           }}
         >
-          <td>{`${entities[foundRecord]?.LastName}, ${entities[foundRecord]?.FirstName} ${entities[foundRecord]?.MI}.`}</td>
-          <td>{leave?.DateOfFilling}</td>
+          <td>{`${leave.FiledFor?.GenInfo.FullName}`}</td>
+          <td>{format(new Date(leave?.DateFiled), "PP")}</td>
           <td>{leave?.Lfrom}</td>
           <td>{leave?.Lto}</td>
           <td>{leave?.NoOfDays}</td>
@@ -185,7 +164,7 @@ const Leave = ({ leaveId, handleHover, leaveCredit }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${entities[foundRecord]?.LastName}'s ${leave?.Ltype}`}</Modal.Title>
+            <Modal.Title>{`${leave.FiledFor?.GenInfo.LastName}'s ${leave?.Ltype}`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

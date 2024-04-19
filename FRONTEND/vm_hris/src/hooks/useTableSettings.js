@@ -19,8 +19,8 @@ const useTableSettings = () => {
     statusFilter: "Y",
     empTypeFilter: "",
     name: "",
-    year: "2024",
-    month: new Date().toLocaleString("default", { month: "short" }),
+    year: new Date().getFullYear(),
+    month: "",
     dateSort: false,
     dateSortIcon: dateSortIconArr[1],
   };
@@ -77,13 +77,18 @@ const useTableSettings = () => {
         };
       }
       case "name": {
-        return { ...state, name: action.name, sliceStart: 0, sliceENd: 10 };
+        return { ...state, name: action.name, sliceStart: 0, sliceEnd: 10 };
       }
       case "month": {
-        return { ...state, month: action.month, sliceStart: 0, sliceENd: 10 };
+        return { ...state, month: action.month, sliceStart: 0, sliceEnd: 10 };
       }
       case "year": {
-        return { ...state, year: action.year, sliceStart: 0, sliceENd: 10 };
+        return {
+          ...state,
+          year: action.year * 1,
+          sliceStart: 0,
+          sliceEnd: 10,
+        };
       }
       case "datesort": {
         return {

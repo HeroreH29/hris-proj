@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileAlt, faLevelUp } from "@fortawesome/free-solid-svg-icons";
-import { useGetLeavesQuery } from "./leavesApiSlice";
+import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import useTitle from "../../hooks/useTitle";
@@ -20,7 +20,6 @@ import Leave from "./Leave";
 import useAuth from "../../hooks/useAuth";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { FONTS } from "../../config/fontBase64";
 import useTableSettings from "../../hooks/useTableSettings";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
@@ -40,49 +39,54 @@ const LeavesList = () => {
 
   const navigate = useNavigate();
 
+  const { tableState, tableDispatch } = useTableSettings();
+
   const [leaveCredit, setLeaveCredit] = useState("");
   const [empId, setEmpId] = useState(undefined);
 
-  // const {
-  //   data: leaves,
-  //   isLoading,
-  //   isSuccess,
-  //   isError,
-  //   error,
-  // } = useGetLeavesQuery();
-
   const { leaves } = useGetLeavesQuery("", {
     selectFromResult: ({ data }) => ({
-      leaves: data?.ids
-        // /* .filter((id) => {
-        //   return (
-        //     data?.entities[id].Employee?.GenInfo?.EmpStatus === "Y" &&
-        //     data?.entities[id].Employee?.GenInfo?.EmployeeType === "Regular"
-        //   );
-        // }) */
-        .sort((a, b) => a.StartingYear - b.StartingYear)
-        .map((id) => data?.entities[id]),
+      leaves: data?.ids.map((id) => data?.entities[id]),
     }),
+    pollingInterval: 0,
   });
 
-  const { data: geninfos } = useGetGeninfosQuery();
+  const { leavecredits } = useGetLeaveCreditsQuery("", {
+    selectFromResult: ({ data }) => ({
+      leavecredits: data?.ids
+        .filter((id) => data?.entities[id].Employee.GenInfo !== null)
+        .map((id) => data?.entities[id]),
+    }),
+    pollingInterval: 0,
+  });
 
   const handleHover = (empId) => {
     setEmpId(empId);
     try {
-      setLeaveCredit(leaves?.Credits);
+      setLeaveCredit(
+        leavecredits.find(
+          (credit) => credit.Employee?.GenInfo.EmployeeID === empId
+        )
+      );
     } catch (error) {
       console.error(error);
     }
   };
 
-  const { tableState, tableDispatch } = useTableSettings();
-  const start = new Date().getFullYear();
-  const yearsArr = Array.from({ length: start - 2018 + 1 }, (_, i) => 2018 + i);
-  const monthsArr = Array.from({ length: 12 }, (_, index) => index).map(
-    (monthNum) => format(new Date(2023, monthNum, 1), "MMM")
+  // DROPDOWN DATA
+  const startYear = leaves ? leaves[0].StartingYear : 2018;
+  const yearsArr = Array.from(
+    { length: new Date().getFullYear() - startYear + 1 },
+    (_, i) => startYear + i
   );
+  const monthsArr = Array.from({ length: 12 }, (_, index) => {
+    // Create a date for the first day of each month in current year
+    const date = new Date(startYear, index, 1);
+    // Get the short name of the month using toLocaleString()
+    return date.toLocaleString("default", { month: "short" });
+  });
 
+  // DROPDOWNS
   const yearDropdown = yearsArr.map((yr, index) => {
     return (
       <option value={yr} key={index}>
@@ -146,9 +150,9 @@ const LeavesList = () => {
       })
       .map((leave) => leave);
 
-    const leaveCredit = leaves
-      .filter((leave) => leave.EmployeeID === empId)
-      .map((leave) => leave);
+    const leaveCredit = leavecredits
+      .filter((credit) => credit.Employee.GenInfo.EmployeeID === empId)
+      .map((credit) => credit);
 
     // Page parts
     const pageTitle = () => {
@@ -671,322 +675,296 @@ const LeavesList = () => {
     window.open(blobUrl, "_blank");
   };
 
-  let content;
-
-  if (isLoading && !leaves) content = <Spinner animation="border" />;
-
-  if (isError) {
-    content = <p className="text-danger fw-bold">{error?.data?.message}</p>;
-  }
+  if (!leaves || !leavecredits) return <Spinner animation="border" />;
 
   let overallLeavesContent;
-  if (isSuccess) {
-    const { ids, entities } = leaves;
+  let filteredLeaves = [];
 
-    const filteredIds = ids
-      .filter((id) => {
-        const leave = entities[id];
-        let matches = true;
+  filteredLeaves = leaves?.filter((leave) => {
+    const employeeName = leave.FiledFor?.GenInfo?.FullName?.toLowerCase();
+    const filedYear = new Date(leave.DateFiled).getFullYear();
+    const filedMonth = new Date(leave.DateFiled).toLocaleString("default", {
+      month: "short",
+    });
 
-        if (isOutletProcessor) {
-          matches = matches && leave.Branch === branch;
-        }
+    let match = true;
 
-        if (isUser) {
-          matches = matches && leave?.EmployeeID === employeeId;
-        }
+    if (tableState.name) {
+      match = match && employeeName?.includes(tableState.name.toLowerCase());
+    }
 
-        if (tableState.name !== "") {
-          matches =
-            matches &&
-            leave.EmpName.toLowerCase().includes(tableState.name.toLowerCase());
-        }
+    if (tableState.year) {
+      match = match && filedYear === tableState.year;
+    }
 
-        if (tableState.month !== "") {
-          matches = matches && leave.DateOfFilling?.includes(tableState.month);
-        }
+    if (tableState.month) {
+      match = match && filedMonth === tableState.month;
+    }
 
-        if (tableState.year !== "") {
-          matches = matches && leave.DateOfFilling?.includes(tableState.year);
-        }
+    return match;
+  });
 
-        return matches;
-      })
-      .reduce((acc, id) => {
-        const leave = entities[id];
-        const isPending = leave.Approve === 0;
+  overallLeavesContent = filteredLeaves?.length
+    ? filteredLeaves
+        .sort(() => {
+          return tableState.dateSort ? 1 : -1;
+        })
+        .slice(tableState.sliceStart, tableState.sliceEnd)
+        .map((leave) => (
+          <Leave
+            key={leave.id}
+            leave={leave}
+            /* handleHover={handleHover} */
+            leaveCredit={leaveCredit}
+          />
+        ))
+    : null;
 
-        return isPending ? [id, ...acc] : [...acc, id];
-      }, []);
+  console.log(filteredLeaves.length);
 
-    overallLeavesContent = filteredIds?.length
-      ? filteredIds
-          .sort(() => {
-            return tableState.dateSort ? 1 : -1;
-          })
-          .slice(tableState.sliceStart, tableState.sliceEnd)
-          .map((leaveId) => (
-            <Leave
-              key={leaveId}
-              leaveId={leaveId}
-              handleHover={handleHover}
-              leaveCredit={leaveCredit}
-            />
-          ))
-      : null;
-
-    content = (
-      <Container>
-        <Row>
-          <Col>
-            <h3>Leaves</h3>
-          </Col>
-          <Col>
-            <Stack direction="horizontal" gap={1}>
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h3>Leaves</h3>
+        </Col>
+        <Col>
+          <Stack direction="horizontal" gap={1}>
+            <OverlayTrigger
+              overlay={TooltipRenderer({ tip: "File new leave" })}
+            >
+              <Button
+                className="ms-auto"
+                variant="outline-primary"
+                onClick={() => navigate("/leaves/new")}
+              >
+                <FontAwesomeIcon icon={faFileAlt} />
+              </Button>
+            </OverlayTrigger>
+            {(isHR || isAdmin) && (
               <OverlayTrigger
-                overlay={TooltipRenderer({ tip: "File new leave" })}
+                overlay={TooltipRenderer({ tip: "Increase credits" })}
               >
                 <Button
-                  className="ms-auto"
-                  variant="outline-primary"
-                  onClick={() => navigate("/leaves/new")}
+                  variant="outline-success"
+                  onClick={() => navigate("/leaves/increasecredits")}
                 >
-                  <FontAwesomeIcon icon={faFileAlt} />
+                  <FontAwesomeIcon icon={faLevelUp} />
                 </Button>
               </OverlayTrigger>
-              {(isHR || isAdmin) && (
-                <OverlayTrigger
-                  overlay={TooltipRenderer({ tip: "Increase credits" })}
-                >
-                  <Button
-                    variant="outline-success"
-                    onClick={() => navigate("/leaves/increasecredits")}
-                  >
-                    <FontAwesomeIcon icon={faLevelUp} />
-                  </Button>
-                </OverlayTrigger>
-              )}
-            </Stack>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Table
-              bordered
-              striped
-              hover
-              className="align-middle ms-3 mt-3 mb-3 caption-top"
-            >
-              <caption>Overall Filed Leaves</caption>
-              <thead>
-                <tr className="align-middle">
-                  <th scope="col">User</th>
-                  <th scope="col" onClick={handleSortIconChange}>
-                    Date Filed{" "}
-                    <FontAwesomeIcon
-                      className="float-end"
-                      icon={tableState.dateSortIcon}
+            )}
+          </Stack>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Table
+            bordered
+            striped
+            hover
+            className="align-middle ms-3 mt-3 mb-3 caption-top"
+          >
+            <caption>Overall Filed Leaves</caption>
+            <thead>
+              <tr className="align-middle">
+                <th scope="col">User</th>
+                <th scope="col" onClick={handleSortIconChange}>
+                  Date Filed{" "}
+                  <FontAwesomeIcon
+                    className="float-end"
+                    icon={tableState.dateSortIcon}
+                  />
+                </th>
+                <th scope="col">From</th>
+                <th scope="col">Until</th>
+                <th scope="col"># of Days</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>{overallLeavesContent}</tbody>
+            <tfoot>
+              <tr>
+                <td className="bg-secondary-subtle">
+                  <Form>
+                    <Form.Control
+                      type="text"
+                      value={tableState.name}
+                      placeholder="Enter name"
+                      disabled={userLevel !== "Admin" /* true */}
+                      onChange={(e) =>
+                        tableDispatch({ type: "name", name: e.target.value })
+                      }
                     />
-                  </th>
-                  <th scope="col">From</th>
-                  <th scope="col">Until</th>
-                  <th scope="col"># of Days</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>{overallLeavesContent}</tbody>
-              <tfoot>
-                <tr>
-                  <td className="bg-secondary-subtle">
-                    <Form>
-                      <Form.Control
-                        type="text"
-                        value={tableState.name}
-                        placeholder="Enter name"
-                        disabled={userLevel !== "Admin" /* true */}
-                        onChange={(e) =>
-                          tableDispatch({ type: "name", name: e.target.value })
-                        }
-                      />
-                    </Form>
-                  </td>
-                  <td className="bg-secondary-subtle" colSpan={2}>
-                    <Form>
-                      <Form.Select
-                        value={tableState.year}
-                        onChange={(e) =>
-                          tableDispatch({ type: "year", year: e.target.value })
-                        }
-                      >
-                        <option value={""}>Year</option>
-                        {yearDropdown}
-                      </Form.Select>
-                    </Form>
-                  </td>
-                  <td className="bg-secondary-subtle" colSpan={2}>
-                    <Form>
-                      <Form.Select
-                        value={tableState.month}
-                        onChange={(e) =>
-                          tableDispatch({
-                            type: "month",
-                            month: e.target.value,
-                          })
-                        }
-                      >
-                        <option value={""}>Month</option>
-                        {monthDropdown}
-                      </Form.Select>
-                    </Form>
-                  </td>
-                  <td className="bg-secondary-subtle" colSpan={4}>
-                    <Button
-                      className="float-end ms-2"
-                      variant="outline-primary"
-                      onClick={handleNext}
-                      disabled={tableState.sliceEnd > filteredIds?.length}
+                  </Form>
+                </td>
+                <td className="bg-secondary-subtle" colSpan={2}>
+                  <Form>
+                    <Form.Select
+                      value={tableState.year}
+                      onChange={(e) =>
+                        tableDispatch({ type: "year", year: e.target.value })
+                      }
                     >
-                      Next
-                    </Button>
-                    <Button
-                      className="float-end"
-                      variant="outline-primary"
-                      onClick={handlePrev}
-                      disabled={!tableState.sliceStart}
+                      <option value={""}>Year</option>
+                      {yearDropdown}
+                    </Form.Select>
+                  </Form>
+                </td>
+                <td className="bg-secondary-subtle" colSpan={2}>
+                  <Form>
+                    <Form.Select
+                      value={tableState.month}
+                      onChange={(e) =>
+                        tableDispatch({
+                          type: "month",
+                          month: e.target.value,
+                        })
+                      }
                     >
-                      Prev
-                    </Button>
-                  </td>
-                </tr>
-              </tfoot>
-            </Table>
-          </Col>
+                      <option value={""}>Month</option>
+                      {monthDropdown}
+                    </Form.Select>
+                  </Form>
+                </td>
+                <td className="bg-secondary-subtle" colSpan={4}>
+                  <Button
+                    className="float-end ms-2"
+                    variant="outline-primary"
+                    onClick={handleNext}
+                    disabled={tableState.sliceEnd > filteredLeaves?.length}
+                  >
+                    Next
+                  </Button>
+                  <Button
+                    className="float-end"
+                    variant="outline-primary"
+                    onClick={handlePrev}
+                    disabled={!tableState.sliceStart}
+                  >
+                    Prev
+                  </Button>
+                </td>
+              </tr>
+            </tfoot>
+          </Table>
+        </Col>
 
-          <Col className="align-items-center" md="auto">
-            <Table
-              size="sm"
-              striped
-              bordered
-              hover
-              className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
-            >
-              <caption>
-                {isHR || isAdmin || isOutletProcessor
-                  ? `Leave Credit Info of ${
-                      leaveCredit?.EmployeeID ? leaveCredit.EmployeeID : ""
-                    }`
-                  : "Your Credit Info"}
-              </caption>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Used</th>
-                  <th>Balance</th>
-                </tr>
-              </thead>
-              {leaveCredit ? (
-                <>
-                  <tbody>
-                    <tr>
-                      <td className="fw-semibold">Sick</td>
-                      <td>{leaveCredit?.CreditBudget}</td>
-                      <td>
-                        {leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
-                      </td>
-                      <td>{leaveCredit?.SickLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Vacation</td>
-                      <td>{leaveCredit?.CreditBudget}</td>
-                      <td>
-                        {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
-                      </td>
-                      <td>{leaveCredit?.VacationLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Birthday</td>
-                      <td>1</td>
-                      <td>{1 - leaveCredit?.BirthdayLeave}</td>
-                      <td>{leaveCredit?.BirthdayLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Maternity</td>
-                      <td>{leaveCredit?.MaternityLeave && 105}</td>
-                      <td>
-                        {leaveCredit?.MaternityLeave &&
-                          105 - leaveCredit?.MaternityLeave}
-                      </td>
-                      <td>{leaveCredit?.MaternityLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Paternity</td>
-                      <td>{leaveCredit?.PaternityLeave && 7}</td>
-                      <td>
-                        {leaveCredit?.PaternityLeave &&
-                          7 - leaveCredit?.PaternityLeave}
-                      </td>
-                      <td>{leaveCredit?.PaternityLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Matrimonial</td>
-                      <td>{leaveCredit?.MatrimonialLeave && 7}</td>
-                      <td>
-                        {leaveCredit?.MatrimonialLeave &&
-                          7 - leaveCredit?.MatrimonialLeave}
-                      </td>
-                      <td>{leaveCredit?.MatrimonialLeave}</td>
-                    </tr>
-                    <tr>
-                      <td className="fw-semibold">Bereavement</td>
-                      <td>{leaveCredit?.BereavementLeave}</td>
-                      <td>0</td>
-                      <td>0</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td className="fw-semibold">Print:</td>
-                      <td colSpan={3}>
-                        <Button
-                          variant="outline-secondary"
-                          className="me-2"
-                          onClick={(e) => handlePrintLeave(e.target.value)}
-                          value={"Detailed"}
-                        >
-                          Detailed
-                        </Button>
-                        <Button
-                          value={"Summary"}
-                          variant="outline-secondary"
-                          onClick={(e) => handlePrintLeave(e.target.value)}
-                        >
-                          Summary
-                        </Button>
-                      </td>
-                    </tr>
-                  </tfoot>
-                </>
-              ) : (
-                <>
-                  <tbody>
-                    <tr>
-                      <td colSpan={4} className="text-center">
-                        No leave credits yet...
-                      </td>
-                    </tr>
-                  </tbody>
-                </>
-              )}
-            </Table>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  return content;
+        <Col className="align-items-center" md="auto">
+          <Table
+            size="sm"
+            striped
+            bordered
+            hover
+            className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
+          >
+            <caption>
+              {isHR || isAdmin || isOutletProcessor
+                ? `Leave Credit Info of ${
+                    leaveCredit?.EmployeeID ? leaveCredit.EmployeeID : ""
+                  }`
+                : "Your Credit Info"}
+            </caption>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Used</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            {leaveCredit ? (
+              <>
+                <tbody>
+                  <tr>
+                    <td className="fw-semibold">Sick</td>
+                    <td>{leaveCredit?.CreditBudget}</td>
+                    <td>
+                      {leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
+                    </td>
+                    <td>{leaveCredit?.SickLeave}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Vacation</td>
+                    <td>{leaveCredit?.CreditBudget}</td>
+                    <td>
+                      {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
+                    </td>
+                    <td>{leaveCredit?.VacationLeave}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Birthday</td>
+                    <td>1</td>
+                    <td>{1 - leaveCredit?.BirthdayLeave}</td>
+                    <td>{leaveCredit?.BirthdayLeave}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Maternity</td>
+                    <td>{leaveCredit?.MaternityLeave && 105}</td>
+                    <td>
+                      {leaveCredit?.MaternityLeave &&
+                        105 - leaveCredit?.MaternityLeave}
+                    </td>
+                    <td>{leaveCredit?.MaternityLeave}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Paternity</td>
+                    <td>{leaveCredit?.PaternityLeave && 7}</td>
+                    <td>
+                      {leaveCredit?.PaternityLeave &&
+                        7 - leaveCredit?.PaternityLeave}
+                    </td>
+                    <td>{leaveCredit?.PaternityLeave}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Matrimonial</td>
+                    <td>{leaveCredit?.MatrimonialLeave && 7}</td>
+                    <td>
+                      {leaveCredit?.MatrimonialLeave &&
+                        7 - leaveCredit?.MatrimonialLeave}
+                    </td>
+                    <td>{leaveCredit?.MatrimonialLeave}</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td className="fw-semibold">Print:</td>
+                    <td colSpan={3}>
+                      <Button
+                        variant="outline-secondary"
+                        className="me-2"
+                        onClick={(e) => handlePrintLeave(e.target.value)}
+                        value={"Detailed"}
+                      >
+                        Detailed
+                      </Button>
+                      <Button
+                        value={"Summary"}
+                        variant="outline-secondary"
+                        onClick={(e) => handlePrintLeave(e.target.value)}
+                      >
+                        Summary
+                      </Button>
+                    </td>
+                  </tr>
+                </tfoot>
+              </>
+            ) : (
+              <>
+                <tbody>
+                  <tr>
+                    <td colSpan={4} className="text-center">
+                      No leave credits yet...
+                    </td>
+                  </tr>
+                </tbody>
+              </>
+            )}
+          </Table>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default LeavesList;

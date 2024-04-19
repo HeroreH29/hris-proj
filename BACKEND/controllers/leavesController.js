@@ -6,51 +6,55 @@ const { format } = require("date-fns");
 // @route GET /leaves
 // @access Private
 const getAllLeaves = async (req, res) => {
+  // const currentYear = new Date().getFullYear();
+  // const previousYear = currentYear - 1;
+
   // Fetch all leaves and employees
   const [leaves, employees] = await Promise.all([
     Leave.find().populate({
       path: "FiledFor",
+      select: "GenInfo",
       populate: {
         path: "GenInfo",
-        select: "FirstName MI LastName DateEmployed EmployeeID", // Specify any nested fields you want to populate
+        select: "FirstName MI LastName DateEmployed EmployeeID AssignedOutlet", // Specify any nested fields you want to populate
       },
     }),
     EmployeeRecord.find().populate("GenInfo", "EmployeeID").lean(),
   ]);
 
   // Create a map of employees for faster lookup
-  const employeeMap = new Map();
-  employees.forEach((employee) => {
-    employeeMap.set(employee.GenInfo.EmployeeID, employee);
-  });
+  // const employeeMap = new Map();
+  // employees.forEach((employee) => {
+  //   employeeMap.set(employee.GenInfo.EmployeeID, employee);
+  // });
 
-  // Array to store update operations for batch update
-  const updateOperations = [];
+  // // Array to store update operations for batch update
+  // const updateOperations = [];
 
-  // Process leaves
-  leaves.forEach((leave) => {
-    // Determine credited status based on approve field
-    leave.Credited = leave.Approve === 1;
+  // // Process leaves
+  // leaves.forEach((leave) => {
+  //   // Determine credited status based on approve field
+  //   leave.Credited = leave.Approve === 1;
 
-    // Find the corresponding employee
-    const employee = employeeMap.get(leave.EmployeeID);
-    if (employee) {
-      leave.FiledFor = employee._id;
-    }
+  //   // Find the corresponding employee
+  //   const employee = employeeMap.get(leave.EmployeeID);
+  //   if (employee) {
+  //     leave.FiledFor = employee._id;
+  //   }
 
-    // Add update operation
-    updateOperations.push({
-      updateOne: {
-        filter: { _id: leave._id },
-        update: leave,
-      },
-    });
-  });
+  //   // Add update operation
+  //   updateOperations.push({
+  //     updateOne: {
+  //       filter: { _id: leave._id },
+  //       update: leave,
+  //     },
+  //   });
+  // });
 
-  // Perform batch update
-  if (updateOperations.length > 0) {
-    await Leave.bulkWrite(updateOperations);
-  }
+  // // Perform batch update
+  // if (updateOperations.length > 0) {
+  //   await Leave.bulkWrite(updateOperations);
+  // }
 
   // Respond with populated leaves
   res.json(leaves);

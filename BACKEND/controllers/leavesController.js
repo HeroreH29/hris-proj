@@ -6,58 +6,41 @@ const { format } = require("date-fns");
 // @route GET /leaves
 // @access Private
 const getAllLeaves = async (req, res) => {
-  // const currentYear = new Date().getFullYear();
-  // const previousYear = currentYear - 1;
+  try {
+    const leaves = await Leave.find();
 
-  // Fetch all leaves and employees
-  const [leaves, employees] = await Promise.all([
-    Leave.find().populate({
-      path: "FiledFor",
-      select: "GenInfo",
-      populate: {
-        path: "GenInfo",
-        select: "FirstName MI LastName DateEmployed EmployeeID AssignedOutlet", // Specify any nested fields you want to populate
-      },
-    }),
-    EmployeeRecord.find().populate("GenInfo", "EmployeeID").lean(),
-  ]);
+    for (const leave of leaves) {
+      // Use for...of loop
+      if (leave.Approve === 1) {
+        leave.Credited = true;
+        await leave.save();
+      }
+    }
 
-  // Create a map of employees for faster lookup
-  // const employeeMap = new Map();
-  // employees.forEach((employee) => {
-  //   employeeMap.set(employee.GenInfo.EmployeeID, employee);
-  // });
+    const employeeRecords = await EmployeeRecord.find().populate(
+      "GenInfo",
+      "EmployeeID"
+    );
 
-  // // Array to store update operations for batch update
-  // const updateOperations = [];
+    for (const record of employeeRecords) {
+      // If a record already has leave data, skip process below
+      if (record.Leaves.length) {
+        continue;
+      }
 
-  // // Process leaves
-  // leaves.forEach((leave) => {
-  //   // Determine credited status based on approve field
-  //   leave.Credited = leave.Approve === 1;
+      const foundLeaves = await Leave.find({
+        EmployeeID: record?.GenInfo.EmployeeID,
+      }).lean();
 
-  //   // Find the corresponding employee
-  //   const employee = employeeMap.get(leave.EmployeeID);
-  //   if (employee) {
-  //     leave.FiledFor = employee._id;
-  //   }
+      record.Leaves = foundLeaves ? foundLeaves.map((leave) => leave._id) : [];
 
-  //   // Add update operation
-  //   updateOperations.push({
-  //     updateOne: {
-  //       filter: { _id: leave._id },
-  //       update: leave,
-  //     },
-  //   });
-  // });
+      await record.save();
+    }
 
-  // // Perform batch update
-  // if (updateOperations.length > 0) {
-  //   await Leave.bulkWrite(updateOperations);
-  // }
-
-  // Respond with populated leaves
-  res.json(leaves);
+    res.json(leaves);
+  } catch (error) {
+    res.status(500).json({ error: "GET LEAVES server error: " + error });
+  }
 };
 
 // desc Create new leave
@@ -65,7 +48,7 @@ const getAllLeaves = async (req, res) => {
 // @access Private
 const createLeave = async (req, res) => {
   const {
-    ModifiedDate,
+    DateModified,
     DayTime,
     Approve,
     Lto,
@@ -90,12 +73,26 @@ const createLeave = async (req, res) => {
   // Proceed leave filing if conditions are met
   const leave = await Leave.create(req.body);
 
+  // Add the filed leave to the employee record
+  const records = await EmployeeRecord.find()
+    .populate({
+      path: "GenInfo",
+      select: "EmployeeID",
+    })
+    .lean();
+
+  const foundrecord = records.find(
+    (record) => record.GenInfo.EmployeeID === others.EmployeeID
+  );
+
+  foundrecord.Leaves.push(leave._id);
+
   // Extra checking if leave data is valid or not
-  if (leave) {
-    res.status(201).json(leave);
-  } else {
-    res.status(500).json({ message: "Invalid leave data received" });
-  }
+  // if (leave) {
+  //   res.status(201).json(leave);
+  // } else {
+  //   res.status(500).json({ message: "Invalid leave data received" });
+  // }
 };
 
 // desc Update leave

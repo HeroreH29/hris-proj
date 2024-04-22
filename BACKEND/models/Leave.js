@@ -43,21 +43,13 @@ const leaveSchema = new Schema(
       type: String,
       default: "",
     },
-    FiledFor: {
-      type: Schema.Types.ObjectId,
-      ref: "EmployeeRecord",
-    },
-    ModifiedDate: {
+    DateModified: {
       type: String,
       default: "",
     },
     Credited: {
       type: Boolean,
       default: false,
-    },
-    Credits: {
-      type: Schema.Types.ObjectId,
-      ref: "LeaveCredit",
     },
   },
   { toJSON: { virtuals: true } }

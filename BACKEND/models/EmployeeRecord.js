@@ -10,7 +10,7 @@ const employeeRecordSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "PersonalInfo",
   },
-  Dependent: {
+  Dependents: {
     type: [Schema.Types.ObjectId],
     ref: "Dependent",
   },
@@ -21,6 +21,14 @@ const employeeRecordSchema = new Schema({
   WorkInfo: {
     type: [Schema.Types.ObjectId],
     ref: "WorkInfo",
+  },
+  Leaves: {
+    type: [Schema.Types.ObjectId],
+    ref: "Leave",
+  },
+  LeaveCredits: {
+    type: Schema.Types.ObjectId,
+    ref: "LeaveCredit",
   },
 });
 

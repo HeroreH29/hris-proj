@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const leaveCreditSchema = new Schema({
-  Employee: {
-    type: Schema.Types.ObjectId,
-    ref: "EmployeeRecord",
-  },
   SickLeave: {
     type: Number,
     default: 5,

@@ -148,12 +148,16 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
       <>
         <tr
           key={leave.id}
+          onMouseEnter={() =>
+            handleHover({ leaveCredit, name: leave.FullName })
+          }
+          onMouseLeave={() => handleHover({})}
           onClick={() => {
             handleSetValues(leave);
             setShowModal(true);
           }}
         >
-          <td>{`${leave.FiledFor?.GenInfo.FullName}`}</td>
+          <td>{`${leave?.FullName}`}</td>
           <td>{format(new Date(leave?.DateFiled), "PP")}</td>
           <td>{leave?.Lfrom}</td>
           <td>{leave?.Lto}</td>
@@ -164,7 +168,7 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${leave.FiledFor?.GenInfo.LastName}'s ${leave?.Ltype}`}</Modal.Title>
+            <Modal.Title>{`${leave?.FullName}'s ${leave?.Ltype}`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

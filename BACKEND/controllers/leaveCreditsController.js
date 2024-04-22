@@ -12,30 +12,9 @@ const { differenceInYears } = require("date-fns");
 // @route GET /leavecredits
 // @access Private
 const getAllLeaveCredits = async (req, res) => {
-  const leavecredits = await LeaveCredit.find().populate({
-    path: "Employee",
-    select: "GenInfo",
-    populate: {
-      path: "GenInfo",
-      select:
-        "EmployeeID FirstName MI LastName DateEmployed EmpStatus EmployeeType",
-      match: {
-        EmpStatus: "Y",
-      },
-    },
-  });
+  const leavecredits = await LeaveCredit.find();
 
-  // Add Employee field
-  const populateCollection = async () => {
-    // Find all EmployeeRecords and populate the GenInfo field with EmployeeID
-    const records = await EmployeeRecord.find().populate({
-      path: "GenInfo",
-      select: "EmpStatus EmployeeType DateEmployed",
-      match: { EmployeeType: "Regular" },
-    });
-
-    const filteredRecords = records.filter((record) => record.GenInfo !== null);
-
+  if (!leavecredits.length) {
     const getLeaveCreditData = (srvcYrs) => {
       if (srvcYrs >= 1 && srvcYrs <= 4) {
         return {};
@@ -57,50 +36,36 @@ const getAllLeaveCredits = async (req, res) => {
       };
     };
 
-    const processRecords = async (filteredRecords) => {
-      // Store all create operations to run as a batch
-      const createOperations = [];
+    const employeeRecords = await EmployeeRecord.find().populate({
+      path: "GenInfo",
+      select: "DateEmployed EmpStatus",
+      match: { EmpStatus: "Y" },
+    });
 
-      // Iterate through filtered records
-      for (const record of filteredRecords) {
-        // Check if a credit record exists for the current record
-        const creditRecord = await LeaveCredit.findOne({
-          Employee: record._id,
-        });
+    const filteredRecords = employeeRecords.filter(
+      (record) => record.GenInfo !== null
+    );
 
-        // If it exists, skip iteration
-        if (creditRecord) {
-          continue;
-        }
-
-        // Calculate service years
-        const srvcYrs = differenceInYears(
-          new Date(),
-          new Date(record.GenInfo?.DateEmployed)
-        );
-
-        // Get leave credit data based on service years
-        const leaveCreditData = getLeaveCreditData(srvcYrs);
-
-        // If leave credit data is available, create a LeaveCredit record
-        if (leaveCreditData) {
-          createOperations.push(
-            LeaveCredit.create({
-              Employee: record._id,
-              ...leaveCreditData,
-            })
-          );
-        }
+    for (const record of filteredRecords) {
+      // Skip iteration if record has leave credit data
+      if (record.LeaveCredits) {
+        continue;
       }
 
-      // Run all create operations as a batch
-      await Promise.all(createOperations);
-    };
-    processRecords(filteredRecords);
-  };
+      const srvcYrs = differenceInYears(
+        new Date(),
+        new Date(record.GenInfo.DateEmployed)
+      );
+      const creditData = getLeaveCreditData(srvcYrs);
 
-  if (!leavecredits?.length) {
-    await populateCollection();
+      if (creditData) {
+        const newCredit = await LeaveCredit.create(creditData);
+
+        // Include new credit to current record data
+        record.LeaveCredits = newCredit._id;
+        await record.save();
+      }
+    }
   }
 
   // Comment/Uncomment if needed

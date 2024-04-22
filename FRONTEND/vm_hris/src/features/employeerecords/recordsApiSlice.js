@@ -8,6 +8,7 @@ const workinfosAdapter = createEntityAdapter({});
 const educinfosAdapter = createEntityAdapter({});
 const documentsAdapter = createEntityAdapter({});
 const inactiveEmpsAdapter = createEntityAdapter({});
+const employeeRecordsAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
@@ -16,6 +17,91 @@ const workInitialState = workinfosAdapter.getInitialState();
 const educInitialState = educinfosAdapter.getInitialState();
 const docuInitialState = documentsAdapter.getInitialState();
 const inactiveEmpsInitialState = inactiveEmpsAdapter.getInitialState();
+const employeeRecordsInitialState = employeeRecordsAdapter.getInitialState();
+
+// Employee records
+export const employeeRecordsApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getEmployeeRecords: builder.query({
+      query: () => ({
+        url: "/employeerecords",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedEmployeeRecords = responseData.map((employeerecord) => {
+          employeerecord.id = employeerecord._id;
+          return employeerecord;
+        });
+        return employeeRecordsAdapter.setAll(
+          employeeRecordsInitialState,
+          loadedEmployeeRecords
+        );
+      },
+      providesTags: (result, error, arg) => {
+        if (result?.ids) {
+          return [
+            { type: "Employeerecord", id: "LIST" },
+            ...result.ids.map((id) => ({ type: "Employeerecord", id })),
+          ];
+        } else return [{ type: "Employeerecord", id: "LIST" }];
+      },
+    }),
+    addEmployeeRecord: builder.mutation({
+      query: (initialEmployeerecord) => ({
+        url: "/employeerecords",
+        method: "POST",
+        body: {
+          ...initialEmployeerecord,
+        },
+      }),
+      invalidatesTags: [
+        {
+          type: "EmployeeRecord",
+          id: "LIST",
+        },
+      ],
+    }),
+    updateEmployeerecord: builder.mutation({
+      query: (initialEmployeerecord) => ({
+        url: "/employeerecords",
+        method: "PATCH",
+        body: {
+          ...initialEmployeerecord,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        {
+          type: "Employeerecord",
+          id: arg.id,
+        },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useGetEmployeeRecordsQuery,
+  useAddEmployeeRecordMutation,
+  useUpdateEmployeerecordMutation,
+} = employeeRecordsApiSlice;
+
+export const selectEmployeerecordsResult =
+  employeeRecordsApiSlice.endpoints.getEmployeeRecords.select();
+
+const selectEmployeerecordsData = createSelector(
+  selectEmployeerecordsResult,
+  (employeerecordsResult) => employeerecordsResult.data
+);
+
+export const {
+  selectAll: selectAllEmployeerecords,
+  selectById: selectEmployeerecordsById,
+  selectIds: selectEmployeerecordIds,
+} = employeeRecordsAdapter.getSelectors(
+  (state) => selectEmployeerecordsData(state) ?? employeeRecordsInitialState
+);
 
 // General infos
 export const geninfosApiSlice = apiSlice.injectEndpoints({

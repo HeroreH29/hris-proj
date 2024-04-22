@@ -46,8 +46,15 @@ const PopulateEmployeeRecord = async (res) => {
 
 // GET
 const getEmployeeRecords = async (req, res) => {
-  await PopulateEmployeeRecord(res);
-  //console.log(employeerecord);
+  const employeeRecords = await EmployeeRecord.find().populate(
+    "GenInfo PersonalInfo Dependents EducInfo WorkInfo Leaves LeaveCredits"
+  );
+
+  if (!employeeRecords.length) {
+    await PopulateEmployeeRecord(res);
+  }
+
+  res.json(employeeRecords);
 };
 
 module.exports = { getEmployeeRecords };

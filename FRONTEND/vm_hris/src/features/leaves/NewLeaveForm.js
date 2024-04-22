@@ -4,7 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { LEAVETYPES } from "../../config/leaveTypeOptions";
-import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
+import {
+  useGetEmployeeRecordsQuery,
+  useGetGeninfosQuery,
+} from "../employeerecords/recordsApiSlice";
 import { useAddNewLeaveMutation } from "./leavesApiSlice";
 import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
@@ -25,6 +28,8 @@ const NewLeaveForm = () => {
 
   const { data: geninfos } = useGetGeninfosQuery();
 
+  const { data: employeerecords } = useGetEmployeeRecordsQuery();
+
   const [
     addLeave,
     { isSuccess: addSuccess, isError: isAddError, error: addError },
@@ -36,33 +41,31 @@ const NewLeaveForm = () => {
 
   // For searching employees
   const handleSearch = (e) => {
-    const { ids, entities } = geninfos;
+    const { ids, entities } = employeerecords;
+
+    const geninfos = ids.map((id) => entities[id].GenInfo);
 
     setSearchQuery(e.target.value.toLowerCase());
 
-    if (ids?.length) {
-      const filteredResults = ids
-        .filter((id) => {
-          let matches = true;
+    if (geninfos) {
+      const filteredResults = geninfos.filter((info) => {
+        let matches = true;
 
-          if (isOutletProcessor) {
-            matches =
-              matches &&
-              entities[id].AssignedOutlet === branch &&
-              entities[id].EmpStatus === "Y" &&
-              (entities[id].LastName.toLowerCase().includes(searchQuery) ||
-                entities[id].FirstName.toLowerCase().includes(searchQuery));
-          } else {
-            matches =
-              matches &&
-              entities[id].EmpStatus === "Y" &&
-              (entities[id].LastName.toLowerCase().includes(searchQuery) ||
-                entities[id].FirstName.toLowerCase().includes(searchQuery));
-          }
+        if (isOutletProcessor) {
+          matches =
+            matches &&
+            info.AssignedOutlet === branch &&
+            info.EmpStatus === "Y" &&
+            info.FullName.toLowerCase().includes(searchQuery);
+        } else {
+          matches =
+            matches &&
+            info.EmpStatus === "Y" &&
+            info.FullName.toLowerCase().includes(searchQuery);
+        }
 
-          return matches;
-        })
-        .map((id) => entities[id]);
+        return matches;
+      });
 
       setSearchResults(filteredResults);
     }
@@ -70,9 +73,7 @@ const NewLeaveForm = () => {
 
   // For selecting searched employee
   const handleSearchResultClick = (result) => {
-    setSearchQuery(
-      `${result.LastName}, ${result.FirstName} ${result.MI}. (${result.EmployeeID})`
-    );
+    setSearchQuery(`${result.FullName}. (${result.EmployeeID})`);
     setSearchResults("");
     setSelectedEmployee(result.EmployeeID);
   };
@@ -107,27 +108,25 @@ const NewLeaveForm = () => {
               new Date(leaveState.Lfrom)
             ) + 1;
         }
-
-        console.log(days);
         return days;
       };
 
       if (confirm) {
         const leaveJson = {
           EmployeeID: selectedEmployee ? selectedEmployee : employeeId,
-          DateOfFilling: format(new Date(), "MMM dd, yyyy"),
+          DateFiled: format(new Date(), "P"),
           NoOfDays: CalcuNoOfDays(),
           DayTime: leaveState.DayTime,
           Ltype: leaveState.Ltype,
           Lfrom: format(new Date(leaveState.Lfrom), "MMM dd, yyyy"),
           Lto: format(new Date(leaveState.Lto), "MMM dd, yyyy"),
           Reason: leaveState.Reason,
-          User: user,
+          FiledBy: user,
         };
 
         // Send data to database
         try {
-          await addLeave(leaveJson).unwrap();
+          await addLeave(leaveJson);
         } catch (error) {
           console.error(error.data.message);
         }

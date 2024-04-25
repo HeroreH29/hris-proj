@@ -2,6 +2,7 @@ import React, { memo, useEffect, useState } from "react";
 import {
   useUpdateLeaveMutation,
   useUpdateLeaveCreditMutation,
+  useGetLeaveCreditsQuery,
 } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
@@ -10,9 +11,17 @@ import useAuth from "../../hooks/useAuth";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { toast } from "react-toastify";
 
-const Leave = ({ leave, handleHover, leaveCredit }) => {
+const Leave = ({ leave, handleHover }) => {
   const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
   const navigate = useNavigate();
+
+  const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
+    selectFromResult: ({ data }) => ({
+      leaveCredit: data?.ids
+        .filter((id) => data.entities[id].CreditsOf._id === leave.FiledFor._id)
+        .map((id) => data.entities[id])[0],
+    }),
+  });
 
   const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
 
@@ -52,7 +61,7 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
 
         // Send leave information to HR email if leave is filed from outlets/branches
         if (isOutletProcessor) {
-          const { _id, __v, ...others } = payload;
+          const { _id, ...others } = payload;
 
           let emailMsg = {
             email: "hero.viamare@gmail.com",
@@ -79,11 +88,11 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
       if (approveStat === 1) {
         // Update leave credit of employee
         const ltype = leave?.Ltype.replace(" ", "");
-        const noOfCreditsToDeduct = leaveCredit?.[ltype] - leave?.NoOfDays;
+        const deductedCredit = leaveCredit?.[ltype] - leave?.NoOfDays;
 
         const updatedLeaveCredit = {
           id: leaveCredit?.id,
-          [ltype]: noOfCreditsToDeduct >= 0 ? noOfCreditsToDeduct : 0,
+          [ltype]: deductedCredit >= 0 ? deductedCredit : 0,
         };
         try {
           await updateLeaveCredit(updatedLeaveCredit);
@@ -148,16 +157,13 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
       <>
         <tr
           key={leave.id}
-          onMouseEnter={() =>
-            handleHover({ leaveCredit, name: leave.FullName })
-          }
-          onMouseLeave={() => handleHover({})}
+          onMouseOver={() => handleHover(leaveCredit)}
           onClick={() => {
             handleSetValues(leave);
             setShowModal(true);
           }}
         >
-          <td>{`${leave?.FullName}`}</td>
+          <td>{`${leave?.FiledFor?.GenInfo.FullName}`}</td>
           <td>{format(new Date(leave?.DateFiled), "PP")}</td>
           <td>{leave?.Lfrom}</td>
           <td>{leave?.Lto}</td>
@@ -168,7 +174,7 @@ const Leave = ({ leave, handleHover, leaveCredit }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${leave?.FullName}'s ${leave?.Ltype}`}</Modal.Title>
+            <Modal.Title>{`${leave.FiledFor?.GenInfo.LastName}'s ${leave?.Ltype}`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

@@ -26,7 +26,13 @@ const login = async (req, res) => {
   }
 
   const foundUser = await User.findOne({ username })
-    .populate("employee")
+    .populate({
+      path: "employee",
+      select: "GenInfo",
+      populate: {
+        path: "GenInfo",
+      },
+    })
     .exec();
 
   if (!foundUser || !foundUser.active) {
@@ -54,9 +60,9 @@ const login = async (req, res) => {
       UserInfo: {
         username: foundUser.username,
         userLevel: foundUser.userLevel,
-        branch: foundUser.employee.AssignedOutlet,
-        user: `${foundUser.employee.FirstName}, ${foundUser.employee.LastName}`,
-        employeeId: foundUser.employee.EmployeeID,
+        branch: foundUser.employee?.GenInfo.AssignedOutlet,
+        user: `${foundUser.employee?.GenInfo.FullName}`,
+        employeeId: foundUser.employee?.GenInfo.EmployeeID,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -95,7 +101,13 @@ const refresh = async (req, res) => {
       if (err) return res.status(403).json({ message: "Forbidden" });
 
       const foundUser = await User.findOne({ username: decoded.username })
-        .populate("employee")
+        .populate({
+          path: "employee",
+          select: "GenInfo",
+          populate: {
+            path: "GenInfo",
+          },
+        })
         .exec();
 
       if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
@@ -105,9 +117,9 @@ const refresh = async (req, res) => {
           UserInfo: {
             username: foundUser.username,
             userLevel: foundUser.userLevel,
-            branch: foundUser.employee.AssignedOutlet,
-            user: `${foundUser.employee.FirstName}, ${foundUser.employee.LastName}`,
-            employeeId: foundUser.employee.EmployeeID,
+            branch: foundUser.employee?.GenInfo.AssignedOutlet,
+            user: foundUser.employee?.GenInfo.FullName,
+            employeeId: foundUser.employee?.GenInfo.EmployeeID,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,

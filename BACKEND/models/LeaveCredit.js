@@ -30,6 +30,10 @@ const leaveCreditSchema = new Schema({
     type: Number,
     default: 5,
   },
+  CreditsOf: {
+    type: Schema.Types.ObjectId,
+    ref: "EmployeeRecord",
+  },
 });
 
 module.exports = mongoose.model("LeaveCredit", leaveCreditSchema);

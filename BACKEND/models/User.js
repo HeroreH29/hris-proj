@@ -29,7 +29,7 @@ const userSchema = new Schema({
   },
   employee: {
     type: Schema.Types.ObjectId,
-    ref: "GenInfo",
+    ref: "EmployeeRecord",
   },
 });
 

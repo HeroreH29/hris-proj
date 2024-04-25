@@ -28,7 +28,7 @@ const NewLeaveForm = () => {
 
   const { data: geninfos } = useGetGeninfosQuery();
 
-  const { data: employeerecords } = useGetEmployeeRecordsQuery();
+  const { data: employeerecords, isSuccess } = useGetEmployeeRecordsQuery();
 
   const [
     addLeave,
@@ -41,41 +41,49 @@ const NewLeaveForm = () => {
 
   // For searching employees
   const handleSearch = (e) => {
-    const { ids, entities } = employeerecords;
+    if (isSuccess) {
+      const { ids, entities } = employeerecords;
 
-    const geninfos = ids.map((id) => entities[id].GenInfo);
+      const records = ids.map((id) => entities[id]);
 
-    setSearchQuery(e.target.value.toLowerCase());
+      console.log(records);
 
-    if (geninfos) {
-      const filteredResults = geninfos.filter((info) => {
-        let matches = true;
+      setSearchQuery(e.target.value.toLowerCase());
 
-        if (isOutletProcessor) {
-          matches =
-            matches &&
-            info.AssignedOutlet === branch &&
-            info.EmpStatus === "Y" &&
-            info.FullName.toLowerCase().includes(searchQuery);
-        } else {
-          matches =
-            matches &&
-            info.EmpStatus === "Y" &&
-            info.FullName.toLowerCase().includes(searchQuery);
-        }
+      if (records) {
+        const filteredResults = records.filter((record) => {
+          const info = record?.GenInfo;
+          let matches = true;
 
-        return matches;
-      });
+          if (isOutletProcessor) {
+            matches =
+              matches &&
+              info.AssignedOutlet === branch &&
+              info.EmpStatus === "Y" &&
+              info.FullName.toLowerCase().includes(searchQuery);
+          } else {
+            matches =
+              matches &&
+              info.EmpStatus === "Y" &&
+              info.FullName.toLowerCase().includes(searchQuery);
+          }
 
-      setSearchResults(filteredResults);
+          return matches;
+        });
+
+        // console.log(filteredResults);
+        setSearchResults(filteredResults);
+      }
     }
   };
 
   // For selecting searched employee
   const handleSearchResultClick = (result) => {
-    setSearchQuery(`${result.FullName}. (${result.EmployeeID})`);
+    setSearchQuery(
+      `${result?.GenInfo.FullName}. (${result?.GenInfo.EmployeeID})`
+    );
     setSearchResults("");
-    setSelectedEmployee(result.EmployeeID);
+    setSelectedEmployee(result);
   };
 
   const handlePreviousPage = () => navigate("/leaves");
@@ -113,7 +121,9 @@ const NewLeaveForm = () => {
 
       if (confirm) {
         const leaveJson = {
-          EmployeeID: selectedEmployee ? selectedEmployee : employeeId,
+          EmployeeID: selectedEmployee
+            ? selectedEmployee?.GenInfo.EmployeeID
+            : employeeId,
           DateFiled: format(new Date(), "P"),
           NoOfDays: CalcuNoOfDays(),
           DayTime: leaveState.DayTime,
@@ -122,6 +132,7 @@ const NewLeaveForm = () => {
           Lto: format(new Date(leaveState.Lto), "MMM dd, yyyy"),
           Reason: leaveState.Reason,
           FiledBy: user,
+          FiledFor: selectedEmployee.id ?? selectedEmployee._id,
         };
 
         // Send data to database
@@ -231,7 +242,7 @@ const NewLeaveForm = () => {
                       href={`#`}
                       key={result.id}
                       onClick={() => handleSearchResultClick(result)}
-                    >{`${result.LastName}, ${result.FirstName} ${result.MI}`}</ListGroup.Item>
+                    >{`${result?.GenInfo.FullName}`}</ListGroup.Item>
                   ))}
                 </ListGroup>
               )}

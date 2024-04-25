@@ -97,6 +97,12 @@ const useTableSettings = () => {
           dateSortIcon: dateSortIconArr[state.dateSort ? 1 : 0],
         };
       }
+      case "reset": {
+        return {
+          ...state,
+          ...initialState,
+        };
+      }
 
       default: {
         throw Error("Unknown action: " + action.type);

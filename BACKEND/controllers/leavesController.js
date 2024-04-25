@@ -1,4 +1,5 @@
 const Leave = require("../models/Leave");
+const LeaveCredit = require("../models/LeaveCredit");
 const EmployeeRecord = require("../models/EmployeeRecord");
 const { format } = require("date-fns");
 
@@ -7,37 +8,91 @@ const { format } = require("date-fns");
 // @access Private
 const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find();
+    const leaves = await Leave.find().populate({
+      path: "FiledFor",
+      select: "GenInfo",
+      populate: {
+        path: "GenInfo",
+      },
+    });
 
-    for (const leave of leaves) {
+    const currentYearLeaves = leaves.filter((leave) =>
+      leave.DateFiled.includes(new Date().getFullYear().toString())
+    );
+
+    // for (const leave of currentYearLeaves) {
+    //   if (leave.Approve === 1) {
+    //     const ltype = leave.Ltype.replace(" ", "");
+    //     const foundCredit = await LeaveCredit.findOne({
+    //       CreditsOf: leave.FiledFor,
+    //     });
+
+    //     if (ltype.includes("Maternity") && foundCredit[ltype] === 0) {
+    //       foundCredit[ltype] = 105;
+    //     } else if (ltype.includes("Paternity") && foundCredit[ltype] === 0) {
+    //       foundCredit[ltype] = 7;
+    //     }
+
+    //     if (foundCredit.CreditBudget > 0) {
+    //       foundCredit[ltype] -= leave.NoOfDays;
+    //       if (foundCredit[ltype] < 0) {
+    //         foundCredit[ltype] = 0;
+    //       }
+    //     }
+
+    //     // Save changes
+    //     await foundCredit.save();
+    //   }
+    // }
+
+    /* Uncomment code below if needed */
+    for (const leave of currentYearLeaves) {
+      const foundCredit = await LeaveCredit.findOne({
+        CreditsOf: leave.FiledFor,
+      });
+
       // Use for...of loop
-      if (leave.Approve === 1) {
+      if (leave.Approve === 1 && foundCredit.CreditBudget > 0) {
         leave.Credited = true;
         await leave.save();
       }
     }
 
-    const employeeRecords = await EmployeeRecord.find().populate(
-      "GenInfo",
-      "EmployeeID"
-    );
+    // const employeeRecords = await EmployeeRecord.find()
+    //   .populate("GenInfo", "EmployeeID")
+    //   .lean();
 
-    for (const record of employeeRecords) {
-      // If a record already has leave data, skip process below
-      if (record.Leaves.length) {
-        continue;
-      }
+    // for (const leave of leaves) {
+    //   const foundRecord = employeeRecords.find(
+    //     (record) => record.GenInfo.EmployeeID === leave.EmployeeID
+    //   );
 
-      const foundLeaves = await Leave.find({
-        EmployeeID: record?.GenInfo.EmployeeID,
-      }).lean();
+    //   if (!foundRecord) continue;
 
-      record.Leaves = foundLeaves ? foundLeaves.map((leave) => leave._id) : [];
+    //   leave.FiledFor = foundRecord._id;
+    //   await leave.save();
+    // }
 
-      await record.save();
-    }
+    // for (const record of employeeRecords) {
+    //   // If a record already has leave data, skip process below
+    //   if (record.Leaves.length) {
+    //     continue;
+    //   }
 
-    res.json(leaves);
+    //   const foundLeaves = await Leave.find({
+    //     EmployeeID: record?.GenInfo.EmployeeID,
+    //   }).lean();
+
+    //   if (!foundLeaves.length) {
+    //     continue;
+    //   }
+
+    //   record.Leaves = foundLeaves.map((leave) => leave._id);
+
+    //   await record.save();
+    // }
+
+    res.json(leaves.sort(() => -1));
   } catch (error) {
     res.status(500).json({ error: "GET LEAVES server error: " + error });
   }
@@ -87,12 +142,21 @@ const createLeave = async (req, res) => {
 
   foundrecord.Leaves.push(leave._id);
 
-  // Extra checking if leave data is valid or not
-  // if (leave) {
-  //   res.status(201).json(leave);
-  // } else {
-  //   res.status(500).json({ message: "Invalid leave data received" });
-  // }
+  // Save changes
+  const updatedRecord = await EmployeeRecord.findByIdAndUpdate(
+    foundrecord._id,
+    foundrecord,
+    {
+      returnDocument: "after",
+    }
+  ).exec();
+
+  // Extra checking if leave and record data is valid or not
+  if (leave && updatedRecord) {
+    res.status(201).json(leave);
+  } else {
+    res.status(500).json({ message: "Invalid leave data received" });
+  }
 };
 
 // desc Update leave

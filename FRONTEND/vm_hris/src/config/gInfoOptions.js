@@ -1,5 +1,5 @@
 export const ASSIGNEDOUTLET = {
-  "Select outlet...": "",
+  Outlet: "",
   Catering: "Catering",
   "Greenbelt 1": "Greenbelt 1",
   PICC: "PICC",
@@ -15,7 +15,7 @@ export const ASSIGNEDOUTLET = {
   "LM Trinoma": "LM Trinoma",
   Eastwood: "Eastwood",
   "St. Lukes": "St. Lukes",
-  "Wack-Wack": "02Wack-Wack8",
+  "Wack-Wack": "Wack-Wack",
   "SL - JuiceBar": "SL - JuiceBar",
   "EDSA Shangri-La": "EDSA Shangri-La",
   "Manila Golf": "Manila Golf",

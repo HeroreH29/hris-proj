@@ -4,7 +4,7 @@ export const USERLEVELS = {
   HR: "HR",
   Approver: "Approver",
   Accounting: "Accounting",
-  OutletProcessor: "Outlet/Processor",
+  OutletProcessor: "Outlet Processor",
   Audit: "Audit",
   PayrollMaster: "Payroll Master",
   Approver2: "Approver 2",
@@ -18,13 +18,9 @@ export const USERGROUPS = {
   IT: "IT",
   Administrator: "Administrator",
   HR: "HR",
-  vpnOutlet: "vpn_Outlet",
   Marketing: "Marketing",
-  "Catering/Cost Control": "Catering/Cost Control",
-  Commissary: "Commissary",
+  "Cost Control": "Cost Control",
   Catering: "Catering",
-  PICC: "PICC",
-  newVpnOutlet: "new_vpn_outlet",
 };
 
 export const BRANCHES = {

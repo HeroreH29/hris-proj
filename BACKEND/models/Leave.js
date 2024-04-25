@@ -51,6 +51,14 @@ const leaveSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    EmployeeID: {
+      type: Object,
+      required: true,
+    },
+    FiledFor: {
+      type: Schema.Types.ObjectId,
+      ref: "EmployeeRecord",
+    },
   },
   { toJSON: { virtuals: true } }
 );

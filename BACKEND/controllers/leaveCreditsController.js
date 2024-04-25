@@ -12,7 +12,13 @@ const { differenceInYears } = require("date-fns");
 // @route GET /leavecredits
 // @access Private
 const getAllLeaveCredits = async (req, res) => {
-  const leavecredits = await LeaveCredit.find();
+  const leavecredits = await LeaveCredit.find().populate({
+    path: "CreditsOf",
+    select: "GenInfo",
+    populate: {
+      path: "GenInfo",
+    },
+  });
 
   if (!leavecredits.length) {
     const getLeaveCreditData = (srvcYrs) => {
@@ -47,11 +53,6 @@ const getAllLeaveCredits = async (req, res) => {
     );
 
     for (const record of filteredRecords) {
-      // Skip iteration if record has leave credit data
-      if (record.LeaveCredits) {
-        continue;
-      }
-
       const srvcYrs = differenceInYears(
         new Date(),
         new Date(record.GenInfo.DateEmployed)
@@ -59,7 +60,10 @@ const getAllLeaveCredits = async (req, res) => {
       const creditData = getLeaveCreditData(srvcYrs);
 
       if (creditData) {
-        const newCredit = await LeaveCredit.create(creditData);
+        const newCredit = await LeaveCredit.create({
+          ...creditData,
+          CreditsOf: record._id,
+        });
 
         // Include new credit to current record data
         record.LeaveCredits = newCredit._id;

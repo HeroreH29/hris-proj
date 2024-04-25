@@ -15,6 +15,7 @@ import {
   faUserPlus,
   faArrowUpAZ,
   faArrowDownAZ,
+  faPrint,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
@@ -23,6 +24,7 @@ import { toast } from "react-toastify";
 import { parse, differenceInDays, differenceInMonths } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
+import PrintPerBranch from "./PrintPerBranch";
 
 const RecordsList = () => {
   const navigate = useNavigate();
@@ -169,7 +171,7 @@ const RecordsList = () => {
           geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
       }
 
-      return matches;
+      return matches && geninfo?.EmployeeID !== 1;
     });
 
     // Passing geninfo ids as table content
@@ -256,7 +258,20 @@ const RecordsList = () => {
                   </Form.Select>
                 </Form>
               </td>
-              <td className="bg-secondary-subtle"></td>
+              <td className="bg-secondary-subtle">
+                <Button
+                  variant="outline-primary"
+                  type="button"
+                  onClick={() =>
+                    PrintPerBranch({
+                      branch: tableState.outletFilter,
+                      employees: filteredIds.map((id) => gentities[id]),
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faPrint} /> Employee List
+                </Button>
+              </td>
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select

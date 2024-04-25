@@ -35,10 +35,7 @@ const IncreaseCredits = () => {
     selectFromResult: ({ data }) => ({
       leavecredits: data?.ids
         .filter((id) => {
-          return (
-            data?.entities[id].Employee?.GenInfo?.EmpStatus === "Y" &&
-            data?.entities[id].Employee?.GenInfo?.EmployeeType === "Regular"
-          );
+          return data?.entities[id].CreditsOf?.GenInfo?.EmpStatus === "Y";
         })
         .map((id) => data?.entities[id]),
     }),
@@ -61,12 +58,9 @@ const IncreaseCredits = () => {
   const searchEmployee = (searchTxt = "") => {
     // Filter content based on searchTxt
     const filteredInfos = leavecredits.filter((data) => {
-      const info = data.Employee?.GenInfo;
+      const info = data.CreditsOf?.GenInfo;
 
-      return (
-        info?.LastName.toLowerCase().includes(searchTxt.toLowerCase()) ||
-        info?.FirstName.toLowerCase().includes(searchTxt.toLowerCase())
-      );
+      return info?.FullName.toLowerCase().includes(searchTxt.toLowerCase());
     });
 
     // Update the state with filtered results
@@ -79,6 +73,14 @@ const IncreaseCredits = () => {
 
     if (budget === 5 || budget === 10) {
       await updateLeaveCredit({ ...data, CreditBudget: budget + 2 });
+    } else if (!budget) {
+      await updateLeaveCredit({
+        ...data,
+        VacationLeave: 5,
+        SickLeave: 5,
+        BirthdayLeave: 1,
+        CreditBudget: 5,
+      });
     } else {
       await updateLeaveCredit({ ...data, CreditBudget: budget + 3 });
     }
@@ -98,6 +100,7 @@ const IncreaseCredits = () => {
   // For enabling/disabling increase button
   const creditChecker = ({ srvcYrs = 0, data = {} }) => {
     const conditions = [
+      { years: [0, 0], maxCredit: 0 },
       { years: [1, 4], maxCredit: 5 },
       { years: [5, 7], maxCredit: 7 },
       { years: [8, 10], maxCredit: 10 },
@@ -111,7 +114,7 @@ const IncreaseCredits = () => {
       if (
         srvcYrs >= start &&
         srvcYrs <= end &&
-        data.CreditBudget < condition.maxCredit
+        data.CreditBudget <= condition.maxCredit
       ) {
         return false; // Enable button
       }
@@ -137,7 +140,7 @@ const IncreaseCredits = () => {
   const tableContent =
     content?.length &&
     content.slice(0, 20).map((data) => {
-      const info = data.Employee?.GenInfo;
+      const info = data.CreditsOf?.GenInfo;
       const srvcYrs = differenceInYears(
         new Date(),
         new Date(info.DateEmployed)
@@ -145,7 +148,7 @@ const IncreaseCredits = () => {
       return (
         <tr key={info._id}>
           <td>{info.EmployeeID}</td>
-          <td>{`${info.LastName}, ${info.FirstName}`}</td>
+          <td>{`${info.FullName}`}</td>
           <td>{srvcYrs}</td>
           <td>{data.CreditBudget}</td>
           <td>

@@ -689,7 +689,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Pag-IBIG #</Form.Label>
               <InputGroup>
                 <Form.Control
-                  value={genState.PInumber[0]}
+                  value={genState?.PInumber?.[0]}
                   onChange={(e) =>
                     genDispatch({
                       type: "pi_number",
@@ -702,7 +702,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                   maxLength={4}
                 />
                 <Form.Control
-                  value={genState.PInumber[1]}
+                  value={genState?.PInumber?.[1]}
                   onChange={(e) =>
                     genDispatch({
                       type: "pi_number",
@@ -715,7 +715,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                   maxLength={4}
                 />
                 <Form.Control
-                  value={genState.PInumber[2]}
+                  value={genState?.PInumber?.[2]}
                   onChange={(e) =>
                     genDispatch({
                       type: "pi_number",

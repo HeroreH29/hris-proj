@@ -9,6 +9,7 @@ const educinfosAdapter = createEntityAdapter({});
 const documentsAdapter = createEntityAdapter({});
 const inactiveEmpsAdapter = createEntityAdapter({});
 const employeeRecordsAdapter = createEntityAdapter({});
+const trainingHistoriesAdapter = createEntityAdapter({});
 
 const genInitialState = geninfosAdapter.getInitialState();
 const personalInitialState = personalinfosAdapter.getInitialState();
@@ -18,6 +19,80 @@ const educInitialState = educinfosAdapter.getInitialState();
 const docuInitialState = documentsAdapter.getInitialState();
 const inactiveEmpsInitialState = inactiveEmpsAdapter.getInitialState();
 const employeeRecordsInitialState = employeeRecordsAdapter.getInitialState();
+const trainingHistoriesInitialState =
+  trainingHistoriesAdapter.getInitialState();
+
+// Training histories
+export const trainingHistoriesApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getTrainingHistories: builder.query({
+      query: () => ({
+        url: "/traininghistories",
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result.isError;
+        },
+      }),
+      transformResponse: (responseData) => {
+        const loadedTrainingHistories = responseData.map((traininghistory) => {
+          traininghistory.id = traininghistory._id;
+          return traininghistory;
+        });
+        return trainingHistoriesAdapter.setAll(
+          trainingHistoriesInitialState,
+          loadedTrainingHistories
+        );
+      },
+    }),
+    addTrainingHistory: builder.mutation({
+      query: (initialTrainingHistory) => ({
+        url: "/traininghistories",
+        method: "POST",
+        body: {
+          ...initialTrainingHistory,
+        },
+      }),
+    }),
+    updateTrainingHistory: builder.mutation({
+      query: (initialTrainingHistory) => ({
+        url: "/traininghistories",
+        method: "PATCH",
+        body: {
+          ...initialTrainingHistory,
+        },
+      }),
+    }),
+    deleteTrainingHistory: builder.mutation({
+      query: ({ id }) => ({
+        url: "/traininghistories",
+        method: "DELETE",
+        body: { id },
+      }),
+    }),
+  }),
+});
+
+export const {
+  useGetTrainingHistoriesQuery,
+  useAddTrainingHistoryMutation,
+  useUpdateTrainingHistoryMutation,
+  useDeleteTrainingHistoryMutation,
+} = trainingHistoriesApiSlice;
+
+export const selectTrainingHistoriesResult =
+  trainingHistoriesApiSlice.endpoints.getTrainingHistories.select();
+
+const selectTrainingHistoriesData = createSelector(
+  selectTrainingHistoriesResult,
+  (traininghistoriesresult) => traininghistoriesresult.data
+);
+
+export const {
+  selectAll: selectAllTrainingHistories,
+  selectById: selectTrainingHistoryById,
+  selectIds: selectTrainingHistoryIds,
+} = trainingHistoriesAdapter.getSelectors(
+  (state) => selectTrainingHistoriesData(state) ?? trainingHistoriesInitialState
+);
 
 // Employee records
 export const employeeRecordsApiSlice = apiSlice.injectEndpoints({

@@ -34,7 +34,7 @@ const useRecordForm = ({
 
   // Number splitter
   const idNumberSplitter = (str) => {
-    const splitStr = str.split("-");
+    const splitStr = str?.split("-");
     return splitStr;
   };
 

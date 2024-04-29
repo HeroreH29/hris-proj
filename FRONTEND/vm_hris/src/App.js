@@ -27,13 +27,7 @@ function App() {
   useTitle("Login | Via Mare HRIS");
   return (
     <>
-      <ToastContainer
-        autoClose={3000}
-        hideProgressBar={true}
-        stacked
-        newestOnTop={true}
-        closeOnClick={true}
-      />
+      <ToastContainer autoClose={3000} stacked closeOnClick={true} />
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* public routes */}

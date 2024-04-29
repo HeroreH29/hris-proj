@@ -48,6 +48,7 @@ app.use("/emailsender", require("./routes/emailSenderRoutes"));
 app.use("/celebrants", require("./routes/celebrantRoutes"));
 app.use("/casualrates", require("./routes/casualRateRoutes"));
 app.use("/employeerecords", require("./routes/employeeRecordRoutes"));
+app.use("/traininghistories", require("./routes/trainingHistoryRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

@@ -20,11 +20,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
-import { toast } from "react-toastify";
-import { parse, differenceInDays, differenceInMonths } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
 import PrintPerBranch from "./PrintPerBranch";
+import EmployeeNotifier from "./EmployeeNotifier";
 
 const RecordsList = () => {
   const navigate = useNavigate();
@@ -66,75 +65,11 @@ const RecordsList = () => {
       const { ids: gids, entities: gentities } = geninfos;
 
       // For notifying HR/Admin or Outlet/Processor for employee regularization
-      RegularizationNotifier(gids, gentities);
+      EmployeeNotifier({ gids, gentities, tableState });
     }
 
     // eslint-disable-next-line
   }, [geninfos]);
-
-  const RegularizationNotifier = (gids, gentities) => {
-    const toRegularize = gids
-      .filter((gid) => {
-        let match = true;
-
-        if (isOutletProcessor) {
-          match =
-            match && gentities[gid]?.AssignedOutlet === tableState.outletFilter;
-        }
-
-        return match;
-      })
-      .reduce((acc, gid) => {
-        const dateToday = new Date();
-        let parsedDate;
-
-        if (
-          gentities[gid]?.EmployeeType === "Probationary" &&
-          gentities[gid].EmpStatus === "Y"
-        ) {
-          if (gentities[gid]?.RegDate) {
-            parsedDate = parse(
-              gentities[gid]?.RegDate,
-              "MMMM dd, yyyy",
-              new Date()
-            );
-            if (differenceInDays(dateToday, parsedDate) >= 1) {
-              acc.push(gentities[gid].EmployeeID);
-            }
-          } else if (gentities[gid]?.DateProbationary) {
-            parsedDate = parse(
-              gentities[gid]?.DateProbationary,
-              "MMM dd, yyyy",
-              new Date()
-            );
-            if (differenceInMonths(dateToday, parsedDate) >= 6) {
-              acc.push(gentities[gid].EmployeeID);
-            }
-          } else if (gentities[gid]?.DateEmployed) {
-            parsedDate = parse(
-              gentities[gid]?.DateEmployed,
-              "MMM dd, yyyy",
-              new Date()
-            );
-            if (differenceInMonths(dateToday, parsedDate) >= 6) {
-              acc.push(gentities[gid].EmployeeID);
-            }
-          }
-        }
-        return acc;
-      }, []);
-
-    toRegularize.forEach((e) => {
-      toast.info(`"${e}" needs to be regularized`, {
-        toastId: e,
-        position: "top-left",
-        onClick: () => {
-          const newTab = window.open("", "_blank");
-          newTab.location.href = `/employeerecords/${e}`;
-        },
-      });
-    });
-  };
 
   if (genLoading) return <Spinner animation="border" />;
 
@@ -144,45 +79,46 @@ const RecordsList = () => {
   if (genSuccess) {
     const { ids: gids, entities: gentities } = geninfos;
 
-    const filteredIds = gids?.filter((id) => {
-      const geninfo = gentities[id];
-      let matches = true;
+    const filteredIds = gids
+      ?.filter((id) => {
+        const geninfo = gentities[id];
+        let matches = true;
 
-      const searchLowerCase = tableState.searchValue.toLowerCase();
-      const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
-      const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
+        const searchLowerCase = tableState.searchValue.toLowerCase();
+        const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
+        const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
 
-      if (tableState.searchValue !== "") {
-        matches =
-          (matches &&
-            geninfo.LastName.toLowerCase().includes(searchLowerCase)) ||
-          geninfo.FirstName.toLowerCase().includes(searchLowerCase);
-      }
+        if (tableState.searchValue !== "") {
+          matches =
+            (matches &&
+              geninfo.LastName.toLowerCase().includes(searchLowerCase)) ||
+            geninfo.FirstName.toLowerCase().includes(searchLowerCase);
+        }
 
-      if (tableState.outletFilter !== "") {
-        matches =
-          matches &&
-          geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
-      }
+        if (tableState.outletFilter !== "") {
+          matches =
+            matches &&
+            geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
+        }
 
-      if (tableState.statusFilter !== "") {
-        matches =
-          matches &&
-          geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
-      }
+        if (tableState.statusFilter !== "") {
+          matches =
+            matches &&
+            geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
+        }
 
-      return matches && geninfo?.EmployeeID !== 1;
-    });
+        return matches && geninfo?.EmployeeID !== 1;
+      })
+      .sort((a, b) => {
+        return !tableState.nameSort
+          ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+          : gentities[b].LastName.localeCompare(gentities[a].LastName);
+      });
 
     // Passing geninfo ids as table content
     const tableContent =
       gids?.length &&
       [...filteredIds]
-        .sort((a, b) => {
-          return !tableState.nameSort
-            ? gentities[a].LastName.localeCompare(gentities[b].LastName)
-            : gentities[b].LastName.localeCompare(gentities[a].LastName);
-        })
         .slice(tableState.sliceStart, tableState.sliceEnd)
         .map((geninfoId) => <Record key={geninfoId} geninfoId={geninfoId} />);
 

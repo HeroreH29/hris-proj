@@ -9,16 +9,7 @@ import {
   useGetPersonalinfosQuery,
   useGetWorkinfosQuery,
   useGetInactiveEmpsQuery,
-  /* useUpdateGeninfoMutation,
-  useUpdatePersonalinfoMutation,
-  useUpdateDependentMutation,
-  useUpdateEducinfoMutation,
-  useUpdateWorkinfoMutation,
-  useAddGeninfoMutation,
-  useAddPersonalinfoMutation,
-  useAddDependentMutation,
-  useAddEducinfoMutation,
-  useAddWorkinfoMutation, */
+  useGetTrainingHistoriesQuery,
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -28,7 +19,6 @@ import {
   Row,
   Col,
   Button,
-  /* Form, */
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong, faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -42,7 +32,7 @@ import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
 import { FONTS } from "../../config/fontBase64";
 import fontkit from "@pdf-lib/fontkit";
-//import uploadData from "../uploaddata/uploadData";
+import TrainingHistoryList from "./TrainingHistoryList";
 
 const refetchInterval = 15000;
 
@@ -141,18 +131,17 @@ const EditRecord = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  // Create and Update API's for employee record file upload
-  /*  const [createGenInfo] = useAddGeninfoMutation();
-  const [createPersonalInfo] = useAddPersonalinfoMutation();
-  const [createDependent] = useAddDependentMutation();
-  const [createEducInfo] = useAddEducinfoMutation();
-  const [createWorkInfo] = useAddWorkinfoMutation();
-
-  const [updateGenInfo] = useUpdateGeninfoMutation();
-  const [updatePersonalInfo] = useUpdatePersonalinfoMutation();
-  const [updateDependents] = useUpdateDependentMutation();
-  const [updateEducInfo] = useUpdateEducinfoMutation();
-  const [updateWorkInfo] = useUpdateWorkinfoMutation(); */
+  // Fetch training/seminar history using EmployeeID
+  const { trainingHistories } = useGetTrainingHistoriesQuery(undefined, {
+    selectFromResult: ({ data }) => ({
+      trainingHistories: data?.ids
+        .filter((id) => data?.entities[id].EmployeeID.toString() === employeeId)
+        .map((id) => data?.entities[id]),
+    }),
+    pollingInterval: refetchInterval,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   let content;
 
@@ -163,7 +152,8 @@ const EditRecord = () => {
     !workinfos &&
     !educinfos &&
     !document &&
-    !inactiveEmp
+    !inactiveEmp &&
+    !trainingHistories
   ) {
     content = <Spinner animation="border" />;
   }
@@ -565,7 +555,7 @@ const EditRecord = () => {
       <Tabs
         className="p-3 mb-3"
         defaultActiveKey={employeeId ? "" : "geninfo"}
-        fill
+        justify
       >
         <Tab eventKey="geninfo" title="General Info" unmountOnExit={true}>
           <EditGenInfoForm geninfo={geninfo} inactiveEmp={inactiveEmp} />
@@ -617,6 +607,14 @@ const EditRecord = () => {
             workinfos={workinfos}
             employeeId={employeeId}
           />
+        </Tab>
+        <Tab
+          eventKey="traininghistory"
+          title="Training History"
+          unmountOnExit={true}
+          disabled={!employeeId}
+        >
+          <TrainingHistoryList trainingHistories />
         </Tab>
         <Tab
           title="Print record"

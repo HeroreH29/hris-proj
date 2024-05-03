@@ -28,10 +28,6 @@ const login = async (req, res) => {
   const foundUser = await User.findOne({ username })
     .populate({
       path: "employee",
-      select: "GenInfo",
-      populate: {
-        path: "GenInfo",
-      },
     })
     .exec();
 
@@ -60,9 +56,9 @@ const login = async (req, res) => {
       UserInfo: {
         username: foundUser.username,
         userLevel: foundUser.userLevel,
-        branch: foundUser.employee?.GenInfo.AssignedOutlet,
-        user: `${foundUser.employee?.GenInfo.FullName}`,
-        employeeId: foundUser.employee?.GenInfo.EmployeeID,
+        branch: foundUser.employee?.AssignedOutlet,
+        user: `${foundUser.employee?.FullName}`,
+        employeeId: foundUser.employee?.EmployeeID,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -103,10 +99,6 @@ const refresh = async (req, res) => {
       const foundUser = await User.findOne({ username: decoded.username })
         .populate({
           path: "employee",
-          select: "GenInfo",
-          populate: {
-            path: "GenInfo",
-          },
         })
         .exec();
 
@@ -117,9 +109,9 @@ const refresh = async (req, res) => {
           UserInfo: {
             username: foundUser.username,
             userLevel: foundUser.userLevel,
-            branch: foundUser.employee?.GenInfo.AssignedOutlet,
-            user: foundUser.employee?.GenInfo.FullName,
-            employeeId: foundUser.employee?.GenInfo.EmployeeID,
+            branch: foundUser.employee?.AssignedOutlet,
+            user: foundUser.employee?.FullName,
+            employeeId: foundUser.employee?.EmployeeID,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,

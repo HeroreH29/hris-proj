@@ -35,7 +35,7 @@ const IncreaseCredits = () => {
     selectFromResult: ({ data }) => ({
       leavecredits: data?.ids
         .filter((id) => {
-          return data?.entities[id].CreditsOf?.GenInfo?.EmpStatus === "Y";
+          return data?.entities[id].CreditsOf?.EmpStatus === "Y";
         })
         .map((id) => data?.entities[id]),
     }),
@@ -58,7 +58,7 @@ const IncreaseCredits = () => {
   const searchEmployee = (searchTxt = "") => {
     // Filter content based on searchTxt
     const filteredInfos = leavecredits.filter((data) => {
-      const info = data.CreditsOf?.GenInfo;
+      const info = data.CreditsOf;
 
       return info?.FullName.toLowerCase().includes(searchTxt.toLowerCase());
     });
@@ -140,7 +140,7 @@ const IncreaseCredits = () => {
   const tableContent =
     content?.length &&
     content.slice(0, 20).map((data) => {
-      const info = data.CreditsOf?.GenInfo;
+      const info = data.CreditsOf;
       const srvcYrs = differenceInYears(
         new Date(),
         new Date(info.DateEmployed)

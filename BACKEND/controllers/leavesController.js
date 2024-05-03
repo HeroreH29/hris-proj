@@ -1,6 +1,6 @@
 const Leave = require("../models/Leave");
 const LeaveCredit = require("../models/LeaveCredit");
-const EmployeeRecord = require("../models/EmployeeRecord");
+const GenInfo = require("../models/GenInfo");
 const { format } = require("date-fns");
 
 // desc Get all leaves
@@ -8,88 +8,39 @@ const { format } = require("date-fns");
 // @access Private
 const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find().populate({
-      path: "FiledFor",
-      select: "GenInfo",
-      populate: {
-        path: "GenInfo",
-      },
-    });
-
-    const currentYearLeaves = leaves.filter((leave) =>
-      leave.DateFiled.includes(new Date().getFullYear().toString())
-    );
-
-    // for (const leave of currentYearLeaves) {
-    //   if (leave.Approve === 1) {
-    //     const ltype = leave.Ltype.replace(" ", "");
-    //     const foundCredit = await LeaveCredit.findOne({
-    //       CreditsOf: leave.FiledFor,
-    //     });
-
-    //     if (ltype.includes("Maternity") && foundCredit[ltype] === 0) {
-    //       foundCredit[ltype] = 105;
-    //     } else if (ltype.includes("Paternity") && foundCredit[ltype] === 0) {
-    //       foundCredit[ltype] = 7;
-    //     }
-
-    //     if (foundCredit.CreditBudget > 0) {
-    //       foundCredit[ltype] -= leave.NoOfDays;
-    //       if (foundCredit[ltype] < 0) {
-    //         foundCredit[ltype] = 0;
-    //       }
-    //     }
-
-    //     // Save changes
-    //     await foundCredit.save();
-    //   }
-    // }
-
-    /* Uncomment code below if needed */
-    for (const leave of currentYearLeaves) {
-      const foundCredit = await LeaveCredit.findOne({
-        CreditsOf: leave.FiledFor,
-      });
-
-      // Use for...of loop
-      if (leave.Approve === 1 && foundCredit.CreditBudget > 0) {
-        leave.Credited = true;
-        await leave.save();
-      }
-    }
-
-    // const employeeRecords = await EmployeeRecord.find()
-    //   .populate("GenInfo", "EmployeeID")
-    //   .lean();
+    const leaves = await Leave.find().populate("FiledFor");
 
     // for (const leave of leaves) {
-    //   const foundRecord = employeeRecords.find(
-    //     (record) => record.GenInfo.EmployeeID === leave.EmployeeID
-    //   );
+    //   if (!leave.EmployeeID) {
+    //     continue;
+    //   }
 
-    //   if (!foundRecord) continue;
+    //   const foundGenInfo = await GenInfo.findOne({
+    //     EmployeeID: leave.EmployeeID,
+    //   });
 
-    //   leave.FiledFor = foundRecord._id;
+    //   // if (!foundGenInfo) res.status(404).json({ message: "GenInfo not found" });
+
+    //   leave.FiledFor = foundGenInfo?._id;
+
     //   await leave.save();
     // }
 
-    // for (const record of employeeRecords) {
-    //   // If a record already has leave data, skip process below
-    //   if (record.Leaves.length) {
-    //     continue;
+    // const currentYearLeaves = leaves.filter((leave) =>
+    //   leave.DateFiled.includes(new Date().getFullYear().toString())
+    // );
+
+    // for (const leave of currentYearLeaves) {
+    //   if (leave.Approve === 1) {
+    //     const leaveType = leave.Ltype.replace(" ", "");
+
+    //     const foundLeaveCredit = await LeaveCredit.findOne({
+    //       CreditsOf: leave.FiledFor,
+    //     });
+
+    //     foundLeaveCredit[leaveType] -= leave.NoOfDays;
+    //     await foundLeaveCredit.save();
     //   }
-
-    //   const foundLeaves = await Leave.find({
-    //     EmployeeID: record?.GenInfo.EmployeeID,
-    //   }).lean();
-
-    //   if (!foundLeaves.length) {
-    //     continue;
-    //   }
-
-    //   record.Leaves = foundLeaves.map((leave) => leave._id);
-
-    //   await record.save();
     // }
 
     res.json(leaves.sort(() => -1));
@@ -127,29 +78,6 @@ const createLeave = async (req, res) => {
 
   // Proceed leave filing if conditions are met
   const leave = await Leave.create(req.body);
-
-  // Add the filed leave to the employee record
-  const records = await EmployeeRecord.find()
-    .populate({
-      path: "GenInfo",
-      select: "EmployeeID",
-    })
-    .lean();
-
-  const foundrecord = records.find(
-    (record) => record.GenInfo.EmployeeID === others.EmployeeID
-  );
-
-  foundrecord.Leaves.push(leave._id);
-
-  // Save changes
-  const updatedRecord = await EmployeeRecord.findByIdAndUpdate(
-    foundrecord._id,
-    foundrecord,
-    {
-      returnDocument: "after",
-    }
-  ).exec();
 
   // Extra checking if leave and record data is valid or not
   if (leave && updatedRecord) {

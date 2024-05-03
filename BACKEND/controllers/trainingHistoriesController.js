@@ -32,14 +32,14 @@ const createTrainingHistory = async (req, res) => {
 
 // PATCH
 const updateTrainingHistory = async (req, res) => {
-  const { id, _id } = req.body;
+  const { id } = req.body;
 
-  if (!id || !_id) {
+  if (!id) {
     return res.status(400).json({ message: "Document ID is missing!" });
   }
 
   const updatedTrainingHist = await TrainingHistory.findByIdAndUpdate(
-    id ?? _id,
+    id,
     req.body,
     {
       returnDocument: "after",
@@ -57,15 +57,13 @@ const updateTrainingHistory = async (req, res) => {
 
 // DELETE
 const deleteTrainingHistory = async (req, res) => {
-  const { id, _id } = req.body;
+  const { id } = req.body;
 
-  if (!id || !_id) {
+  if (!id) {
     return res.status(400).json({ message: "Document ID is missing!" });
   }
 
-  const deletedTrainingHistory = await TrainingHistory.findByIdAndDelete(
-    id ?? _id
-  );
+  const deletedTrainingHistory = await TrainingHistory.findByIdAndDelete(id);
 
   try {
     if (deletedTrainingHistory) {

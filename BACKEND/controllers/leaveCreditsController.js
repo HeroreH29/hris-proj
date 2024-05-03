@@ -1,5 +1,5 @@
 const LeaveCredit = require("../models/LeaveCredit");
-const EmployeeRecord = require("../models/EmployeeRecord");
+const GenInfo = require("../models/GenInfo");
 const {
   reApplyCreditBudget,
 } = require("../xtra_functions/reApplyCreditBudget");
@@ -12,13 +12,7 @@ const { differenceInYears } = require("date-fns");
 // @route GET /leavecredits
 // @access Private
 const getAllLeaveCredits = async (req, res) => {
-  const leavecredits = await LeaveCredit.find().populate({
-    path: "CreditsOf",
-    select: "GenInfo",
-    populate: {
-      path: "GenInfo",
-    },
-  });
+  const leavecredits = await LeaveCredit.find().populate("CreditsOf");
 
   if (!leavecredits.length) {
     const getLeaveCreditData = (srvcYrs) => {
@@ -42,32 +36,27 @@ const getAllLeaveCredits = async (req, res) => {
       };
     };
 
-    const employeeRecords = await EmployeeRecord.find().populate({
-      path: "GenInfo",
-      select: "DateEmployed EmpStatus",
-      match: { EmpStatus: "Y" },
-    });
-
-    const filteredRecords = employeeRecords.filter(
-      (record) => record.GenInfo !== null
+    const genInfos = await GenInfo.find(
+      { EmpStatus: "Y" },
+      "DateEmployed EmpStatus"
     );
 
-    for (const record of filteredRecords) {
+    // const filteredRecords = genInfos.filter(
+    //   (record) => record.GenInfo !== null
+    // );
+
+    for (const info of genInfos) {
       const srvcYrs = differenceInYears(
         new Date(),
-        new Date(record.GenInfo.DateEmployed)
+        new Date(info.DateEmployed)
       );
       const creditData = getLeaveCreditData(srvcYrs);
 
       if (creditData) {
-        const newCredit = await LeaveCredit.create({
+        await LeaveCredit.create({
           ...creditData,
-          CreditsOf: record._id,
+          CreditsOf: info._id,
         });
-
-        // Include new credit to current record data
-        record.LeaveCredits = newCredit._id;
-        await record.save();
       }
     }
   }

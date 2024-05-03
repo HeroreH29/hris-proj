@@ -32,7 +32,7 @@ const leaveCreditSchema = new Schema({
   },
   CreditsOf: {
     type: Schema.Types.ObjectId,
-    ref: "EmployeeRecord",
+    ref: "GenInfo",
   },
 });
 

@@ -44,7 +44,10 @@ const useLeaveForm = () => {
       case "reason": {
         const disallowedWords = ["not feeling well", "nfw"];
         for (const word of disallowedWords) {
-          if (action.Reason.includes(word) && state.Ltype === "Sick Leave") {
+          if (
+            action.Reason.toLowerCase().includes(word) &&
+            state.Ltype === "Sick Leave"
+          ) {
             toast.error("This reason is not allowed!");
             action.Reason = "";
             break;

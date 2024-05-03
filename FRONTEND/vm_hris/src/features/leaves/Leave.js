@@ -18,7 +18,7 @@ const Leave = ({ leave, handleHover }) => {
   const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
     selectFromResult: ({ data }) => ({
       leaveCredit: data?.ids
-        .filter((id) => data.entities[id].CreditsOf._id === leave.FiledFor._id)
+        .filter((id) => data.entities[id]?.CreditsOf?.id === leave.FiledFor?.id)
         .map((id) => data.entities[id])[0],
     }),
   });
@@ -163,7 +163,7 @@ const Leave = ({ leave, handleHover }) => {
             setShowModal(true);
           }}
         >
-          <td>{`${leave?.FiledFor?.GenInfo.FullName}`}</td>
+          <td>{`${leave?.FiledFor.FullName}`}</td>
           <td>{format(new Date(leave?.DateFiled), "PP")}</td>
           <td>{leave?.Lfrom}</td>
           <td>{leave?.Lto}</td>
@@ -174,7 +174,7 @@ const Leave = ({ leave, handleHover }) => {
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>{`${leave.FiledFor?.GenInfo.LastName}'s ${leave?.Ltype}`}</Modal.Title>
+            <Modal.Title>{`${leave.FiledFor?.LastName}'s ${leave?.Ltype}`}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>

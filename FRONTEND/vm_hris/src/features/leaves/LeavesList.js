@@ -33,12 +33,27 @@ const LeavesList = () => {
     isHR,
     isAdmin,
     branch,
+    user,
   } = useAuth();
 
   const navigate = useNavigate();
 
   const { tableState, tableDispatch } = useTableSettings();
   const [leaveCredit, setLeaveCredit] = useState("");
+
+  /* If the current user level is neither HR/Admin/Approver/Outlet Processor/Payroll Master,
+        DO NOT let them see all of the employees' filed leaves */
+  // if (
+  //   userLevel !== "HR" &&
+  //   userLevel !== "Admin" &&
+  //   userLevel !== "Approver" &&
+  //   userLevel !== "Outlet Processor" &&
+  //   userLevel !== "Payroll Master"
+  // ) {
+  //   tableDispatch({ type: "name", name: user });
+  // }
+
+  console.log(user);
 
   const {
     data: leaves,
@@ -119,9 +134,11 @@ const LeavesList = () => {
         if (tableState.name) {
           match =
             match &&
-            entities[id].FiledFor?.GenInfo.FullName.toLowerCase().includes(
+            entities[id].FiledFor?.FullName.toLowerCase().includes(
               tableState.name
             );
+        } else if (isUser) {
+          match = match && entities[id].FiledFor?.EmployeeID === employeeId;
         }
 
         // Year
@@ -144,11 +161,10 @@ const LeavesList = () => {
         if (tableState.outletFilter) {
           match =
             match &&
-            entities[id].FiledFor?.GenInfo.AssignedOutlet ===
-              tableState.outletFilter;
+            entities[id].FiledFor?.AssignedOutlet === tableState.outletFilter;
         }
 
-        return match && entities[id].FiledFor?.GenInfo.EmployeeID !== 1;
+        return match && entities[id].FiledFor?.EmployeeID !== 1;
       })
       .map((id) => entities[id]);
 
@@ -230,7 +246,7 @@ const LeavesList = () => {
                             type="text"
                             value={tableState.name}
                             placeholder="Enter name"
-                            disabled={userLevel !== "Admin"}
+                            disabled={isUser}
                             onChange={(e) => {
                               tableDispatch({
                                 type: "name",
@@ -270,6 +286,7 @@ const LeavesList = () => {
                         <Col xs={12} sm={6} lg={3}>
                           <Form.Select
                             value={tableState.outletFilter}
+                            disabled={isUser || isOutletProcessor}
                             onChange={(e) => {
                               tableDispatch({
                                 type: "outlet_filter",
@@ -321,7 +338,7 @@ const LeavesList = () => {
               <caption>
                 {isHR || isAdmin || isOutletProcessor
                   ? `Leave Credit Info of ${
-                      leaveCredit?.CreditsOf?.GenInfo?.LastName ?? ""
+                      leaveCredit?.CreditsOf?.LastName ?? ""
                     }`
                   : "Your Credit Info"}
               </caption>
@@ -404,7 +421,7 @@ const LeavesList = () => {
                                 (id) => leaves.entities[id]
                               ),
                               leaveCredit,
-                              empId: leaveCredit.CreditsOf?.GenInfo.EmployeeID,
+                              empId: leaveCredit.CreditsOf?.EmployeeID,
                             })
                           }
                         >
@@ -420,7 +437,7 @@ const LeavesList = () => {
                                 (id) => leaves.entities[id]
                               ),
                               leaveCredit,
-                              empId: leaveCredit.CreditsOf?.GenInfo.EmployeeID,
+                              empId: leaveCredit.CreditsOf?.EmployeeID,
                             })
                           }
                         >

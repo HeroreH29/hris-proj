@@ -1,13 +1,12 @@
 import React from "react";
 
-const TrainingHistory = ({ trainingHistory = {} }) => {
+const TrainingHistory = ({
+  trainingHistory = {},
+  handleEditTrainingHistory = undefined,
+}) => {
   return (
     <>
-      <tr
-      //   onClick={() => {
-      //     setShowModal(true);
-      //   }}
-      >
+      <tr onClick={() => handleEditTrainingHistory(trainingHistory)}>
         <td>{trainingHistory.TrainingCourse}</td>
         <td>{trainingHistory.TrainingDate}</td>
         <td>{trainingHistory.Remarks}</td>

@@ -7,6 +7,8 @@ const useAuth = () => {
   let isHR = false;
   let isAdmin = false;
   let isOutletProcessor = false;
+  let isPayrollMaster = false;
+  let isApprover = false;
   let isUser = false;
 
   if (token) {
@@ -15,8 +17,13 @@ const useAuth = () => {
 
     isHR = userLevel === "HR";
     isAdmin = userLevel === "Admin";
-    isOutletProcessor = userLevel === "Outlet/Processor";
-    isUser = userLevel === "User";
+    isOutletProcessor = userLevel === "Outlet Processor";
+    isPayrollMaster = userLevel === "Payroll Master";
+    isApprover = userLevel === "Approver";
+    isUser =
+      userLevel === "User" ||
+      userLevel === "Accounting" ||
+      userLevel === "Audit";
 
     return {
       username,
@@ -24,6 +31,8 @@ const useAuth = () => {
       isHR,
       isAdmin,
       isOutletProcessor,
+      isPayrollMaster,
+      isApprover,
       isUser,
       userLevel,
       branch,

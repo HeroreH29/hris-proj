@@ -7,7 +7,6 @@ export const USERLEVELS = {
   OutletProcessor: "Outlet Processor",
   Audit: "Audit",
   PayrollMaster: "Payroll Master",
-  Approver2: "Approver 2",
 };
 
 export const USERGROUPS = {
@@ -16,8 +15,6 @@ export const USERGROUPS = {
   Outlet: "Outlet",
   Audit: "Audit",
   IT: "IT",
-  Administrator: "Administrator",
-  HR: "HR",
   Marketing: "Marketing",
   "Cost Control": "Cost Control",
   Catering: "Catering",

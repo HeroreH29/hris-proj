@@ -33,7 +33,7 @@ const PrintLeave = async ({
   let contentEnd = 0;
 
   // Necessary data setup
-  const employeeName = leaveCredit.CreditsOf?.GenInfo.FullName;
+  const employeeName = leaveCredit.CreditsOf?.FullName;
   const leaveData = leaves
     .filter((leave) => leave.EmployeeID === empId)
     .sort(() => {

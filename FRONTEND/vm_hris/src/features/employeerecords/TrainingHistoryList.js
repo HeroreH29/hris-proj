@@ -9,13 +9,32 @@ const TrainingHistoryList = ({ trainingHistories = [] }) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
+  const [trainingData, setTrainingData] = useState({});
+  const [newHistory, setNewHistory] = useState(true);
+
+  const handleNewTrainingHistory = () => {
+    setShow(true);
+    setTrainingData({});
+    setNewHistory(true);
+  };
+
+  const handleEditTrainingHistory = (trainingHistory) => {
+    setShow(true);
+    setTrainingData(trainingHistory);
+    setNewHistory(false);
+  };
+
   const tableContent = trainingHistories?.length
     ? trainingHistories
         .sort((a, b) => {
           return b.TrainingDate - a.TrainingDate;
         })
         .map((trainingHistory, index) => (
-          <TrainingHistory key={index} trainingHistory={trainingHistory} />
+          <TrainingHistory
+            key={index}
+            trainingHistory={trainingHistory}
+            handleEditTrainingHistory={handleEditTrainingHistory}
+          />
         ))
     : null;
   return (
@@ -27,7 +46,7 @@ const TrainingHistoryList = ({ trainingHistories = [] }) => {
               className="float-end"
               type="button"
               variant="outline-primary"
-              onClick={() => setShow(true)}
+              onClick={handleNewTrainingHistory}
             >
               <FontAwesomeIcon icon={faPlus} />
             </Button>
@@ -46,7 +65,12 @@ const TrainingHistoryList = ({ trainingHistories = [] }) => {
       </Container>
 
       {/* View add training history modal */}
-      <TrainingHistoryModal handleClose={handleClose} newHistory show={show} />
+      <TrainingHistoryModal
+        handleClose={handleClose}
+        trainingData={trainingData}
+        newHistory={newHistory}
+        show={show}
+      />
     </>
   );
 };

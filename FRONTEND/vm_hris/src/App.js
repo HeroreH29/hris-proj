@@ -53,7 +53,6 @@ function App() {
                             allowedUserLevels={[
                               USERLEVELS.Admin,
                               USERLEVELS.HR,
-                              USERLEVELS.OutletProcessor,
                             ]}
                           />
                         }

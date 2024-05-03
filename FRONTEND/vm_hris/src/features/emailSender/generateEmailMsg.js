@@ -24,7 +24,6 @@ export const generateEmailMsg = ({
 
   // Generate email for HR dept
   if (branch !== "Head Office") {
-    console.log("outlet has modified a record");
     emails = /* OUTLET_EMAILS["Head Office"] */ OUTLET_EMAILS.admin;
   } else {
     if (Array.isArray(OUTLET_EMAILS[compiledInfo.AssignedOutlet])) {

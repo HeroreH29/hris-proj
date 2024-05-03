@@ -26,9 +26,9 @@ const NewLeaveForm = () => {
   const { leaveState, leaveDispatch } = useLeaveForm();
   const [validated, setValidated] = useState(false);
 
-  const { data: geninfos } = useGetGeninfosQuery();
+  const { data: geninfos, isSuccess } = useGetGeninfosQuery();
 
-  const { data: employeerecords, isSuccess } = useGetEmployeeRecordsQuery();
+  //const { data: employeerecords, isSuccess } = useGetEmployeeRecordsQuery();
 
   const [
     addLeave,
@@ -42,17 +42,14 @@ const NewLeaveForm = () => {
   // For searching employees
   const handleSearch = (e) => {
     if (isSuccess) {
-      const { ids, entities } = employeerecords;
+      const { ids, entities } = geninfos;
 
       const records = ids.map((id) => entities[id]);
-
-      console.log(records);
 
       setSearchQuery(e.target.value.toLowerCase());
 
       if (records) {
-        const filteredResults = records.filter((record) => {
-          const info = record?.GenInfo;
+        const filteredResults = records.filter((info) => {
           let matches = true;
 
           if (isOutletProcessor) {
@@ -79,9 +76,7 @@ const NewLeaveForm = () => {
 
   // For selecting searched employee
   const handleSearchResultClick = (result) => {
-    setSearchQuery(
-      `${result?.GenInfo.FullName}. (${result?.GenInfo.EmployeeID})`
-    );
+    setSearchQuery(`${result?.FullName}. (${result?.EmployeeID})`);
     setSearchResults("");
     setSelectedEmployee(result);
   };
@@ -122,7 +117,7 @@ const NewLeaveForm = () => {
       if (confirm) {
         const leaveJson = {
           EmployeeID: selectedEmployee
-            ? selectedEmployee?.GenInfo.EmployeeID
+            ? selectedEmployee?.EmployeeID
             : employeeId,
           DateFiled: format(new Date(), "P"),
           NoOfDays: CalcuNoOfDays(),
@@ -242,7 +237,7 @@ const NewLeaveForm = () => {
                       href={`#`}
                       key={result.id}
                       onClick={() => handleSearchResultClick(result)}
-                    >{`${result?.GenInfo.FullName}`}</ListGroup.Item>
+                    >{`${result?.FullName}`}</ListGroup.Item>
                   ))}
                 </ListGroup>
               )}

@@ -115,6 +115,35 @@ const RecordsList = () => {
           : gentities[b].LastName.localeCompare(gentities[a].LastName);
       });
 
+    // This is for printing employees per branch
+    const filteredIdsForPrint = gids
+      ?.filter((id) => {
+        const geninfo = gentities[id];
+        let matches = true;
+
+        const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
+        const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
+
+        if (tableState.outletFilter !== "") {
+          matches =
+            matches &&
+            geninfo.AssignedOutlet.toLowerCase() === outletFilterLowerCase;
+        }
+
+        if (tableState.statusFilter !== "") {
+          matches =
+            matches &&
+            geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
+        }
+
+        return matches && geninfo?.EmployeeID !== 1;
+      })
+      .sort((a, b) => {
+        return !tableState.nameSort
+          ? gentities[a].LastName.localeCompare(gentities[b].LastName)
+          : gentities[b].LastName.localeCompare(gentities[a].LastName);
+      });
+
     // Passing geninfo ids as table content
     const tableContent =
       gids?.length &&
@@ -201,7 +230,7 @@ const RecordsList = () => {
                   onClick={() =>
                     PrintPerBranch({
                       branch: tableState.outletFilter,
-                      employees: filteredIds.map((id) => gentities[id]),
+                      employees: filteredIdsForPrint.map((id) => gentities[id]),
                     })
                   }
                 >

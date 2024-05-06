@@ -50,16 +50,16 @@ const EducInfo = ({
       await updateEducinfo(others);
 
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-EducInfo.json`,
-            id: educinfo?.id,
-            compiledInfo: others,
-            update: true,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-EducInfo.json`,
+        //     id: educinfo?.id,
+        //     compiledInfo: others,
+        //     update: true,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

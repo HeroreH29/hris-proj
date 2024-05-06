@@ -99,15 +99,19 @@ const updateLeave = async (req, res) => {
   }
 
   /* Include duplicate checking if neccessary */
+  others.DateModified = format(new Date(), "Ppp");
+
   const leaveRecord = await Leave.findByIdAndUpdate(id, others, {
     new: true,
   }).exec();
-  leaveRecord.ModifiedDate = format(new Date(), "Ppp");
 
-  const updatedLeaveRecord = await leaveRecord.save();
+  // // Update modification date to the current date
+  // leaveRecord.DateModified = format(new Date(), "Ppp");
 
-  if (updatedLeaveRecord) {
-    res.json(updatedLeaveRecord);
+  // const updatedLeaveRecord = await leaveRecord.save();
+
+  if (leaveRecord) {
+    res.json(leaveRecord);
   } else {
     res.json({ message: "Something went wrong" });
   }

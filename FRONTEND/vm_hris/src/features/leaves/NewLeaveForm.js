@@ -115,6 +115,14 @@ const NewLeaveForm = () => {
       };
 
       if (confirm) {
+        // Make Lto same as Lfrom if DayTime is truthy (non-null value)
+        let lto;
+        if (leaveState.DayTime !== "") {
+          lto = format(new Date(leaveState.Lfrom), "MMM dd, yyyy");
+        } else {
+          lto = format(new Date(leaveState.Lto), "MMM dd, yyyy");
+        }
+
         const leaveJson = {
           EmployeeID: selectedEmployee
             ? selectedEmployee?.EmployeeID
@@ -124,7 +132,7 @@ const NewLeaveForm = () => {
           DayTime: leaveState.DayTime,
           Ltype: leaveState.Ltype,
           Lfrom: format(new Date(leaveState.Lfrom), "MMM dd, yyyy"),
-          Lto: format(new Date(leaveState.Lto), "MMM dd, yyyy"),
+          Lto: lto,
           Reason: leaveState.Reason,
           FiledBy: user,
           FiledFor: selectedEmployee.id ?? selectedEmployee._id,

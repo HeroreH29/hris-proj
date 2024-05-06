@@ -84,41 +84,6 @@ const WorkInfoModal = ({
             <Form.Group as={Col} md="auto" className="mb-3">
               <Form.Label className="fw-semibold">Address</Form.Label>
               <InputGroup>
-                {showRegion ? (
-                  <RegionDropdown
-                    classes="dropdown-toggle show form-select"
-                    defaultOptionLabel="Select State"
-                    country={workState.Country}
-                    value={workState.State}
-                    onChange={(e) => workDispatch({ type: "state", State: e })}
-                  />
-                ) : (
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter State"
-                    value={workState.State}
-                    onChange={(e) =>
-                      workDispatch({
-                        type: "state",
-                        State: e.target.value,
-                      })
-                    }
-                  />
-                )}
-                <DropdownButton title="" variant="outline-secondary">
-                  <Dropdown.Item
-                    as={"option"}
-                    onClick={() => setShowRegion(false)}
-                  >
-                    Enter State
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    as={"option"}
-                    onClick={() => setShowRegion(true)}
-                  >
-                    Select State
-                  </Dropdown.Item>
-                </DropdownButton>
                 {showCountry ? (
                   <CountryDropdown
                     classes="form-select"
@@ -155,6 +120,41 @@ const WorkInfoModal = ({
                     onClick={() => setShowCountry(true)}
                   >
                     Select Country
+                  </Dropdown.Item>
+                </DropdownButton>
+                {showRegion ? (
+                  <RegionDropdown
+                    classes="dropdown-toggle show form-select"
+                    defaultOptionLabel="Select State"
+                    country={workState.Country}
+                    value={workState.State}
+                    onChange={(e) => workDispatch({ type: "state", State: e })}
+                  />
+                ) : (
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter State"
+                    value={workState.State}
+                    onChange={(e) =>
+                      workDispatch({
+                        type: "state",
+                        State: e.target.value,
+                      })
+                    }
+                  />
+                )}
+                <DropdownButton title="" variant="outline-secondary">
+                  <Dropdown.Item
+                    as={"option"}
+                    onClick={() => setShowRegion(false)}
+                  >
+                    Enter State
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    as={"option"}
+                    onClick={() => setShowRegion(true)}
+                  >
+                    Select State
                   </Dropdown.Item>
                 </DropdownButton>
               </InputGroup>

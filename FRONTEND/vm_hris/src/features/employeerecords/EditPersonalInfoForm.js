@@ -90,16 +90,16 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
         const updateRecord = isOutletProcessor && personalinfo;
         const id = updateRecord ? personalinfo?.id : "";
 
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-PersonalInfo.json`,
-            id,
-            compiledInfo: others,
-            updateRecord,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-PersonalInfo.json`,
+        //     id,
+        //     compiledInfo: others,
+        //     updateRecord,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
 
       /* // Send data to HR email if processed by outlet/branch

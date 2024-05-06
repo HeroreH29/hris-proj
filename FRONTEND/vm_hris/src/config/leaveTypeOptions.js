@@ -5,5 +5,4 @@ export const LEAVETYPES = {
   MatrimonialLeave: "Matrimonial Leave",
   PaternityLeave: "Paternity Leave",
   MaternityLeave: "Maternity Leave",
-  BereavementLeave: "Bereavement Leave",
 };

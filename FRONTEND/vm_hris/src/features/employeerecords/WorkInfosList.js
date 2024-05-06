@@ -47,14 +47,14 @@ const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         //const updateRecord = isOutletProcessor && payload;
         //const id = updateRecord ? geninfo?.id : "";
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-WorkInfo.json`,
-            workInfoData,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-WorkInfo.json`,
+        //     workInfoData,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

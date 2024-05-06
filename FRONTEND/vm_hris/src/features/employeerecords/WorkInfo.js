@@ -50,16 +50,16 @@ const WorkInfo = ({
       await updateWorkinfo(workInfoData);
 
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-WorkInfo.json`,
-            id: workinfo?.id,
-            compiledInfo: workInfoData,
-            update: true,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-WorkInfo.json`,
+        //     id: workinfo?.id,
+        //     compiledInfo: workInfoData,
+        //     update: true,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

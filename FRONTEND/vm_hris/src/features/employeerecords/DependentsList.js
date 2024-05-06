@@ -49,15 +49,14 @@ const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         //const updateRecord = isOutletProcessor && dependents;
         //const id = updateRecord ? geninfo?.id : "";
-
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-Dependent.json`,
-            compiledInfo: dependentData,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-Dependent.json`,
+        //     compiledInfo: dependentData,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

@@ -730,7 +730,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </InputGroup>
             </Form.Group>
             <Form.Group as={Col} md="4">
-              <Form.Label className="fw-semibold">ATM #</Form.Label>
+              <Form.Label className="fw-semibold">{`ATM # (Optional)`}</Form.Label>
               <InputGroup>
                 <Form.Control
                   value={genState.ATMnumber[0]}

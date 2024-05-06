@@ -241,8 +241,8 @@ const EditRecord = () => {
           <div>
             <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
             {!employeeId ? (
-              <small className="text-decoration-underline fw-semibold fst-italic">
-                You can only add GENERAL INFO for now. Add other details later.
+              <small className="text-decoration-underline fw-semibold fst-italic text-primary">
+                You can ONLY add GENERAL INFO for now. Add other details later.
               </small>
             ) : (
               <small className="text-decoration-underline fw-semibold fst-italic">

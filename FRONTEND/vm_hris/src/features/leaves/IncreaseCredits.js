@@ -92,6 +92,14 @@ const IncreaseCredits = () => {
 
     if (budget === 12 || budget === 7) {
       await updateLeaveCredit({ ...data, CreditBudget: budget - 2 });
+    } else if (budget === 5) {
+      await updateLeaveCredit({
+        ...data,
+        VacationLeave: 0,
+        SickLeave: 0,
+        BirthdayLeave: 0,
+        CreditBudget: 0,
+      });
     } else {
       await updateLeaveCredit({ ...data, CreditBudget: budget - 3 });
     }

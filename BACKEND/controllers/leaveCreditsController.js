@@ -114,9 +114,7 @@ const updateLeaveCredit = async (req, res) => {
     new: true,
   }).exec();
 
-  const updatedLeaveCredit = await leaveCreditRecord.save();
-
-  if (updatedLeaveCredit) {
+  if (leaveCreditRecord) {
     res.json({
       message: `Leave credit updated`,
     });

@@ -55,14 +55,14 @@ const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         //const updateRecord = isOutletProcessor && payload;
         //const id = updateRecord ? geninfo?.id : "";
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-EducInfo.json`,
-            educInfoData,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-EducInfo.json`,
+        //     educInfoData,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

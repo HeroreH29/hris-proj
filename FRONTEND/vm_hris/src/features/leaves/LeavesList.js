@@ -53,8 +53,6 @@ const LeavesList = () => {
   //   tableDispatch({ type: "name", name: user });
   // }
 
-  console.log(user);
-
   const {
     data: leaves,
     isSuccess: leaveSuccess,
@@ -357,7 +355,8 @@ const LeavesList = () => {
                       <td className="fw-semibold">Sick</td>
                       <td>{leaveCredit?.CreditBudget}</td>
                       <td>
-                        {leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
+                        {leaveCredit?.SickLeave &&
+                          leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
                       </td>
                       <td>{leaveCredit?.SickLeave}</td>
                     </tr>
@@ -365,7 +364,9 @@ const LeavesList = () => {
                       <td className="fw-semibold">Vacation</td>
                       <td>{leaveCredit?.CreditBudget}</td>
                       <td>
-                        {leaveCredit?.CreditBudget - leaveCredit?.VacationLeave}
+                        {leaveCredit?.VacationLeave &&
+                          leaveCredit?.CreditBudget -
+                            leaveCredit?.VacationLeave}
                       </td>
                       <td>{leaveCredit?.VacationLeave}</td>
                     </tr>

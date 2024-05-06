@@ -12,7 +12,7 @@ import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { toast } from "react-toastify";
 
 const Leave = ({ leave, handleHover }) => {
-  const { branch, isHR, isAdmin, isOutletProcessor } = useAuth();
+  const { branch, isHR, isAdmin, isOutletProcessor, isApprover } = useAuth();
   const navigate = useNavigate();
 
   const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
@@ -60,24 +60,24 @@ const Leave = ({ leave, handleHover }) => {
         }).unwrap();
 
         // Send leave information to HR email if leave is filed from outlets/branches
-        if (isOutletProcessor) {
-          const { _id, ...others } = payload;
+        // if (isOutletProcessor) {
+        //   const { _id, ...others } = payload;
 
-          let emailMsg = {
-            email: "hero.viamare@gmail.com",
-            subject: `${branch} Leave Application for Filing`,
-            message: `Good day,\n\nThis email contains an employee leave application from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
-            attachments: [
-              {
-                filename: `${leave?.EmployeeID}-FiledLeave.json`,
-                content: JSON.stringify(others),
-                contentType: "application/json",
-              },
-            ],
-          };
+        //   let emailMsg = {
+        //     email: "hero.viamare@gmail.com",
+        //     subject: `${branch} Leave Application for Filing`,
+        //     message: `Good day,\n\nThis email contains an employee leave application from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
+        //     attachments: [
+        //       {
+        //         filename: `${leave?.EmployeeID}-FiledLeave.json`,
+        //         content: JSON.stringify(others),
+        //         contentType: "application/json",
+        //       },
+        //     ],
+        //   };
 
-          sendEmail(emailMsg);
-        }
+        //   sendEmail(emailMsg);
+        // }
 
         setLeaveStatus(approveStat);
       } catch (error) {
@@ -96,6 +96,9 @@ const Leave = ({ leave, handleHover }) => {
         };
         try {
           await updateLeaveCredit(updatedLeaveCredit);
+          if (leaveCredit?.[ltype] > 0) {
+            await updateLeave({ id: leave?.id, Credited: true });
+          }
         } catch (error) {
           alert(`Something went wrong: ${error}`);
         }
@@ -113,22 +116,22 @@ const Leave = ({ leave, handleHover }) => {
   };
 
   useEffect(() => {
-    if (updateSuccess || creditUpdateSuccess || emailSuccess) {
+    if (updateSuccess && creditUpdateSuccess /* || emailSuccess */) {
       setLeaveFrom("");
       setLeaveUntil("");
       handleHover("");
       setRemarks("");
       setShowModal(false);
-      if (isAdmin || isHR) {
+      if (isAdmin || isHR || isApprover) {
         toast.success("Leave status updated");
       } else if (isOutletProcessor) {
         toast.success("Leave status updated and sent to HR email");
       }
 
-      navigate("/leaves");
+      window.location.reload();
     }
     // eslint-disable-next-line
-  }, [updateSuccess, creditUpdateSuccess, navigate]);
+  }, [updateSuccess, creditUpdateSuccess /* , navigate */]);
 
   if (leave) {
     let approve;

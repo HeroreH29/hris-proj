@@ -88,17 +88,16 @@ const Dependent = ({
       if (isOutletProcessor || AssignedOutlet !== "Head Office") {
         //const updateRecord = isOutletProcessor && dependent;
         //const id = updateRecord ? dependent?.id : "";
-
-        await sendEmail(
-          generateEmailMsg({
-            branch,
-            filename: `${employeeId}-Dependent.json`,
-            id: dependent?.id,
-            compiledInfo: others,
-            update: true,
-            assignedOutlet: AssignedOutlet,
-          })
-        );
+        // await sendEmail(
+        //   generateEmailMsg({
+        //     branch,
+        //     filename: `${employeeId}-Dependent.json`,
+        //     id: dependent?.id,
+        //     compiledInfo: others,
+        //     update: true,
+        //     assignedOutlet: AssignedOutlet,
+        //   })
+        // );
       }
     } else {
       e.stopPropagation();

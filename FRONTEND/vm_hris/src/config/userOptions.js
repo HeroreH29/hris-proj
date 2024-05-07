@@ -1,11 +1,8 @@
 export const USERLEVELS = {
   User: "User",
   Admin: "Admin",
-  HR: "HR",
   Approver: "Approver",
-  Accounting: "Accounting",
   OutletProcessor: "Outlet Processor",
-  Audit: "Audit",
   PayrollMaster: "Payroll Master",
 };
 

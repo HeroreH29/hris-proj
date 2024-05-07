@@ -22,6 +22,7 @@ import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
 import { ToastContainer } from "react-toastify";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
+import ContentLayout from "./components/Content/ContentLayout";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -61,7 +62,6 @@ function App() {
                         <Route path="new" element={<NewAnnouncement />} />
                       </Route>
                     </Route>
-                    {/* End Dash */}
                   </Route>
                   <Route
                     element={
@@ -70,7 +70,16 @@ function App() {
                       />
                     }
                   >
-                    <Route path="users">
+                    <Route
+                      path="users"
+                      element={
+                        <ContentLayout
+                          backTo="/users"
+                          add={true}
+                          update={true}
+                        />
+                      }
+                    >
                       <Route index element={<UsersList />} />
                       <Route path=":id" element={<EditUser />} />
                       <Route path="new" element={<NewUserForm />} />
@@ -126,6 +135,7 @@ function App() {
                       />
                     </Route>
                   </Route>
+                  {/* End Dash */}
                 </Route>
               </Route>
             </Route>

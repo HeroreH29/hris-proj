@@ -27,7 +27,7 @@ import useUserForm from "../../hooks/useUserForm";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const NewUserForm = () => {
-  useTitle("Create New User | Via Mare HRIS");
+  useTitle("New User | Via Mare HRIS");
 
   const [addNewUser, { isLoading, isSuccess, isError, error }] =
     useAddNewUserMutation();
@@ -139,7 +139,7 @@ const NewUserForm = () => {
   const content = (
     <>
       <Container>
-        <Row>
+        {/* <Row>
           <Col md="auto">
             <Button
               variant="outline-secondary"
@@ -154,7 +154,7 @@ const NewUserForm = () => {
               <p className="text-danger fw-bold">{error?.data?.message}</p>
             )}
           </Col>
-        </Row>
+        </Row> */}
         <Form
           className="p-3"
           noValidate

@@ -192,8 +192,8 @@ const NewLeaveForm = () => {
   }, [addSuccess, addError, isAddError, navigate]);
 
   return (
-    <Container>
-      <Row>
+    <>
+      {/* <Row>
         <Col md="auto">
           <Button variant="outline-secondary" onClick={handlePreviousPage}>
             <FontAwesomeIcon icon={faLeftLong} />
@@ -202,7 +202,7 @@ const NewLeaveForm = () => {
         <Col>
           <h3>Leave Filing</h3>
         </Col>
-      </Row>
+      </Row> */}
       <Form
         noValidate
         validated={validated}
@@ -367,7 +367,7 @@ const NewLeaveForm = () => {
           </Form.Group>
         </Row>
       </Form>
-    </Container>
+    </>
   );
 };
 

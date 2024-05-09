@@ -72,13 +72,7 @@ function App() {
                   >
                     <Route
                       path="users"
-                      element={
-                        <ContentLayout
-                          backTo="/users"
-                          add={true}
-                          update={true}
-                        />
-                      }
+                      element={<ContentLayout backTo="/users" title="User" />}
                     >
                       <Route index element={<UsersList />} />
                       <Route path=":id" element={<EditUser />} />
@@ -118,7 +112,10 @@ function App() {
                       {/* Include more routes if necessary */}
                     </Route>
                   </Route>
-                  <Route path="leaves">
+                  <Route
+                    path="leaves"
+                    element={<ContentLayout backTo="/leaves" title="Leave" />}
+                  >
                     <Route index element={<LeavesList />} />
                     {/* Include more routes if necessary */}
                     <Route path="new" element={<NewLeaveForm />} />

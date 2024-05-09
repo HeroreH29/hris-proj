@@ -84,9 +84,9 @@ const RecordsList = () => {
         const geninfo = gentities[id];
         let matches = true;
 
-        const searchLowerCase = tableState.searchValue.toLowerCase();
-        const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
-        const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
+        const searchLowerCase = tableState.searchValue?.toLowerCase();
+        const outletFilterLowerCase = tableState.outletFilter?.toLowerCase();
+        const statusFilterLowerCase = tableState.statusFilter?.toLowerCase();
 
         if (tableState.searchValue !== "") {
           matches =
@@ -121,8 +121,8 @@ const RecordsList = () => {
         const geninfo = gentities[id];
         let matches = true;
 
-        const outletFilterLowerCase = tableState.outletFilter.toLowerCase();
-        const statusFilterLowerCase = tableState.statusFilter.toLowerCase();
+        const outletFilterLowerCase = tableState.outletFilter?.toLowerCase();
+        const statusFilterLowerCase = tableState.statusFilter?.toLowerCase();
 
         if (tableState.outletFilter !== "") {
           matches =

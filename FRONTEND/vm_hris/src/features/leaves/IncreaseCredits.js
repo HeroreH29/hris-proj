@@ -192,8 +192,8 @@ const IncreaseCredits = () => {
     });
 
   return (
-    <Container>
-      <Row className="mb-3">
+    <>
+      {/* <Row className="mb-3">
         <Stack direction="horizontal" gap={4}>
           <div>
             <Button
@@ -206,21 +206,21 @@ const IncreaseCredits = () => {
           <div>
             <h3>Increase Credits</h3>
           </div>
-          <div className="ms-auto">
-            <InputGroup>
-              <InputGroup.Text className="">
-                <FontAwesomeIcon icon={faSearch} />
-              </InputGroup.Text>
-              <Form.Control
-                type="text"
-                placeholder="Search by name..."
-                onChange={(e) => searchEmployee(e.target.value)}
-              />
-            </InputGroup>
-          </div>
         </Stack>
-      </Row>
+      </Row> */}
       <Row className="p-3">
+        <div className="pb-3">
+          <InputGroup>
+            <InputGroup.Text className="">
+              <FontAwesomeIcon icon={faSearch} />
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search by name..."
+              onChange={(e) => searchEmployee(e.target.value)}
+            />
+          </InputGroup>
+        </div>
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -234,7 +234,7 @@ const IncreaseCredits = () => {
           <tbody>{tableContent}</tbody>
         </Table>
       </Row>
-    </Container>
+    </>
   );
 };
 

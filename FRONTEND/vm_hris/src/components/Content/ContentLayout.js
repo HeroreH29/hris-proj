@@ -1,32 +1,49 @@
 import React from "react";
 import { Outlet, useParams, useLocation, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  OverlayTrigger,
+  Stack,
+} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFileAlt,
+  faLeftLong,
+  faLevelUp,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
+import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
 
-const ContentLayout = ({ backTo = "", add = false, update = false }) => {
+const ContentLayout = ({ backTo = "", title = "" }) => {
   const { id, employeeId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isNewUser = location.pathname.includes("new");
-  const isEditUser = !isNewUser && (id || employeeId);
+  const isNew = location.pathname.includes("new");
+  const isEdit = !isNew && (id || employeeId);
+  const isLeave = location.pathname.includes("leaves");
+  const isCreditIncrease = location.pathname.includes("increasecredits");
 
-  let title = "";
-  if (isNewUser) {
-    title = "New User";
-  } else if (isEditUser) {
-    title = "Edit User";
+  let pageTitle = "";
+  if (isNew) {
+    pageTitle = `New ${title}`;
+  } else if (isEdit) {
+    pageTitle = `Edit ${title}`;
+  } else if (isCreditIncrease) {
+    pageTitle = `Increase Credits`;
   } else {
-    title = "Users";
+    pageTitle = `${title}s`;
   }
 
   return (
     <Container>
       <Row>
         {/* Back button */}
-        {(isNewUser || isEditUser) && (
+        {(isNew || isEdit || isCreditIncrease) && (
           <Col md="auto">
             <Button
               variant="outline-secondary"
@@ -38,18 +55,39 @@ const ContentLayout = ({ backTo = "", add = false, update = false }) => {
         )}
         {/* Content title */}
         <Col>
-          <h3>{title}</h3>
+          <h3>{pageTitle}</h3>
         </Col>
         {/* Extra buttons */}
         <Col md="auto">
-          {add && !isNewUser && (
-            <Button variant="outline-primary">
-              <FontAwesomeIcon
-                icon={faPlus}
-                onClick={() => navigate(location.pathname + "/new")}
-              />
-            </Button>
-          )}
+          <Stack direction="horizontal" gap={1}>
+            {!isNew && !isEdit && !isCreditIncrease && (
+              <OverlayTrigger
+                overlay={TooltipRenderer({ tip: `New ${title}` })}
+              >
+                <Button
+                  variant="outline-primary"
+                  onClick={() => navigate(`${location.pathname}/new`)}
+                >
+                  <FontAwesomeIcon icon={isLeave ? faFileAlt : faPlus} />
+                </Button>
+              </OverlayTrigger>
+            )}
+
+            {isLeave && !isNew && !isEdit && !isCreditIncrease && (
+              <OverlayTrigger
+                overlay={TooltipRenderer({ tip: `Increase Credit` })}
+              >
+                <Button
+                  variant="outline-success"
+                  onClick={() =>
+                    navigate(`${location.pathname}/increasecredits`)
+                  }
+                >
+                  <FontAwesomeIcon icon={faLevelUp} />
+                </Button>
+              </OverlayTrigger>
+            )}
+          </Stack>
         </Col>
       </Row>
       <Outlet />

@@ -275,7 +275,7 @@ const GenerateTimeSheet = async ({
         {
           x: width * 0.105,
           y: rowSpace,
-          font: workSansRegular,
+          font: workSansBold,
           size: bodyFontSize,
         }
       );
@@ -290,7 +290,7 @@ const GenerateTimeSheet = async ({
           {
             x: width * 0.38,
             y: rowSpace,
-            font: workSansRegular,
+            font: workSansBold,
             size: bodyFontSize,
           }
         );
@@ -300,7 +300,7 @@ const GenerateTimeSheet = async ({
           {
             x: width * 0.41,
             y: rowSpace,
-            font: workSansRegular,
+            font: workSansBold,
             size: bodyFontSize,
           }
         );
@@ -310,13 +310,13 @@ const GenerateTimeSheet = async ({
       /* Check if break-out on current row exist */
       if (breakOut) {
         page.drawText(breakOut, {
-          font: workSansRegular,
+          font: workSansBold,
           size: bodyFontSize,
           x: width * 0.205,
           y: rowSpace,
         });
         page.drawText(breakIn, {
-          font: workSansRegular,
+          font: workSansBold,
           size: bodyFontSize,
           x: width * 0.305,
           y: rowSpace,

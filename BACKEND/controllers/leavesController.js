@@ -10,6 +10,24 @@ const getAllLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find().populate("FiledFor");
 
+    /* FOR UPDATING CREDITED STATUS */
+    // for (const leave of leaves) {
+    //   const foundCredit = await LeaveCredit.find({
+    //     CreditsOf: leave.FiledFor,
+    //   }).exec();
+
+    //   if (
+    //     leave.Approve === 1 &&
+    //     leave.DateFiled &&
+    //     foundCredit.CreditBudget > 0
+    //   ) {
+    //     leave.Credited = true;
+    //     await leave.save();
+    //   }
+    // }
+
+    /* FOR REASSIGNING GENINFO REFERENCE */
+
     // for (const leave of leaves) {
     //   if (!leave.EmployeeID) {
     //     continue;
@@ -26,6 +44,8 @@ const getAllLeaves = async (req, res) => {
     //   await leave.save();
     // }
 
+    /* FOR RECALCULATING APPROVED LEAVES FOR LEAVE CREDITS */
+
     // const currentYearLeaves = leaves.filter((leave) =>
     //   leave.DateFiled.includes(new Date().getFullYear().toString())
     // );
@@ -38,8 +58,10 @@ const getAllLeaves = async (req, res) => {
     //       CreditsOf: leave.FiledFor,
     //     });
 
-    //     foundLeaveCredit[leaveType] -= leave.NoOfDays;
-    //     await foundLeaveCredit.save();
+    //     if (foundLeaveCredit?.CreditBudget > 0) {
+    //       foundLeaveCredit[leaveType] -= leave.NoOfDays;
+    //       await foundLeaveCredit.save();
+    //     }
     //   }
     // }
 

@@ -174,8 +174,8 @@ const LeavesList = () => {
       ));
 
     return (
-      <Container>
-        <Row className="mb-3">
+      <>
+        {/* <Row className="mb-3">
           <Col>
             <h3>Leaves</h3>
           </Col>
@@ -206,7 +206,7 @@ const LeavesList = () => {
               )}
             </Stack>
           </Col>
-        </Row>
+        </Row> */}
         <Row>
           <Col>
             <Table
@@ -460,7 +460,7 @@ const LeavesList = () => {
             </Table>
           </Col>
         </Row>
-      </Container>
+      </>
     );
   }
 };

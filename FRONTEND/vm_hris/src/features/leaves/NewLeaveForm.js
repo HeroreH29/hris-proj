@@ -16,11 +16,11 @@ import useTitle from "../../hooks/useTitle";
 import useLeaveForm from "../../hooks/useLeaveForm";
 
 const NewLeaveForm = () => {
-  useTitle("Leave Filing | Via Mare HRIS");
+  useTitle("New Leave | Via Mare HRIS");
 
   const navigate = useNavigate();
 
-  const { user, employeeId, isAdmin, isHR, isOutletProcessor, branch } =
+  const { user, employeeId, isUser, isAdmin, isHR, isOutletProcessor, branch } =
     useAuth();
 
   const { leaveState, leaveDispatch } = useLeaveForm();
@@ -38,6 +38,19 @@ const NewLeaveForm = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState("");
+
+  // For automatically selecting the matching employee for "Users"
+  if (isUser) {
+    const { ids, entities } = geninfos;
+
+    const foundEmployee = ids.find(
+      (id) => entities[id].EmployeeID === employeeId
+    );
+
+    if (!selectedEmployee) {
+      setSelectedEmployee(entities[foundEmployee]);
+    }
+  }
 
   // For searching employees
   const handleSearch = (e) => {
@@ -257,7 +270,7 @@ const NewLeaveForm = () => {
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">Leave Type</Form.Label>
             <Form.Select
-              disabled={selectedEmployee === ""}
+              disabled={!selectedEmployee}
               required
               value={leaveState.Ltype}
               onChange={(e) =>
@@ -350,6 +363,7 @@ const NewLeaveForm = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+        {/* Buttons */}
         <Row className="mb-3">
           <Form.Group as={Col} md="auto">
             <Button type="submit" variant="outline-success">

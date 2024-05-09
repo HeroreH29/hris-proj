@@ -17,8 +17,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import useTitle from "../../hooks/useTitle";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
+import useAuth from "../../hooks/useAuth";
 
 const ContentLayout = ({ backTo = "", title = "" }) => {
+  const { isHR, isAdmin } = useAuth();
   const { id, employeeId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,20 +75,24 @@ const ContentLayout = ({ backTo = "", title = "" }) => {
               </OverlayTrigger>
             )}
 
-            {isLeave && !isNew && !isEdit && !isCreditIncrease && (
-              <OverlayTrigger
-                overlay={TooltipRenderer({ tip: `Increase Credit` })}
-              >
-                <Button
-                  variant="outline-success"
-                  onClick={() =>
-                    navigate(`${location.pathname}/increasecredits`)
-                  }
+            {isLeave &&
+              !isNew &&
+              !isEdit &&
+              !isCreditIncrease &&
+              (isAdmin || isHR) && (
+                <OverlayTrigger
+                  overlay={TooltipRenderer({ tip: `Increase Credit` })}
                 >
-                  <FontAwesomeIcon icon={faLevelUp} />
-                </Button>
-              </OverlayTrigger>
-            )}
+                  <Button
+                    variant="outline-success"
+                    onClick={() =>
+                      navigate(`${location.pathname}/increasecredits`)
+                    }
+                  >
+                    <FontAwesomeIcon icon={faLevelUp} />
+                  </Button>
+                </OverlayTrigger>
+              )}
           </Stack>
         </Col>
       </Row>

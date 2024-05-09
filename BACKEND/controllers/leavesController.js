@@ -102,7 +102,7 @@ const createLeave = async (req, res) => {
   const leave = await Leave.create(req.body);
 
   // Extra checking if leave and record data is valid or not
-  if (leave && updatedRecord) {
+  if (leave) {
     res.status(201).json(leave);
   } else {
     res.status(500).json({ message: "Invalid leave data received" });

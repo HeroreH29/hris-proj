@@ -21,7 +21,7 @@ export const ASSIGNEDOUTLET = {
   "Manila Golf": "Manila Golf",
   "Eastwood Express": "Eastwood Express",
   KIDZANIA: "KIDZANIA",
-  "LM Alabang": "LM Alabang",
+  "LM - Alabang": "LM - Alabang",
   "NAIA-T3": "NAIA-T3",
   "Ayala North Exchange": "Ayala North Exchange",
   "Celebrity Club": "Celebrity Club",

@@ -23,8 +23,8 @@ const useAuth = () => {
     isPayrollMaster = userLevel === "Payroll Master";
     isApprover = userLevel === "Approver";
     isUser = userLevel === "User";
-    (isCostController = userLevel === "Cost Controller"),
-      (isProcessor = userLevel === "Processor");
+    isCostController = userLevel === "Cost Controller";
+    isProcessor = userLevel === "Processor";
 
     return {
       username,

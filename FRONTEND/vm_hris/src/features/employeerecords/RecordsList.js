@@ -64,8 +64,8 @@ const RecordsList = () => {
     if (geninfos?.ids?.length > 0) {
       const { ids: gids, entities: gentities } = geninfos;
 
-      // For notifying HR/Admin or Outlet/Processor for employee regularization
-      EmployeeNotifier({ gids, gentities, tableState });
+      // For notifying HR/Admin or Outlet Processor for employee regularization
+      EmployeeNotifier({ gids, gentities, tableState, navigate });
     }
 
     // eslint-disable-next-line

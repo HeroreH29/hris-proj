@@ -10,6 +10,8 @@ const useAuth = () => {
   let isPayrollMaster = false;
   let isApprover = false;
   let isUser = false;
+  let isCostController = false;
+  let isProcessor = false;
 
   if (token) {
     const decoded = jwtDecode(token);
@@ -20,10 +22,9 @@ const useAuth = () => {
     isOutletProcessor = userLevel === "Outlet Processor";
     isPayrollMaster = userLevel === "Payroll Master";
     isApprover = userLevel === "Approver";
-    isUser =
-      userLevel === "User" ||
-      userLevel === "Accounting" ||
-      userLevel === "Audit";
+    isUser = userLevel === "User";
+    (isCostController = userLevel === "Cost Controller"),
+      (isProcessor = userLevel === "Processor");
 
     return {
       username,

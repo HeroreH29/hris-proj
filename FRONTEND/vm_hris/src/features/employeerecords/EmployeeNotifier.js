@@ -2,7 +2,12 @@ import { differenceInMonths } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 
-const EmployeeNotifier = ({ gids = [], gentities = [], tableState = {} }) => {
+const EmployeeNotifier = ({
+  gids = [],
+  gentities = [],
+  tableState = {},
+  navigate = undefined,
+}) => {
   const { isOutletProcessor } = useAuth;
 
   const firstEval = [];
@@ -24,7 +29,7 @@ const EmployeeNotifier = ({ gids = [], gentities = [], tableState = {} }) => {
       const dateToday = new Date();
 
       if (
-        gentities[gid]?.EmployeeType === "Probationary" &&
+        gentities[gid].EmployeeType === "Probationary" &&
         gentities[gid].EmpStatus === "Y"
       ) {
         if (gentities[gid]?.DateEmployed) {
@@ -55,9 +60,12 @@ const EmployeeNotifier = ({ gids = [], gentities = [], tableState = {} }) => {
     toast.warning(`First evaluation for "${e}" `, {
       toastId: e,
       position: "top-left",
+      autoClose: false,
       onClick: () => {
-        const newTab = window.open("", "_blank");
-        newTab.location.href = `/employeerecords/${e}`;
+        // const newTab = window.open("", "_blank");
+        // newTab.location.href = `/employeerecords/${e}`;
+        //navigate(`/employeerecords/${e}`);
+        window.location.reload();
       },
     });
   });
@@ -66,9 +74,12 @@ const EmployeeNotifier = ({ gids = [], gentities = [], tableState = {} }) => {
     toast.warning(`Final evaluation for "${e}" `, {
       toastId: e,
       position: "top-left",
+      autoClose: false,
       onClick: () => {
-        const newTab = window.open("", "_blank");
-        newTab.location.href = `/employeerecords/${e}`;
+        // const newTab = window.open("", "_blank");
+        // newTab.location.href = `/employeerecords/${e}`;
+        //navigate(`/employeerecords/${e}`);
+        window.location.reload();
       },
     });
   });
@@ -77,9 +88,12 @@ const EmployeeNotifier = ({ gids = [], gentities = [], tableState = {} }) => {
     toast.warning(`Regularization for "${e}"`, {
       toastId: e,
       position: "top-left",
+      autoClose: false,
       onClick: () => {
-        const newTab = window.open("", "_blank");
-        newTab.location.href = `/employeerecords/${e}`;
+        // const newTab = window.open("", "_blank");
+        // newTab.location.href = `/employeerecords/${e}`;
+        //navigate(`/employeerecords/${e}`);
+        window.location.reload();
       },
     });
   });

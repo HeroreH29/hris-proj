@@ -33,7 +33,7 @@ const useRecordForm = ({
   };
 
   // Number splitter
-  const idNumberSplitter = (str) => {
+  const idNumberSplitter = (str = "") => {
     const splitStr = str?.split("-");
     return splitStr;
   };
@@ -76,11 +76,11 @@ const useRecordForm = ({
         DateProbationary: DateFormatter(geninfo?.DateProbationary),
         DateLeaved: DateFormatter(geninfo?.DateLeaved),
         ContractDateEnd: DateFormatter(geninfo?.ContractDateEnd),
-        PInumber: idNumberSplitter(geninfo?.PInumber),
-        ATMnumber: idNumberSplitter(geninfo?.ATMnumber),
-        TINnumber: idNumberSplitter(geninfo?.TINnumber),
-        SSSnumber: idNumberSplitter(geninfo?.SSSnumber),
-        PHnumber: idNumberSplitter(geninfo?.PHnumber),
+        PInumber: idNumberSplitter(geninfo?.PInumber) ?? "",
+        ATMnumber: idNumberSplitter(geninfo?.ATMnumber) ?? "",
+        TINnumber: idNumberSplitter(geninfo?.TINnumber) ?? "",
+        SSSnumber: idNumberSplitter(geninfo?.SSSnumber) ?? "",
+        PHnumber: idNumberSplitter(geninfo?.PHnumber) ?? "",
       };
   const personalinfoInitialState = !personalinfo
     ? {

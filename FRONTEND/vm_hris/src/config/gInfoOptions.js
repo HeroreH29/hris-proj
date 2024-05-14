@@ -1,5 +1,5 @@
 export const ASSIGNEDOUTLET = {
-  Outlet: "",
+  "Select Outlet...": "",
   Catering: "Catering",
   "Greenbelt 1": "Greenbelt 1",
   PICC: "PICC",

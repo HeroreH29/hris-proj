@@ -23,6 +23,7 @@ import NewLeaveForm from "./features/leaves/NewLeaveForm";
 import { ToastContainer } from "react-toastify";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
 import ContentLayout from "./components/Content/ContentLayout";
+import UserAccess from "./features/users/UserAccess";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -40,6 +41,7 @@ function App() {
               element={
                 <RequireAuth
                   allowedUserLevels={[...Object.values(USERLEVELS)]}
+                  /* allowedAccess={{ C: true, R: true, U: true, D: true }} */
                 />
               }
             >
@@ -77,6 +79,7 @@ function App() {
                       <Route index element={<UsersList />} />
                       <Route path=":id" element={<EditUser />} />
                       <Route path="new" element={<NewUserForm />} />
+                      <Route path="useraccess" element={<UserAccess />} />
                     </Route>
                   </Route>
                   <Route

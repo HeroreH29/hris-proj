@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Nav, Navbar, Image, Container } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 
 const DashHeader = () => {
+  const location = useLocation();
+
   const { isHR, isAdmin, isOutletProcessor, username } = useAuth();
 
   const toastId = useRef(null);
@@ -47,6 +49,23 @@ const DashHeader = () => {
   const toastDismisser = () => {
     toast.dismiss();
   };
+
+  // Active page identifier
+  useEffect(() => {
+    const currentLoc = location.pathname;
+
+    if (currentLoc.includes("/dashboard")) {
+      setActive(1);
+    } else if (currentLoc.includes("/employeerecords")) {
+      setActive(2);
+    } else if (currentLoc.includes("/attendances")) {
+      setActive(3);
+    } else if (currentLoc.includes("/leaves")) {
+      setActive(4);
+    } else if (currentLoc.includes("/users")) {
+      setActive(5);
+    }
+  }, [location.pathname]);
 
   if (isError) return <p>Error: {error?.data?.message}</p>;
 

@@ -98,20 +98,24 @@ const EditUserForm = ({ user }) => {
   };
 
   /* DROPDOWN OPTIONS */
-  const userLevelOptions = Object.values(USERLEVELS).map((userlevel) => {
-    return (
-      <option key={userlevel} value={userlevel}>
-        {userlevel}
-      </option>
-    );
-  });
-  const userGroupOptions = Object.values(USERGROUPS).map((usergroup) => {
-    return (
-      <option key={usergroup} value={usergroup}>
-        {usergroup}
-      </option>
-    );
-  });
+  const userLevelOptions = Object.values(USERLEVELS)
+    .sort((a, b) => a.localeCompare(b))
+    .map((userlevel) => {
+      return (
+        <option key={userlevel} value={userlevel}>
+          {userlevel}
+        </option>
+      );
+    });
+  const userGroupOptions = Object.values(USERGROUPS)
+    .sort((a, b) => a.localeCompare(b))
+    .map((usergroup) => {
+      return (
+        <option key={usergroup} value={usergroup}>
+          {usergroup}
+        </option>
+      );
+    });
 
   const branchOptions = Object.entries(BRANCHES).map(([key, value]) => {
     return (

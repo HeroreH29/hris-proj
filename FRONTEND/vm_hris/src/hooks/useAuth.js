@@ -19,12 +19,12 @@ const useAuth = () => {
 
     isHR = userLevel === "HR";
     isAdmin = userLevel === "Admin";
+    isProcessor = userLevel === "Processor";
     isOutletProcessor = userLevel === "Outlet Processor";
     isPayrollMaster = userLevel === "Payroll Master";
     isApprover = userLevel === "Approver";
     isUser = userLevel === "User";
     isCostController = userLevel === "Cost Controller";
-    isProcessor = userLevel === "Processor";
 
     return {
       username,

@@ -47,3 +47,11 @@ export const BRANCHES = {
   "Ayala North Exchange": "Ayala North Exchange",
   "Celebrity Club": "Celebrity Club",
 };
+
+export const SYSFEATS = {
+  Dashboard: "Dashboard",
+  "Employee Records": "Employee Records",
+  Attendances: "Attendances",
+  Leaves: "Leaves",
+  "User Settings": "User Settings",
+};

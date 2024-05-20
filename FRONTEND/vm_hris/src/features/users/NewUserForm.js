@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAddNewUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
-import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
+import { USERLEVELS, USERGROUPS } from "../../config/userOptions";
 import {
   Form,
   Button,
@@ -83,20 +83,24 @@ const NewUserForm = () => {
   };
 
   /* DROPDOWN OPTIONS */
-  const userLevelOptions = Object.values(USERLEVELS).map((userlevel) => {
-    return (
-      <option key={userlevel} value={userlevel}>
-        {userlevel}
-      </option>
-    );
-  });
-  const userGroupOptions = Object.entries(USERGROUPS).map(([key, value]) => {
-    return (
-      <option key={value} value={value}>
-        {key}
-      </option>
-    );
-  });
+  const userLevelOptions = Object.values(USERLEVELS)
+    .sort((a, b) => a.localeCompare(b))
+    .map((userlevel) => {
+      return (
+        <option key={userlevel} value={userlevel}>
+          {userlevel}
+        </option>
+      );
+    });
+  const userGroupOptions = Object.values(USERGROUPS)
+    .sort((a, b) => a.localeCompare(b))
+    .map((usergroup) => {
+      return (
+        <option key={usergroup} value={usergroup}>
+          {usergroup}
+        </option>
+      );
+    });
 
   const [validated, setValidated] = useState(false);
 

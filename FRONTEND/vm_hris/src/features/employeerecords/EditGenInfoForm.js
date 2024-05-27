@@ -30,7 +30,7 @@ import useAuth from "../../hooks/useAuth";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
-  const { username /* , isOutletProcessor, branch */ } = useAuth();
+  const { username, isX } = useAuth();
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
@@ -211,6 +211,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Employee ID</Form.Label>
               <Form.Control
                 required
+                disabled={isX.isOutletProcessor}
                 autoFocus
                 autoComplete="off"
                 type="text"
@@ -245,6 +246,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Prefix</Form.Label>
               <Form.Select
+                disabled={isX.isOutletProcessor}
                 value={genState.Prefix}
                 onChange={(e) =>
                   genDispatch({ type: "prefix", Prefix: e.target.value })
@@ -257,6 +259,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">First Name</Form.Label>
               <Form.Control
                 required
+                disabled={isX.isOutletProcessor}
                 type="text"
                 autoComplete="off"
                 value={genState.FirstName}
@@ -271,6 +274,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 type="text"
                 autoComplete="off"
                 placeholder="(Optional)"
+                disabled={isX.isOutletProcessor}
                 value={genState.MiddleName}
                 onChange={(e) =>
                   genDispatch({
@@ -284,6 +288,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Last Name</Form.Label>
               <Form.Control
                 required
+                disabled={isX.isOutletProcessor}
                 type="text"
                 autoComplete="off"
                 value={genState.LastName}
@@ -302,6 +307,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Employee Type</Form.Label>
               <Form.Select
                 required
+                disabled={isX.isOutletProcessor}
                 value={genState.EmployeeType}
                 onChange={(e) =>
                   genDispatch({
@@ -321,6 +327,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <InputGroup>
                 <Form.Control
                   required
+                  disabled={isX.isOutletProcessor}
                   type="text"
                   value={genState.AssignedOutlet}
                   onChange={(e) =>
@@ -330,7 +337,11 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                     })
                   }
                 />
-                <DropdownButton variant="outline-secondary" title="Options">
+                <DropdownButton
+                  disabled={isX.isOutletProcessor}
+                  variant="outline-secondary"
+                  title="Options"
+                >
                   {assignedOutletOptions}
                 </DropdownButton>
               </InputGroup>
@@ -344,6 +355,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Department</Form.Label>
               <Form.Select
+                disabled={isX.isOutletProcessor}
                 required
                 value={genState.Department}
                 onChange={(e) =>
@@ -362,6 +374,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Job Title</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 type="text"
                 required
                 value={genState.JobTitle}
@@ -380,6 +393,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Date Employed</Form.Label>
               <Form.Control
                 required
+                disabled={isX.isOutletProcessor}
                 autoComplete="off"
                 type="date"
                 value={genState.DateEmployed}
@@ -398,6 +412,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Contractual?</Form.Label>
               <Form.Check
                 type="switch"
+                disabled={isX.isOutletProcessor}
                 checked={isContractual}
                 label={isContractual ? "Yes" : "No"}
                 onChange={() => {
@@ -447,7 +462,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Probationary Date</Form.Label>
               <Form.Control
-                disabled={isContractual}
+                disabled={isContractual || isX.isOutletProcessor}
                 type="date"
                 value={genState.DateProbationary}
                 onChange={(e) =>
@@ -470,7 +485,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Label>
               <Form.Control
                 type="date"
-                disabled={isContractual}
+                disabled={isContractual || isX.isOutletProcessor}
                 value={genState.RegDate}
                 onChange={(e) =>
                   genDispatch({ type: "reg_date", RegDate: e.target.value })
@@ -486,7 +501,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Label>
               <Form.Control
                 type="date"
-                disabled={isContractual}
+                disabled={isContractual || isX.isOutletProcessor}
                 value={genState.DateLeaved}
                 onChange={(e) =>
                   genDispatch({
@@ -505,6 +520,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Employment Status</Form.Label>
               <Form.Select
+                disabled={isX.isOutletProcessor}
                 onChange={(e) =>
                   genDispatch({ type: "emp_status", EmpStatus: e.target.value })
                 }
@@ -540,6 +556,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Notes</Form.Label>
               <Form.Control
                 type="text"
+                disabled={isX.isOutletProcessor}
                 as="textarea"
                 value={genState.Notes}
                 onChange={(e) =>
@@ -555,6 +572,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <InputGroup>
                 <Form.Control
                   value={genState.TINnumber[0]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "tin_number",
@@ -568,6 +586,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.TINnumber[1]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "tin_number",
@@ -580,6 +599,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                   maxLength={3}
                 />
                 <Form.Control
+                  disabled={isX.isOutletProcessor}
                   value={genState.TINnumber[2]}
                   onChange={(e) =>
                     genDispatch({
@@ -599,6 +619,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <InputGroup>
                 <Form.Control
                   value={genState.SSSnumber[0]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "sss_number",
@@ -612,6 +633,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.SSSnumber[1]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "sss_number",
@@ -625,6 +647,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.SSSnumber[2]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "sss_number",
@@ -643,6 +666,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <InputGroup>
                 <Form.Control
                   value={genState.PHnumber[0]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "ph_number",
@@ -656,6 +680,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.PHnumber[1]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "ph_number",
@@ -669,6 +694,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.PHnumber[2]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "ph_number",
@@ -689,6 +715,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Pag-IBIG #</Form.Label>
               <InputGroup>
                 <Form.Control
+                  disabled={isX.isOutletProcessor}
                   value={genState?.PInumber?.[0]}
                   onChange={(e) =>
                     genDispatch({
@@ -703,6 +730,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState?.PInumber?.[1]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "pi_number",
@@ -716,6 +744,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState?.PInumber?.[2]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "pi_number",
@@ -734,6 +763,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <InputGroup>
                 <Form.Control
                   value={genState.ATMnumber[0]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "atm_number",
@@ -747,6 +777,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.ATMnumber[1]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "atm_number",
@@ -760,6 +791,7 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                 />
                 <Form.Control
                   value={genState.ATMnumber[2]}
+                  disabled={isX.isOutletProcessor}
                   onChange={(e) =>
                     genDispatch({
                       type: "atm_number",
@@ -776,9 +808,11 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
           </Row>
           <Row className="pt-3">
             <Col md="auto">
-              <Button type="submit" variant="outline-success">
-                {geninfo ? "Save Change" : "Proceed"}
-              </Button>
+              {!isX.isOutletProcessor && (
+                <Button type="submit" variant="outline-success">
+                  {geninfo ? "Save Change" : "Proceed"}
+                </Button>
+              )}
             </Col>
           </Row>
         </Form>

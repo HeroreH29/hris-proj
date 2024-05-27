@@ -4,8 +4,11 @@ import React, { useState } from "react";
 import { Container, Row, Col, Button, Table } from "react-bootstrap";
 import TrainingHistory from "./TrainingHistory";
 import TrainingHistoryModal from "../../modals/TrainingHistoryModal";
+import useAuth from "../../hooks/useAuth";
 
 const TrainingHistoryList = ({ trainingHistories = [] }) => {
+  const { isX } = useAuth();
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
@@ -13,15 +16,19 @@ const TrainingHistoryList = ({ trainingHistories = [] }) => {
   const [newHistory, setNewHistory] = useState(true);
 
   const handleNewTrainingHistory = () => {
-    setShow(true);
-    setTrainingData({});
-    setNewHistory(true);
+    if (!isX.isOutletProcessor) {
+      setShow(true);
+      setTrainingData({});
+      setNewHistory(true);
+    }
   };
 
   const handleEditTrainingHistory = (trainingHistory) => {
-    setShow(true);
-    setTrainingData(trainingHistory);
-    setNewHistory(false);
+    if (!isX.isOutletProcessor) {
+      setShow(true);
+      setTrainingData(trainingHistory);
+      setNewHistory(false);
+    }
   };
 
   const tableContent = trainingHistories?.length
@@ -41,16 +48,20 @@ const TrainingHistoryList = ({ trainingHistories = [] }) => {
     <>
       <Container>
         <Row>
-          <Col>
-            <Button
-              className="float-end"
-              type="button"
-              variant="outline-primary"
-              onClick={handleNewTrainingHistory}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </Col>
+          {!isX.isOutletProcessor && (
+            <>
+              <Col>
+                <Button
+                  className="float-end"
+                  type="button"
+                  variant="outline-primary"
+                  onClick={handleNewTrainingHistory}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+              </Col>
+            </>
+          )}
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>

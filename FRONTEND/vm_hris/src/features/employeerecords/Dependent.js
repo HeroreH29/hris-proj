@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import useAuth from "../../hooks/useAuth";
 
 const Dependent = ({
   dependent,
@@ -21,6 +22,8 @@ const Dependent = ({
 }) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+
+  const { isX } = useAuth();
 
   // eslint-disable-next-line
   const [updateDependent, { isLoading, isSuccess, isError }] =
@@ -127,7 +130,9 @@ const Dependent = ({
       <>
         <tr
           onClick={() => {
-            setShowModal(true);
+            if (!isX.isOutletProcessor) {
+              setShowModal(true);
+            }
           }}
         >
           <td>{depState.Names}</td>

@@ -4,16 +4,15 @@ import {
   useUpdateLeaveCreditMutation,
   useGetLeaveCreditsQuery,
 } from "./leavesApiSlice";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
-import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
+//import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { toast } from "react-toastify";
 
 const Leave = ({ leave, handleHover }) => {
-  const { branch, isHR, isAdmin, isOutletProcessor, isApprover } = useAuth();
-  const navigate = useNavigate();
+  const { isX } = useAuth();
 
   const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
     selectFromResult: ({ data }) => ({
@@ -23,7 +22,7 @@ const Leave = ({ leave, handleHover }) => {
     }),
   });
 
-  const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
+  //const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
 
   const [updateLeave, { isSuccess: updateSuccess }] = useUpdateLeaveMutation();
 
@@ -53,11 +52,11 @@ const Leave = ({ leave, handleHover }) => {
     if (confirm) {
       // Update leave
       try {
-        const payload = await updateLeave({
+        /* const payload =  */ await updateLeave({
           id: leave?.id,
           Approve: approveStat,
           Remarks: remarks,
-        }).unwrap();
+        }); /* .unwrap(); */
 
         // Send leave information to HR email if leave is filed from outlets/branches
         // if (isOutletProcessor) {
@@ -122,9 +121,9 @@ const Leave = ({ leave, handleHover }) => {
       handleHover("");
       setRemarks("");
       setShowModal(false);
-      if (isAdmin || isHR || isApprover) {
+      if (isX.isAdmin || isX.isProcessor || isX.isApprover) {
         toast.success("Leave status updated");
-      } else if (isOutletProcessor) {
+      } else if (isX.isOutletProcessor) {
         toast.success("Leave status updated and sent to HR email");
       }
 
@@ -213,9 +212,9 @@ const Leave = ({ leave, handleHover }) => {
                 <Row className="mb-3">
                   <Form.Group as={Col}>
                     <Form.Label className="fw-semibold">
-                      Remarks {(isHR || isAdmin) && `(Optional)`}
+                      Remarks {(isX.isProcessor || isX.isAdmin) && `(Optional)`}
                     </Form.Label>
-                    {isHR || isAdmin ? (
+                    {isX.isProcessor || isX.isAdmin ? (
                       <>
                         <Form.Control
                           disabled={leave?.Approve !== 0}
@@ -239,25 +238,30 @@ const Leave = ({ leave, handleHover }) => {
               </Form>
             </Container>
           </Modal.Body>
-          {isHR || isOutletProcessor || isAdmin ? (
-            <>
-              <Modal.Footer>
-                <Button
-                  disabled={leave?.Approve !== 0}
-                  type="button"
-                  variant="outline-success"
-                  onClick={() => handleUpdateLeave(1)}
-                >
-                  Approve
-                </Button>
-                <Button
-                  disabled={leave?.Approve !== 0}
-                  type="button"
-                  variant="outline-danger"
-                  onClick={() => handleUpdateLeave(2)}
-                >
-                  Disapprove
-                </Button>
+
+          <>
+            <Modal.Footer>
+              {(isX.isAdmin || isX.isOutletProcessor || isX.isApprover) && (
+                <>
+                  <Button
+                    disabled={leave?.Approve !== 0}
+                    type="button"
+                    variant="outline-success"
+                    onClick={() => handleUpdateLeave(1)}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    disabled={leave?.Approve !== 0}
+                    type="button"
+                    variant="outline-danger"
+                    onClick={() => handleUpdateLeave(2)}
+                  >
+                    Disapprove
+                  </Button>
+                </>
+              )}
+              {isX.isUser && (
                 <Button
                   disabled={leave?.Approve !== 0}
                   type="button"
@@ -266,11 +270,9 @@ const Leave = ({ leave, handleHover }) => {
                 >
                   Cancel
                 </Button>
-              </Modal.Footer>
-            </>
-          ) : (
-            <></>
-          )}
+              )}
+            </Modal.Footer>
+          </>
         </Modal>
       </>
     );

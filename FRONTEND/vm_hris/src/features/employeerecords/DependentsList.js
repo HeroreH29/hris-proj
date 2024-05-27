@@ -20,7 +20,7 @@ import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
-  const { isOutletProcessor, branch } = useAuth();
+  const { isX, branch } = useAuth();
 
   // eslint-disable-next-line
   const [addDependent, { isLoading, isSuccess, isError, error }] =
@@ -46,18 +46,18 @@ const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
       await addDependent(dependentData);
 
       // Send data to HR email if processed by outlet/branch (and vice versa)
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        //const updateRecord = isOutletProcessor && dependents;
-        //const id = updateRecord ? geninfo?.id : "";
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-Dependent.json`,
-        //     compiledInfo: dependentData,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      // if (isX || AssignedOutlet !== "Head Office") {
+      //   const updateRecord = isX && dependents;
+      //   const id = updateRecord ? geninfo?.id : "";
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-Dependent.json`,
+      //       compiledInfo: dependentData,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
     } else {
       e.stopPropagation();
     }
@@ -97,7 +97,7 @@ const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
           <Dependent
             key={index}
             dependent={dep}
-            isOutletProcessor={isOutletProcessor}
+            isX={isX}
             branch={branch}
             sendEmail={sendEmail}
             AssignedOutlet={AssignedOutlet}
@@ -121,19 +121,23 @@ const DependentsList = ({ dependents, employeeId, AssignedOutlet }) => {
     <>
       <Container>
         <Row>
-          <Col>
-            <small>{`(Click a dependent to edit)`}</small>
-          </Col>
-          <Col>
-            <Button
-              className="float-end"
-              type="button"
-              variant="outline-primary"
-              onClick={() => setShowModal(true)}
-            >
-              <FontAwesomeIcon icon={faPersonCirclePlus} />
-            </Button>
-          </Col>
+          {!isX.isOutletProcessor && (
+            <>
+              <Col>
+                <small>{`(Click a dependent to edit)`}</small>
+              </Col>
+              <Col>
+                <Button
+                  className="float-end"
+                  type="button"
+                  variant="outline-primary"
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faPersonCirclePlus} />
+                </Button>
+              </Col>
+            </>
+          )}
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>

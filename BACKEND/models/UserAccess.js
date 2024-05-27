@@ -34,6 +34,12 @@ const userAccessSchema = new Schema({
       U: Boolean,
       D: Boolean,
     },
+    Announcements: {
+      C: Boolean,
+      R: Boolean,
+      U: Boolean,
+      D: Boolean,
+    },
   },
 });
 

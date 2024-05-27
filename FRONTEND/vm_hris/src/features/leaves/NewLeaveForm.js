@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Form, ListGroup } from "react-bootstrap";
+import { Row, Col, Button, Form, ListGroup } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { LEAVETYPES } from "../../config/leaveTypeOptions";
-import {
-  useGetEmployeeRecordsQuery,
-  useGetGeninfosQuery,
-} from "../employeerecords/recordsApiSlice";
+import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { useAddNewLeaveMutation } from "./leavesApiSlice";
 import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
@@ -20,8 +17,7 @@ const NewLeaveForm = () => {
 
   const navigate = useNavigate();
 
-  const { user, employeeId, isUser, isAdmin, isHR, isOutletProcessor, branch } =
-    useAuth();
+  const { user, employeeId, isX, branch } = useAuth();
 
   const { leaveState, leaveDispatch } = useLeaveForm();
   const [validated, setValidated] = useState(false);
@@ -40,7 +36,7 @@ const NewLeaveForm = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
 
   // For automatically selecting the matching employee for "Users"
-  if (isUser) {
+  if (isX.isUser && isSuccess) {
     const { ids, entities } = geninfos;
 
     const foundEmployee = ids.find(
@@ -65,7 +61,7 @@ const NewLeaveForm = () => {
         const filteredResults = records.filter((info) => {
           let matches = true;
 
-          if (isOutletProcessor) {
+          if (isX.isOutletProcessor) {
             matches =
               matches &&
               info.AssignedOutlet === branch &&
@@ -206,23 +202,23 @@ const NewLeaveForm = () => {
 
   return (
     <>
-      {/* <Row>
+      <Row>
         <Col md="auto">
           <Button variant="outline-secondary" onClick={handlePreviousPage}>
             <FontAwesomeIcon icon={faLeftLong} />
           </Button>
         </Col>
         <Col>
-          <h3>Leave Filing</h3>
+          <h3>New Leave</h3>
         </Col>
-      </Row> */}
+      </Row>
       <Form
         noValidate
         validated={validated}
         className="p-3"
         onSubmit={handleSubmit}
       >
-        {(isAdmin || isHR || isOutletProcessor) && (
+        {(isX.isAdmin || isX.isProcessor || isX.isOutletProcessor) && (
           <>
             <Row className="mb-3">
               <Form.Group as={Col} md="4">

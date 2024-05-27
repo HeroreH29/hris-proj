@@ -143,7 +143,7 @@ const NewUserForm = () => {
   const content = (
     <>
       <Container>
-        {/* <Row>
+        <Row>
           <Col md="auto">
             <Button
               variant="outline-secondary"
@@ -158,7 +158,7 @@ const NewUserForm = () => {
               <p className="text-danger fw-bold">{error?.data?.message}</p>
             )}
           </Col>
-        </Row> */}
+        </Row>
         <Form
           className="p-3"
           noValidate

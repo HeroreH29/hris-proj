@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Container,
   Row,
   Col,
   Table,
@@ -25,16 +24,7 @@ import PrintLeave from "./PrintLeave";
 const LeavesList = () => {
   useTitle("Leaves | Via Mare HRIS");
 
-  const {
-    userLevel,
-    employeeId,
-    isUser,
-    isOutletProcessor,
-    isHR,
-    isAdmin,
-    branch,
-    user,
-  } = useAuth();
+  const { employeeId, isX } = useAuth();
 
   const navigate = useNavigate();
 
@@ -135,7 +125,7 @@ const LeavesList = () => {
             entities[id].FiledFor?.FullName.toLowerCase().includes(
               tableState.name
             );
-        } else if (isUser) {
+        } else if (isX.isUser) {
           match = match && entities[id].FiledFor?.EmployeeID === employeeId;
         }
 
@@ -168,6 +158,10 @@ const LeavesList = () => {
 
     // Render the component
     overallLeavesContent = leavesList
+      .sort(
+        (a, b) =>
+          new Date(b?.DateFiled).valueOf() - new Date(a?.DateFiled).valueOf()
+      )
       .slice(tableState.sliceStart, tableState.sliceEnd)
       .map((leave) => (
         <Leave key={leave.id} leave={leave} handleHover={handleHover} />
@@ -175,38 +169,42 @@ const LeavesList = () => {
 
     return (
       <>
-        {/* <Row className="mb-3">
+        <Row className="mb-3">
           <Col>
             <h3>Leaves</h3>
           </Col>
           <Col>
             <Stack direction="horizontal" gap={1}>
-              <OverlayTrigger
-                overlay={TooltipRenderer({ tip: "File new leave" })}
-              >
-                <Button
-                  className="ms-auto"
-                  variant="outline-primary"
-                  onClick={() => navigate("/leaves/new")}
-                >
-                  <FontAwesomeIcon icon={faFileAlt} />
-                </Button>
-              </OverlayTrigger>
-              {(isHR || isAdmin) && (
-                <OverlayTrigger
-                  overlay={TooltipRenderer({ tip: "Increase credits" })}
-                >
-                  <Button
-                    variant="outline-success"
-                    onClick={() => navigate("/leaves/increasecredits")}
+              {(isX.isProcessor || isX.isAdmin || isX.isOutletProcessor) && (
+                <>
+                  <OverlayTrigger
+                    overlay={TooltipRenderer({ tip: "File new leave" })}
                   >
-                    <FontAwesomeIcon icon={faLevelUp} />
-                  </Button>
-                </OverlayTrigger>
+                    <Button
+                      className="ms-auto"
+                      variant="outline-primary"
+                      onClick={() => navigate("/leaves/new")}
+                    >
+                      <FontAwesomeIcon icon={faFileAlt} />
+                    </Button>
+                  </OverlayTrigger>
+                  {!isX.isOutletProcessor && (
+                    <OverlayTrigger
+                      overlay={TooltipRenderer({ tip: "Increase credits" })}
+                    >
+                      <Button
+                        variant="outline-success"
+                        onClick={() => navigate("/leaves/increasecredits")}
+                      >
+                        <FontAwesomeIcon icon={faLevelUp} />
+                      </Button>
+                    </OverlayTrigger>
+                  )}
+                </>
               )}
             </Stack>
           </Col>
-        </Row> */}
+        </Row>
         <Row>
           <Col>
             <Table
@@ -244,7 +242,7 @@ const LeavesList = () => {
                             type="text"
                             value={tableState.name}
                             placeholder="Enter name"
-                            disabled={isUser}
+                            disabled={isX.isUser}
                             onChange={(e) => {
                               tableDispatch({
                                 type: "name",
@@ -284,7 +282,7 @@ const LeavesList = () => {
                         <Col xs={12} sm={6} lg={3}>
                           <Form.Select
                             value={tableState.outletFilter}
-                            disabled={isUser || isOutletProcessor}
+                            disabled={isX.isUser || isX.isOutletProcessor}
                             onChange={(e) => {
                               tableDispatch({
                                 type: "outlet_filter",
@@ -334,7 +332,7 @@ const LeavesList = () => {
               className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
             >
               <caption>
-                {isHR || isAdmin || isOutletProcessor
+                {!isX.isUser
                   ? `Leave Credit Info of ${
                       leaveCredit?.CreditsOf?.LastName ?? ""
                     }`

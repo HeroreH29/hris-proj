@@ -28,7 +28,7 @@ import EmployeeNotifier from "./EmployeeNotifier";
 const RecordsList = () => {
   const navigate = useNavigate();
 
-  const { isOutletProcessor } = useAuth();
+  const { isX, canX } = useAuth();
 
   useTitle("Employee Records | Via Mare HRIS");
 
@@ -60,12 +60,14 @@ const RecordsList = () => {
     error: gerror,
   } = useGetGeninfosQuery();
 
+  // Employee Assesment and Regularization Notifier
   useEffect(() => {
     if (geninfos?.ids?.length > 0) {
       const { ids: gids, entities: gentities } = geninfos;
 
       // For notifying HR/Admin or Outlet Processor for employee regularization
-      EmployeeNotifier({ gids, gentities, tableState, navigate });
+
+      EmployeeNotifier({ gids, gentities, tableState, navigate, isX });
     }
 
     // eslint-disable-next-line
@@ -154,19 +156,22 @@ const RecordsList = () => {
     return (
       <Container>
         <Row>
-          <Col>
-            <h3>Employee Records</h3>
-            <small>{`(Click a record to view/edit)`}</small>
-          </Col>
+          {!isX.isOutletProcessor && (
+            <Col>
+              <h3>Employee Records</h3>
+              <small>{`(Click a record to view/edit)`}</small>
+            </Col>
+          )}
 
           <Col md="auto">
-            {/* Temporarily disabled */}
-            <Button
-              variant="outline-primary"
-              onClick={() => navigate("/employeerecords/new")}
-            >
-              <FontAwesomeIcon icon={faUserPlus} />
-            </Button>
+            {canX.canCreate && canX.canUpdate && canX.canDelete && (
+              <Button
+                variant="outline-primary"
+                onClick={() => navigate("/employeerecords/new")}
+              >
+                <FontAwesomeIcon icon={faUserPlus} />
+              </Button>
+            )}
           </Col>
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
@@ -210,7 +215,9 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
-                    disabled={isOutletProcessor}
+                    disabled={
+                      !canX.canCreate && !canX.canUpdate && !canX.canDelete
+                    }
                     value={tableState.outletFilter}
                     onChange={(e) => {
                       tableDispatch({

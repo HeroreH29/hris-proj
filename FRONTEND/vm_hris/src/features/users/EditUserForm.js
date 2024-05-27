@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
-import { USERLEVELS, BRANCHES, USERGROUPS } from "../../config/userOptions";
+import {
+  USERLEVELS,
+  /* BRANCHES, */ USERGROUPS,
+} from "../../config/userOptions";
 import { Form, Button, Col, Row, Container, InputGroup } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -59,8 +62,6 @@ const EditUserForm = ({ user }) => {
 
     const form = e.currentTarget;
 
-    console.log(form.checkValidity());
-
     const { __v, _id, password, ...others } = userState;
 
     if (form.checkValidity() && !isLoading) {
@@ -117,32 +118,31 @@ const EditUserForm = ({ user }) => {
       );
     });
 
-  const branchOptions = Object.entries(BRANCHES).map(([key, value]) => {
-    return (
-      <option key={value} value={value}>
-        {key}
-      </option>
-    );
-  });
+  // const branchOptions = Object.entries(BRANCHES).map(([key, value]) => {
+  //   return (
+  //     <option key={value} value={value}>
+  //       {key}
+  //     </option>
+  //   );
+  // });
 
   const [validated, setValidated] = useState(false);
 
   const content = (
-    <>
-      {/* <Container>
-        <Row>
-          <Col md="auto">
-            <Button
-              variant="outline-secondary"
-              onClick={() => navigate("/users")}
-            >
-              <FontAwesomeIcon icon={faLeftLong} />
-            </Button>
-          </Col>
-          <Col md="auto">
-            <h3>Edit User</h3>
-          </Col>
-        </Row> */}
+    <Container>
+      <Row>
+        <Col md="auto">
+          <Button
+            variant="outline-secondary"
+            onClick={() => navigate("/users")}
+          >
+            <FontAwesomeIcon icon={faLeftLong} />
+          </Button>
+        </Col>
+        <Col md="auto">
+          <h3>Edit User</h3>
+        </Col>
+      </Row>
       <Form
         className="p-3"
         noValidate
@@ -315,8 +315,7 @@ const EditUserForm = ({ user }) => {
           </Col>
         </Row>
       </Form>
-      {/* </Container> */}
-    </>
+    </Container>
   );
 
   return content;

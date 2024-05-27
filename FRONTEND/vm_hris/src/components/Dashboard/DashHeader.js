@@ -9,7 +9,7 @@ import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
 const DashHeader = () => {
   const location = useLocation();
 
-  const { isHR, isAdmin, isOutletProcessor, username } = useAuth();
+  const { isX, username } = useAuth();
 
   const toastId = useRef(null);
 
@@ -86,23 +86,24 @@ const DashHeader = () => {
             <Nav.Link eventKey="1" onClick={() => navigate("/dashboard")}>
               Dashboard
             </Nav.Link>
-            {(isHR || isAdmin || isOutletProcessor) && (
-              <Nav.Link
-                eventKey="2"
-                onClick={() => navigate("/employeerecords")}
-              >
-                Employee Records
-              </Nav.Link>
-            )}
-            {(isHR || isAdmin || isOutletProcessor) && (
-              <Nav.Link eventKey="3" onClick={() => navigate("/attendances")}>
-                Attendances
-              </Nav.Link>
+            {(!isX.isUser || !isX.isApprover) && (
+              <>
+                <Nav.Link
+                  eventKey="2"
+                  onClick={() => navigate("/employeerecords")}
+                >
+                  Employee Records
+                </Nav.Link>
+
+                <Nav.Link eventKey="3" onClick={() => navigate("/attendances")}>
+                  Attendances
+                </Nav.Link>
+              </>
             )}
             <Nav.Link eventKey="4" onClick={() => navigate("/leaves")}>
               Leaves
             </Nav.Link>
-            {(isHR || isAdmin) && (
+            {isX.isAdmin && (
               <Nav.Link eventKey="5" onClick={() => navigate("/users")}>
                 User Settings
               </Nav.Link>

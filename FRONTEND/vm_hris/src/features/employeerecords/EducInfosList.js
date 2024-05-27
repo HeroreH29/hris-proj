@@ -21,7 +21,7 @@ import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
-  const { branch, isOutletProcessor } = useAuth();
+  const { branch, isX } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -52,18 +52,18 @@ const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
     if (form.checkValidity() && !isLoading) {
       await addEducinfo(educInfoData);
 
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        //const updateRecord = isOutletProcessor && payload;
-        //const id = updateRecord ? geninfo?.id : "";
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-EducInfo.json`,
-        //     educInfoData,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+      //   const updateRecord = isOutletProcessor && payload;
+      //   const id = updateRecord ? geninfo?.id : "";
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-EducInfo.json`,
+      //       educInfoData,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
     } else {
       e.stopPropagation();
     }
@@ -107,7 +107,6 @@ const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
             key={index}
             educinfo={educ}
             branch={branch}
-            isOutletProcessor={isOutletProcessor}
             sendEmail={sendEmail}
             AssignedOutlet={AssignedOutlet}
             employeeId={employeeId}
@@ -119,19 +118,23 @@ const EducInfoList = ({ educinfos, employeeId, AssignedOutlet }) => {
     <>
       <Container>
         <Row>
-          <Col>
-            <small>{`(Click any educational attainment to edit)`}</small>
-          </Col>
-          <Col>
-            <Button
-              className="float-end"
-              type="button"
-              variant="outline-primary"
-              onClick={() => setShowModal(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </Col>
+          {!isX.isOutletProcessor && (
+            <>
+              <Col>
+                <small>{`(Click any educational attainment to edit)`}</small>
+              </Col>
+              <Col>
+                <Button
+                  className="float-end"
+                  type="button"
+                  variant="outline-primary"
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+              </Col>
+            </>
+          )}
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>

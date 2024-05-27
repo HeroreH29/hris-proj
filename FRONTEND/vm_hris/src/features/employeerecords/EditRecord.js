@@ -29,11 +29,13 @@ import EducInfoList from "./EducInfosList";
 import useTitle from "../../hooks/useTitle";
 import TrainingHistoryList from "./TrainingHistoryList";
 import PrintEmployeeRecord from "./PrintEmployeeRecord";
+import useAuth from "../../hooks/useAuth";
 
 const refetchInterval = 15000;
 
 const EditRecord = () => {
   const { employeeId } = useParams();
+  const { isX } = useAuth();
 
   useTitle(`${employeeId ? "Edit Record" : "Add Record"} | Via Mare HRIS`);
 
@@ -239,7 +241,13 @@ const EditRecord = () => {
         </Col>
         <Col>
           <div>
-            <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
+            <h3>
+              {isX.isOutletProcessor
+                ? "View Record"
+                : employeeId
+                ? "Edit Record"
+                : "Add Record"}
+            </h3>
             {!employeeId ? (
               <small className="text-decoration-underline fw-semibold fst-italic text-primary">
                 You can ONLY add GENERAL INFO for now. Add other details later.

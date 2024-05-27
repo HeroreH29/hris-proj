@@ -1,15 +1,13 @@
 import { differenceInMonths } from "date-fns";
 import { toast } from "react-toastify";
-import useAuth from "../../hooks/useAuth";
 
 const EmployeeNotifier = ({
   gids = [],
   gentities = [],
   tableState = {},
   navigate = undefined,
+  isX = {},
 }) => {
-  const { isOutletProcessor } = useAuth;
-
   const firstEval = [];
   const finalEval = [];
   const forRegularization = [];
@@ -18,7 +16,7 @@ const EmployeeNotifier = ({
     .filter((gid) => {
       let match = true;
 
-      if (isOutletProcessor) {
+      if (isX.isOutletProcessor) {
         match =
           match && gentities[gid]?.AssignedOutlet === tableState.outletFilter;
       }
@@ -62,10 +60,10 @@ const EmployeeNotifier = ({
       position: "top-left",
       autoClose: false,
       onClick: () => {
-        // const newTab = window.open("", "_blank");
-        // newTab.location.href = `/employeerecords/${e}`;
-        //navigate(`/employeerecords/${e}`);
-        window.location.reload();
+        const newTab = window.open("", "_blank");
+        newTab.location.href = `/employeerecords/${e}`;
+        // navigate(`/employeerecords/${e}`);
+        // window.location.reload();
       },
     });
   });
@@ -76,10 +74,10 @@ const EmployeeNotifier = ({
       position: "top-left",
       autoClose: false,
       onClick: () => {
-        // const newTab = window.open("", "_blank");
-        // newTab.location.href = `/employeerecords/${e}`;
-        //navigate(`/employeerecords/${e}`);
-        window.location.reload();
+        const newTab = window.open("", "_blank");
+        newTab.location.href = `/employeerecords/${e}`;
+        // navigate(`/employeerecords/${e}`);
+        //window.location.reload();
       },
     });
   });
@@ -90,10 +88,10 @@ const EmployeeNotifier = ({
       position: "top-left",
       autoClose: false,
       onClick: () => {
-        // const newTab = window.open("", "_blank");
-        // newTab.location.href = `/employeerecords/${e}`;
-        //navigate(`/employeerecords/${e}`);
-        window.location.reload();
+        const newTab = window.open("", "_blank");
+        newTab.location.href = `/employeerecords/${e}`;
+        // navigate(`/employeerecords/${e}`);
+        //window.location.reload();
       },
     });
   });

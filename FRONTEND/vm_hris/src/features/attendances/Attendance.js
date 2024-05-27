@@ -14,7 +14,7 @@ const Attendance = ({ att, attlogData }) => {
   const { tableState, tableDispatch } = useTableSettings();
 
   // Fetch general info using Bio ID
-  const { geninfo } = useGetGeninfosQuery("recordsList", {
+  const { geninfo } = useGetGeninfosQuery("", {
     selectFromResult: ({ data }) => ({
       geninfo: data?.ids
         .filter(

@@ -65,13 +65,13 @@ const PrintLeave = async ({
     size: fontSize - 2,
     font: workSansBoldItalic,
   });
-  page.drawText(`* - No Leave Credits`, {
+  /* page.drawText(`* - No Leave Credits`, {
     x: width * 0.77,
     y: height * 0.88,
     size: fontSize - 6,
     font: workSansBoldItalic,
     opacity: 0.5,
-  });
+  }); */
   page.drawLine({
     start: { x: width * 0.05, y: height * 0.87 },
     end: { x: width * 0.95, y: height * 0.87 },
@@ -179,9 +179,9 @@ const PrintLeave = async ({
       });
 
       let leaveTypeTxt = leave.Ltype;
-      if (!leave.Credited && leave.Approve === 1) {
+      /* if (!leave.Credited && leave.Approve === 1) {
         leaveTypeTxt = `${leave.Ltype} *`;
-      }
+      } */
 
       page.drawText(leaveTypeTxt, {
         x: width * 0.2,

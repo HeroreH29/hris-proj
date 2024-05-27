@@ -11,7 +11,7 @@ import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import useContractNotif from "../../hooks/useContractNotif";
 
 const Welcome = () => {
-  const { isHR, isAdmin, userLevel } = useAuth();
+  const { isX, userLevel } = useAuth();
   useTitle(`${userLevel} Dashboard | Via Mare HRIS`);
 
   const { data: geninfos, isSuccess } = useGetGeninfosQuery();
@@ -31,7 +31,7 @@ const Welcome = () => {
         <Col>
           <h3>
             HR Memos/Announcements{" "}
-            {(isHR || isAdmin) && (
+            {(isX.isProcessor || isX.isAdmin) && (
               <>
                 <Button
                   className="float-end"
@@ -44,7 +44,9 @@ const Welcome = () => {
             )}
           </h3>
           <small className="text-muted">
-            {(isHR || isAdmin) && <>Click an announcement to edit</>}
+            {(isX.isProcessor || isX.isAdmin) && (
+              <>Click an announcement to edit</>
+            )}
           </small>
           <AnnouncementsList />
         </Col>

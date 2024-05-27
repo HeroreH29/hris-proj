@@ -193,7 +193,7 @@ const IncreaseCredits = () => {
 
   return (
     <>
-      {/* <Row className="mb-3">
+      <Row className="mb-3">
         <Stack direction="horizontal" gap={4}>
           <div>
             <Button
@@ -207,7 +207,7 @@ const IncreaseCredits = () => {
             <h3>Increase Credits</h3>
           </div>
         </Stack>
-      </Row> */}
+      </Row>
       <Row className="p-3">
         <div className="pb-3">
           <InputGroup>

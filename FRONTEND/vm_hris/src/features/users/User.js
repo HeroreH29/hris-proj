@@ -10,7 +10,7 @@ import { Button } from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 
 const User = ({ userId }) => {
-  const { isHR, isAdmin } = useAuth();
+  const { isX } = useAuth();
 
   const { user } = useGetUsersQuery("usersList", {
     selectFromResult: ({ data }) => ({
@@ -39,7 +39,7 @@ const User = ({ userId }) => {
         <td>{userLevelString}</td>
         <td className={activeStringClr}>{userActiveString}</td>
         <td className={onlineStringClr}>{userOnlineString}</td>
-        {(isHR || isAdmin) && (
+        {isX.isAdmin && (
           <td>
             <Button variant="outline-primary" onClick={handleEdit}>
               <FontAwesomeIcon icon={faPenToSquare} />

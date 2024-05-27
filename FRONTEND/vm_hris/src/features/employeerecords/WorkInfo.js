@@ -8,15 +8,17 @@ import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
 import WorkInfoModal from "../../modals/WorkInfoModal";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import useAuth from "../../hooks/useAuth";
 
 const WorkInfo = ({
   workinfo,
   branch,
-  isOutletProcessor,
   sendEmail,
   AssignedOutlet,
   employeeId,
 }) => {
+  const { isX } = useAuth();
+
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
@@ -49,18 +51,18 @@ const WorkInfo = ({
     if (form.checkValidity() && !isLoading) {
       await updateWorkinfo(workInfoData);
 
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-WorkInfo.json`,
-        //     id: workinfo?.id,
-        //     compiledInfo: workInfoData,
-        //     update: true,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-WorkInfo.json`,
+      //       id: workinfo?.id,
+      //       compiledInfo: workInfoData,
+      //       update: true,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
     } else {
       e.stopPropagation();
     }
@@ -97,7 +99,9 @@ const WorkInfo = ({
       <>
         <tr
           onClick={() => {
-            setShowModal(true);
+            if (!isX.isOutletProcessor) {
+              setShowModal(true);
+            }
           }}
         >
           <td className={workState.ToPresent === 1 ? "bg-success-subtle" : ""}>

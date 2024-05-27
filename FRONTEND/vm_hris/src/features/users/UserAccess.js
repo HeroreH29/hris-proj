@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useTitle from "../../hooks/useTitle";
-import { Form, Stack, Spinner, Button } from "react-bootstrap";
+import { Form, Stack, Spinner, Button, Row, Col } from "react-bootstrap";
 import { USERLEVELS, SYSFEATS } from "../../config/userOptions";
 import {
   useGetUserAccessesQuery,
@@ -8,6 +8,8 @@ import {
 } from "./userAccessApiSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 const UserAccess = () => {
   useTitle("User Access | Via Mare HRIS");
@@ -114,6 +116,22 @@ const UserAccess = () => {
   if (isSuccess) {
     return (
       <>
+        <Row>
+          <Col md="auto">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate("/users")}
+            >
+              <FontAwesomeIcon icon={faLeftLong} />
+            </Button>
+          </Col>
+          <Col>
+            <h3>User Access</h3>
+            {isError && (
+              <p className="text-danger fw-bold">{error?.data?.message}</p>
+            )}
+          </Col>
+        </Row>
         <Form className="p-3">
           <Stack direction="horizontal" gap={3}>
             <Form.Group>
@@ -143,7 +161,7 @@ const UserAccess = () => {
                 <Form.Check
                   label="Create"
                   type="checkbox"
-                  checked={crudValues.C}
+                  checked={crudValues?.C}
                   onChange={(e) =>
                     setCrudValues((prev) => ({ ...prev, C: e.target.checked }))
                   }
@@ -151,7 +169,7 @@ const UserAccess = () => {
                 <Form.Check
                   label="Read"
                   type="checkbox"
-                  checked={crudValues.R}
+                  checked={crudValues?.R}
                   onChange={(e) =>
                     setCrudValues((prev) => ({ ...prev, R: e.target.checked }))
                   }
@@ -159,7 +177,7 @@ const UserAccess = () => {
                 <Form.Check
                   label="Update"
                   type="checkbox"
-                  checked={crudValues.U}
+                  checked={crudValues?.U}
                   onChange={(e) =>
                     setCrudValues((prev) => ({ ...prev, U: e.target.checked }))
                   }
@@ -167,7 +185,7 @@ const UserAccess = () => {
                 <Form.Check
                   label="Delete"
                   type="checkbox"
-                  checked={crudValues.D}
+                  checked={crudValues?.D}
                   onChange={(e) =>
                     setCrudValues((prev) => ({ ...prev, D: e.target.checked }))
                   }

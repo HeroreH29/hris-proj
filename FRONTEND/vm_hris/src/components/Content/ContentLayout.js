@@ -82,7 +82,7 @@ const ContentLayout = ({ backTo = "", title = "" }) => {
                   </Button>
                 </OverlayTrigger>
                 {/* Hidden = UNDER DEVELOPMENT = */}
-                {/* <OverlayTrigger
+                <OverlayTrigger
                   overlay={TooltipRenderer({ tip: `${title} Access` })}
                 >
                   <Button
@@ -91,7 +91,7 @@ const ContentLayout = ({ backTo = "", title = "" }) => {
                   >
                     <FontAwesomeIcon icon={faUserLock} />
                   </Button>
-                </OverlayTrigger> */}
+                </OverlayTrigger>
               </>
             )}
 

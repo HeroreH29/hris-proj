@@ -1,6 +1,6 @@
 {
   "name": "vm_hris",
-  "version": "2.3.4",
+  "version": "2.4.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",

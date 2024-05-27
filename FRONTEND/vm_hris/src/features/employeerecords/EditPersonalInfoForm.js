@@ -22,7 +22,7 @@ import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useRecordForm from "../../hooks/useRecordForm";
 
 const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
-  const { isOutletProcessor, branch } = useAuth();
+  const { isX, branch } = useAuth();
 
   // eslint-disable-next-line
   const [
@@ -86,24 +86,24 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
       }
 
       // Send data to HR email if processed by outlet/branch (and vice versa)
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        const updateRecord = isOutletProcessor && personalinfo;
-        const id = updateRecord ? personalinfo?.id : "";
+      // if (isX.isOutletProcessor || AssignedOutlet !== "Head Office") {
+      //   const updateRecord = isX.isOutletProcessor && personalinfo;
+      //   const id = updateRecord ? personalinfo?.id : "";
 
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-PersonalInfo.json`,
-        //     id,
-        //     compiledInfo: others,
-        //     updateRecord,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-PersonalInfo.json`,
+      //       id,
+      //       compiledInfo: others,
+      //       updateRecord,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
 
       /* // Send data to HR email if processed by outlet/branch
-      if (isOutletProcessor && personalinfo) {
+      if (isX && personalinfo) {
         // Update record
         await sendEmail(
           generateEmailMsg(
@@ -114,7 +114,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             true
           )
         );
-      } else if (isOutletProcessor) {
+      } else if (isX) {
         // Add new record
         await sendEmail(
           generateEmailMsg(
@@ -164,6 +164,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Birthday</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 required
                 autoFocus
                 type="date"
@@ -179,6 +180,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Email</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 type="text"
                 value={persState.Email}
                 onChange={(e) =>
@@ -192,6 +194,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="4">
               <Form.Label className="fw-semibold">Present Address</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 required
                 type="text"
                 value={persState.PresentAddress ?? persState.Address}
@@ -225,6 +228,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
                   variant="outline-secondary"
                   title="Options"
                   align="end"
+                  disabled={isX.isOutletProcessor}
                 >
                   <Dropdown.Item
                     as="option"
@@ -256,6 +260,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
               <Form.Label className="fw-semibold">Zip Code</Form.Label>
               <Form.Control
                 required
+                disabled={isX.isOutletProcessor}
                 type="text"
                 value={persState.ZipCode}
                 onChange={(e) =>
@@ -272,6 +277,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Gender</Form.Label>
               <Form.Select
+                disabled={isX.isOutletProcessor}
                 required
                 value={persState.Gender}
                 onChange={(e) =>
@@ -287,6 +293,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Height</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 required
                 value={persState.Height}
                 onChange={(e) =>
@@ -301,6 +308,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Weight</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 required
                 value={persState.Weight}
                 onChange={(e) =>
@@ -317,6 +325,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Civil Status</Form.Label>
               <Form.Select
+                disabled={isX.isOutletProcessor}
                 required
                 value={persState.CivilStatus}
                 onChange={(e) =>
@@ -335,7 +344,9 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Spouse</Form.Label>
               <Form.Control
-                disabled={persState.CivilStatus !== "Married"}
+                disabled={
+                  persState.CivilStatus !== "Married" || isX.isOutletProcessor
+                }
                 type="text"
                 value={persState.Spouse}
                 onChange={(e) =>
@@ -349,6 +360,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Phone</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 autoComplete="off"
                 type="text"
                 placeholder="(Optional)"
@@ -361,6 +373,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
             <Form.Group as={Col} md="auto">
               <Form.Label className="fw-semibold">Mobile</Form.Label>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 required
                 type="text"
                 value={persState.Mobile}
@@ -380,6 +393,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
                 Father Name and Occupation
               </InputGroup.Text>
               <Form.Control
+                disabled={isX.isOutletProcessor}
                 type="text"
                 value={persState.FatherName}
                 onChange={(e) =>
@@ -392,6 +406,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
               <Form.Control
                 type="text"
                 value={persState.Foccupation}
+                disabled={isX.isOutletProcessor}
                 onChange={(e) =>
                   persDispatch({
                     type: "foccupation",
@@ -406,6 +421,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
               </InputGroup.Text>
               <Form.Control
                 type="text"
+                disabled={isX.isOutletProcessor}
                 value={persState.MotherName}
                 onChange={(e) =>
                   persDispatch({
@@ -416,6 +432,7 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
               />
               <Form.Control
                 type="text"
+                disabled={isX.isOutletProcessor}
                 value={persState.Moccupation}
                 onChange={(e) =>
                   persDispatch({
@@ -428,9 +445,11 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
           </Row>
           <Row className="pt-3">
             <Col md="auto">
-              <Button type="submit" variant="outline-success">
-                Save Changes
-              </Button>
+              {!isX.isOutletProcessor && (
+                <Button type="submit" variant="outline-success">
+                  Save Changes
+                </Button>
+              )}
             </Col>
           </Row>
         </Form>

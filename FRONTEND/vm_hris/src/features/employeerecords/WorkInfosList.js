@@ -12,7 +12,7 @@ import useRecordForm from "../../hooks/useRecordForm";
 import WorkInfoModal from "../../modals/WorkInfoModal";
 
 const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
-  const { isOutletProcessor, branch } = useAuth();
+  const { isOutletProcessor, isX, branch } = useAuth();
 
   const [sendEmail] = useSendEmailMutation();
 
@@ -44,18 +44,18 @@ const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
     if (form.checkValidity() && !isLoading) {
       await addWorkinfo(workInfoData);
 
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        //const updateRecord = isOutletProcessor && payload;
-        //const id = updateRecord ? geninfo?.id : "";
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-WorkInfo.json`,
-        //     workInfoData,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+      //   const updateRecord = isOutletProcessor && payload;
+      //   const id = updateRecord ? geninfo?.id : "";
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-WorkInfo.json`,
+      //       workInfoData,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
     } else {
       e.stopPropagation();
     }
@@ -83,7 +83,6 @@ const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
             key={index}
             workinfo={work}
             branch={branch}
-            isOutletProcessor={isOutletProcessor}
             sendEmail={sendEmail}
             AssignedOutlet={AssignedOutlet}
             employeeId={employeeId}
@@ -95,19 +94,23 @@ const WorkInfosList = ({ workinfos, employeeId, AssignedOutlet }) => {
     <>
       <Container>
         <Row>
-          <Col>
-            <small>{`(Click any work history to edit. Present work is highlighted in GREEN)`}</small>
-          </Col>
-          <Col>
-            <Button
-              className="float-end"
-              type="button"
-              variant="outline-primary"
-              onClick={() => setShowModal(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </Col>
+          {!isX.isOutletProcessor && (
+            <>
+              <Col>
+                <small>{`(Click any work history to edit. Present work is highlighted in GREEN)`}</small>
+              </Col>
+              <Col>
+                <Button
+                  className="float-end"
+                  type="button"
+                  variant="outline-primary"
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+              </Col>
+            </>
+          )}
         </Row>
         <Table bordered striped hover className="align-middle ms-3 mt-3 mb-3">
           <thead>

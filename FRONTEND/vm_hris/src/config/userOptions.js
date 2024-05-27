@@ -50,6 +50,7 @@ export const BRANCHES = {
 
 export const SYSFEATS = {
   Dashboard: "Dashboard",
+  Announcements: "Announcements",
   "Employee Records": "Employee Records",
   Attendances: "Attendances",
   Leaves: "Leaves",

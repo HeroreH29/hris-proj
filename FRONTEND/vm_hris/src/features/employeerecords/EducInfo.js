@@ -9,17 +9,19 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
 import { generateEmailMsg } from "../emailSender/generateEmailMsg";
+import useAuth from "../../hooks/useAuth";
 
 const EducInfo = ({
   educinfo,
   branch,
-  isOutletProcessor,
   sendEmail,
   AssignedOutlet,
   employeeId,
 }) => {
   const navigate = useNavigate();
   const formRef = useRef();
+
+  const { isX } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -49,18 +51,18 @@ const EducInfo = ({
     if (form.checkValidity() && !isLoading) {
       await updateEducinfo(others);
 
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-EducInfo.json`,
-        //     id: educinfo?.id,
-        //     compiledInfo: others,
-        //     update: true,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
+      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
+      //   await sendEmail(
+      //     generateEmailMsg({
+      //       branch,
+      //       filename: `${employeeId}-EducInfo.json`,
+      //       id: educinfo?.id,
+      //       compiledInfo: others,
+      //       update: true,
+      //       assignedOutlet: AssignedOutlet,
+      //     })
+      //   );
+      // }
     } else {
       e.stopPropagation();
     }
@@ -114,7 +116,9 @@ const EducInfo = ({
       <>
         <tr
           onClick={() => {
-            setShowModal(true);
+            if (!isX.isOutletProcessor) {
+              setShowModal(true);
+            }
           }}
         >
           <td>{educState.Institution_Name}</td>

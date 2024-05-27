@@ -4,7 +4,7 @@ import React, { memo, useState } from "react";
 import { Card, Modal, Button } from "react-bootstrap";
 
 const Announcement = ({ announcementId, useAuth, username }) => {
-  const { isHR, isAdmin } = useAuth();
+  const { isX } = useAuth();
 
   // Variable to simulate hover animation on card
   const [hovered, setHovered] = useState(false);
@@ -50,7 +50,7 @@ const Announcement = ({ announcementId, useAuth, username }) => {
           </Modal.Header>
           <Modal.Body>{announcement.message}</Modal.Body>
           <Modal.Footer>
-            {(isHR || isAdmin) && (
+            {(isX.isProcessor || isX.isAdmin) && (
               <Button
                 variant="outline-primary"
                 onClick={() =>

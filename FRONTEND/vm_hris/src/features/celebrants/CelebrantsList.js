@@ -5,7 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import { useGetCelebrantsQuery } from "./celebrantsApiSlice";
 
 const CelebrantsList = () => {
-  const { isOutletProcessor, branch } = useAuth();
+  const { isX, branch } = useAuth();
 
   const {
     data: celebrants,
@@ -30,7 +30,7 @@ const CelebrantsList = () => {
       .filter((celebrant) => {
         let matches = true;
 
-        if (isOutletProcessor) {
+        if (isX.isOutletProcessor) {
           matches = matches && celebrant?.branch === branch;
         }
 

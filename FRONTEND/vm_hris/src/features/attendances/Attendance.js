@@ -110,7 +110,7 @@ const Attendance = ({ att, attlogData }) => {
     // Attendance data processing
     try {
       attlogData
-        .filter((line) => {
+        ?.filter((line) => {
           const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
 
           return String(bioId) === String(att.bioId);

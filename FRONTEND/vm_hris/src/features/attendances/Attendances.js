@@ -27,7 +27,6 @@ import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
 import AttendanceModal from "../../modals/AttendanceModal";
 import useAttModalSettings from "../../hooks/useAttModalSettings";
-import GenerateTimeSheet from "./GenerateTimeSheet";
 import AttLogProcessor from "./AttLogProcessor";
 
 const Attendances = () => {
@@ -115,7 +114,6 @@ const Attendances = () => {
       reader.onload = async (event) => {
         const uploadedRawAttData = event.target.result;
 
-        let result;
         if (!attdata?.ids.length) {
           await addAttData({
             attlogName: file.name,

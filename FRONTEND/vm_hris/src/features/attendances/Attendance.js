@@ -25,7 +25,7 @@ const Attendance = ({ att, attlogData }) => {
   });
 
   // Casual rate data
-  const { data: casualrates, error } = useGetCasualRatesQuery();
+  const { data: casualrates } = useGetCasualRatesQuery();
 
   const [matchingAtt, setMatchingAtt] = useState([]);
 

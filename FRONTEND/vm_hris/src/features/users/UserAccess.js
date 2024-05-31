@@ -92,12 +92,12 @@ const UserAccess = () => {
   // User access update checker
   useEffect(() => {
     if (updateLoading) {
-      toast.loading("Updating...");
+      toast.loading("Updating...", { containerId: "A" });
     }
 
     if (updateSuccess) {
       toast.dismiss(); // to dismiss all toast
-      toast.success("User Acccess updated!");
+      toast.success("User Acccess updated!", { containerId: "A" });
       //navigate("/users");
       // setTimeout(() => {
       //   window.location.reload();

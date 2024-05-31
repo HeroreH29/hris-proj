@@ -75,6 +75,8 @@ const Attendances = () => {
     data: attdata,
     isSuccess: attdataSuccess,
     isLoading: attdataLoading,
+    isError: attdataError,
+    error: attdataerr,
   } = useGetAttendanceDataQuery();
 
   const [addAttData, { isError: addattError, error: addatterr }] =
@@ -83,21 +85,23 @@ const Attendances = () => {
   const [updateAttData, { isError: updateattError, error: updateatterr }] =
     useUpdateAttendanceMutation();
 
+  // attdata error checker
   useEffect(() => {
-    if (!attdata?.ids.length) {
-      toast.warn("There is no attlog data. Upload one now!");
+    if (attdataError) {
+      toast.warn(attdataerr.data.message, {
+        toastId: "attdata-err",
+        containerId: "A",
+      });
     }
-  }, [attdata]);
+  }, [attdataError]);
 
-  useEffect(() => {
-    if (attList?.length > 0) {
-      toast.success("Attendance logs loaded!");
-    }
-  }, [attList]);
-
+  // Add or update att data error checker
   useEffect(() => {
     if (addattError || updateattError) {
-      toast.error(addatterr ?? updateatterr);
+      toast.error(addatterr.data.message ?? updateatterr.data.message, {
+        containerId: "A",
+        toastId: "add-update-att-error",
+      });
     }
   }, [addattError, addatterr, updateattError, updateatterr]);
 
@@ -115,10 +119,26 @@ const Attendances = () => {
         const uploadedRawAttData = event.target.result;
 
         if (!attdata?.ids.length) {
-          await addAttData({
-            attlogName: file.name,
-            data: uploadedRawAttData,
+          const addPromise = new Promise((resolve) => {
+            resolve(
+              addAttData({
+                attlogName: file.name,
+                data: uploadedRawAttData,
+              })
+            );
           });
+
+          toast.promise(
+            addPromise,
+            {
+              pending: "Uploading attendance data...",
+              success: "Attendance data uploaded!",
+              error: "Attendance data failed to upload!",
+            },
+            {
+              containerId: "A",
+            }
+          );
         } else {
           const { ids: attids, entities: attentities } = attdata;
 
@@ -127,11 +147,25 @@ const Attendances = () => {
           });
 
           const mergedAttData = currRawAttData[0] + "\n" + uploadedRawAttData;
-          await updateAttData({
-            id: attids[0],
-            attlogName: file.name,
-            data: mergedAttData,
+          const updatePromise = new Promise((resolve) => {
+            resolve(
+              updateAttData({
+                id: attids[0],
+                attlogName: file.name,
+                data: mergedAttData,
+              })
+            );
           });
+
+          toast.promise(
+            updatePromise,
+            {
+              pending: "Updating existing attendance data...",
+              success: "Attendance data updated!",
+              error: "Failed updating attendance data!",
+            },
+            { containerId: "A" }
+          );
         }
       };
       reader.readAsText(file);
@@ -147,10 +181,33 @@ const Attendances = () => {
         return attentities[id].data;
       });
 
-      setAttList([]);
-      setAttList(
-        attListProcessor(genids, genentities, fileContents[0], setAttlogData)
+      const attlistPromise = attListProcessor(
+        genids,
+        genentities,
+        fileContents[0],
+        setAttlogData
       );
+
+      setAttList([]);
+      /* setAttList(
+        attListProcessor(genids, genentities, fileContents[0], setAttlogData)
+      ); */
+      toast
+        .promise(
+          attlistPromise,
+          {
+            pending: "Attendance loading...",
+            success: "Attendance loaded!",
+            error: "Attendance failed to load!",
+          },
+          { containerId: "A" }
+        )
+        .then((result) => {
+          setAttList(result);
+        })
+        .catch((error) => {
+          console.log("Attendance load error: ", error);
+        });
     }
   };
 
@@ -166,7 +223,6 @@ const Attendances = () => {
     e.preventDefault();
 
     const form = e.currentTarget;
-
     const daysDiff =
       differenceInDays(
         new Date(attModalState.dateTo),
@@ -175,56 +231,48 @@ const Attendances = () => {
 
     if (!form.checkValidity()) {
       e.stopPropagation();
-    } else {
-      if (daysDiff > 15) {
-        return toast.warn("Selected date range is more than 15 days");
+      setValidated(true);
+      return;
+    }
+
+    if (daysDiff > 15) {
+      return toast.warn("Selected date range is more than 15 days", {
+        containerId: "A",
+      });
+    }
+
+    // Reset date values and close modal
+    attModalDispatch({ type: "close_modal" });
+
+    // Every attendance record per employee will generate a time sheet PDF
+    const generatedPdfs = await Promise.all(
+      filteredList.map((att) =>
+        pdfListProcessor(att, attlogData, geninfos, attModalState, casualrates)
+      )
+    );
+
+    // After generation, collate the PDFs into one document
+    if (generatedPdfs.length > 0) {
+      const mainDoc = await PDFDocument.create();
+      for (const pdf of generatedPdfs) {
+        const pdfDoc = await PDFDocument.load(pdf);
+        const [existingPage] = await mainDoc.copyPages(pdfDoc, [0]);
+        mainDoc.insertPage(0, existingPage);
       }
-      // Reset date values and close modal
-      attModalDispatch({ type: "close_modal" });
 
-      // Every attendance record per employee will generate a time sheet pdf
-      const generatedPdfs = [];
-      if (filteredList.length > 0) {
-        await Promise.all(
-          filteredList.map(async (att) => {
-            const generatedPdf = await pdfListProcessor(
-              att,
-              attlogData,
-              geninfos,
-              attModalState,
-              casualrates
-            );
-            generatedPdfs.push(generatedPdf);
-          })
-        );
-      }
+      // Open a new browser tab to show the collated PDFs
+      const modifiedPdfBlob = await mainDoc.save();
+      const modifiedPdfUrl = URL.createObjectURL(
+        new Blob([modifiedPdfBlob], { type: "application/pdf" })
+      );
 
-      // After generation, it will be collated in one pdf (1 time sheet per page)
-      if (generatedPdfs?.length > 0) {
-        const mainDoc = await PDFDocument.create();
-        await Promise.all(
-          generatedPdfs.map(async (pdf) => {
-            const pdfDoc = await PDFDocument.load(pdf);
-            const [existingPage] = await mainDoc.copyPages(pdfDoc, [0]);
-            mainDoc.insertPage(0, existingPage);
-          })
-        );
-
-        // Open new browser tab to show the collated PDFs
-        const modifiedPdfBlob = await mainDoc.save();
-        const modifiedPdfUrl = URL.createObjectURL(
-          new Blob([modifiedPdfBlob], {
-            type: "application/pdf",
-          })
-        );
-
+      if (modifiedPdfUrl) {
         toast.success("Time sheets generated!");
         window.open(modifiedPdfUrl, "_blank");
       }
-      return setValidated(false);
     }
 
-    setValidated(true);
+    setValidated(false);
   };
 
   const filteredList = attList?.filter((att) => {

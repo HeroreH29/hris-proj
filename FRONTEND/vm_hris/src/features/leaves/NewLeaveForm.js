@@ -149,7 +149,23 @@ const NewLeaveForm = () => {
 
         // Send data to database
         try {
-          await addLeave(leaveJson);
+          const addPromise = new Promise((resolve) => {
+            resolve(addLeave(leaveJson));
+          });
+
+          toast
+            .promise(
+              addPromise,
+              {
+                pending: "Filing leave...",
+                success: "New leave filed!",
+                error: "Failed filing leave!",
+              },
+              { containerId: "A" }
+            )
+            .then(() => {
+              navigate("/leaves");
+            });
         } catch (error) {
           console.error(error.data.message);
         }
@@ -171,7 +187,9 @@ const NewLeaveForm = () => {
 
   const LeaveApplicationUpload = (file) => {
     if (!file.type.startsWith("application/json")) {
-      return toast.error("Invalid file type. Please upload a '.json' file");
+      return toast.error("Invalid file type. Please upload a '.json' file", {
+        containerId: "A",
+      });
     }
 
     const reader = new FileReader();
@@ -180,7 +198,23 @@ const NewLeaveForm = () => {
       const leaveData = JSON.parse(event.target.result);
 
       // Upload leave data to database
-      await addLeave(leaveData);
+      const addPromise = new Promise((resolve) => {
+        resolve(addLeave(leaveData));
+      });
+
+      toast
+        .promise(
+          addPromise,
+          {
+            pending: "Filing leave...",
+            success: "New leave filed!",
+            error: addError.data.message,
+          },
+          { containerId: "A" }
+        )
+        .then(() => {
+          navigate("/leaves");
+        });
     };
 
     reader.onerror = (error) => {
@@ -190,7 +224,7 @@ const NewLeaveForm = () => {
     reader.readAsText(file);
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (addSuccess) {
       toast.success("Leave filed!");
       navigate("/leaves");
@@ -198,7 +232,7 @@ const NewLeaveForm = () => {
     if (isAddError) {
       toast.error(`Something went wrong: ${addError.data.message}`);
     }
-  }, [addSuccess, addError, isAddError, navigate]);
+  }, [addSuccess, addError, isAddError, navigate]); */
 
   return (
     <>

@@ -7,7 +7,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import {
-  Container,
   Stack,
   Table,
   Button,
@@ -67,23 +66,46 @@ const IncreaseCredits = () => {
     setContent(filteredInfos);
   };
 
+  let updatePromise;
   const increaseCredit = async ({ data = {} }) => {
     // Check credit budget if it can be decreased
     const budget = data.CreditBudget;
 
     if (budget === 5 || budget === 10) {
-      await updateLeaveCredit({ ...data, CreditBudget: budget + 2 });
+      updatePromise = new Promise((resolve) => {
+        resolve(updateLeaveCredit({ ...data, CreditBudget: budget + 2 }));
+      });
     } else if (!budget) {
-      await updateLeaveCredit({
-        ...data,
-        VacationLeave: 5,
-        SickLeave: 5,
-        BirthdayLeave: 1,
-        CreditBudget: 5,
+      updatePromise = new Promise((resolve) => {
+        resolve(
+          updateLeaveCredit({
+            ...data,
+            VacationLeave: 5,
+            SickLeave: 5,
+            BirthdayLeave: 1,
+            CreditBudget: 5,
+          })
+        );
       });
     } else {
-      await updateLeaveCredit({ ...data, CreditBudget: budget + 3 });
+      updatePromise = new Promise((resolve) => {
+        resolve(updateLeaveCredit({ ...data, CreditBudget: budget + 3 }));
+      });
     }
+
+    toast
+      .promise(
+        updatePromise,
+        {
+          pending: "Increasing credit...",
+          success: "Credit increased!",
+          error: "Failed to increase credit!",
+        },
+        { containerId: "A" }
+      )
+      .then(() => {
+        navigate("/leaves");
+      });
   };
 
   const decreaseCredit = async ({ data = {} }) => {
@@ -91,18 +113,40 @@ const IncreaseCredits = () => {
     const budget = data.CreditBudget;
 
     if (budget === 12 || budget === 7) {
-      await updateLeaveCredit({ ...data, CreditBudget: budget - 2 });
+      updatePromise = new Promise((resolve) => {
+        resolve(updateLeaveCredit({ ...data, CreditBudget: budget - 2 }));
+      });
     } else if (budget === 5) {
-      await updateLeaveCredit({
-        ...data,
-        VacationLeave: 0,
-        SickLeave: 0,
-        BirthdayLeave: 0,
-        CreditBudget: 0,
+      updatePromise = new Promise((resolve) => {
+        resolve(
+          updateLeaveCredit({
+            ...data,
+            VacationLeave: 0,
+            SickLeave: 0,
+            BirthdayLeave: 0,
+            CreditBudget: 0,
+          })
+        );
       });
     } else {
-      await updateLeaveCredit({ ...data, CreditBudget: budget - 3 });
+      updatePromise = new Promise((resolve) => {
+        resolve(updateLeaveCredit({ ...data, CreditBudget: budget - 3 }));
+      });
     }
+
+    toast
+      .promise(
+        updatePromise,
+        {
+          pending: "Decreasing credit...",
+          success: "Credit decreased!",
+          error: "Failed to decrease credit!",
+        },
+        { containerId: "A" }
+      )
+      .then(() => {
+        navigate("/leaves");
+      });
   };
 
   // For enabling/disabling increase button
@@ -132,21 +176,7 @@ const IncreaseCredits = () => {
     return true;
   };
 
-  // Leave credit update checker
-  useEffect(() => {
-    if (isLoading) {
-      toast.loading("Saving changes...");
-    } else if (isError) {
-      toast.error(error);
-    } else if (isSuccess) {
-      toast.dismiss(); // Remove loading toast
-      toast.success("Leave credit budget changed");
-      navigate("/leaves");
-    }
-  }, [isSuccess, isLoading, isError, error, navigate]);
-
-  const tableContent =
-    content?.length &&
+  const tableContent = content?.length ? (
     content.slice(0, 20).map((data) => {
       const info = data.CreditsOf;
       const srvcYrs = differenceInYears(
@@ -189,7 +219,10 @@ const IncreaseCredits = () => {
           </td>
         </tr>
       );
-    });
+    })
+  ) : (
+    <></>
+  );
 
   return (
     <>

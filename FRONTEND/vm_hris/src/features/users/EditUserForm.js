@@ -37,8 +37,8 @@ const EditUserForm = ({ user }) => {
 
   useEffect(() => {
     if (isSuccess || isDelSuccess) {
-      isSuccess && toast.success("User changes saved!");
-      isDelSuccess && toast.success("User deleted!");
+      isSuccess && toast.success("User changes saved!", { containerId: "A" });
+      isDelSuccess && toast.success("User deleted!", { containerId: "A" });
       navigate("/users");
     }
   }, [isSuccess, isDelSuccess, navigate]);

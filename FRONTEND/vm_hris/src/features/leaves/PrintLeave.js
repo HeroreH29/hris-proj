@@ -153,7 +153,7 @@ const PrintLeave = async ({
     let currentLeaveType = "";
     leaveData.sort(compareLeavesByType).forEach((leave) => {
       // Checking if current page is full, another page will be created
-      if (dataHeight < 0.025) {
+      if (dataHeight < 0.075) {
         page = pdfDoc.addPage();
         width = page.getSize().width;
         height = page.getSize().height;

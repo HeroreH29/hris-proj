@@ -4,11 +4,9 @@ import {
   useUpdateLeaveCreditMutation,
   useGetLeaveCreditsQuery,
 } from "./leavesApiSlice";
-//import { useNavigate } from "react-router-dom";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
-//import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 import { toast } from "react-toastify";
 
 const Leave = ({ leave, handleHover }) => {
@@ -122,10 +120,12 @@ const Leave = ({ leave, handleHover }) => {
       setRemarks("");
       setShowModal(false);
       if (isX.isAdmin || isX.isProcessor || isX.isApprover) {
-        toast.success("Leave status updated");
-      } else if (isX.isOutletProcessor) {
-        toast.success("Leave status updated and sent to HR email");
-      }
+        toast.success("Leave status updated", { containerId: "A" });
+      } /* else if (isX.isOutletProcessor) {
+        toast.success("Leave status updated and sent to HR email", {
+          containerId: "A",
+        });
+      } */
 
       window.location.reload();
     }

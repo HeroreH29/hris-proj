@@ -3,10 +3,10 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 
 const useContractNotif = (geninfos, isSuccess, useAuth) => {
-  const { isHR, isAdmin, isOutletProcessor } = useAuth();
+  const { isX } = useAuth();
 
   useEffect(() => {
-    if (isSuccess && (isHR || isAdmin || isOutletProcessor)) {
+    if (isSuccess && (isX.isHR || isX.isAdmin || isX.isOutletProcessor)) {
       const { ids, entities } = geninfos;
       const contractedEmployees = ids
         .filter((id) => entities[id]?.ContractDateEnd)
@@ -27,7 +27,7 @@ const useContractNotif = (geninfos, isSuccess, useAuth) => {
           daysLeft < 7 &&
             daysLeft > 0 &&
             toast.info(`Contract of "${employee?.EmployeeID}" will end soon`, {
-              toastId: employee.EmployeeID,
+              containerId: "A",
               onClick: () => {
                 const newTab = window.open("", "_blank");
                 newTab.location.href = `/employeerecords/${employee.EmployeeID}`;
@@ -36,9 +36,9 @@ const useContractNotif = (geninfos, isSuccess, useAuth) => {
 
           daysLeft < 1 &&
             toast.warning(
-              `Contract of "${employee?.EmployeeID}" already ended. System will inactivate this record.`,
+              `Contract of "${employee?.EmployeeID}" already ended. Check and update this record accordingly.`,
               {
-                toastId: employee.EmployeeID,
+                containerId: "A",
                 onClick: () => {
                   const newTab = window.open("", "_blank");
                   newTab.location.href = `/employeerecords/${employee.EmployeeID}`;

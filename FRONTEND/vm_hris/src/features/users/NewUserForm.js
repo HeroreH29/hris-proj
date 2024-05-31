@@ -45,12 +45,12 @@ const NewUserForm = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("New user added!");
+      toast.success("New user added!", { containerId: "A" });
       navigate("/users");
     }
 
     if (isError) {
-      toast.error(error.data.message);
+      toast.error(error.data.message, { containerId: "A" });
     }
   }, [isSuccess, isError, error, navigate]);
 

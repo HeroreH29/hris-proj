@@ -5,7 +5,6 @@ const EmployeeNotifier = ({
   gids = [],
   gentities = [],
   tableState = {},
-  navigate = undefined,
   isX = {},
 }) => {
   const firstEval = [];
@@ -57,42 +56,39 @@ const EmployeeNotifier = ({
   firstEval.forEach((e) => {
     toast.warning(`First evaluation for "${e}" `, {
       toastId: e,
-      position: "top-left",
-      autoClose: false,
       onClick: () => {
         const newTab = window.open("", "_blank");
         newTab.location.href = `/employeerecords/${e}`;
         // navigate(`/employeerecords/${e}`);
         // window.location.reload();
       },
+      containerId: "B",
     });
   });
 
   finalEval.forEach((e) => {
     toast.warning(`Final evaluation for "${e}" `, {
       toastId: e,
-      position: "top-left",
-      autoClose: false,
       onClick: () => {
         const newTab = window.open("", "_blank");
         newTab.location.href = `/employeerecords/${e}`;
         // navigate(`/employeerecords/${e}`);
         //window.location.reload();
       },
+      containerId: "B",
     });
   });
 
   forRegularization.forEach((e) => {
     toast.warning(`Regularization for "${e}"`, {
       toastId: e,
-      position: "top-left",
-      autoClose: false,
       onClick: () => {
         const newTab = window.open("", "_blank");
         newTab.location.href = `/employeerecords/${e}`;
         // navigate(`/employeerecords/${e}`);
         //window.location.reload();
       },
+      containerId: "B",
     });
   });
 };

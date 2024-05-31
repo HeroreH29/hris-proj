@@ -21,7 +21,7 @@ import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
 const UsersList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isHR, isAdmin } = useAuth();
+  const { isX } = useAuth();
 
   useTitle("User Settings | Via Mare HRIS");
 
@@ -87,7 +87,7 @@ const UsersList = () => {
               <th scope="col">User level</th>
               <th scope="col">Account Status</th>
               <th scope="col">Online Status</th>
-              {(isHR || isAdmin) && <th scope="col">Edit</th>}
+              {(isX.isHR || isX.isAdmin) && <th scope="col">Edit</th>}
             </tr>
           </thead>
           <tbody>{tableContent}</tbody>

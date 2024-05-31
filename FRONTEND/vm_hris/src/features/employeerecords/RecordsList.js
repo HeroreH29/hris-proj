@@ -17,16 +17,18 @@ import {
   faArrowDownAZ,
   faPrint,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
 import PrintPerBranch from "./PrintPerBranch";
 import EmployeeNotifier from "./EmployeeNotifier";
+import { toast } from "react-toastify";
 
 const RecordsList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { isX, canX } = useAuth();
 
@@ -66,8 +68,9 @@ const RecordsList = () => {
       const { ids: gids, entities: gentities } = geninfos;
 
       // For notifying HR/Admin or Outlet Processor for employee regularization
-
-      EmployeeNotifier({ gids, gentities, tableState, navigate, isX });
+      if (location.pathname === "/employeerecords") {
+        EmployeeNotifier({ gids, gentities, tableState, isX });
+      }
     }
 
     // eslint-disable-next-line
@@ -167,7 +170,10 @@ const RecordsList = () => {
             {canX.canCreate && canX.canUpdate && canX.canDelete && (
               <Button
                 variant="outline-primary"
-                onClick={() => navigate("/employeerecords/new")}
+                onClick={() => {
+                  navigate("/employeerecords/new");
+                  toast.dismiss();
+                }}
               >
                 <FontAwesomeIcon icon={faUserPlus} />
               </Button>

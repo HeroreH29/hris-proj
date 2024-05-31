@@ -55,10 +55,10 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
 
   useEffect(() => {
     if (addSuccess || updateSuccess) {
-      toast.success("Record saved!");
+      toast.success("Record saved!", { containerId: "A" });
       navigate("/employeerecords");
     } else if (addError || updateError) {
-      toast.error("Record saving error!");
+      toast.error("Record saving error!", { containerId: "A" });
     }
 
     /* if (emailSuccess) {
@@ -448,7 +448,8 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
                         });
                       } else {
                         toast.error(
-                          "Contract date must be greater than employed date"
+                          "Contract date must be greater than employed date",
+                          { containerId: "A" }
                         );
                       }
                     }}

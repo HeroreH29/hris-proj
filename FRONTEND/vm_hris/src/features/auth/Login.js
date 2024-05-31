@@ -30,7 +30,7 @@ const Login = () => {
   // Login feedback
   useEffect(() => {
     if (isSuccess) {
-      toast.success(`Welcome back ${state.username}!`);
+      toast.success(`Welcome back ${state.username}!`, { containerId: "A" });
     }
     // eslint-disable-next-line
   }, [isSuccess]);

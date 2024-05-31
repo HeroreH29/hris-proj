@@ -13,7 +13,6 @@ import EditRecord from "./features/employeerecords/EditRecord";
 import Prefetch from "./features/auth/Prefetch";
 import PersistLogin from "./features/auth/PersistLogin";
 import ForgotPass from "./features/auth/ForgotPass";
-//import { USERLEVELS } from "./config/userOptions";
 import RequireAuth from "./features/auth/RequireAuth";
 import useTitle from "./hooks/useTitle";
 import Attendances from "./features/attendances/Attendances";
@@ -21,15 +20,28 @@ import LeavesList from "./features/leaves/LeavesList";
 import NewLeaveForm from "./features/leaves/NewLeaveForm";
 
 import { ToastContainer } from "react-toastify";
+import "react-toastify/ReactToastify.css";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
-//import ContentLayout from "./components/Content/ContentLayout";
 import UserAccess from "./features/users/UserAccess";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
   return (
     <>
-      <ToastContainer autoClose={3000} stacked closeOnClick={true} />
+      <ToastContainer
+        containerId={"A"}
+        autoClose={3000}
+        stacked
+        closeOnClick={true}
+        position="top-right"
+      />
+      <ToastContainer
+        containerId={"B"}
+        autoClose={false}
+        stacked
+        closeOnClick={true}
+        position="bottom-left"
+      />
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* public routes */}

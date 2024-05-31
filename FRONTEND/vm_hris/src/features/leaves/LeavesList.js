@@ -31,18 +31,6 @@ const LeavesList = () => {
   const { tableState, tableDispatch } = useTableSettings();
   const [leaveCredit, setLeaveCredit] = useState("");
 
-  /* If the current user level is neither HR/Admin/Approver/Outlet Processor/Payroll Master,
-        DO NOT let them see all of the employees' filed leaves */
-  // if (
-  //   userLevel !== "HR" &&
-  //   userLevel !== "Admin" &&
-  //   userLevel !== "Approver" &&
-  //   userLevel !== "Outlet Processor" &&
-  //   userLevel !== "Payroll Master"
-  // ) {
-  //   tableDispatch({ type: "name", name: user });
-  // }
-
   const {
     data: leaves,
     isSuccess: leaveSuccess,

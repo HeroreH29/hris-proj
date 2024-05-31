@@ -7,7 +7,9 @@ const { format } = require("date-fns");
 const getAttendanceData = async (req, res) => {
   const attendancedata = await Attendance.find().lean();
   if (!attendancedata?.length) {
-    res.status(404).json({ message: "No attendance data found" });
+    res
+      .status(404)
+      .json({ message: "No attendance data found. Upload one now!" });
   }
 
   attendancedata[0].data = atob(attendancedata[0].data.toString("base64"));

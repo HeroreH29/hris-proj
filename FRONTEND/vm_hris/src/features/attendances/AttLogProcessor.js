@@ -2,51 +2,58 @@ import { format, parse } from "date-fns";
 import GenerateTimeSheet from "./GenerateTimeSheet";
 
 const AttLogProcessor = () => {
-  const attListProcessor = (
+  const attListProcessor = async (
     ids = [],
     entities = [],
     fileContents = "",
     setAttlogData
   ) => {
-    const lines = fileContents.split("\n").map((line) => line.trim());
-    setAttlogData(lines);
+    return new Promise((resolve, reject) => {
+      try {
+        const lines = fileContents.split("\n").map((line) => line.trim());
+        setAttlogData(lines);
 
-    const tempAttList = [];
+        const tempAttList = [];
 
-    try {
-      lines.forEach((line) => {
-        const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
+        lines.forEach((line) => {
+          const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
 
-        if (bioId !== "1") {
-          const matchedRecord = ids
-            .filter((id) => {
-              return (
-                String(entities[id].BioID) === String(bioId) &&
-                entities[id].EmpStatus === "Y"
-              );
-            })
-            .map((id) => entities[id])[0];
+          if (bioId !== "1") {
+            const matchedRecord = ids
+              .filter((id) => {
+                return (
+                  String(entities[id].BioID) === String(bioId) &&
+                  entities[id].EmpStatus === "Y"
+                );
+              })
+              .map((id) => entities[id])[0];
 
-          const existingLine = tempAttList.findIndex((e) => {
-            return String(e.bioId) === String(bioId);
-          });
-
-          if (existingLine === -1) {
-            tempAttList.push({
-              bioId: bioId,
-              name: matchedRecord?.FullName,
-              outlet: matchedRecord?.AssignedOutlet,
-              empType: matchedRecord?.EmployeeType,
+            const existingLine = tempAttList.findIndex((e) => {
+              return String(e.bioId) === String(bioId);
             });
-          }
-        }
-      });
-    } catch (error) {
-      console.error(`ProcessAttlog() Error: ${error}`);
-    }
 
-    // Clean array of objects with undefined field values
-    return tempAttList;
+            if (existingLine === -1) {
+              tempAttList.push({
+                bioId: bioId,
+                name: matchedRecord?.FullName,
+                outlet: matchedRecord?.AssignedOutlet,
+                empType: matchedRecord?.EmployeeType,
+              });
+            }
+          }
+        });
+
+        // Clean array of objects with undefined field values
+        const cleanedAttList = tempAttList.filter((item) => {
+          return Object.values(item).every((value) => value !== undefined);
+        });
+
+        resolve(cleanedAttList);
+      } catch (error) {
+        console.error(`attListProcessor() Error: ${error}`);
+        reject(error);
+      }
+    });
   };
 
   const pdfListProcessor = async (

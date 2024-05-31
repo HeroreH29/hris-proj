@@ -1,6 +1,6 @@
-/* const os = require("os");
+const os = require("os");
 
-const getLocalIpAddress = () => {
+const GetLocalIPAddress = () => {
   const interfaces = os.networkInterfaces();
   const ipAddresses = [];
 
@@ -18,15 +18,6 @@ const getLocalIpAddress = () => {
   } else {
     throw new Error("There are no IP addresses found!");
   }
-}; */
+};
 
-const GetLocalIPAddress = require("./GetLocalIPAddress");
-
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3500",
-  `http://${GetLocalIPAddress()}:3000`,
-  `http://${GetLocalIPAddress()}:3500`,
-];
-
-module.exports = { allowedOrigins };
+module.exports = GetLocalIPAddress;

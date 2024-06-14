@@ -15,7 +15,7 @@ const uploadData = async (
 
     if (res) {
       navigate("/employeerecords");
-      toast.success("Record saved!");
+      toast.success("Record uploaded and saved!");
     }
   } catch (error) {
     toast.error("Error uploading data:", error);

@@ -52,10 +52,10 @@ const EditPersonalInfoForm = ({ employeeId, personalinfo, AssignedOutlet }) => {
 
   useEffect(() => {
     if (addSuccess || updateSuccess) {
-      toast.success("Record saved!");
+      toast.success("Record saved!", { containerId: "A" });
       navigate("/employeerecords");
     } else if (addError || updateError) {
-      toast.error("Record saving error!");
+      toast.error("Record saving error!", { containerId: "A" });
     }
   }, [addError, updateError, updateSuccess, addSuccess, navigate]);
 

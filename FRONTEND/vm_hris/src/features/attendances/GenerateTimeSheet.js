@@ -149,7 +149,7 @@ const GenerateTimeSheet = async ({
       size: baseFontSize - 4,
       font: workSansBold,
     });
-    page.drawText("", {
+    page.drawText(geninfo.AssignedOutlet === "Head Office" ? "SUNDAY" : "", {
       x: width * 0.42,
       y: height - 8.2 * baseFontSize,
       size: baseFontSize - 4,

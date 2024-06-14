@@ -93,7 +93,7 @@ const LeavesList = () => {
 
   if (leaveError) return <p>{leaveerr}</p>;
 
-  if (leaveLoading) return <Spinner animation="border" />;
+  if (leaveLoading && !leaveCredit) return <Spinner animation="border" />;
 
   let overallLeavesContent;
 
@@ -146,10 +146,14 @@ const LeavesList = () => {
 
     // Render the component
     overallLeavesContent = leavesList
-      .sort(
-        (a, b) =>
-          new Date(b?.DateFiled).valueOf() - new Date(a?.DateFiled).valueOf()
-      )
+      .sort((a, b) => {
+        const ba =
+          new Date(b?.DateFiled).valueOf() - new Date(a?.DateFiled).valueOf();
+        const ab =
+          new Date(a?.DateFiled).valueOf() - new Date(b?.DateFiled).valueOf();
+
+        return tableState.dateSort ? ab : ba;
+      })
       .slice(tableState.sliceStart, tableState.sliceEnd)
       .map((leave) => (
         <Leave key={leave.id} leave={leave} handleHover={handleHover} />
@@ -163,8 +167,8 @@ const LeavesList = () => {
           </Col>
           <Col>
             <Stack direction="horizontal" gap={1}>
-              {(isX.isProcessor || isX.isAdmin || isX.isOutletProcessor) && (
-                <>
+              <>
+                {!isX.isApprover && (
                   <OverlayTrigger
                     overlay={TooltipRenderer({ tip: "File new leave" })}
                   >
@@ -176,20 +180,20 @@ const LeavesList = () => {
                       <FontAwesomeIcon icon={faFileAlt} />
                     </Button>
                   </OverlayTrigger>
-                  {!isX.isOutletProcessor && (
-                    <OverlayTrigger
-                      overlay={TooltipRenderer({ tip: "Increase credits" })}
+                )}
+                {!isX.isUser && !isX.isOutletProcessor && (
+                  <OverlayTrigger
+                    overlay={TooltipRenderer({ tip: "Increase credits" })}
+                  >
+                    <Button
+                      variant="outline-success"
+                      onClick={() => navigate("/leaves/increasecredits")}
                     >
-                      <Button
-                        variant="outline-success"
-                        onClick={() => navigate("/leaves/increasecredits")}
-                      >
-                        <FontAwesomeIcon icon={faLevelUp} />
-                      </Button>
-                    </OverlayTrigger>
-                  )}
-                </>
-              )}
+                      <FontAwesomeIcon icon={faLevelUp} />
+                    </Button>
+                  </OverlayTrigger>
+                )}
+              </>
             </Stack>
           </Col>
         </Row>
@@ -339,26 +343,23 @@ const LeavesList = () => {
                   <>
                     <tr>
                       <td className="fw-semibold">Sick</td>
-                      <td>{leaveCredit?.CreditBudget}</td>
+                      <td>{leaveCredit.CreditBudget}</td>
                       <td>
-                        {leaveCredit?.SickLeave &&
-                          leaveCredit?.CreditBudget - leaveCredit?.SickLeave}
+                        {leaveCredit.CreditBudget - leaveCredit.SickLeave}
                       </td>
-                      <td>{leaveCredit?.SickLeave}</td>
+                      <td>{leaveCredit.SickLeave}</td>
                     </tr>
                     <tr>
                       <td className="fw-semibold">Vacation</td>
-                      <td>{leaveCredit?.CreditBudget}</td>
+                      <td>{leaveCredit.CreditBudget}</td>
                       <td>
-                        {leaveCredit?.VacationLeave &&
-                          leaveCredit?.CreditBudget -
-                            leaveCredit?.VacationLeave}
+                        {leaveCredit.CreditBudget - leaveCredit.VacationLeave}
                       </td>
-                      <td>{leaveCredit?.VacationLeave}</td>
+                      <td>{leaveCredit.VacationLeave}</td>
                     </tr>
                     <tr>
                       <td className="fw-semibold">Birthday</td>
-                      <td>{leaveCredit?.BirthdayLeave ? 1 : 0}</td>
+                      <td>{leaveCredit.CreditBudget > 0 ? 1 : 0}</td>
                       <td>
                         {leaveCredit?.CreditBudget &&
                         !leaveCredit?.BirthdayLeave
@@ -436,8 +437,9 @@ const LeavesList = () => {
                 ) : (
                   <>
                     <tr>
-                      <td as={Col} colSpan={4}>
-                        No leave credit data to display...
+                      <td colSpan={4}>
+                        <Spinner animation="border" />
+                        <span className="ms-3">Calculating credits...</span>
                       </td>
                     </tr>
                   </>

@@ -5,7 +5,6 @@ const leaveSchema = new Schema(
   {
     DateFiled: {
       type: String,
-      required: true,
     },
     NoOfDays: {
       type: Number,
@@ -47,10 +46,6 @@ const leaveSchema = new Schema(
       type: String,
       default: "",
     },
-    Credited: {
-      type: Boolean,
-      default: false,
-    },
     EmployeeID: {
       type: Object,
       required: true,
@@ -58,6 +53,10 @@ const leaveSchema = new Schema(
     FiledFor: {
       type: Schema.Types.ObjectId,
       ref: "GenInfo",
+    },
+    Credited: {
+      type: Boolean,
+      default: false,
     },
   },
   { toJSON: { virtuals: true } }

@@ -1,16 +1,17 @@
 import React, { memo, useEffect, useState } from "react";
 import {
   useUpdateLeaveMutation,
-  useUpdateLeaveCreditMutation,
   useGetLeaveCreditsQuery,
 } from "./leavesApiSlice";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import { OUTLET_EMAILS } from "../../config/outletEmailOptions";
+import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 
 const Leave = ({ leave, handleHover }) => {
-  const { isX } = useAuth();
+  const { isX, branch } = useAuth();
 
   const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
     selectFromResult: ({ data }) => ({
@@ -20,12 +21,12 @@ const Leave = ({ leave, handleHover }) => {
     }),
   });
 
-  //const [sendEmail, { isSuccess: emailSuccess }] = useSendEmailMutation();
+  const [
+    sendEmail,
+    { isSuccess: emailSuccess, isError: emailError, error: emailerr },
+  ] = useSendEmailMutation();
 
   const [updateLeave, { isSuccess: updateSuccess }] = useUpdateLeaveMutation();
-
-  const [updateLeaveCredit, { isSuccess: creditUpdateSuccess }] =
-    useUpdateLeaveCreditMutation();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -48,57 +49,30 @@ const Leave = ({ leave, handleHover }) => {
     );
 
     if (confirm) {
-      // Update leave
-      try {
-        /* const payload =  */ await updateLeave({
-          id: leave?.id,
-          Approve: approveStat,
-          Remarks: remarks,
-        }); /* .unwrap(); */
+      const result = await updateLeave({
+        id: leave?.id,
+        Approve: approveStat,
+        Remarks: remarks,
+      }).unwrap();
 
-        // Send leave information to HR email if leave is filed from outlets/branches
-        // if (isOutletProcessor) {
-        //   const { _id, ...others } = payload;
+      // Send leave info to HR email if leave if filed from outlets/branches
+      if (isX.isOutletProcessor) {
+        const { _id, ...others } = result;
 
-        //   let emailMsg = {
-        //     email: "hero.viamare@gmail.com",
-        //     subject: `${branch} Leave Application for Filing`,
-        //     message: `Good day,\n\nThis email contains an employee leave application from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
-        //     attachments: [
-        //       {
-        //         filename: `${leave?.EmployeeID}-FiledLeave.json`,
-        //         content: JSON.stringify(others),
-        //         contentType: "application/json",
-        //       },
-        //     ],
-        //   };
-
-        //   sendEmail(emailMsg);
-        // }
-
-        setLeaveStatus(approveStat);
-      } catch (error) {
-        alert(`Something went wrong: ${error}`);
-      }
-
-      // Check first if leave is being approved. Then proceed in credit deduction if necessary
-      if (approveStat === 1) {
-        // Update leave credit of employee
-        const ltype = leave?.Ltype.replace(" ", "");
-        const deductedCredit = leaveCredit?.[ltype] - leave?.NoOfDays;
-
-        const updatedLeaveCredit = {
-          id: leaveCredit?.id,
-          [ltype]: deductedCredit >= 0 ? deductedCredit : 0,
+        let emailMsg = {
+          email: OUTLET_EMAILS["Head Office"],
+          subject: `${branch} Leave Application for Filing`,
+          message: `Good day,\n\nThis email contains an employee leave application from '${branch}'.\nKindly upload the attached file to your system.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
+          attachments: [
+            {
+              filename: `${leave?.EmployeeID}-FiledLeave.json`,
+              content: JSON.stringify(others),
+              contentType: "application/json",
+            },
+          ],
         };
-        try {
-          await updateLeaveCredit(updatedLeaveCredit);
-          if (leaveCredit?.[ltype] > 0) {
-            await updateLeave({ id: leave?.id, Credited: true });
-          }
-        } catch (error) {
-          alert(`Something went wrong: ${error}`);
-        }
+
+        sendEmail(emailMsg);
       }
     }
   };
@@ -113,24 +87,35 @@ const Leave = ({ leave, handleHover }) => {
   };
 
   useEffect(() => {
-    if (updateSuccess && creditUpdateSuccess /* || emailSuccess */) {
+    let toastMsg = "Leave status updated";
+    if (updateSuccess) {
       setLeaveFrom("");
       setLeaveUntil("");
       handleHover("");
       setRemarks("");
       setShowModal(false);
-      if (isX.isAdmin || isX.isProcessor || isX.isApprover) {
-        toast.success("Leave status updated", { containerId: "A" });
-      } /* else if (isX.isOutletProcessor) {
-        toast.success("Leave status updated and sent to HR email", {
-          containerId: "A",
-        });
-      } */
 
-      window.location.reload();
+      // Double check if email has been sent (for Outlet Processors)
+      if (isX.isOutletProcessor) {
+        if (emailSuccess) {
+          toastMsg = toastMsg + ", and been sent to HR";
+        } else if (emailError) {
+          toast.error("Email sending error. Contact administrator!");
+          console.log(emailerr);
+        }
+      }
+
+      toast.success(toastMsg, { containerId: "A" });
+      toast.info("Page will refresh after 2 secs...", { containerId: "A" });
+
+      const timeOutId = setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+
+      return () => clearTimeout(timeOutId);
     }
     // eslint-disable-next-line
-  }, [updateSuccess, creditUpdateSuccess /* , navigate */]);
+  }, [updateSuccess]);
 
   if (leave) {
     let approve;
@@ -263,7 +248,6 @@ const Leave = ({ leave, handleHover }) => {
               )}
               {isX.isUser && (
                 <Button
-                  disabled={leave?.Approve !== 0}
                   type="button"
                   variant="outline-warning"
                   onClick={() => handleUpdateLeave(3)}

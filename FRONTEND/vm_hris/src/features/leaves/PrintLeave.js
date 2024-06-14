@@ -290,7 +290,7 @@ const PrintLeave = async ({
       leaveCredit.BirthdayLeave;
 
     // Table Body
-    page.drawText("Leave Credits", {
+    page.drawText("Remaining Credits", {
       x: width * 0.06,
       y: height * 0.82,
       size: fontSize - 6,

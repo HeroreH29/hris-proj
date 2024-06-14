@@ -9,7 +9,6 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
-import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useAuth from "../../hooks/useAuth";
 
 const Dependent = ({
@@ -68,8 +67,10 @@ const Dependent = ({
       setShowModal(false);
       setValidated(false);
 
-      isSuccess && toast.info("Dependent information updated!");
-      isDelSuccess && toast.info("Dependent successfully deleted!");
+      isSuccess &&
+        toast.info("Dependent information updated!", { containerId: "A" });
+      isDelSuccess &&
+        toast.info("Dependent successfully deleted!", { containerId: "A" });
 
       window.location.reload();
     }
@@ -87,21 +88,6 @@ const Dependent = ({
       const { _id, __v, ...others } = depState;
 
       await updateDependent(others);
-
-      if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-        //const updateRecord = isOutletProcessor && dependent;
-        //const id = updateRecord ? dependent?.id : "";
-        // await sendEmail(
-        //   generateEmailMsg({
-        //     branch,
-        //     filename: `${employeeId}-Dependent.json`,
-        //     id: dependent?.id,
-        //     compiledInfo: others,
-        //     update: true,
-        //     assignedOutlet: AssignedOutlet,
-        //   })
-        // );
-      }
     } else {
       e.stopPropagation();
     }

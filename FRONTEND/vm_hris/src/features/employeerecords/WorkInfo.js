@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
 import WorkInfoModal from "../../modals/WorkInfoModal";
-import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useAuth from "../../hooks/useAuth";
 
 const WorkInfo = ({
@@ -50,19 +49,6 @@ const WorkInfo = ({
 
     if (form.checkValidity() && !isLoading) {
       await updateWorkinfo(workInfoData);
-
-      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-      //   await sendEmail(
-      //     generateEmailMsg({
-      //       branch,
-      //       filename: `${employeeId}-WorkInfo.json`,
-      //       id: workinfo?.id,
-      //       compiledInfo: workInfoData,
-      //       update: true,
-      //       assignedOutlet: AssignedOutlet,
-      //     })
-      //   );
-      // }
     } else {
       e.stopPropagation();
     }
@@ -87,8 +73,10 @@ const WorkInfo = ({
       setShowModal(false);
       setValidated(false);
 
-      isSuccess && toast.info("Employment history updated!");
-      isDelSuccess && toast.info("Employment history deleted!");
+      isSuccess &&
+        toast.info("Employment history updated!", { containerId: "A" });
+      isDelSuccess &&
+        toast.info("Employment history deleted!", { containerId: "A" });
 
       window.location.reload();
     }

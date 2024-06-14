@@ -32,6 +32,7 @@ const Login = () => {
     if (isSuccess) {
       toast.success(`Welcome back ${state.username}!`, { containerId: "A" });
     }
+
     // eslint-disable-next-line
   }, [isSuccess]);
 
@@ -58,10 +59,10 @@ const Login = () => {
         }
       } catch (error) {
         if (error.status === 401) {
-          toast.warn(error.data.message);
+          toast.warn(error.data.message, { containerId: "A" });
           stateDispatch({ type: "input_username", username: "" });
         } else if (error.status === 404) {
-          toast.warn(error.data.message);
+          toast.warn(error.data.message, { containerId: "A" });
           stateDispatch({ type: "input_username", username: "" });
         }
         stateDispatch({ type: "input_password", password: "" });

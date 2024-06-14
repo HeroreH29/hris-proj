@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import EditGenInfoForm from "./EditGenInfoForm";
 import {
@@ -10,6 +10,8 @@ import {
   useGetWorkinfosQuery,
   useGetInactiveEmpsQuery,
   useGetTrainingHistoriesQuery,
+  useAddGeninfoMutation,
+  useAddPersonalinfoMutation,
 } from "./recordsApiSlice";
 import {
   Spinner,
@@ -19,9 +21,14 @@ import {
   Row,
   Col,
   Button,
+  Form,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLeftLong, faPrint } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faLeftLong,
+  faPrint,
+} from "@fortawesome/free-solid-svg-icons";
 import EditPersonalInfoForm from "./EditPersonalInfoForm";
 import DependentsList from "./DependentsList";
 import WorkInfosList from "./WorkInfosList";
@@ -30,6 +37,8 @@ import useTitle from "../../hooks/useTitle";
 import TrainingHistoryList from "./TrainingHistoryList";
 import PrintEmployeeRecord from "./PrintEmployeeRecord";
 import useAuth from "../../hooks/useAuth";
+import { toast } from "react-toastify";
+import RecordToOutletModal from "../../modals/RecordToOutletModal";
 
 const refetchInterval = 15000;
 
@@ -39,7 +48,29 @@ const EditRecord = () => {
 
   useTitle(`${employeeId ? "Edit Record" : "Add Record"} | Via Mare HRIS`);
 
+  const [
+    addGeninfo,
+    {
+      isSuccess: isGenSuccess,
+      isLoading: isGenLoading,
+      isError: isGenError,
+      error: genErr,
+    },
+  ] = useAddGeninfoMutation();
+
+  const [
+    addPersonainfo,
+    {
+      isSuccess: isPersonalSuccess,
+      isLoading: isPersonalLoading,
+      isError: isPersonalError,
+      err: personalErr,
+    },
+  ] = useAddPersonalinfoMutation();
+
   const navigate = useNavigate();
+
+  const [showOutletPicker, setShowOutletPicker] = useState(false);
 
   // Fetch general info using Employee ID
   const { geninfo } = useGetGeninfosQuery("recordsList", {
@@ -167,66 +198,57 @@ const EditRecord = () => {
     });
   };
 
-  /* const handleEmployeeRecordUpload = async (file) => {
+  const handleEmployeeRecordUpload = async (file) => {
     if (!file.type.startsWith("application/json")) {
-      toast.error("Invalid file type. Please upload a '.json' file");
+      return toast.error("Invalid file type. Please upload a '.json' file", {
+        containerId: "A",
+      });
     }
-
     const reader = new FileReader();
-    const filename = file.name;
 
-    reader.onload = async (event) => {
-      const parsedData = JSON.parse(event.target.result);
+    reader.onload = async (e) => {
+      const infoData = JSON.parse(e.target.result);
+      const genInfo = infoData[0].GenInfo; // Gen Info
+      const persInfo = infoData[0].PersonalInfo; // Personal Info
 
-      if (filename.includes("GenInfo")) {
-        await uploadData(
-          updateGenInfo,
-          createGenInfo,
-          parsedData,
-          navigate,
-          toast
-        );
-      } else if (filename.includes("PersonalInfo")) {
-        await uploadData(
-          updatePersonalInfo,
-          createPersonalInfo,
-          parsedData,
-          navigate,
-          toast
-        );
-      } else if (filename.includes("Dependent")) {
-        await uploadData(
-          updateDependents,
-          createDependent,
-          parsedData,
-          navigate,
-          toast
-        );
-      } else if (filename.includes("WorkInfo")) {
-        await uploadData(
-          updateWorkInfo,
-          createWorkInfo,
-          parsedData,
-          navigate,
-          toast
-        );
-      } else if (filename.includes("EducInfo")) {
-        await uploadData(
-          updateEducInfo,
-          createEducInfo,
-          parsedData,
-          navigate,
-          toast
-        );
-      }
+      // Gen Info upload
+      await addGeninfo(genInfo);
+      await addPersonainfo(persInfo);
     };
 
+    // Error catcher
     reader.onerror = (error) => {
       console.error("Error reading file:", error);
     };
 
     reader.readAsText(file);
-  }; */
+  };
+
+  useEffect(() => {
+    if (isGenLoading && isPersonalLoading) {
+      toast.loading(`Uploading data to server...`, { containerId: "A" });
+    }
+    if (isGenSuccess && isPersonalSuccess) {
+      toast.dismiss();
+      toast.success("Data uploaded to server!", { containerId: "A" });
+      navigate("/employeerecords");
+    }
+    if (isGenError && isPersonalError) {
+      toast.error(
+        `Error occurred while uploading data to server: ${genErr?.data}|${personalErr?.data}`,
+        { containerId: "A" }
+      );
+    }
+  }, [
+    isGenSuccess,
+    isGenLoading,
+    isPersonalLoading,
+    isPersonalSuccess,
+    isGenError,
+    isPersonalError,
+    genErr,
+    personalErr,
+  ]);
 
   content = (
     <Container>
@@ -241,14 +263,10 @@ const EditRecord = () => {
         </Col>
         <Col>
           <div>
-            <h3>
-              {isX.isOutletProcessor
-                ? "View Record"
-                : employeeId
-                ? "Edit Record"
-                : "Add Record"}
-            </h3>
-            {!employeeId ? (
+            <h3>{employeeId ? "Edit Record" : "Add Record"}</h3>
+            {isX.isOutletProcessor ? (
+              <></>
+            ) : !employeeId ? (
               <small className="text-decoration-underline fw-semibold fst-italic text-primary">
                 You can ONLY add GENERAL INFO for now. Add other details later.
               </small>
@@ -259,7 +277,7 @@ const EditRecord = () => {
             )}
           </div>
         </Col>
-        {/* {!employeeId && (
+        {!employeeId && isX.isOutletProcessor ? (
           <Form.Group as={Col}>
             <Form.Label className="fw-semibold">
               Or upload a record file here...
@@ -270,7 +288,21 @@ const EditRecord = () => {
               onChange={(e) => handleEmployeeRecordUpload(e.target.files[0])}
             />
           </Form.Group>
-        )} */}
+        ) : (
+          employeeId &&
+          isX.isAdmin && (
+            <Col md="auto">
+              <Button
+                variant="outline-success"
+                size="sm"
+                onClick={() => setShowOutletPicker(true)}
+              >
+                <span className="me-2">Send record to outlet</span>
+                <FontAwesomeIcon icon={faEnvelope} />
+              </Button>
+            </Col>
+          )
+        )}
       </Row>
       <Tabs
         className="p-3 mb-3"
@@ -284,7 +316,7 @@ const EditRecord = () => {
           eventKey="personalinfo"
           title="Personal Info"
           unmountOnExit={true}
-          disabled={!employeeId}
+          disabled={!employeeId || isX.isOutletProcessor}
         >
           <EditPersonalInfoForm
             employeeId={employeeId}
@@ -296,7 +328,7 @@ const EditRecord = () => {
           eventKey="dependents"
           title="Dependents"
           unmountOnExit={true}
-          disabled={!employeeId}
+          disabled={!employeeId || isX.isOutletProcessor}
         >
           <DependentsList
             dependents={dependents}
@@ -308,7 +340,7 @@ const EditRecord = () => {
           eventKey="educinfo"
           title="Educational Attainment"
           unmountOnExit={true}
-          disabled={!employeeId}
+          disabled={!employeeId || isX.isOutletProcessor}
         >
           <EducInfoList
             AssignedOutlet={geninfo?.AssignedOutlet}
@@ -320,7 +352,7 @@ const EditRecord = () => {
           eventKey="workinfo"
           title="Employment History"
           unmountOnExit={true}
-          disabled={!employeeId}
+          disabled={!employeeId || isX.isOutletProcessor}
         >
           <WorkInfosList
             AssignedOutlet={geninfo?.AssignedOutlet}
@@ -332,13 +364,13 @@ const EditRecord = () => {
           eventKey="traininghistory"
           title="Training History"
           unmountOnExit={true}
-          disabled={!employeeId}
+          disabled={!employeeId || isX.isOutletProcessor}
         >
           <TrainingHistoryList trainingHistories={trainingHistories} />
         </Tab>
         <Tab
           title="Print record"
-          disabled={!employeeId || !personalinfo}
+          disabled={!employeeId || !personalinfo || isX.isOutletProcessor}
           eventKey={"printrecord"}
           unmountOnExit={true}
         >
@@ -353,6 +385,17 @@ const EditRecord = () => {
           </div>
         </Tab>
       </Tabs>
+
+      <RecordToOutletModal
+        showOutletPicker={showOutletPicker}
+        setShowOutletPicker={setShowOutletPicker}
+        geninfo={geninfo}
+        personalinfo={personalinfo}
+        dependents={dependents}
+        educinfos={educinfos}
+        workinfos={workinfos}
+        trainingHistories={trainingHistories}
+      />
     </Container>
   );
 

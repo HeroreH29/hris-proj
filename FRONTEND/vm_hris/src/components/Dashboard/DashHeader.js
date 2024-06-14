@@ -1,42 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Nav, Navbar, Image, Container } from "react-bootstrap";
+import {
+  Nav,
+  Navbar,
+  Container,
+  OverlayTrigger,
+  Badge,
+  Dropdown,
+  DropdownButton,
+} from "react-bootstrap";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
 import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
+import useNotifier from "../../hooks/useNotifier";
 
 const DashHeader = () => {
+  // Notifier
+  const notifList = useNotifier();
+
   const location = useLocation();
 
   const { isX, username } = useAuth();
 
   const [active, setActive] = useState(1);
 
-  /* const notify = () =>
-    (toastId.current = toast("Logging out...", { autoClose: false })); */
-
-  /* const update = () =>
-    toast.update(toastId.current, {
-      render: "Logged out",
-      type: "success",
-      autoClose: 2000,
-    }); */
-
-  // eslint-disable-next-line
-  const [imageData, setImageData] = useState("https://placehold.jp/40x40.png");
-
   const navigate = useNavigate();
 
   const [sendLogout, { isError, error }] = useSendLogoutMutation();
-
-  /* useEffect(() => {
-    if (isSuccess) {
-      // Update toast when logged out successfully
-      update();
-      navigate("/");
-    }
-  }, [isSuccess, navigate]); */
 
   const onLogoutClicked = () => {
     const logoutPromise = new Promise((resolve) =>
@@ -55,10 +49,6 @@ const DashHeader = () => {
       .then(() => {
         navigate("/");
       });
-  };
-
-  const toastDismisser = () => {
-    toast.dismiss();
   };
 
   // Active page identifier
@@ -87,7 +77,6 @@ const DashHeader = () => {
       collapseOnSelect={true}
       expand="lg"
       className="border-bottom border-dark-subtle bg-white"
-      onSelect={toastDismisser}
     >
       <Container>
         <Navbar.Brand id="logo">Via Mare HRIS</Navbar.Brand>
@@ -97,7 +86,7 @@ const DashHeader = () => {
             <Nav.Link eventKey="1" onClick={() => navigate("/dashboard")}>
               Dashboard
             </Nav.Link>
-            {(!isX.isUser || !isX.isApprover) && (
+            {!isX.isUser && !isX.isApprover && (
               <>
                 <Nav.Link
                   eventKey="2"
@@ -107,7 +96,7 @@ const DashHeader = () => {
                 </Nav.Link>
 
                 <Nav.Link eventKey="3" onClick={() => navigate("/attendances")}>
-                  Attendances
+                  Attendance
                 </Nav.Link>
               </>
             )}
@@ -122,9 +111,62 @@ const DashHeader = () => {
             <Nav.Link onClick={onLogoutClicked} className="text-danger">
               Logout
             </Nav.Link>
-            <Nav.Item className="ms-2">
+            {/* <Nav.Item className="ms-2">
               <Image src={imageData} roundedCircle />
-            </Nav.Item>
+            </Nav.Item> */}
+            {isX.isAdmin && (
+              <OverlayTrigger
+                placement="auto"
+                overlay={TooltipRenderer({
+                  tip: `(${notifList.length}) Notification/s`,
+                })}
+              >
+                <Nav.Item>
+                  <DropdownButton
+                    align={"end"}
+                    size="lg"
+                    variant="outline"
+                    title={
+                      <>
+                        <FontAwesomeIcon
+                          icon={faBell}
+                          className="text-primary float-start"
+                        />
+                        {notifList.length > 0 && (
+                          <Badge pill bg="danger">
+                            {notifList.length}
+                          </Badge>
+                        )}
+                      </>
+                    }
+                  >
+                    {notifList.map((notif) => {
+                      let bgColor = "";
+                      if (
+                        notif.msg.toLowerCase().includes("evaluation") ||
+                        notif.msg.toLowerCase().includes("will end soon")
+                      ) {
+                        bgColor = "bg-warning-subtle";
+                      }
+                      if (
+                        notif.msg.toLowerCase().includes("regularization") ||
+                        notif.msg.toLowerCase().includes("already ended")
+                      ) {
+                        bgColor = "bg-danger-subtle";
+                      }
+                      return (
+                        <Dropdown.Item
+                          className={`border fw-medium py-2 ${bgColor}`}
+                          href={`/employeerecords/${notif.id}`}
+                        >
+                          {notif.msg}
+                        </Dropdown.Item>
+                      );
+                    })}
+                  </DropdownButton>
+                </Nav.Item>
+              </OverlayTrigger>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

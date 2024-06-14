@@ -63,11 +63,15 @@ const TrainingHistoryModal = ({
     }
 
     if (newHistory) {
-      toast.promise(() => addTrainingHistory(newTrainingData), {
-        pending: "Adding training history...",
-        success: "Training history added!",
-        error: adderr,
-      });
+      toast.promise(
+        () => addTrainingHistory(newTrainingData),
+        {
+          pending: "Adding training history...",
+          success: "Training history added!",
+          error: adderr,
+        },
+        { containerId: "A" }
+      );
     } else {
       toast.promise(
         updateTrainingHistory({ ...trainingData, ...newTrainingData }),
@@ -75,7 +79,8 @@ const TrainingHistoryModal = ({
           pending: "Updating training history...",
           success: "Training history updated!",
           error: updateerr,
-        }
+        },
+        { containerId: "A" }
       );
     }
 
@@ -89,11 +94,15 @@ const TrainingHistoryModal = ({
     const isConfirmed = window.confirm("Are you sure you want to delete this?");
     if (!isConfirmed) return;
 
-    toast.promise(deleteTrainingHistory(trainingData), {
-      pending: "Deleting training history...",
-      success: "Training history deleted!",
-      error: deleteerr,
-    });
+    toast.promise(
+      deleteTrainingHistory(trainingData),
+      {
+        pending: "Deleting training history...",
+        success: "Training history deleted!",
+        error: deleteerr,
+      },
+      { containerId: "A" }
+    );
 
     window.location.reload();
   };

@@ -31,7 +31,6 @@ function App() {
       <ToastContainer
         containerId={"A"}
         autoClose={3000}
-        stacked
         closeOnClick={true}
         position="top-right"
       />

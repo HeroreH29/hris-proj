@@ -307,7 +307,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               <Form.Label className="fw-semibold">Employee Type</Form.Label>
               <Form.Select
                 required
-                disabled={isX.isOutletProcessor}
                 value={genState.EmployeeType}
                 onChange={(e) =>
                   genDispatch({
@@ -387,433 +386,442 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          {/* Date employed, contractual, and date probationary */}
-          <Row className="mb-3 pt-3">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Date Employed</Form.Label>
-              <Form.Control
-                required
-                disabled={isX.isOutletProcessor}
-                autoComplete="off"
-                type="date"
-                value={genState.DateEmployed}
-                onChange={(e) =>
-                  genDispatch({
-                    type: "date_employed",
-                    DateEmployed: e.target.value,
-                  })
-                }
-              />
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Contractual?</Form.Label>
-              <Form.Check
-                type="switch"
-                disabled={isX.isOutletProcessor}
-                checked={isContractual}
-                label={isContractual ? "Yes" : "No"}
-                onChange={() => {
-                  setIsContractual(!isContractual);
-                  genDispatch({
-                    type: "contract_date_end",
-                    ContractDateEnd: "",
-                  });
-                }}
-              />
-            </Form.Group>
-            {isContractual && (
-              <>
+          {!isX.isOutletProcessor && (
+            <>
+              {/* Date employed, contractual, and date probationary */}
+              <Row className="mb-3 pt-3">
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">Date Employed</Form.Label>
+                  <Form.Control
+                    required
+                    disabled={isX.isOutletProcessor}
+                    autoComplete="off"
+                    type="date"
+                    value={genState.DateEmployed}
+                    onChange={(e) =>
+                      genDispatch({
+                        type: "date_employed",
+                        DateEmployed: e.target.value,
+                      })
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    This field is required!
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">Contractual?</Form.Label>
+                  <Form.Check
+                    type="switch"
+                    disabled={isX.isOutletProcessor}
+                    checked={isContractual}
+                    label={isContractual ? "Yes" : "No"}
+                    onChange={() => {
+                      setIsContractual(!isContractual);
+                      genDispatch({
+                        type: "contract_date_end",
+                        ContractDateEnd: "",
+                      });
+                    }}
+                  />
+                </Form.Group>
+                {isContractual && (
+                  <>
+                    <Form.Group as={Col} md="auto">
+                      <Form.Label className="fw-semibold">
+                        Contract Date End
+                      </Form.Label>
+                      <Form.Control
+                        type="date"
+                        required
+                        value={genState.ContractDateEnd}
+                        onChange={(e) => {
+                          // Checking if the contract date is after the employed date
+                          const daysDiff = differenceInDays(
+                            new Date(e.target.value),
+                            new Date(genState.DateEmployed)
+                          );
+
+                          if (daysDiff > 0) {
+                            genDispatch({
+                              type: "contract_date_end",
+                              ContractDateEnd: e.target.value,
+                            });
+                          } else {
+                            toast.error(
+                              "Contract date must be greater than employed date",
+                              { containerId: "A" }
+                            );
+                          }
+                        }}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        This field is required
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </>
+                )}
                 <Form.Group as={Col} md="auto">
                   <Form.Label className="fw-semibold">
-                    Contract Date End
+                    Probationary Date
+                  </Form.Label>
+                  <Form.Control
+                    disabled={isContractual || isX.isOutletProcessor}
+                    type="date"
+                    value={genState.DateProbationary}
+                    onChange={(e) =>
+                      genDispatch({
+                        type: "date_probationary",
+                        DateProbationary: e.target.value,
+                      })
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    This field is required!
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Row>
+              {/* Regularization Date and Date Leaved/Date of Resignation */}
+              <Row className="mb-3 ">
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">
+                    Regularization Date
                   </Form.Label>
                   <Form.Control
                     type="date"
-                    required
-                    value={genState.ContractDateEnd}
-                    onChange={(e) => {
-                      // Checking if the contract date is after the employed date
-                      const daysDiff = differenceInDays(
-                        new Date(e.target.value),
-                        new Date(genState.DateEmployed)
-                      );
-
-                      if (daysDiff > 0) {
-                        genDispatch({
-                          type: "contract_date_end",
-                          ContractDateEnd: e.target.value,
-                        });
-                      } else {
-                        toast.error(
-                          "Contract date must be greater than employed date",
-                          { containerId: "A" }
-                        );
-                      }
-                    }}
+                    disabled={isContractual || isX.isOutletProcessor}
+                    value={genState.RegDate}
+                    onChange={(e) =>
+                      genDispatch({ type: "reg_date", RegDate: e.target.value })
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
-                    This field is required
+                    This field is required!
                   </Form.Control.Feedback>
                 </Form.Group>
-              </>
-            )}
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Probationary Date</Form.Label>
-              <Form.Control
-                disabled={isContractual || isX.isOutletProcessor}
-                type="date"
-                value={genState.DateProbationary}
-                onChange={(e) =>
-                  genDispatch({
-                    type: "date_probationary",
-                    DateProbationary: e.target.value,
-                  })
-                }
-              />
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Row>
-          {/* Regularization Date and Date Leaved/Date of Resignation */}
-          <Row className="mb-3 ">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">
-                Regularization Date
-              </Form.Label>
-              <Form.Control
-                type="date"
-                disabled={isContractual || isX.isOutletProcessor}
-                value={genState.RegDate}
-                onChange={(e) =>
-                  genDispatch({ type: "reg_date", RegDate: e.target.value })
-                }
-              />
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">
-                Date of Resignation
-              </Form.Label>
-              <Form.Control
-                type="date"
-                disabled={isContractual || isX.isOutletProcessor}
-                value={genState.DateLeaved}
-                onChange={(e) =>
-                  genDispatch({
-                    type: "date_leaved",
-                    DateLeaved: e.target.value,
-                  })
-                }
-              />
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Row>
-          {/* Employment Status, Mode of Separation & Notes */}
-          <Row className="mb-3 pb-5 border-bottom">
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Employment Status</Form.Label>
-              <Form.Select
-                disabled={isX.isOutletProcessor}
-                onChange={(e) =>
-                  genDispatch({ type: "emp_status", EmpStatus: e.target.value })
-                }
-                value={genState.EmpStatus}
-              >
-                {empStatusOptions}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                This field is required!
-              </Form.Control.Feedback>
-            </Form.Group>
-            {genState.EmpStatus === "N" && (
-              <>
                 <Form.Group as={Col} md="auto">
                   <Form.Label className="fw-semibold">
-                    Mode of Separation
+                    Date of Resignation
+                  </Form.Label>
+                  <Form.Control
+                    type="date"
+                    disabled={isContractual || isX.isOutletProcessor}
+                    value={genState.DateLeaved}
+                    onChange={(e) =>
+                      genDispatch({
+                        type: "date_leaved",
+                        DateLeaved: e.target.value,
+                      })
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    This field is required!
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Row>
+              {/* Employment Status, Mode of Separation & Notes */}
+              <Row className="mb-3 pb-5 border-bottom">
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">
+                    Employment Status
                   </Form.Label>
                   <Form.Select
-                    required
-                    value={modeOfSeparation}
-                    onChange={(e) => setModeOfSeparation(e.target.value)}
+                    disabled={isX.isOutletProcessor}
+                    onChange={(e) =>
+                      genDispatch({
+                        type: "emp_status",
+                        EmpStatus: e.target.value,
+                      })
+                    }
+                    value={genState.EmpStatus}
                   >
-                    <option value={""}>Select mode...</option>
-                    {modeOfSeparationOptions}
+                    {empStatusOptions}
                   </Form.Select>
                   <Form.Control.Feedback type="invalid">
                     This field is required!
                   </Form.Control.Feedback>
                 </Form.Group>
-              </>
-            )}
-            <Form.Group as={Col} md="auto">
-              <Form.Label className="fw-semibold">Notes</Form.Label>
-              <Form.Control
-                type="text"
-                disabled={isX.isOutletProcessor}
-                as="textarea"
-                value={genState.Notes}
-                onChange={(e) =>
-                  genDispatch({ type: "notes", Notes: e.target.value })
-                }
-              />
-            </Form.Group>
-          </Row>
-          {/* TIN number, SSS number, and PH number */}
-          <Row className="mb-3 pt-3">
-            <Form.Group as={Col} md="5">
-              <Form.Label className="fw-semibold">TIN #</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  value={genState.TINnumber[0]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "tin_number",
-                      TINnumber: e.target.value,
-                      index: 0,
-                    })
-                  }
-                  type="number"
-                  placeholder="###"
-                  maxLength={3}
-                />
-                <Form.Control
-                  value={genState.TINnumber[1]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "tin_number",
-                      TINnumber: e.target.value,
-                      index: 1,
-                    })
-                  }
-                  type="number"
-                  placeholder="###"
-                  maxLength={3}
-                />
-                <Form.Control
-                  disabled={isX.isOutletProcessor}
-                  value={genState.TINnumber[2]}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "tin_number",
-                      TINnumber: e.target.value,
-                      index: 2,
-                    })
-                  }
-                  type="number"
-                  placeholder="###"
-                  maxLength={3}
-                />
-              </InputGroup>
-            </Form.Group>
-            <Form.Group as={Col} md="5">
-              <Form.Label className="fw-semibold">SSS #</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  value={genState.SSSnumber[0]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "sss_number",
-                      SSSnumber: e.target.value,
-                      index: 0,
-                    })
-                  }
-                  type="number"
-                  placeholder="##"
-                  maxLength={2}
-                />
-                <Form.Control
-                  value={genState.SSSnumber[1]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "sss_number",
-                      SSSnumber: e.target.value,
-                      index: 1,
-                    })
-                  }
-                  type="number"
-                  placeholder="#######"
-                  maxLength={7}
-                />
-                <Form.Control
-                  value={genState.SSSnumber[2]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "sss_number",
-                      SSSnumber: e.target.value,
-                      index: 2,
-                    })
-                  }
-                  type="number"
-                  placeholder="#"
-                  maxLength={1}
-                />
-              </InputGroup>
-            </Form.Group>
-            <Form.Group as={Col} md="5">
-              <Form.Label className="fw-semibold">PH #</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  value={genState.PHnumber[0]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "ph_number",
-                      PHnumber: e.target.value,
-                      index: 0,
-                    })
-                  }
-                  type="number"
-                  placeholder="##"
-                  maxLength={2}
-                />
-                <Form.Control
-                  value={genState.PHnumber[1]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "ph_number",
-                      PHnumber: e.target.value,
-                      index: 1,
-                    })
-                  }
-                  type="number"
-                  placeholder="#########"
-                  maxLength={9}
-                />
-                <Form.Control
-                  value={genState.PHnumber[2]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "ph_number",
-                      PHnumber: e.target.value,
-                      index: 2,
-                    })
-                  }
-                  type="number"
-                  placeholder="#"
-                  maxLength={1}
-                />
-              </InputGroup>
-            </Form.Group>
-          </Row>
-          {/* Pag-IBIG # & ATM # */}
-          <Row className="mb-3 pb-5 border-bottom">
-            <Form.Group as={Col} md="4">
-              <Form.Label className="fw-semibold">Pag-IBIG #</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  disabled={isX.isOutletProcessor}
-                  value={genState?.PInumber?.[0]}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "pi_number",
-                      PInumber: e.target.value,
-                      index: 0,
-                    })
-                  }
-                  type="number"
-                  placeholder="####"
-                  maxLength={4}
-                />
-                <Form.Control
-                  value={genState?.PInumber?.[1]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "pi_number",
-                      PInumber: e.target.value,
-                      index: 1,
-                    })
-                  }
-                  type="number"
-                  placeholder="####"
-                  maxLength={4}
-                />
-                <Form.Control
-                  value={genState?.PInumber?.[2]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "pi_number",
-                      PInumber: e.target.value,
-                      index: 2,
-                    })
-                  }
-                  type="number"
-                  placeholder="####"
-                  maxLength={4}
-                />
-              </InputGroup>
-            </Form.Group>
-            <Form.Group as={Col} md="4">
-              <Form.Label className="fw-semibold">{`ATM # (Optional)`}</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  value={genState.ATMnumber[0]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "atm_number",
-                      ATMnumber: e.target.value,
-                      index: 0,
-                    })
-                  }
-                  type="number"
-                  placeholder="####"
-                  maxLength={4}
-                />
-                <Form.Control
-                  value={genState.ATMnumber[1]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "atm_number",
-                      ATMnumber: e.target.value,
-                      index: 1,
-                    })
-                  }
-                  type="number"
-                  placeholder="###"
-                  maxLength={3}
-                />
-                <Form.Control
-                  value={genState.ATMnumber[2]}
-                  disabled={isX.isOutletProcessor}
-                  onChange={(e) =>
-                    genDispatch({
-                      type: "atm_number",
-                      ATMnumber: e.target.value,
-                      index: 2,
-                    })
-                  }
-                  type="number"
-                  placeholder="###"
-                  maxLength={3}
-                />
-              </InputGroup>
-            </Form.Group>
-          </Row>
+                {genState.EmpStatus === "N" && (
+                  <>
+                    <Form.Group as={Col} md="auto">
+                      <Form.Label className="fw-semibold">
+                        Mode of Separation
+                      </Form.Label>
+                      <Form.Select
+                        required
+                        value={modeOfSeparation}
+                        onChange={(e) => setModeOfSeparation(e.target.value)}
+                      >
+                        <option value={""}>Select mode...</option>
+                        {modeOfSeparationOptions}
+                      </Form.Select>
+                      <Form.Control.Feedback type="invalid">
+                        This field is required!
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </>
+                )}
+                <Form.Group as={Col} md="auto">
+                  <Form.Label className="fw-semibold">Notes</Form.Label>
+                  <Form.Control
+                    type="text"
+                    disabled={isX.isOutletProcessor}
+                    as="textarea"
+                    value={genState.Notes}
+                    onChange={(e) =>
+                      genDispatch({ type: "notes", Notes: e.target.value })
+                    }
+                  />
+                </Form.Group>
+              </Row>
+              {/* TIN number, SSS number, and PH number */}
+              <Row className="mb-3 pt-3">
+                <Form.Group as={Col} md="5">
+                  <Form.Label className="fw-semibold">TIN #</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      value={genState.TINnumber[0]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "tin_number",
+                          TINnumber: e.target.value,
+                          index: 0,
+                        })
+                      }
+                      type="number"
+                      placeholder="###"
+                      maxLength={3}
+                    />
+                    <Form.Control
+                      value={genState.TINnumber[1]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "tin_number",
+                          TINnumber: e.target.value,
+                          index: 1,
+                        })
+                      }
+                      type="number"
+                      placeholder="###"
+                      maxLength={3}
+                    />
+                    <Form.Control
+                      disabled={isX.isOutletProcessor}
+                      value={genState.TINnumber[2]}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "tin_number",
+                          TINnumber: e.target.value,
+                          index: 2,
+                        })
+                      }
+                      type="number"
+                      placeholder="###"
+                      maxLength={3}
+                    />
+                  </InputGroup>
+                </Form.Group>
+                <Form.Group as={Col} md="5">
+                  <Form.Label className="fw-semibold">SSS #</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      value={genState.SSSnumber[0]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "sss_number",
+                          SSSnumber: e.target.value,
+                          index: 0,
+                        })
+                      }
+                      type="number"
+                      placeholder="##"
+                      maxLength={2}
+                    />
+                    <Form.Control
+                      value={genState.SSSnumber[1]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "sss_number",
+                          SSSnumber: e.target.value,
+                          index: 1,
+                        })
+                      }
+                      type="number"
+                      placeholder="#######"
+                      maxLength={7}
+                    />
+                    <Form.Control
+                      value={genState.SSSnumber[2]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "sss_number",
+                          SSSnumber: e.target.value,
+                          index: 2,
+                        })
+                      }
+                      type="number"
+                      placeholder="#"
+                      maxLength={1}
+                    />
+                  </InputGroup>
+                </Form.Group>
+                <Form.Group as={Col} md="5">
+                  <Form.Label className="fw-semibold">PH #</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      value={genState.PHnumber[0]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "ph_number",
+                          PHnumber: e.target.value,
+                          index: 0,
+                        })
+                      }
+                      type="number"
+                      placeholder="##"
+                      maxLength={2}
+                    />
+                    <Form.Control
+                      value={genState.PHnumber[1]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "ph_number",
+                          PHnumber: e.target.value,
+                          index: 1,
+                        })
+                      }
+                      type="number"
+                      placeholder="#########"
+                      maxLength={9}
+                    />
+                    <Form.Control
+                      value={genState.PHnumber[2]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "ph_number",
+                          PHnumber: e.target.value,
+                          index: 2,
+                        })
+                      }
+                      type="number"
+                      placeholder="#"
+                      maxLength={1}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </Row>
+              {/* Pag-IBIG # & ATM # */}
+              <Row className="mb-3 pb-5 border-bottom">
+                <Form.Group as={Col} md="4">
+                  <Form.Label className="fw-semibold">Pag-IBIG #</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      disabled={isX.isOutletProcessor}
+                      value={genState?.PInumber?.[0]}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "pi_number",
+                          PInumber: e.target.value,
+                          index: 0,
+                        })
+                      }
+                      type="number"
+                      placeholder="####"
+                      maxLength={4}
+                    />
+                    <Form.Control
+                      value={genState?.PInumber?.[1]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "pi_number",
+                          PInumber: e.target.value,
+                          index: 1,
+                        })
+                      }
+                      type="number"
+                      placeholder="####"
+                      maxLength={4}
+                    />
+                    <Form.Control
+                      value={genState?.PInumber?.[2]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "pi_number",
+                          PInumber: e.target.value,
+                          index: 2,
+                        })
+                      }
+                      type="number"
+                      placeholder="####"
+                      maxLength={4}
+                    />
+                  </InputGroup>
+                </Form.Group>
+                <Form.Group as={Col} md="4">
+                  <Form.Label className="fw-semibold">{`ATM # (Optional)`}</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      value={genState.ATMnumber[0]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "atm_number",
+                          ATMnumber: e.target.value,
+                          index: 0,
+                        })
+                      }
+                      type="number"
+                      placeholder="####"
+                      maxLength={4}
+                    />
+                    <Form.Control
+                      value={genState.ATMnumber[1]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "atm_number",
+                          ATMnumber: e.target.value,
+                          index: 1,
+                        })
+                      }
+                      type="number"
+                      placeholder="###"
+                      maxLength={3}
+                    />
+                    <Form.Control
+                      value={genState.ATMnumber[2]}
+                      disabled={isX.isOutletProcessor}
+                      onChange={(e) =>
+                        genDispatch({
+                          type: "atm_number",
+                          ATMnumber: e.target.value,
+                          index: 2,
+                        })
+                      }
+                      type="number"
+                      placeholder="###"
+                      maxLength={3}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </Row>
+            </>
+          )}
           <Row className="pt-3">
             <Col md="auto">
-              {!isX.isOutletProcessor && (
-                <Button type="submit" variant="outline-success">
-                  {geninfo ? "Save Change" : "Proceed"}
-                </Button>
-              )}
+              <Button type="submit" variant="outline-success">
+                {geninfo ? "Save Changes" : "Proceed"}
+              </Button>
             </Col>
           </Row>
         </Form>

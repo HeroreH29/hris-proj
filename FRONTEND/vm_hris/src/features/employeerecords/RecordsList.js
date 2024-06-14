@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useGetGeninfosQuery } from "./recordsApiSlice";
 import Record from "./Record";
 import {
@@ -17,18 +17,16 @@ import {
   faArrowDownAZ,
   faPrint,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
 import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
 import PrintPerBranch from "./PrintPerBranch";
-import EmployeeNotifier from "./EmployeeNotifier";
 import { toast } from "react-toastify";
 
 const RecordsList = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const { isX, canX } = useAuth();
 
@@ -61,20 +59,6 @@ const RecordsList = () => {
     isError: genError,
     error: gerror,
   } = useGetGeninfosQuery();
-
-  // Employee Assesment and Regularization Notifier
-  useEffect(() => {
-    if (geninfos?.ids?.length > 0) {
-      const { ids: gids, entities: gentities } = geninfos;
-
-      // For notifying HR/Admin or Outlet Processor for employee regularization
-      if (location.pathname === "/employeerecords") {
-        EmployeeNotifier({ gids, gentities, tableState, isX });
-      }
-    }
-
-    // eslint-disable-next-line
-  }, [geninfos]);
 
   if (genLoading) return <Spinner animation="border" />;
 
@@ -159,15 +143,15 @@ const RecordsList = () => {
     return (
       <Container>
         <Row>
-          {!isX.isOutletProcessor && (
-            <Col>
-              <h3>Employee Records</h3>
-              <small>{`(Click a record to view/edit)`}</small>
-            </Col>
-          )}
+          <Col>
+            <h3>Employee Records</h3>
+            <small>
+              {!isX.isOutletProcessor ? `(Click a record to view/edit)` : ""}
+            </small>
+          </Col>
 
           <Col md="auto">
-            {canX.canCreate && canX.canUpdate && canX.canDelete && (
+            {(canX.canCreate || canX.canUpdate || canX.canDelete) && (
               <Button
                 variant="outline-primary"
                 onClick={() => {
@@ -221,9 +205,7 @@ const RecordsList = () => {
               <td className="bg-secondary-subtle">
                 <Form>
                   <Form.Select
-                    disabled={
-                      !canX.canCreate && !canX.canUpdate && !canX.canDelete
-                    }
+                    disabled={isX.isOutletProcessor}
                     value={tableState.outletFilter}
                     onChange={(e) => {
                       tableDispatch({

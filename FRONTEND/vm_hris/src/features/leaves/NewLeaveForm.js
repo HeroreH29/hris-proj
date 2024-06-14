@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Button, Form, ListGroup } from "react-bootstrap";
+import { Row, Col, Button, Form, ListGroup, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { LEAVETYPES } from "../../config/leaveTypeOptions";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
-import { useAddNewLeaveMutation } from "./leavesApiSlice";
+import { useAddNewLeaveMutation, useGetLeavesQuery } from "./leavesApiSlice";
 import { differenceInDays, format } from "date-fns";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
@@ -18,14 +18,15 @@ const NewLeaveForm = () => {
   const navigate = useNavigate();
 
   const { user, employeeId, isX, branch } = useAuth();
-
   const { leaveState, leaveDispatch } = useLeaveForm();
-  const [validated, setValidated] = useState(false);
-
   const { data: geninfos, isSuccess } = useGetGeninfosQuery();
-
-  //const { data: employeerecords, isSuccess } = useGetEmployeeRecordsQuery();
-
+  const {
+    data: leaves,
+    isSuccess: leaveSuccess,
+    isLoading: leaveLoading,
+    isError: leaveError,
+    error: leaveerr,
+  } = useGetLeavesQuery();
   const [
     addLeave,
     { isSuccess: addSuccess, isError: isAddError, error: addError },
@@ -34,19 +35,18 @@ const NewLeaveForm = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [validated, setValidated] = useState(false);
+  const [datesWithLeaves, setDatesWithLeaves] = useState([]);
+  const [isLeaveExisting, setIsLeaveExisting] = useState(false);
 
-  // For automatically selecting the matching employee for "Users"
-  if (isX.isUser && isSuccess) {
-    const { ids, entities } = geninfos;
-
-    const foundEmployee = ids.find(
-      (id) => entities[id].EmployeeID === employeeId
+  // Dropdown options occupier
+  const leaveTypeDropdown = Object.entries(LEAVETYPES).map(([key, value]) => {
+    return (
+      <option key={key} value={value}>
+        {value}
+      </option>
     );
-
-    if (!selectedEmployee) {
-      setSelectedEmployee(entities[foundEmployee]);
-    }
-  }
+  });
 
   // For searching employees
   const handleSearch = (e) => {
@@ -82,24 +82,91 @@ const NewLeaveForm = () => {
       }
     }
   };
-
   // For selecting searched employee
   const handleSearchResultClick = (result) => {
     setSearchQuery(`${result?.FullName}. (${result?.EmployeeID})`);
     setSearchResults("");
     setSelectedEmployee(result);
+
+    const { ids, entities } = leaves;
+    const matchingLeaveRecords = ids
+      .filter((id) => entities[id].FiledFor?.EmployeeID === result?.EmployeeID)
+      .map((id) => entities[id]);
+
+    const tempDatesWithLeaves = [];
+
+    for (const leave of matchingLeaveRecords) {
+      const noOfDays =
+        differenceInDays(new Date(leave.Lto), new Date(leave.Lfrom)) + 1;
+
+      let currentDate = new Date(leave.Lfrom);
+      for (let i = 0; i < noOfDays; i++) {
+        tempDatesWithLeaves.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    setDatesWithLeaves((prev) => [...prev, ...tempDatesWithLeaves]);
   };
-
+  // Return to previous page handler
   const handlePreviousPage = () => navigate("/leaves");
+  // Reset button handler
+  const handleResetFields = () => {
+    leaveDispatch({ type: "resetform" });
+    setSelectedEmployee("");
+    setSearchQuery("");
+    setSearchResults("");
+    setValidated(false);
+  };
+  // Leave file upload handler
+  const LeaveApplicationUpload = (file) => {
+    if (!file.type.startsWith("application/json")) {
+      return toast.error("Invalid file type. Please upload a '.json' file", {
+        containerId: "A",
+      });
+    }
 
-  const leaveTypeDropdown = Object.entries(LEAVETYPES).map(([key, value]) => {
-    return (
-      <option key={key} value={value}>
-        {value}
-      </option>
-    );
-  });
+    const reader = new FileReader();
 
+    reader.onload = async (event) => {
+      const leaveData = JSON.parse(event.target.result);
+
+      // Check first the uploaded leave if already existing. PREVENT UPLOAD if it is.
+      const { ids } = leaves;
+      const isExistingLeave = ids.some((id) => id === leaveData.id);
+      if (isExistingLeave) {
+        return toast.warn("Uploaded leave already exist in the system!", {
+          containerId: "A",
+        });
+      }
+
+      // Upload leave data to database
+      const addPromise = new Promise((resolve) => {
+        resolve(addLeave(leaveData));
+      });
+
+      toast
+        .promise(
+          addPromise,
+          {
+            pending: "Filing leave...",
+            success: "New leave filed!",
+            error: addError,
+          },
+          { containerId: "A" }
+        )
+        .then(() => {
+          navigate("/leaves");
+        });
+    };
+
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
+
+    reader.readAsText(file);
+  };
+  // Leave file submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -177,62 +244,74 @@ const NewLeaveForm = () => {
     setValidated(true);
   };
 
-  const handleResetFields = () => {
-    leaveDispatch({ type: "resetform" });
-    setSelectedEmployee("");
-    setSearchQuery("");
-    setSearchResults("");
-    setValidated(false);
-  };
+  // For automatically selecting the matching employee for "Users"
+  if (isX.isUser && isSuccess) {
+    const { ids, entities } = geninfos;
 
-  const LeaveApplicationUpload = (file) => {
-    if (!file.type.startsWith("application/json")) {
-      return toast.error("Invalid file type. Please upload a '.json' file", {
-        containerId: "A",
-      });
+    const foundEmployee = ids.find(
+      (id) => entities[id].EmployeeID === employeeId
+    );
+
+    if (!selectedEmployee) {
+      setSelectedEmployee(entities[foundEmployee]);
+    }
+  }
+
+  /* Leave existence checker */
+  useEffect(() => {
+    try {
+      const isExisting = datesWithLeaves.some(
+        (date) =>
+          format(new Date(leaveState.Lfrom), "PP") === format(date, "PP") ||
+          format(new Date(leaveState.Lto), "PP") === format(date, "PP")
+      );
+      setIsLeaveExisting(isExisting);
+    } catch (error) {
+      console.log(error);
     }
 
-    const reader = new FileReader();
+    // eslint-disable-next-line
+  }, [leaveState.Lto, leaveState.Lfrom]);
 
-    reader.onload = async (event) => {
-      const leaveData = JSON.parse(event.target.result);
-
-      // Upload leave data to database
-      const addPromise = new Promise((resolve) => {
-        resolve(addLeave(leaveData));
-      });
-
-      toast
-        .promise(
-          addPromise,
-          {
-            pending: "Filing leave...",
-            success: "New leave filed!",
-            error: addError.data.message,
-          },
-          { containerId: "A" }
-        )
-        .then(() => {
-          navigate("/leaves");
+  /* Leave existence toast trigger */
+  useEffect(() => {
+    try {
+      let currentToastId;
+      if (isLeaveExisting) {
+        currentToastId = toast.warn("A filed leave exist on selected dates!", {
+          containerId: "A",
         });
-    };
-
-    reader.onerror = (error) => {
-      console.error("Error reading file:", error);
-    };
-
-    reader.readAsText(file);
-  };
-
-  /* useEffect(() => {
-    if (addSuccess) {
-      toast.success("Leave filed!");
-      navigate("/leaves");
+      } else {
+        if (toast.isActive(currentToastId, "A")) toast.dismiss(currentToastId);
+      }
+    } catch (error) {
+      console.log(error);
     }
-    if (isAddError) {
-      toast.error(`Something went wrong: ${addError.data.message}`);
+    // eslint-disable-next-line
+  }, [leaveState.Lto, leaveState.Lfrom, isLeaveExisting]);
+
+  /* Invalid date range checker */
+  useEffect(() => {
+    try {
+      let currentToastId;
+      const fromDate = new Date(leaveState.Lfrom).valueOf();
+      const toDate = new Date(leaveState.Lto).valueOf();
+      if (fromDate > toDate) {
+        currentToastId = toast.warn(
+          "Invalid date range. Double check selected dates!",
+          {
+            containerId: "A",
+          }
+        );
+      } else {
+        if (toast.isActive(currentToastId, "A")) toast.dismiss(currentToastId);
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }, [addSuccess, addError, isAddError, navigate]); */
+  }, [leaveState.Lto, leaveState.Lfrom]);
+
+  if (leaveLoading) return <Spinner animation="border" />;
 
   return (
     <>
@@ -396,7 +475,11 @@ const NewLeaveForm = () => {
         {/* Buttons */}
         <Row className="mb-3">
           <Form.Group as={Col} md="auto">
-            <Button type="submit" variant="outline-success">
+            <Button
+              disabled={isLeaveExisting}
+              type="submit"
+              variant="outline-success"
+            >
               File Leave
             </Button>
           </Form.Group>

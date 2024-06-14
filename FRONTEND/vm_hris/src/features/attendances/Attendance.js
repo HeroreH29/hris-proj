@@ -31,17 +31,19 @@ const Attendance = ({ att, attlogData }) => {
 
   // Printing attendance function
   const handlePrintAtt = async () => {
+    const dayCount = getDatesInBetween(
+      attModalState.dateFrom,
+      attModalState.dateTo
+    )?.length;
     /* Check if document requested is appropriate based on employee type and length of dateArr */
-    if (
-      geninfo.EmployeeType === "Casual" &&
-      getDatesInBetween(attModalState.dateFrom, attModalState.dateTo)?.length >
-        7
-    ) {
+    if (geninfo.EmployeeType === "Casual" && dayCount > 7) {
       toast.error(
-        `Most # of days required for Casual Time Sheet is 7 days. Requested is ${
-          getDatesInBetween(attModalState.dateFrom, attModalState.dateTo)
-            ?.length
-        } days. Double check your dates!`
+        `Most # of days required for Casual Time Sheet is 7 days. Requested is ${dayCount} days. Double check your dates!`
+      );
+      return;
+    } else if (dayCount > 15) {
+      toast.error(
+        `Most # of days required for Regular Time Sheet is 15. Request is ${dayCount}. Double check your dates!`
       );
       return;
     }

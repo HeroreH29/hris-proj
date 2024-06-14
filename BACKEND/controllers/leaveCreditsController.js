@@ -1,4 +1,5 @@
 const LeaveCredit = require("../models/LeaveCredit");
+const Leave = require("../models/Leave");
 const GenInfo = require("../models/GenInfo");
 const {
   reApplyCreditBudget,
@@ -14,6 +15,7 @@ const { differenceInYears } = require("date-fns");
 const getAllLeaveCredits = async (req, res) => {
   const leavecredits = await LeaveCredit.find().populate("CreditsOf");
 
+  // Populating the collection
   if (!leavecredits.length) {
     const getLeaveCreditData = (srvcYrs) => {
       if (srvcYrs >= 1 && srvcYrs <= 4) {
@@ -41,10 +43,6 @@ const getAllLeaveCredits = async (req, res) => {
       "DateEmployed EmpStatus"
     );
 
-    // const filteredRecords = genInfos.filter(
-    //   (record) => record.GenInfo !== null
-    // );
-
     for (const info of genInfos) {
       const srvcYrs = differenceInYears(
         new Date(),
@@ -58,6 +56,37 @@ const getAllLeaveCredits = async (req, res) => {
           CreditsOf: info._id,
         });
       }
+    }
+  }
+
+  // Recalculating the credits based on latest/recent filed leave of the current year
+  if (leavecredits.length) {
+    for (const credit of leavecredits) {
+      const matchingLeaves = await Leave.find({
+        FiledFor: credit.CreditsOf,
+        DateModified: { $regex: /\/2024$/ },
+        Approve: 1,
+      }).exec();
+
+      if (!matchingLeaves.length) continue;
+      for (const leave of matchingLeaves) {
+        if (!leave?.Credited) {
+          const ltype = leave.Ltype.replace(" ", "");
+          const creditCalculation = credit[ltype] - leave.NoOfDays;
+          if (creditCalculation < 0) {
+            credit[ltype] = 0;
+          } else {
+            credit[ltype] = creditCalculation;
+          }
+          leave.Credited = true;
+
+          // Save changes
+          await leave.save();
+        }
+      }
+
+      // Save changes
+      await credit.save();
     }
   }
 

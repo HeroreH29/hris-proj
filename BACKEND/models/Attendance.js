@@ -10,13 +10,9 @@ const attendanceSchema = new mongoose.Schema({
     type: Buffer,
     required: true,
   },
-  createdAt: {
+  uploadedAt: {
     type: String,
-    default: format(new Date(), "Ppppp"),
-  },
-  updatedAt: {
-    type: String,
-    default: "",
+    default: new Date(),
   },
 });
 

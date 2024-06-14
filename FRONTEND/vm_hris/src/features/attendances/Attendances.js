@@ -28,6 +28,7 @@ import useTableSettings from "../../hooks/useTableSettings";
 import AttendanceModal from "../../modals/AttendanceModal";
 import useAttModalSettings from "../../hooks/useAttModalSettings";
 import AttLogProcessor from "./AttLogProcessor";
+import AttendanceListModal from "../../modals/AttendanceListModal";
 
 const Attendances = () => {
   const { attListProcessor, pdfListProcessor } = AttLogProcessor();
@@ -93,7 +94,7 @@ const Attendances = () => {
         containerId: "A",
       });
     }
-  }, [attdataError]);
+  }, [attdataError, attdataerr?.data.message]);
 
   // Add or update att data error checker
   useEffect(() => {
@@ -118,97 +119,60 @@ const Attendances = () => {
       reader.onload = async (event) => {
         const uploadedRawAttData = event.target.result;
 
-        if (!attdata?.ids.length) {
-          const addPromise = new Promise((resolve) => {
-            resolve(
-              addAttData({
-                attlogName: file.name,
-                data: uploadedRawAttData,
-              })
-            );
-          });
-
-          toast.promise(
-            addPromise,
-            {
-              pending: "Uploading attendance data...",
-              success: "Attendance data uploaded!",
-              error: "Attendance data failed to upload!",
-            },
-            {
-              containerId: "A",
-            }
-          );
-        } else {
-          const { ids: attids, entities: attentities } = attdata;
-
-          const currRawAttData = attids.map((id) => {
-            return attentities[id].data;
-          });
-
-          const mergedAttData = currRawAttData[0] + "\n" + uploadedRawAttData;
-          const updatePromise = new Promise((resolve) => {
-            resolve(
-              updateAttData({
-                id: attids[0],
-                attlogName: file.name,
-                data: mergedAttData,
-              })
-            );
-          });
-
-          toast.promise(
-            updatePromise,
-            {
-              pending: "Updating existing attendance data...",
-              success: "Attendance data updated!",
-              error: "Failed updating attendance data!",
-            },
-            { containerId: "A" }
-          );
+        try {
+          const addPromise = await addAttData({
+            attlogName: file.name,
+            data: uploadedRawAttData,
+          }).unwrap();
+          if (addPromise) toast.success("Attendance data uploaded!");
+        } catch (error) {
+          toast.error(error);
         }
       };
       reader.readAsText(file);
     }
   };
 
-  const handleAttlistRefresh = () => {
-    if (attdataSuccess && genSuccess) {
-      const { ids: genids, entities: genentities } = geninfos;
-      const { ids: attids, entities: attentities } = attdata;
+  const handleAttlistRefresh = (data) => {
+    attModalDispatch({ type: "close_list_modal" });
 
-      const fileContents = attids.map((id) => {
-        return attentities[id].data;
+    let decodedData = data;
+    try {
+      decodedData = window.atob(data);
+    } catch (error) {
+      console.log("Data is not base64. Proceeding...");
+    }
+
+    const { ids: genids, entities: genentities } = geninfos;
+    const attlistPromise = attListProcessor(
+      genids,
+      genentities,
+      decodedData,
+      setAttlogData
+    );
+
+    // Clear previous attList state
+    setAttList([]);
+
+    toast
+      .promise(
+        attlistPromise,
+        {
+          pending: "Attendance loading...",
+          success: "Attendance loaded!",
+          error: "Attendance failed to load!",
+        },
+        { containerId: "A" }
+      )
+      .then((result) => {
+        setAttList(result);
+      })
+      .catch((error) => {
+        console.log("Attendance load error: ", error);
       });
 
-      const attlistPromise = attListProcessor(
-        genids,
-        genentities,
-        fileContents[0],
-        setAttlogData
-      );
-
-      setAttList([]);
-      /* setAttList(
-        attListProcessor(genids, genentities, fileContents[0], setAttlogData)
-      ); */
-      toast
-        .promise(
-          attlistPromise,
-          {
-            pending: "Attendance loading...",
-            success: "Attendance loaded!",
-            error: "Attendance failed to load!",
-          },
-          { containerId: "A" }
-        )
-        .then((result) => {
-          setAttList(result);
-        })
-        .catch((error) => {
-          console.log("Attendance load error: ", error);
-        });
-    }
+    // if (attdataSuccess && genSuccess) {
+    // }
   };
 
   const handleNextPage = () => {
@@ -236,9 +200,16 @@ const Attendances = () => {
     }
 
     if (daysDiff > 15) {
-      return toast.warn("Selected date range is more than 15 days", {
-        containerId: "A",
-      });
+      return toast.warn(
+        "Selected date range is more than 15 days. Max is 15 days only for Regulars",
+        {
+          containerId: "A",
+        }
+      );
+    } else if (daysDiff > 7 && tableState?.empTypeFilter === "Casual") {
+      return toast.warn(
+        '"Selected date range is more than 15 days. Max is 7 days only for Casuals"'
+      );
     }
 
     // Reset date values and close modal
@@ -303,13 +274,13 @@ const Attendances = () => {
       {/* Title and attendance load button */}
       <Row>
         <Col>
-          <h3>Attendances</h3>
+          <h3>Attendance</h3>
         </Col>
         <Col md="auto">
           <Button
             variant="outline-success"
             disabled={!attdata?.ids.length}
-            onClick={() => handleAttlistRefresh()}
+            onClick={() => attModalDispatch({ type: "show_list_modal" })}
           >
             Load attendance
             <FontAwesomeIcon className="ms-2" icon={faRefresh} />
@@ -415,6 +386,19 @@ const Attendances = () => {
         validated={validated}
         handlePrintBranchAttendance={handlePrintBranchAttendance}
       />
+
+      {/* Modal of list of uploaded attendances */}
+      {attdataSuccess && (
+        <>
+          <AttendanceListModal
+            attModalState={attModalState}
+            attModalDispatch={attModalDispatch}
+            attdata={attdata}
+            setAttlogData={setAttlogData}
+            handleAttlistRefresh={handleAttlistRefresh}
+          />
+        </>
+      )}
     </Container>
   );
 };

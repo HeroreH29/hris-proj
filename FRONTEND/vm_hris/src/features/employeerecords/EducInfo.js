@@ -8,7 +8,6 @@ import { LEVEL, DEGREE } from "../../config/educOptions";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import useRecordForm from "../../hooks/useRecordForm";
-import { generateEmailMsg } from "../emailSender/generateEmailMsg";
 import useAuth from "../../hooks/useAuth";
 
 const EducInfo = ({
@@ -50,19 +49,6 @@ const EducInfo = ({
 
     if (form.checkValidity() && !isLoading) {
       await updateEducinfo(others);
-
-      // if (isOutletProcessor || AssignedOutlet !== "Head Office") {
-      //   await sendEmail(
-      //     generateEmailMsg({
-      //       branch,
-      //       filename: `${employeeId}-EducInfo.json`,
-      //       id: educinfo?.id,
-      //       compiledInfo: others,
-      //       update: true,
-      //       assignedOutlet: AssignedOutlet,
-      //     })
-      //   );
-      // }
     } else {
       e.stopPropagation();
     }
@@ -103,8 +89,10 @@ const EducInfo = ({
       setShowModal(false);
       setValidated(false);
 
-      isSuccess && toast.info("Educational attainment updated!");
-      isDelSuccess && toast.info("Educational attainment deleted!");
+      isSuccess &&
+        toast.info("Educational attainment updated!", { containerId: "A" });
+      isDelSuccess &&
+        toast.info("Educational attainment deleted!", { containerId: "A" });
 
       //navigate(`/employeerecords/${educState.EmployeeID}`);
       window.location.reload();

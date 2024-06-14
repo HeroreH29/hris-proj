@@ -35,6 +35,7 @@ const createGenInfo = async (req, res) => {
     Notes,
     ATMnumber,
     ContractDateEnd,
+    MI,
     ...others
   } = req.body;
 
@@ -45,7 +46,9 @@ const createGenInfo = async (req, res) => {
 
   // Confirm data
   if (!othersHasValues) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res
+      .status(400)
+      .json({ message: "General Info: All fields are required" });
   }
 
   // Check duplicates

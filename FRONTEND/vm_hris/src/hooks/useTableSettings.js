@@ -1,9 +1,9 @@
-import { useReducer } from "react";
-import useAuth from "./useAuth";
+import { useReducer, useEffect } from "react";
 import {
   faSortNumericAsc,
   faSortNumericDesc,
 } from "@fortawesome/free-solid-svg-icons";
+import useAuth from "./useAuth";
 
 const useTableSettings = () => {
   const { branch } = useAuth();
@@ -93,6 +93,8 @@ const useTableSettings = () => {
       case "datesort": {
         return {
           ...state,
+          sliceStart: 0,
+          sliceEnd: 10,
           dateSort: !state.dateSort,
           dateSortIcon: dateSortIconArr[state.dateSort ? 1 : 0],
         };
@@ -110,7 +112,16 @@ const useTableSettings = () => {
     }
   };
 
-  const [tableState, tableDispatch] = useReducer(reducer, initialState);
+  const init = () => ({
+    ...initialState,
+    outletFilter: branch,
+  });
+
+  const [tableState, tableDispatch] = useReducer(reducer, initialState, init);
+
+  useEffect(() => {
+    tableDispatch({ type: "outlet_filter", outletFilter: branch });
+  }, [branch]);
 
   return { tableState, tableDispatch };
 };

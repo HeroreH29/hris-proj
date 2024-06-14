@@ -21,18 +21,25 @@ const getAttendanceData = async (req, res) => {
 // @route POST /attendances
 // @access Private
 const createAttendance = async (req, res) => {
-  const data = req.body;
+  const { data, ...others } = req.body;
 
   // Check if other properties of the request body has values
-  const othersHasValues = Object.values(data).every((value) => value);
+  const othersHasValues = Object.values(req.body).every((value) => value);
 
   // Some values are missing
   if (!othersHasValues) {
     return res.status(400).json({ message: "Some fields are missing values" });
   }
 
+  // Check if attendance data already exist in the database. Prevent upload if it is.
+  const isAttlogExist = await Attendance.findOne({ data: data });
+  if (isAttlogExist)
+    return res
+      .status(409)
+      .json({ message: "Attlog data already exist in the system!" });
+
   // Create and store new announcement
-  const attendance = await Attendance.create(data);
+  const attendance = await Attendance.create(req.body);
 
   if (attendance) {
     return res.status(201).json({ message: `Attendance data uploaded` });

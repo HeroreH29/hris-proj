@@ -5,6 +5,7 @@ const useAttModalSettings = () => {
     dateTo: "",
     dateFrom: "",
     showModal: false,
+    showListModal: false,
     startSlice: 0,
     endSlice: 10,
   };
@@ -28,8 +29,14 @@ const useAttModalSettings = () => {
       case "show_modal": {
         return { ...state, showModal: true };
       }
+      case "show_list_modal": {
+        return { ...state, showListModal: true };
+      }
       case "close_modal": {
         return { ...state, showModal: false, dateTo: "", dateFrom: "" };
+      }
+      case "close_list_modal": {
+        return { ...state, showListModal: false };
       }
 
       default: {

@@ -7,21 +7,15 @@ import useTitle from "../../hooks/useTitle";
 import useAuth from "../../hooks/useAuth";
 import AnnouncementsList from "../announcements/AnnouncementsList";
 import CelebrantsList from "../celebrants/CelebrantsList";
-import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
-import useContractNotif from "../../hooks/useContractNotif";
 
 const Welcome = () => {
   const { isX, userLevel } = useAuth();
   useTitle(`${userLevel} Dashboard | Via Mare HRIS`);
 
-  const { data: geninfos, isSuccess } = useGetGeninfosQuery();
-
   const navigate = useNavigate();
 
   const date = new Date();
   const monthName = date.toLocaleString("default", { month: "long" });
-
-  useContractNotif(geninfos, isSuccess, useAuth);
 
   const content = (
     <Container>

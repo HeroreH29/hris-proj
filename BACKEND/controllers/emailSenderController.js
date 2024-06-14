@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
+// Code below is the OLD email transport. Keeping it for future references.
+/* const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   host: process.env.SMTP_HOST,
   port: process.env.SMTP_PORT,
@@ -11,6 +12,24 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     rejectUnauthorized: true,
+  },
+}); */
+
+const oauth2Transporter = nodemailer.createTransport({
+  service: process.env.SMTP_SERVICE,
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: true,
+  auth: {
+    type: "OAuth2",
+    user: process.env.SMTP_MAIL,
+    clientId: process.env.SMTP_CLIENT_ID,
+    clientSecret: process.env.SMTP_CLIENT_SECRET,
+    accessToken: process.env.SMTP_ACCESS_TOKEN,
+    refreshToken: process.env.SMTP_REFRESH_TOKEN,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
@@ -30,11 +49,11 @@ const sendLeaveThruEmail = async (req, res) => {
     attachments,
   };
 
-  transporter.sendMail(mailOptions, function (error, info) {
+  oauth2Transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      console.error(error);
+      res.json({ messsage: error });
     } else {
-      console.log("Email sent successfully!");
+      res.json("Email sent successfully!");
     }
   });
 };

@@ -28,21 +28,23 @@ const getAllLeaves = async (req, res) => {
 
     /* FOR REASSIGNING GENINFO REFERENCE */
 
-    // for (const leave of leaves) {
-    //   if (!leave.EmployeeID) {
-    //     continue;
-    //   }
+    for (const leave of leaves) {
+      if (!leave.EmployeeID) {
+        continue;
+      } else if (leave.FiledFor) {
+        continue;
+      }
 
-    //   const foundGenInfo = await GenInfo.findOne({
-    //     EmployeeID: leave.EmployeeID,
-    //   });
+      const foundGenInfo = await GenInfo.findOne({
+        EmployeeID: leave.EmployeeID,
+      });
 
-    //   // if (!foundGenInfo) res.status(404).json({ message: "GenInfo not found" });
+      // if (!foundGenInfo) res.status(404).json({ message: "GenInfo not found" });
 
-    //   leave.FiledFor = foundGenInfo?._id;
+      leave.FiledFor = foundGenInfo?._id;
 
-    //   await leave.save();
-    // }
+      await leave.save();
+    }
 
     /* FOR RECALCULATING APPROVED LEAVES FOR LEAVE CREDITS */
 
@@ -64,7 +66,6 @@ const getAllLeaves = async (req, res) => {
     //     }
     //   }
     // }
-
     res.json(leaves.sort(() => -1));
   } catch (error) {
     res.status(500).json({ error: "GET LEAVES server error: " + error });

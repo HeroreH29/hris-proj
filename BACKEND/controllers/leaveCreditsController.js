@@ -64,7 +64,7 @@ const getAllLeaveCredits = async (req, res) => {
     for (const credit of leavecredits) {
       const matchingLeaves = await Leave.find({
         FiledFor: credit.CreditsOf,
-        DateModified: { $regex: /\/2024$/ },
+        DateModified: { $regex: "2024" },
         Approve: 1,
       }).exec();
 

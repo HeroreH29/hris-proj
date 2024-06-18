@@ -4,7 +4,7 @@ export const OUTLET_EMAILS = {
   Landmark: ["marivic.viamare@gmail.com", "marivic.rono@gmail.com"],
   "Head Office": "hr@viamare.com.ph",
   Commissary: "commissary.viamare@gmail.com",
-  ICTSI: "ictsi.viamare@gmail.com",
+  ICTSI: "nong@ictsi.com",
   "LM Trinoma": "landmarktrinom@viamare.com.ph",
   "St. Lukes": "stlukesbgc@viamare.com.ph",
   "EDSA Shangri-La": "shangrila@viamare.com.ph",

@@ -91,7 +91,7 @@ const LeavesList = () => {
     tableDispatch({ type: "slice_dec" });
   };
 
-  if (leaveError) return <p>{leaveerr}</p>;
+  if (leaveError) return <p>{JSON.stringify(leaveerr)}</p>;
 
   if (leaveLoading && !leaveCredit) return <Spinner animation="border" />;
 

@@ -50,6 +50,10 @@ const leaveSchema = new Schema(
       type: Object,
       required: true,
     },
+    Credited: {
+      type: Boolean,
+      default: false,
+    },
     FiledFor: {
       type: Schema.Types.ObjectId,
       ref: "GenInfo",

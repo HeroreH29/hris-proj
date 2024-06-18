@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
-import { ASSIGNEDOUTLET } from "../config/gInfoOptions";
 import { OUTLET_EMAILS } from "../config/outletEmailOptions";
 import { useSendEmailMutation } from "../features/emailSender/sendEmailApiSlice";
 import { useParams } from "react-router-dom";
@@ -27,7 +26,7 @@ const RecordToOutletModal = ({
 
   const handleSendToOutlet = async () => {
     let emailMsg = {
-      email: OUTLET_EMAILS["Head Office"],
+      email: OUTLET_EMAILS[selectedOutlet],
       subject: `Employee Record for ${selectedOutlet}`,
       message: `Good day,\n\nThis email contains an employee record for this branch/outlet sent by VM HR Department.\nKindly upload the attached file to your system. ASAP.\n\n\n*PLEASE DO NOT REPLY TO THIS EMAIL*`,
       attachments: [
@@ -65,7 +64,13 @@ const RecordToOutletModal = ({
   }, [isEmailSuccess, isEmailLoading, isEmailError, emailErr]);
 
   return (
-    <Modal show={showOutletPicker} onHide={() => setShowOutletPicker(false)}>
+    <Modal
+      show={showOutletPicker}
+      onHide={() => {
+        setSelectedOutlet("");
+        setShowOutletPicker(false);
+      }}
+    >
       <Modal.Header closeButton>
         <Modal.Title>Pick an outlet to send...</Modal.Title>
       </Modal.Header>
@@ -74,10 +79,17 @@ const RecordToOutletModal = ({
           value={selectedOutlet}
           onChange={(e) => setSelectedOutlet(e.target.value)}
         >
-          {Object.entries(ASSIGNEDOUTLET)
-            .filter(([key]) => key !== "Head Office")
+          <option value="" key="1">
+            Select an outlet...
+          </option>
+          {Object.entries(OUTLET_EMAILS)
+            .filter(([key]) => key !== "admin")
             .map(([key, value]) => {
-              return <option value={value}>{key}</option>;
+              return (
+                <option key={key} value={key}>
+                  {key}
+                </option>
+              );
             })}
         </Form.Select>
       </Modal.Body>
@@ -87,7 +99,7 @@ const RecordToOutletModal = ({
           variant="outline-success"
           onClick={handleSendToOutlet}
         >
-          Send to {!selectedOutlet ? "..." : selectedOutlet}
+          Send to {!selectedOutlet ? "" : selectedOutlet}
         </Button>
       </Modal.Footer>
     </Modal>

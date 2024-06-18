@@ -140,7 +140,7 @@ const DashHeader = () => {
                       </>
                     }
                   >
-                    {notifList.map((notif) => {
+                    {notifList.map((notif, index) => {
                       let bgColor = "";
                       if (
                         notif.msg.toLowerCase().includes("evaluation") ||
@@ -158,6 +158,7 @@ const DashHeader = () => {
                         <Dropdown.Item
                           className={`border fw-medium py-2 ${bgColor}`}
                           href={`/employeerecords/${notif.id}`}
+                          key={index}
                         >
                           {notif.msg}
                         </Dropdown.Item>

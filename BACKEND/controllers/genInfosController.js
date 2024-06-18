@@ -1,6 +1,7 @@
 const GenInfo = require("../models/GenInfo");
 const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 const { leaveCreditInclUpd } = require("../xtra_functions/leaveCreditInclUpd");
+const { updateEmployeeID } = require("../xtra_functions/updateEmployeeID");
 const {
   updateInactiveEmployees,
 } = require("../xtra_functions/updateInactiveEmployees");
@@ -120,7 +121,7 @@ const updateGenInfo = async (req, res) => {
 
       /* It is also required to update the EmployeeID
   of other information of the employee if EmployeeID is changed/modified */
-      UpdateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
+      updateEmployeeID(geninfo?.EmployeeID, newEmployeeID);
     }
 
     const updatedGenInfo = await newGenInfo.save();

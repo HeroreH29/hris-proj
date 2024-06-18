@@ -54,10 +54,6 @@ const leaveSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "GenInfo",
     },
-    Credited: {
-      type: Boolean,
-      default: false,
-    },
   },
   { toJSON: { virtuals: true } }
 );

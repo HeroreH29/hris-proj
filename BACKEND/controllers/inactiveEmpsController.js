@@ -18,7 +18,7 @@ const getAllInactiveEmps = async (req, res) => {
 // @route POST /inactiveemps
 // @access Private
 const createInactiveEmp = async (req, res) => {
-  const { Mode_of_Separation, EmployeeID, ...others } = req.body;
+  const { Mode_of_Separation, ...others } = req.body;
 
   // Check if other properties of the request body has values
   const othersHasValues = Object.values(others).every(
@@ -31,7 +31,7 @@ const createInactiveEmp = async (req, res) => {
   }
 
   // Check for duplicate inactive employee
-  const duplicate = await InactiveEmp.findOne({ EmployeeID: EmployeeID })
+  const duplicate = await InactiveEmp.findOne({ EmployeeID: others.EmployeeID })
     .collation({ locale: "en", strength: 2 })
     .lean()
     .exec();

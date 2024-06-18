@@ -4,6 +4,8 @@ const EducInfo = require("../models/EducInfo");
 const WorkInfo = require("../models/WorkInfo");
 const Leave = require("../models/Leave");
 const InactiveEmp = require("../models/InactiveEmp");
+const TraniningHistory = require("../models/TrainingHistory");
+const TrainingHistory = require("../models/TrainingHistory");
 
 const updateEmployeeID = async (origEmployeeID, newEmployeeID) => {
   // Fetch documents from other informations using EmployeeID
@@ -32,6 +34,10 @@ const updateEmployeeID = async (origEmployeeID, newEmployeeID) => {
   }).exec();
 
   const inactiveEmpRecord = await InactiveEmp.findOne({
+    EmployeeID: origEmployeeID,
+  }).exec();
+
+  const trainingHistories = await TrainingHistory.findOne({
     EmployeeID: origEmployeeID,
   }).exec();
 
@@ -77,6 +83,13 @@ const updateEmployeeID = async (origEmployeeID, newEmployeeID) => {
   if (inactiveEmpRecord) {
     inactiveEmpRecord.EmployeeID = newEmployeeID;
     await inactiveEmpRecord.save();
+  }
+
+  if (trainingHistories) {
+    trainingHistories.forEach(async (history) => {
+      history.EmployeeID = newEmployeeID;
+      await history.save();
+    });
   }
 };
 

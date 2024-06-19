@@ -27,7 +27,6 @@ const getAllLeaves = async (req, res) => {
     // }
 
     /* FOR REASSIGNING GENINFO REFERENCE */
-
     for (const leave of leaves) {
       if (!leave.EmployeeID) {
         continue;

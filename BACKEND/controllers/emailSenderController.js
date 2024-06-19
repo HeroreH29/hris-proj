@@ -25,8 +25,8 @@ const oauth2Transporter = nodemailer.createTransport({
     user: process.env.SMTP_MAIL,
     clientId: process.env.SMTP_CLIENT_ID,
     clientSecret: process.env.SMTP_CLIENT_SECRET,
-    accessToken: process.env.SMTP_ACCESS_TOKEN,
     refreshToken: process.env.SMTP_REFRESH_TOKEN,
+    expires: 1484314697598,
   },
   tls: {
     rejectUnauthorized: false,
@@ -51,8 +51,10 @@ const sendLeaveThruEmail = async (req, res) => {
 
   oauth2Transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      res.json({ messsage: error });
+      console.log(error);
+      res.status(400).json({ messsage: error });
     } else {
+      console.log("Email send successfully!");
       res.json("Email sent successfully!");
     }
   });

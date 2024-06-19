@@ -49,6 +49,7 @@ app.use("/celebrants", require("./routes/celebrantRoutes"));
 app.use("/casualrates", require("./routes/casualRateRoutes"));
 app.use("/traininghistories", require("./routes/trainingHistoryRoutes"));
 app.use("/useraccess", require("./routes/userAccessRoutes"));
+app.use("/outletemails", require("./routes/outletEmailRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

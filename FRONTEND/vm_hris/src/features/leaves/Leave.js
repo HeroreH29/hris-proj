@@ -199,7 +199,7 @@ const Leave = ({ leave, handleHover }) => {
                     <Form.Label className="fw-semibold">
                       Remarks {(isX.isProcessor || isX.isAdmin) && `(Optional)`}
                     </Form.Label>
-                    {isX.isProcessor || isX.isAdmin ? (
+                    {isX.isProcessor || isX.isAdmin || isX.isOutletProcessor ? (
                       <>
                         <Form.Control
                           disabled={leave?.Approve !== 0}

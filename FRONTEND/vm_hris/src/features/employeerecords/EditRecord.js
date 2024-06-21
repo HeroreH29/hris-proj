@@ -386,16 +386,18 @@ const EditRecord = () => {
         </Tab>
       </Tabs>
 
-      <RecordToOutletModal
-        showOutletPicker={showOutletPicker}
-        setShowOutletPicker={setShowOutletPicker}
-        geninfo={geninfo}
-        personalinfo={personalinfo}
-        dependents={dependents}
-        educinfos={educinfos}
-        workinfos={workinfos}
-        trainingHistories={trainingHistories}
-      />
+      {!isX.isOutletProcessor && (
+        <RecordToOutletModal
+          showOutletPicker={showOutletPicker}
+          setShowOutletPicker={setShowOutletPicker}
+          geninfo={geninfo}
+          personalinfo={personalinfo}
+          dependents={dependents}
+          educinfos={educinfos}
+          workinfos={workinfos}
+          trainingHistories={trainingHistories}
+        />
+      )}
     </Container>
   );
 

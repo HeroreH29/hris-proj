@@ -37,6 +37,7 @@ export const EMPLOYEETYPE = {
   Supervisor: "Supervisor",
   OJT: "OJT",
   Director: "Director",
+  Manager: "Manager",
   "General Manager": "General Manager",
   "Co-Terminus": "Co-Terminus",
   "Project Based": "Project Based",

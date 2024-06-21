@@ -199,16 +199,16 @@ const Attendances = () => {
       return;
     }
 
-    if (daysDiff > 15) {
+    if (daysDiff > 16) {
       return toast.warn(
-        "Selected date range is more than 15 days. Max is 15 days only for Regulars",
+        "Selected date range is more than 16 days. Max is 16 days only for the selected Employee Type",
         {
           containerId: "A",
         }
       );
     } else if (daysDiff > 7 && tableState?.empTypeFilter === "Casual") {
       return toast.warn(
-        '"Selected date range is more than 15 days. Max is 7 days only for Casuals"'
+        "Selected date range is more than 7 days. Max is 7 days only for the selected Employee Type"
       );
     }
 

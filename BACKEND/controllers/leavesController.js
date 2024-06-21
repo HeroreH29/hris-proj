@@ -8,7 +8,7 @@ const { format } = require("date-fns");
 // @access Private
 const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find().populate("FiledFor");
+    const leaves = await Leave.find().populate("FiledFor").lean();
 
     /* FOR UPDATING CREDITED STATUS */
     // for (const leave of leaves) {
@@ -30,7 +30,12 @@ const getAllLeaves = async (req, res) => {
     for (const leave of leaves) {
       if (!leave.EmployeeID) {
         continue;
-      } else if (leave.FiledFor) {
+      } else if (
+        leave.FiledFor &&
+        leave.FiledBy &&
+        leave.DateFiled &&
+        leave.DateModified
+      ) {
         continue;
       }
 
@@ -41,9 +46,14 @@ const getAllLeaves = async (req, res) => {
       // if (!foundGenInfo) res.status(404).json({ message: "GenInfo not found" });
 
       leave.FiledFor = foundGenInfo?._id;
+      leave.FiledBy = leave.User;
+      leave.DateFiled = leave.AddDate;
+      leave.DateModified = leave.DateApproved;
 
-      await leave.save();
+      await Leave.findByIdAndUpdate(leave._id, leave);
     }
+
+    const updatedLeaves = await Leave.find().populate("FiledFor");
 
     /* FOR RECALCULATING APPROVED LEAVES FOR LEAVE CREDITS */
 
@@ -65,7 +75,7 @@ const getAllLeaves = async (req, res) => {
     //     }
     //   }
     // }
-    res.json(leaves.sort(() => -1));
+    res.json(updatedLeaves.sort(() => -1));
   } catch (error) {
     res.status(500).json({ error: "GET LEAVES server error: " + error });
   }

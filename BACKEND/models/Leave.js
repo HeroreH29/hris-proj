@@ -5,6 +5,7 @@ const leaveSchema = new Schema(
   {
     DateFiled: {
       type: String,
+      default: "",
     },
     NoOfDays: {
       type: Number,

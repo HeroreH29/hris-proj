@@ -2,18 +2,10 @@ import { useSelector } from "react-redux";
 import { selectCurrentToken } from "../features/auth/authSlice";
 import { jwtDecode } from "jwt-decode";
 import useCurrentPage from "./useCurrentPage";
-import { useGetUserAccessesQuery } from "../features/users/userAccessApiSlice";
 
-const useAuth = (allowedAccess = {}) => {
+const useAuth = () => {
   const token = useSelector(selectCurrentToken);
   const currentPage = useCurrentPage();
-
-  let canX = {
-    canCreate: false,
-    canRead: false,
-    canUpdate: false,
-    canDelete: false,
-  };
 
   let isX = {
     isAdmin: false,
@@ -42,9 +34,7 @@ const useAuth = (allowedAccess = {}) => {
     featureName = "UserSettings";
   }
 
-  const { data: userAccesses, isSuccess } = useGetUserAccessesQuery();
-
-  if (token && isSuccess) {
+  if (token) {
     const decoded = jwtDecode(token);
     const { username, userLevel, branch, user, employeeId } = decoded.UserInfo;
 
@@ -75,26 +65,6 @@ const useAuth = (allowedAccess = {}) => {
         break;
     }
 
-    const { ids, entities } = userAccesses;
-    const matchingUserAccess = ids
-      .filter((id) => entities[id].UserLevel === userLevel)
-      .map((id) => entities[id])[0];
-
-    if (matchingUserAccess) {
-      for (const key in allowedAccess) {
-        if (
-          matchingUserAccess.SysFeature[featureName][key] !== allowedAccess[key]
-        ) {
-          isX.isUserAuthorized = false;
-          break;
-        }
-      }
-      canX.canCreate = matchingUserAccess.SysFeature[featureName].C;
-      canX.canRead = matchingUserAccess.SysFeature[featureName].R;
-      canX.canUpdate = matchingUserAccess.SysFeature[featureName].U;
-      canX.canDelete = matchingUserAccess.SysFeature[featureName].D;
-    }
-
     return {
       username,
       userLevel,
@@ -102,7 +72,6 @@ const useAuth = (allowedAccess = {}) => {
       branch,
       employeeId,
       isX,
-      canX,
     };
   }
 
@@ -113,7 +82,6 @@ const useAuth = (allowedAccess = {}) => {
     branch: "",
     employeeId: "",
     isX,
-    canX,
   };
 };
 

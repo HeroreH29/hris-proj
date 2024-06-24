@@ -151,7 +151,7 @@ const RecordsList = () => {
           </Col>
 
           <Col md="auto">
-            {(canX.canCreate || canX.canUpdate || canX.canDelete) && (
+            {(isX.isHR || isX.isAdmin) && (
               <Button
                 variant="outline-primary"
                 onClick={() => {

@@ -23,20 +23,36 @@ import {
   InputGroup,
   DropdownButton,
   Dropdown,
+  Spinner,
 } from "react-bootstrap";
 import { differenceInDays } from "date-fns";
 import { toast } from "react-toastify";
 import useAuth from "../../hooks/useAuth";
 import useRecordForm from "../../hooks/useRecordForm";
+import { useGetAllOutletsQuery } from "../../app/api/slices/outletsApiSlice";
+import { useGetAllEmpTypesQuery } from "../../app/api/slices/empTypesApiSlice";
+import { useGetAllDepartmentsQuery } from "../../app/api/slices/departmentsApiSlice";
+import { useGetAllModeOfSeparationsQuery } from "../../app/api/slices/modeOfSeparationsApiSlice";
 
 const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   const { username, isX } = useAuth();
+
+  const [validated, setValidated] = useState(false);
 
   const [updateGeninfo, { isSuccess: updateSuccess, isError: updateError }] =
     useUpdateGeninfoMutation();
 
   const [addGeninfo, { isSuccess: addSuccess, isError: addError }] =
     useAddGeninfoMutation();
+
+  // Dropdown options
+  const { data: outlets, isSuccess: isOutletSuccess } = useGetAllOutletsQuery();
+  const { data: emptypes, isSuccess: isEmpTypeSuccess } =
+    useGetAllEmpTypesQuery();
+  const { data: departments, isSuccess: isDepartmentSuccess } =
+    useGetAllDepartmentsQuery();
+  const { data: modeofseparations, isSuccess: isModeOfSeparationSuccess } =
+    useGetAllModeOfSeparationsQuery();
 
   const [addInactiveEmp] = useAddInactiveEmpMutation();
 
@@ -138,38 +154,68 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
   };
 
   /* DROPDOWN OPTIONS */
-  const employeeTypeOptions = Object.entries(EMPLOYEETYPE).map(
-    ([key, value]) => {
+  let employeeTypeOptions,
+    assignedOutletOptions,
+    departmentOptions,
+    modeOfSeparationOptions;
+
+  if (
+    isOutletSuccess &&
+    isDepartmentSuccess &&
+    isModeOfSeparationSuccess &&
+    isEmpTypeSuccess
+  ) {
+    const { ids: outletids, entities: outletentities } = outlets;
+    const { ids: departmentids, entities: departmententities } = departments;
+    const { ids: modeofseparationids, entities: modeofseparationentities } =
+      modeofseparations;
+    const { ids: emptypeids, entities: emptypeentities } = emptypes;
+
+    employeeTypeOptions = emptypeids.map((id) => {
       return (
-        <option key={key} value={value}>
-          {key}
+        <option key={id} value={emptypeentities[id].empType}>
+          {emptypeentities[id].empType}
         </option>
       );
-    }
-  );
-  const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
-    ([key, value]) => {
+    });
+    assignedOutletOptions = outletids.map((id) => {
       return (
         <Dropdown.Item
-          key={key}
-          value={value}
+          key={id}
+          value={outletentities[id].Outlet}
           as="option"
-          onClick={() =>
-            genDispatch({ type: "assigned_outlet", AssignedOutlet: value })
+          onClick={(e) =>
+            genDispatch({
+              type: "assigned_outlet",
+              AssignedOutlet: e.target.value,
+            })
           }
         >
-          {key}
+          {outletentities[id].Outlet}
         </Dropdown.Item>
       );
-    }
-  );
-  const departmentOptions = Object.entries(DEPARTMENT).map(([key, value]) => {
-    return (
-      <option key={key} value={value}>
-        {key}
-      </option>
-    );
-  });
+    });
+    departmentOptions = departmentids.map((id) => {
+      return (
+        <option key={id} value={departmententities[id].Title}>
+          {departmententities[id].Title}
+        </option>
+      );
+    });
+    modeOfSeparationOptions = modeofseparationids.map((id) => {
+      return (
+        <option
+          key={id}
+          value={modeofseparationentities[id].Mode_of_Separation}
+        >
+          {modeofseparationentities[id].Mode_of_Separation}
+        </option>
+      );
+    });
+  } else {
+    return <Spinner animation="border" />;
+  }
+
   const empStatusOptions = Object.entries(EMPSTATUS).map(([key, value]) => {
     return (
       <option key={key} value={value}>
@@ -184,17 +230,6 @@ const EditGenInfoForm = ({ geninfo, inactiveEmp }) => {
       </option>
     );
   });
-  const modeOfSeparationOptions = Object.entries(MODE_OF_SEPARATION).map(
-    ([key, value]) => {
-      return (
-        <option key={key} value={value}>
-          {key}
-        </option>
-      );
-    }
-  );
-
-  const [validated, setValidated] = useState(false);
 
   return (
     <>

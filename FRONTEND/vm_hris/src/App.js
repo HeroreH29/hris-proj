@@ -22,7 +22,6 @@ import NewLeaveForm from "./features/leaves/NewLeaveForm";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
-import UserAccess from "./features/users/UserAccess";
 
 function App() {
   useTitle("Login | Via Mare HRIS");
@@ -48,18 +47,14 @@ function App() {
           <Route path="forgotpassword" element={<ForgotPass />} />
           {/* protected routes */}
           <Route element={<PersistLogin />}>
-            <Route element={<RequireAuth allowedAccess={{ R: true }} />}>
+            <Route element={<RequireAuth allowedAccess={[]} />}>
               <Route element={<Prefetch />}>
                 <Route element={<DashLayout />}>
                   {/* Dashboard Routes */}
                   <Route path="dashboard">
                     <Route index element={<Welcome />} />
                     <Route
-                      element={
-                        <RequireAuth
-                          allowedAccess={{ C: true, U: true, D: true }}
-                        />
-                      }
+                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
                     >
                       <Route
                         path="announcements/:id"
@@ -72,17 +67,19 @@ function App() {
                     </Route>
                   </Route>
                   {/* Employee Records Routes */}
-                  <Route path="employeerecords">
+                  <Route
+                    path="employeerecords"
+                    element={
+                      <RequireAuth
+                        allowedAccess={["HR", "Admin", "Outlet Processor"]}
+                      />
+                    }
+                  >
                     <Route index element={<RecordsList />} />
+                    <Route path=":employeeId" element={<EditRecord />} />
                     <Route
-                      element={
-                        <RequireAuth
-                          exceptions={["Outlet Processor"]}
-                          allowedAccess={{ C: true, U: true, D: true }}
-                        />
-                      }
+                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
                     >
-                      <Route path=":employeeId" element={<EditRecord />} />
                       <Route path="new" element={<EditRecord />} />
                     </Route>
                   </Route>
@@ -91,7 +88,7 @@ function App() {
                     <Route
                       element={
                         <RequireAuth
-                          allowedAccess={{ C: true, R: true, U: true }}
+                          allowedAccess={["HR", "Admin", "Outlet Processor"]}
                         />
                       }
                     >
@@ -102,16 +99,16 @@ function App() {
                   <Route path="leaves">
                     <Route
                       element={
-                        <RequireAuth allowedAccess={{ C: true, R: true }} />
+                        <RequireAuth
+                          allowedAccess={["HR", "Admin", "Outlet Processor"]}
+                        />
                       }
                     >
                       <Route index element={<LeavesList />} />
                       <Route path="new" element={<NewLeaveForm />} />
                     </Route>
                     <Route
-                      element={
-                        <RequireAuth allowedAccess={{ U: true, D: true }} />
-                      }
+                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
                     >
                       <Route
                         path="increasecredits"
@@ -121,22 +118,10 @@ function App() {
                   </Route>
                   {/* User Settings Routes */}
                   <Route path="users">
-                    <Route
-                      element={
-                        <RequireAuth
-                          allowedAccess={{
-                            C: true,
-                            R: true,
-                            U: true,
-                            D: true,
-                          }}
-                        />
-                      }
-                    >
+                    <Route element={<RequireAuth allowedAccess={["Admin"]} />}>
                       <Route index element={<UsersList />} />
                       <Route path=":id" element={<EditUser />} />
                       <Route path="new" element={<NewUserForm />} />
-                      <Route path="useraccess" element={<UserAccess />} />
                     </Route>
                   </Route>
                   {/* End Dash */}

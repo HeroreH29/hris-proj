@@ -12,7 +12,7 @@ import {
   OverlayTrigger,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserPlus, faUserLock } from "@fortawesome/free-solid-svg-icons";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import useTitle from "../../hooks/useTitle";
@@ -69,14 +69,14 @@ const UsersList = () => {
                 </Button>
               </OverlayTrigger>
               {/* Hidden = UNDER DEVELOPMENT = */}
-              <OverlayTrigger overlay={TooltipRenderer({ tip: `User Access` })}>
+              {/* <OverlayTrigger overlay={TooltipRenderer({ tip: `User Access` })}>
                 <Button
                   variant="outline-primary"
                   onClick={() => navigate(`${location.pathname}/useraccess`)}
                 >
                   <FontAwesomeIcon icon={faUserLock} />
                 </Button>
-              </OverlayTrigger>
+              </OverlayTrigger> */}
             </Stack>
           </Col>
         </Row>

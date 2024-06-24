@@ -50,6 +50,10 @@ app.use("/casualrates", require("./routes/casualRateRoutes"));
 app.use("/traininghistories", require("./routes/trainingHistoryRoutes"));
 app.use("/useraccess", require("./routes/userAccessRoutes"));
 app.use("/outletemails", require("./routes/outletEmailRoutes"));
+app.use("/outlets", require("./routes/outletRoutes"));
+app.use("/emptypes", require("./routes/empTypeRoutes"));
+app.use("/departments", require("./routes/departmentRoutes"));
+app.use("/modeofseparations", require("./routes/modeOfSeparationRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

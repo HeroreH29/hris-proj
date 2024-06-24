@@ -5,7 +5,7 @@ const getAllOutletEmails = async (req, res) => {
   const outletEmails = await OutletEmail.find();
 
   if (!outletEmails?.length) {
-    return res.status(400), json({ message: "No outlet emails found" });
+    return res.status(400).json({ message: "No outlet emails found" });
   }
 
   res.json(outletEmails);

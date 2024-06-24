@@ -12,7 +12,6 @@ import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import Attendance from "./Attendance";
 import useTitle from "../../hooks/useTitle";
 import { toast } from "react-toastify";
-import { ASSIGNEDOUTLET, EMPLOYEETYPE } from "../../config/gInfoOptions";
 import {
   useAddNewAttendanceMutation,
   useGetAttendanceDataQuery,
@@ -29,6 +28,8 @@ import AttendanceModal from "../../modals/AttendanceModal";
 import useAttModalSettings from "../../hooks/useAttModalSettings";
 import AttLogProcessor from "./AttLogProcessor";
 import AttendanceListModal from "../../modals/AttendanceListModal";
+import { useGetAllOutletsQuery } from "../../app/api/slices/outletsApiSlice";
+import { useGetAllEmpTypesQuery } from "../../app/api/slices/empTypesApiSlice";
 
 const Attendances = () => {
   const { attListProcessor, pdfListProcessor } = AttLogProcessor();
@@ -45,26 +46,37 @@ const Attendances = () => {
     }),
   });
 
+  // Outlet options data
+  const { data: outlets, isSuccess: isOutletSuccess } = useGetAllOutletsQuery();
+
+  // Employee type options data
+  const { data: empTypes, isSuccess: isEmpTypeSuccess } =
+    useGetAllEmpTypesQuery();
+
   const [validated, setValidated] = useState(false);
 
   const [attList, setAttList] = useState([]);
   const [attlogData, setAttlogData] = useState(undefined);
 
-  const outletOptions = Object.entries(ASSIGNEDOUTLET).map(([key, value]) => {
-    return (
-      <option key={key} value={value}>
-        {key}
+  let outletOptions;
+  if (isOutletSuccess) {
+    const { ids, entities } = outlets;
+    outletOptions = ids.map((id) => (
+      <option value={entities[id]?.Outlet} key={id}>
+        {entities[id]?.Outlet}
       </option>
-    );
-  });
+    ));
+  }
 
-  const empTypeOptions = Object.entries(EMPLOYEETYPE).map(([key, value]) => {
-    return (
-      <option key={key} value={value}>
-        {key}
+  let empTypeOptions;
+  if (isEmpTypeSuccess) {
+    const { ids, entities } = empTypes;
+    empTypeOptions = ids.map((id) => (
+      <option value={entities[id]?.empType} key={id}>
+        {entities[id]?.empType}
       </option>
-    );
-  });
+    ));
+  }
 
   const {
     data: geninfos,

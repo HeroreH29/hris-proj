@@ -2,13 +2,11 @@ import { useLocation, Navigate, Outlet } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import React from "react";
 
-const RequireAuth = ({ exceptions = [], allowedAccess }) => {
+const RequireAuth = ({ allowedAccess = [] }) => {
   const location = useLocation();
-  const { userLevel, isX } = useAuth(allowedAccess);
+  const { userLevel } = useAuth();
 
-  if (exceptions.includes("Outlet Processor")) {
-    return <Outlet />;
-  } else if (isX.isUserAuthorized) {
+  if (allowedAccess.includes(userLevel) || !allowedAccess.length) {
     return <Outlet />;
   } else {
     if (userLevel) {

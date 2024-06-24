@@ -1,8 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
-import {
-  useUpdateLeaveMutation,
-  useGetLeaveCreditsQuery,
-} from "./leavesApiSlice";
+import { useUpdateLeaveMutation } from "./leavesApiSlice";
 import { Modal, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { format, parse } from "date-fns";
 import useAuth from "../../hooks/useAuth";
@@ -10,16 +7,8 @@ import { toast } from "react-toastify";
 import { OUTLET_EMAILS } from "../../config/outletEmailOptions";
 import { useSendEmailMutation } from "../emailSender/sendEmailApiSlice";
 
-const Leave = ({ leave, handleHover }) => {
+const Leave = ({ leave, leaveCredit, handleHover }) => {
   const { isX, branch } = useAuth();
-
-  const { leaveCredit } = useGetLeaveCreditsQuery(undefined, {
-    selectFromResult: ({ data }) => ({
-      leaveCredit: data?.ids
-        .filter((id) => data.entities[id]?.CreditsOf?.id === leave.FiledFor?.id)
-        .map((id) => data.entities[id])[0],
-    }),
-  });
 
   const [
     sendEmail,
@@ -38,13 +27,7 @@ const Leave = ({ leave, handleHover }) => {
   const handleUpdateLeave = async (approveStat) => {
     const confirm = window.confirm(
       `${
-        approveStat === 1
-          ? "APPROVE"
-          : approveStat === 2
-          ? "DISAPPROVE"
-          : approveStat === 3
-          ? "CANCEL"
-          : ""
+        approveStat === 1 ? "APPROVE" : approveStat === 2 ? "CANCEL" : ""
       } this leave?`
     );
 
@@ -126,10 +109,6 @@ const Leave = ({ leave, handleHover }) => {
         apprvTxtColor = "fw-semibold text-success";
         break;
       case 2:
-        approve = "Disapproved";
-        apprvTxtColor = "fw-semibold text-danger";
-        break;
-      case 3:
         approve = "Cancelled";
         apprvTxtColor = "fw-semibold text-warning";
         break;
@@ -197,12 +176,16 @@ const Leave = ({ leave, handleHover }) => {
                 <Row className="mb-3">
                   <Form.Group as={Col}>
                     <Form.Label className="fw-semibold">
-                      Remarks {(isX.isProcessor || isX.isAdmin) && `(Optional)`}
+                      Remarks{" "}
+                      {(isX.isProcessor ||
+                        isX.isOutletProcessor ||
+                        isX.isAdmin) &&
+                        `(Optional)`}
                     </Form.Label>
                     {isX.isProcessor || isX.isAdmin || isX.isOutletProcessor ? (
                       <>
                         <Form.Control
-                          disabled={leave?.Approve !== 0}
+                          disabled={leave?.Approve !== 3}
                           as={"textarea"}
                           value={remarks}
                           onChange={(e) => setRemarks(e.target.value)}
@@ -226,10 +209,10 @@ const Leave = ({ leave, handleHover }) => {
 
           <>
             <Modal.Footer>
-              {(isX.isAdmin || isX.isOutletProcessor || isX.isApprover) && (
+              {isX.isAdmin || isX.isOutletProcessor || isX.isApprover ? (
                 <>
                   <Button
-                    disabled={leave?.Approve !== 0}
+                    disabled={leave?.Approve !== 3}
                     type="button"
                     variant="outline-success"
                     onClick={() => handleUpdateLeave(1)}
@@ -237,23 +220,25 @@ const Leave = ({ leave, handleHover }) => {
                     Approve
                   </Button>
                   <Button
-                    disabled={leave?.Approve !== 0}
+                    disabled={leave?.Approve !== 3}
                     type="button"
-                    variant="outline-danger"
+                    variant="outline-warning"
                     onClick={() => handleUpdateLeave(2)}
                   >
-                    Disapprove
+                    Cancel
                   </Button>
                 </>
-              )}
-              {isX.isUser && (
-                <Button
-                  type="button"
-                  variant="outline-warning"
-                  onClick={() => handleUpdateLeave(3)}
-                >
-                  Cancel
-                </Button>
+              ) : (
+                <>
+                  <Button
+                    disabled={leave?.Approve !== 3}
+                    type="button"
+                    variant="outline-warning"
+                    onClick={() => handleUpdateLeave(2)}
+                  >
+                    Cancel
+                  </Button>
+                </>
               )}
             </Modal.Footer>
           </>

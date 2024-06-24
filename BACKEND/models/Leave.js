@@ -37,7 +37,7 @@ const leaveSchema = new Schema(
     },
     Approve: {
       type: Number,
-      default: 0,
+      default: 3,
     },
     FiledBy: {
       type: String,

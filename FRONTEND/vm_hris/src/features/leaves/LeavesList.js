@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileAlt, faLevelUp } from "@fortawesome/free-solid-svg-icons";
-import { useGetLeavesQuery } from "./leavesApiSlice";
+import { useGetLeaveCreditsQuery, useGetLeavesQuery } from "./leavesApiSlice";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import Leave from "./Leave";
@@ -38,6 +38,18 @@ const LeavesList = () => {
     isError: leaveError,
     error: leaveerr,
   } = useGetLeavesQuery();
+
+  const {
+    data: leaveCredits,
+    isSuccess: isCreditSuccess,
+    isLoading: isCreditLoading,
+    isError: isCreditError,
+    error: creditErr,
+  } = useGetLeaveCreditsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+  });
 
   // DROPDOWN DATA
   const startYear = 2018;
@@ -91,15 +103,17 @@ const LeavesList = () => {
     tableDispatch({ type: "slice_dec" });
   };
 
-  if (leaveError) return <p>{JSON.stringify(leaveerr)}</p>;
+  if (leaveError || isCreditError)
+    return <p>{JSON.stringify(leaveerr) || JSON.stringify(creditErr)}</p>;
 
-  if (leaveLoading && !leaveCredit) return <Spinner animation="border" />;
+  if (leaveLoading && isCreditLoading) return <Spinner animation="border" />;
 
   let overallLeavesContent;
 
-  if (leaveSuccess) {
+  if (leaveSuccess && isCreditSuccess) {
     // Deconstruct leave data
     const { ids, entities } = leaves;
+    const { ids: creditids, entities: creditentities } = leaveCredits;
 
     // Preprocess data
     const leavesList = ids
@@ -155,9 +169,19 @@ const LeavesList = () => {
         return tableState.dateSort ? ab : ba;
       })
       .slice(tableState.sliceStart, tableState.sliceEnd)
-      .map((leave) => (
-        <Leave key={leave.id} leave={leave} handleHover={handleHover} />
-      ));
+      .map((leave) => {
+        const matchingCreditId = creditids.find(
+          (id) => creditentities[id].CreditsOf?.id === leave.FiledFor?.id
+        );
+        return (
+          <Leave
+            key={leave.id}
+            leave={leave}
+            leaveCredit={creditentities[matchingCreditId]}
+            handleHover={handleHover}
+          />
+        );
+      });
 
     return (
       <>
@@ -339,7 +363,7 @@ const LeavesList = () => {
                 </tr>
               </thead>
               <tbody>
-                {leaveCredit ? (
+                {isCreditSuccess && leaveCredit ? (
                   <>
                     <tr>
                       <td className="fw-semibold">Sick</td>
@@ -438,8 +462,9 @@ const LeavesList = () => {
                   <>
                     <tr>
                       <td colSpan={4}>
-                        <Spinner animation="border" />
-                        <span className="ms-3">Calculating credits...</span>
+                        <span className="ms-3">
+                          Hover to a filed leave to see...
+                        </span>
                       </td>
                     </tr>
                   </>

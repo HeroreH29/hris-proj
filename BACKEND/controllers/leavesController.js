@@ -122,7 +122,7 @@ const createLeave = async (req, res) => {
 // desc Update leave
 // @route PATCH /leaves
 // @access Private
-// Approve value equivalent: 0 = Pending; 1 = Approved; 2 = Declined; 3 = Cancelled
+// Approve value equivalent: 1 = Approved; 2 = Cancelled; 3 = Pending;
 const updateLeave = async (req, res) => {
   const { id, ...others } = req.body;
 
@@ -133,17 +133,37 @@ const updateLeave = async (req, res) => {
   /* Include duplicate checking if neccessary */
   others.DateModified = format(new Date(), "Ppp");
 
-  const leaveRecord = await Leave.findByIdAndUpdate(id, others, {
-    new: true,
+  const matchingLeaveRecord = await Leave.findById(id).exec();
+  const matchingLeaveCredit = await LeaveCredit.find({
+    CreditsOf: matchingLeaveRecord.FiledBy,
   }).exec();
 
-  // // Update modification date to the current date
-  // leaveRecord.DateModified = format(new Date(), "Ppp");
+  // Revert the used credit if cancelled...
+  if (
+    others.Approve === 2 &&
+    (matchingLeaveRecord.Approve === 3 || matchingLeaveRecord.Approve === 1)
+  ) {
+    const leaveType = matchingLeaveRecord.Ltype.replace(" ", "");
+    const revertedCredit =
+      matchingLeaveCredit[leaveType] + matchingLeaveRecord.NoOfDays;
 
-  // const updatedLeaveRecord = await leaveRecord.save();
+    if (revertedCredit > matchingLeaveCredit.CreditBudget) {
+      matchingLeaveCredit[leaveType] = matchingLeaveCredit.CreditBudget;
+    } else {
+      matchingLeaveCredit[leaveType] = revertedCredit;
+    }
 
-  if (leaveRecord) {
-    res.json(leaveRecord);
+    await matchingLeaveCredit.save();
+  }
+
+  matchingLeaveRecord.Credited = false;
+  matchingLeaveRecord.Approve = others.Approve;
+  matchingLeaveRecord.Remarks = others.Remarks;
+
+  const updatedLeave = await matchingLeaveRecord.save();
+
+  if (updatedLeave) {
+    res.json(updatedLeave);
   } else {
     res.json({ message: "Something went wrong" });
   }

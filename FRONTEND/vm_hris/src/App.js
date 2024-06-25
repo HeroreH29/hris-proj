@@ -100,7 +100,12 @@ function App() {
                     <Route
                       element={
                         <RequireAuth
-                          allowedAccess={["HR", "Admin", "Outlet Processor"]}
+                          allowedAccess={[
+                            "HR",
+                            "Admin",
+                            "Outlet Processor",
+                            "User",
+                          ]}
                         />
                       }
                     >

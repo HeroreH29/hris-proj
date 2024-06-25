@@ -37,7 +37,12 @@ const LeavesList = () => {
     isLoading: leaveLoading,
     isError: leaveError,
     error: leaveerr,
-  } = useGetLeavesQuery();
+  } = useGetLeavesQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    pollingInterval: 10000,
+  });
 
   const {
     data: leaveCredits,
@@ -346,14 +351,12 @@ const LeavesList = () => {
               striped
               bordered
               hover
-              className="align-middle ms-3 mt-3 mb-3 caption-top sticky-top"
+              className="align-middle ms-3 mt-3 mb-3 caption-top"
             >
               <caption>
                 {!isX.isUser
-                  ? `Leave Credit Info of ${
-                      leaveCredit?.CreditsOf?.LastName ?? ""
-                    }`
-                  : "Your Credit Info"}
+                  ? `Leave Credits of ${leaveCredit?.CreditsOf?.LastName ?? ""}`
+                  : "Your Leave Credits"}
               </caption>
               <thead>
                 <tr>

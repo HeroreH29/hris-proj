@@ -49,6 +49,7 @@ const LeavesList = () => {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
     refetchOnReconnect: true,
+    pollingInterval: 3000,
   });
 
   // DROPDOWN DATA

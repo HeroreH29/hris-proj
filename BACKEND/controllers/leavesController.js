@@ -10,22 +10,6 @@ const getAllLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find().populate("FiledFor").lean();
 
-    /* FOR UPDATING CREDITED STATUS */
-    // for (const leave of leaves) {
-    //   const foundCredit = await LeaveCredit.find({
-    //     CreditsOf: leave.FiledFor,
-    //   }).exec();
-
-    //   if (
-    //     leave.Approve === 1 &&
-    //     leave.DateFiled &&
-    //     foundCredit.CreditBudget > 0
-    //   ) {
-    //     leave.Credited = true;
-    //     await leave.save();
-    //   }
-    // }
-
     /* FOR REASSIGNING GENINFO REFERENCE */
     for (const leave of leaves) {
       if (!leave.EmployeeID) {
@@ -55,26 +39,6 @@ const getAllLeaves = async (req, res) => {
 
     const updatedLeaves = await Leave.find().populate("FiledFor");
 
-    /* FOR RECALCULATING APPROVED LEAVES FOR LEAVE CREDITS */
-
-    // const currentYearLeaves = leaves.filter((leave) =>
-    //   leave.DateFiled.includes(new Date().getFullYear().toString())
-    // );
-
-    // for (const leave of currentYearLeaves) {
-    //   if (leave.Approve === 1) {
-    //     const leaveType = leave.Ltype.replace(" ", "");
-
-    //     const foundLeaveCredit = await LeaveCredit.findOne({
-    //       CreditsOf: leave.FiledFor,
-    //     });
-
-    //     if (foundLeaveCredit?.CreditBudget > 0) {
-    //       foundLeaveCredit[leaveType] -= leave.NoOfDays;
-    //       await foundLeaveCredit.save();
-    //     }
-    //   }
-    // }
     res.json(updatedLeaves.sort(() => -1));
   } catch (error) {
     res.status(500).json({ error: "GET LEAVES server error: " + error });
@@ -124,46 +88,42 @@ const createLeave = async (req, res) => {
 // @access Private
 // Approve value equivalent: 1 = Approved; 2 = Cancelled; 3 = Pending;
 const updateLeave = async (req, res) => {
-  const { id, ...others } = req.body;
+  const { leave, Approve, Remarks, leaveCredit } = req.body;
 
-  if (!id) {
+  if (!leave.id) {
     return res.status(400).json({ message: "Leave 'id' is required" });
   }
 
-  /* Include duplicate checking if neccessary */
-  others.DateModified = format(new Date(), "Ppp");
+  // Update modification date
+  leave.DateModified = format(new Date(), "Ppp");
 
-  const matchingLeaveRecord = await Leave.findById(id).exec();
-  const matchingLeaveCredit = await LeaveCredit.find({
-    CreditsOf: matchingLeaveRecord.FiledBy,
-  }).exec();
+  // Revert the used credit if leave is cancelled...
+  if (Approve === 2 && leave.Approve === 1) {
+    const leaveType = leave.Ltype.replace(" ", "");
 
-  // Revert the used credit if cancelled...
-  if (
-    others.Approve === 2 &&
-    (matchingLeaveRecord.Approve === 3 || matchingLeaveRecord.Approve === 1)
-  ) {
-    const leaveType = matchingLeaveRecord.Ltype.replace(" ", "");
-    const revertedCredit =
-      matchingLeaveCredit[leaveType] + matchingLeaveRecord.NoOfDays;
+    const revertedCredit = leaveCredit[leaveType] + leave.NoOfDays;
 
-    if (revertedCredit > matchingLeaveCredit.CreditBudget) {
-      matchingLeaveCredit[leaveType] = matchingLeaveCredit.CreditBudget;
+    if (revertedCredit > leave.CreditBudget) {
+      leaveCredit[leaveType] = leaveCredit.CreditBudget;
     } else {
-      matchingLeaveCredit[leaveType] = revertedCredit;
+      leaveCredit[leaveType] = revertedCredit;
     }
 
-    await matchingLeaveCredit.save();
+    leave.Credited = false;
+
+    // Save changes to Leave Credit
+    await LeaveCredit.findByIdAndUpdate(leaveCredit.id, leaveCredit);
   }
 
-  matchingLeaveRecord.Credited = false;
-  matchingLeaveRecord.Approve = others.Approve;
-  matchingLeaveRecord.Remarks = others.Remarks;
+  leave.Approve = Approve;
+  leave.Remarks = Remarks;
 
-  const updatedLeave = await matchingLeaveRecord.save();
+  const updatedLeave = await Leave.findByIdAndUpdate(leave.id, leave, {
+    new: true,
+  });
 
   if (updatedLeave) {
-    res.json(updatedLeave);
+    res.json("Leave updated successfully!");
   } else {
     res.json({ message: "Something went wrong" });
   }

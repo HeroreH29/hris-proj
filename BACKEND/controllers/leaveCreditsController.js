@@ -1,12 +1,6 @@
 const LeaveCredit = require("../models/LeaveCredit");
 const Leave = require("../models/Leave");
 const GenInfo = require("../models/GenInfo");
-const {
-  reApplyCreditBudget,
-} = require("../xtra_functions/reApplyCreditBudget");
-const {
-  reUpdateLeaveCredits,
-} = require("../xtra_functions/reUpdateLeaveCredits");
 const { differenceInYears } = require("date-fns");
 
 // desc Get all leavecredits

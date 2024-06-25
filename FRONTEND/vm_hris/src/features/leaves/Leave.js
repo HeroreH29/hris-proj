@@ -33,9 +33,10 @@ const Leave = ({ leave, leaveCredit, handleHover }) => {
 
     if (confirm) {
       const result = await updateLeave({
-        id: leave?.id,
         Approve: approveStat,
         Remarks: remarks,
+        leaveCredit,
+        leave: leave,
       }).unwrap();
 
       // Send leave info to HR email if leave if filed from outlets/branches
@@ -185,7 +186,6 @@ const Leave = ({ leave, leaveCredit, handleHover }) => {
                     {isX.isProcessor || isX.isAdmin || isX.isOutletProcessor ? (
                       <>
                         <Form.Control
-                          disabled={leave?.Approve !== 3}
                           as={"textarea"}
                           value={remarks}
                           onChange={(e) => setRemarks(e.target.value)}
@@ -212,7 +212,7 @@ const Leave = ({ leave, leaveCredit, handleHover }) => {
               {isX.isAdmin || isX.isOutletProcessor || isX.isApprover ? (
                 <>
                   <Button
-                    disabled={leave?.Approve !== 3}
+                    disabled={leave?.Approve === 1 || leave?.Approve === 2}
                     type="button"
                     variant="outline-success"
                     onClick={() => handleUpdateLeave(1)}
@@ -220,7 +220,7 @@ const Leave = ({ leave, leaveCredit, handleHover }) => {
                     Approve
                   </Button>
                   <Button
-                    disabled={leave?.Approve !== 3}
+                    disabled={leave?.Approve === 2}
                     type="button"
                     variant="outline-warning"
                     onClick={() => handleUpdateLeave(2)}

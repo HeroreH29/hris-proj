@@ -14,6 +14,7 @@ import {
   InputGroup,
   Form,
   OverlayTrigger,
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import {
@@ -221,7 +222,14 @@ const IncreaseCredits = () => {
       );
     })
   ) : (
-    <></>
+    <>
+      <tr>
+        <td colSpan={5} className="align-middle">
+          <Spinner animation="border" className="align-middle" />
+          <span className="ms-2 fw-semibold">Loading credits...</span>
+        </td>
+      </tr>
+    </>
   );
 
   return (

@@ -2,8 +2,8 @@ const { allowedOrigins } = require("./allowedOrigins");
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Uncomment '!origin' to allow postman testing (for development use only)
-    if (allowedOrigins.indexOf(origin) !== -1 /* || !origin */) {
+    // Allow requests with no origin (like Postman or curl) in development mode
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));

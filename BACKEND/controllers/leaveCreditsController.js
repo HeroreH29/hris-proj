@@ -60,11 +60,22 @@ const getAllLeaveCredits = async (req, res) => {
         FiledFor: credit.CreditsOf,
         DateModified: { $regex: "2024" },
         Approve: 1,
-      }).exec();
+      })
+        .populate("FiledFor")
+        .exec();
 
       if (!matchingLeaves.length) continue;
+
       for (const leave of matchingLeaves) {
-        if (!leave?.Credited) {
+        const dateEmployed = new Date(leave.FiledFor?.DateEmployed);
+        const supposedCreditIncreaseDate = new Date(dateEmployed);
+        supposedCreditIncreaseDate.setFullYear(
+          supposedCreditIncreaseDate.getFullYear() + 1
+        );
+        const leaveDateFiled = new Date(leave.DateFiled);
+
+        // Check if leave is NOT credited and date filed is greater than supposed 1 year of service of an employee
+        if (!leave?.Credited && leaveDateFiled > supposedCreditIncreaseDate) {
           const ltype = leave.Ltype.replace(" ", "");
           const creditCalculation = credit[ltype] - leave.NoOfDays;
           if (creditCalculation < 0) {

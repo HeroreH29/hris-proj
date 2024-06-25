@@ -37,12 +37,18 @@ const IncreaseCredits = () => {
         .filter((id) => {
           return data?.entities[id].CreditsOf?.EmpStatus === "Y";
         })
-        .map((id) => data?.entities[id]),
+        .map((id) => data?.entities[id])
+        .sort((a, b) => {
+          const lastNameA = a.CreditsOf?.LastName?.toLowerCase() || "";
+          const lastNameB = b.CreditsOf?.LastName?.toLowerCase() || "";
+          if (lastNameA < lastNameB) return -1;
+          if (lastNameA > lastNameB) return 1;
+          return 0;
+        }),
     }),
   });
 
-  const [updateLeaveCredit, { isSuccess, isLoading, isError, error }] =
-    useUpdateLeaveCreditMutation();
+  const [updateLeaveCredit] = useUpdateLeaveCreditMutation();
 
   const [content, setContent] = useState([]);
 

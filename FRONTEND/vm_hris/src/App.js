@@ -54,7 +54,9 @@ function App() {
                   <Route path="dashboard">
                     <Route index element={<Welcome />} />
                     <Route
-                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
+                      element={
+                        <RequireAuth allowedAccess={["Processor", "Admin"]} />
+                      }
                     >
                       <Route
                         path="announcements/:id"
@@ -71,14 +73,20 @@ function App() {
                     path="employeerecords"
                     element={
                       <RequireAuth
-                        allowedAccess={["HR", "Admin", "Outlet Processor"]}
+                        allowedAccess={[
+                          "Processor",
+                          "Admin",
+                          "Outlet Processor",
+                        ]}
                       />
                     }
                   >
                     <Route index element={<RecordsList />} />
                     <Route path=":employeeId" element={<EditRecord />} />
                     <Route
-                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
+                      element={
+                        <RequireAuth allowedAccess={["Processor", "Admin"]} />
+                      }
                     >
                       <Route path="new" element={<EditRecord />} />
                     </Route>
@@ -88,7 +96,11 @@ function App() {
                     <Route
                       element={
                         <RequireAuth
-                          allowedAccess={["HR", "Admin", "Outlet Processor"]}
+                          allowedAccess={[
+                            "Processor",
+                            "Admin",
+                            "Outlet Processor",
+                          ]}
                         />
                       }
                     >
@@ -101,7 +113,7 @@ function App() {
                       element={
                         <RequireAuth
                           allowedAccess={[
-                            "HR",
+                            "Processor",
                             "Admin",
                             "Outlet Processor",
                             "User",
@@ -113,7 +125,9 @@ function App() {
                       <Route path="new" element={<NewLeaveForm />} />
                     </Route>
                     <Route
-                      element={<RequireAuth allowedAccess={["HR", "Admin"]} />}
+                      element={
+                        <RequireAuth allowedAccess={["Processor", "Admin"]} />
+                      }
                     >
                       <Route
                         path="increasecredits"

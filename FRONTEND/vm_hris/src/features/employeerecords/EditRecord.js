@@ -290,7 +290,7 @@ const EditRecord = () => {
           </Form.Group>
         ) : (
           employeeId &&
-          isX.isAdmin && (
+          (isX.isAdmin || isX.isProcessor) && (
             <Col md="auto">
               <Button
                 variant="outline-success"
@@ -386,7 +386,7 @@ const EditRecord = () => {
         </Tab>
       </Tabs>
 
-      {!isX.isOutletProcessor && (
+      {(isX.isAdmin || isX.isProcessor) && (
         <RecordToOutletModal
           showOutletPicker={showOutletPicker}
           setShowOutletPicker={setShowOutletPicker}

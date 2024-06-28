@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Button, Spinner } from "react-bootstrap";
-//import { ASSIGNEDOUTLET } from "../config/gInfoOptions";
 import { OUTLET_EMAILS } from "../config/outletEmailOptions";
 import { useSendEmailMutation } from "../features/emailSender/sendEmailApiSlice";
 import { useParams } from "react-router-dom";

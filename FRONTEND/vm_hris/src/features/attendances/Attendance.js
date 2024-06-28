@@ -1,5 +1,4 @@
 import React, { memo, useState } from "react";
-import { format, parse } from "date-fns";
 import { useGetGeninfosQuery } from "../employeerecords/recordsApiSlice";
 import { toast } from "react-toastify";
 import AttendanceModal from "../../modals/AttendanceModal";
@@ -8,10 +7,12 @@ import useTableSettings from "../../hooks/useTableSettings";
 import GenerateTimeSheet from "./GenerateTimeSheet";
 import getDatesInBetween from "./getDatesInBetween";
 import { useGetCasualRatesQuery } from "./attendancesApiSlice";
+import AttLogProcessor from "./AttLogProcessor";
 
 const Attendance = ({ att, attlogData }) => {
   const { attModalState, attModalDispatch } = useAttModalSettings();
   const { tableState, tableDispatch } = useTableSettings();
+  const { attDataFilterer, attDataProcessor } = AttLogProcessor();
 
   // Fetch general info using Bio ID
   const { geninfo } = useGetGeninfosQuery("", {
@@ -69,20 +70,7 @@ const Attendance = ({ att, attlogData }) => {
   };
 
   // For filtering attendance (if date range has been set by user)
-  const filteredAtt =
-    attModalState.dateFrom !== "" && attModalState.dateTo !== ""
-      ? matchingAtt.filter((att) => {
-          const dateToCompare = new Date(att.date).valueOf();
-          const formattedFrom = new Date(
-            format(new Date(attModalState.dateFrom), "MM/dd/yyyy")
-          ).valueOf();
-          const formattedTo = new Date(
-            format(new Date(attModalState.dateTo), "MM/dd/yyyy")
-          ).valueOf();
-
-          return dateToCompare >= formattedFrom && dateToCompare <= formattedTo;
-        })
-      : matchingAtt;
+  const filteredAtt = attDataFilterer(attModalState, matchingAtt);
 
   // JSX variable for table body
   const tableContent =
@@ -110,77 +98,7 @@ const Attendance = ({ att, attlogData }) => {
     const tempAttData = [];
 
     // Attendance data processing
-    try {
-      attlogData
-        ?.filter((line) => {
-          const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
-
-          return String(bioId) === String(att.bioId);
-        })
-        .forEach((line) => {
-          const [bioId, datetime, val1, val2, val3, val4] = line.split("\t"); // eslint-disable-line no-unused-vars
-
-          const formattedDate = format(new Date(datetime), "M/d/yyyy");
-          const formattedTime = format(new Date(datetime), "p");
-
-          const existingIndex = tempAttData.findIndex((e) => {
-            return e.date === formattedDate;
-          });
-
-          // Line does not exist
-          if (existingIndex === -1) {
-            /* Check first if the next line with a new date is a check out entry.
-            This just means that the employee has checked out on the following day */
-            const parsedFormattedTime = parse(formattedTime, "p", new Date());
-            const attTimeCutOff = new Date(new Date().setHours(4, 0, 0));
-            if (
-              val2 * 1 === 1 &&
-              parsedFormattedTime.getHours() <= attTimeCutOff.getHours()
-            ) {
-              let prevDayAtt = tempAttData[tempAttData?.length - 1];
-              if (!prevDayAtt?.checkOut) {
-                prevDayAtt = {
-                  ...prevDayAtt,
-                  checkOut: `${formattedDate} ${formattedTime}`,
-                  additionalDate: `${formattedDate} ${formattedTime}`,
-                };
-
-                tempAttData[tempAttData?.length - 1] = prevDayAtt;
-              }
-            } else {
-              tempAttData.push({
-                bioId: bioId,
-                date: formattedDate,
-                checkIn:
-                  val2 * 1 === 0 ? `${formattedDate} ${formattedTime}` : "",
-                checkOut:
-                  val2 * 1 === 1 ? `${formattedDate} ${formattedTime}` : "",
-                breakOut: val2 * 1 === 2 ? formattedTime : "",
-                breakIn: val2 * 1 === 3 ? formattedTime : "",
-              });
-            }
-          } else {
-            if (val2 * 1 === 1) {
-              tempAttData[existingIndex] = {
-                ...tempAttData[existingIndex],
-                checkOut: `${formattedDate} ${formattedTime}`,
-              };
-            } else if (val2 * 1 === 2) {
-              tempAttData[existingIndex] = {
-                ...tempAttData[existingIndex],
-                breakIn: formattedTime,
-              };
-            } else if (val2 * 1 === 3) {
-              tempAttData[existingIndex] = {
-                ...tempAttData[existingIndex],
-                breakOut: formattedTime,
-              };
-            }
-          }
-        });
-    } catch (error) {
-      console.error(`handleShowModal Error: ${error}`);
-    }
+    attDataProcessor(attlogData, tempAttData, att);
 
     setMatchingAtt(tempAttData);
     attModalDispatch({ type: "show_modal" });

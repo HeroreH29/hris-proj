@@ -65,6 +65,28 @@ const AttLogProcessor = () => {
   ) => {
     const tempAttData = [];
 
+    attDataProcessor(attlogData, tempAttData, att);
+
+    const filteredAtt = attDataFilterer(attModalState, tempAttData);
+
+    const geninfo = geninfos.ids
+      .filter(
+        (id) => String(geninfos.entities[id]?.BioID) === String(att.bioId)
+      )
+      .map((id) => geninfos.entities[id])[0];
+
+    const generatedPdf = await GenerateTimeSheet({
+      geninfo,
+      filteredAtt,
+      dateFrom: attModalState.dateFrom,
+      dateTo: attModalState.dateTo,
+      casualrates,
+    });
+
+    return { generatedPdf, tempAttData };
+  };
+
+  const attDataProcessor = (attlogData, tempAttData, att) => {
     try {
       attlogData
         .filter((line) => {
@@ -134,12 +156,14 @@ const AttLogProcessor = () => {
           }
         });
     } catch (error) {
-      console.error(`GenerateAttDataPdf Error: ${error}`);
+      console.error(`attDataProcessor Error: ${error}`);
     }
+  };
 
+  const attDataFilterer = (attModalState, attData) => {
     const filteredAtt =
       attModalState.dateFrom !== "" && attModalState.dateTo !== ""
-        ? tempAttData.filter((att) => {
+        ? attData.filter((att) => {
             const dateToCompare = new Date(att.date).valueOf();
             const formattedFrom = new Date(
               format(new Date(attModalState.dateFrom), "MM/dd/yyyy")
@@ -152,28 +176,16 @@ const AttLogProcessor = () => {
               dateToCompare >= formattedFrom && dateToCompare <= formattedTo
             );
           })
-        : tempAttData;
+        : attData;
 
-    const geninfo = geninfos.ids
-      .filter(
-        (id) => String(geninfos.entities[id]?.BioID) === String(att.bioId)
-      )
-      .map((id) => geninfos.entities[id])[0];
-
-    const generatedPdf = await GenerateTimeSheet({
-      geninfo,
-      filteredAtt,
-      dateFrom: attModalState.dateFrom,
-      dateTo: attModalState.dateTo,
-      casualrates,
-    });
-
-    return generatedPdf;
+    return filteredAtt;
   };
 
   return {
     attListProcessor,
     pdfListProcessor,
+    attDataFilterer,
+    attDataProcessor,
   };
 };
 

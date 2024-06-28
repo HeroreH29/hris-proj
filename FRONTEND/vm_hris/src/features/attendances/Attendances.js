@@ -16,7 +16,6 @@ import {
   useAddNewAttendanceMutation,
   useGetAttendanceDataQuery,
   useGetCasualRatesQuery,
-  useUpdateAttendanceMutation,
 } from "./attendancesApiSlice";
 import { faPrint, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -95,9 +94,6 @@ const Attendances = () => {
   const [addAttData, { isError: addattError, error: addatterr }] =
     useAddNewAttendanceMutation();
 
-  const [updateAttData, { isError: updateattError, error: updateatterr }] =
-    useUpdateAttendanceMutation();
-
   // attdata error checker
   useEffect(() => {
     if (attdataError) {
@@ -110,13 +106,13 @@ const Attendances = () => {
 
   // Add or update att data error checker
   useEffect(() => {
-    if (addattError || updateattError) {
-      toast.error(addatterr.data.message ?? updateatterr.data.message, {
+    if (addattError) {
+      toast.error(addatterr.data.message, {
         containerId: "A",
         toastId: "add-update-att-error",
       });
     }
-  }, [addattError, addatterr, updateattError, updateatterr]);
+  }, [addattError, addatterr]);
 
   if (genLoading && attdataLoading) return <Spinner animation="border" />;
 
@@ -229,9 +225,17 @@ const Attendances = () => {
 
     // Every attendance record per employee will generate a time sheet PDF
     const generatedPdfs = await Promise.all(
-      filteredList.map((att) =>
-        pdfListProcessor(att, attlogData, geninfos, attModalState, casualrates)
-      )
+      filteredList.map(async (att) => {
+        const { generatedPdf } = await pdfListProcessor(
+          att,
+          attlogData,
+          geninfos,
+          attModalState,
+          casualrates
+        );
+
+        return generatedPdf;
+      })
     );
 
     // After generation, collate the PDFs into one document

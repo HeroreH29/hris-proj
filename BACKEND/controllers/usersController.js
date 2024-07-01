@@ -1,16 +1,13 @@
 const User = require("../models/User");
-const GenInfo = require("../models/GenInfo");
+//const GenInfo = require("../models/GenInfo");
 const bcrypt = require("bcrypt");
-const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
+//const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 
 // @desc Get all users
 // @route GET /users
 // @access Private
 const getAllUsers = async (req, res) => {
-  const users = await User.find()
-    .populate("employee")
-    .select("-password")
-    .lean();
+  const users = await User.find().lean();
   if (!users?.length) {
     return res.status(400).json({ message: "No users found" });
   }

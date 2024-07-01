@@ -14,9 +14,10 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "./authSlice";
-import { useLoginMutation } from "./authApiSlice";
+
 import useAuthForm from "../../hooks/useAuthForm";
 import usePersist from "../../hooks/usePersist";
+import { useLoginMutation } from "../../app/api/slices/authApiSlice";
 
 const Login = () => {
   const [persist, setPersist] = usePersist();

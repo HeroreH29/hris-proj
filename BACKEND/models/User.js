@@ -27,9 +27,9 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  employee: {
-    type: Schema.Types.ObjectId,
-    ref: "GenInfo",
+  employeeId: {
+    type: Object,
+    required: true,
   },
 });
 

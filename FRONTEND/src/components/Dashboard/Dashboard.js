@@ -5,10 +5,10 @@ import { faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
 import useAuth from "../../hooks/useAuth";
-import AnnouncementsList from "../announcements/AnnouncementsList";
-import CelebrantsList from "../celebrants/CelebrantsList";
+import AnnouncementsList from "../../features/announcements/AnnouncementsList";
+import CelebrantsList from "../../features/celebrants/CelebrantsList";
 
-const Welcome = () => {
+const Dashboard = () => {
   const { isX, userLevel } = useAuth();
   useTitle(`${userLevel} Dashboard | HRIS Project`);
 
@@ -46,7 +46,7 @@ const Welcome = () => {
         </Col>
         <Col>
           <h3>Birthday Celebrants for {monthName}</h3>
-          <CelebrantsList />
+          {/* <CelebrantsList /> */}
         </Col>
       </Row>
     </Container>
@@ -55,4 +55,4 @@ const Welcome = () => {
   return content;
 };
 
-export default Welcome;
+export default Dashboard;

@@ -12,7 +12,7 @@ import {
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
-import { useSendLogoutMutation } from "../../features/auth/authApiSlice";
+import { useSendLogoutMutation } from "../../app/api/slices/authApiSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";

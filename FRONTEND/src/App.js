@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Login from "./features/auth/Login";
 import DashLayout from "./components/Dashboard/DashLayout";
-import Welcome from "./features/auth/Welcome";
 import UsersList from "./features/users/UsersList";
 import EditUser from "./features/users/EditUser";
 import NewUserForm from "./features/users/NewUserForm";
@@ -22,6 +21,8 @@ import NewLeaveForm from "./features/leaves/NewLeaveForm";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
+import Dashboard from "./components/Dashboard/Dashboard";
+import EmployeesList from "./components/EmployeeRecords/EmployeesList";
 
 function App() {
   useTitle("Login | HRIS Project");
@@ -52,7 +53,7 @@ function App() {
                 <Route element={<DashLayout />}>
                   {/* Dashboard Routes */}
                   <Route path="dashboard">
-                    <Route index element={<Welcome />} />
+                    <Route index element={<Dashboard />} />
                     <Route
                       element={
                         <RequireAuth allowedAccess={["Processor", "Admin"]} />
@@ -81,7 +82,7 @@ function App() {
                       />
                     }
                   >
-                    <Route index element={<RecordsList />} />
+                    <Route index element={<EmployeesList />} />
                     <Route path=":employeeId" element={<EditRecord />} />
                     <Route
                       element={

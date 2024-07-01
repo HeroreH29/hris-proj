@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const departmentsController = require("../controllers/deparmentsController");
+const departmentsController = require("../controllers/departmentsController");
 const verifyJWT = require("../middleware/verifyJWT");
 
 router.use(verifyJWT);

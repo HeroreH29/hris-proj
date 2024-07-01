@@ -33,7 +33,7 @@ import { useGetAllEmpTypesQuery } from "../../app/api/slices/empTypesApiSlice";
 const Attendances = () => {
   const { attListProcessor, pdfListProcessor } = AttLogProcessor();
   const { isX } = useAuth();
-  useTitle("Attendances | Via Mare HRIS");
+  useTitle("Attendances | HRIS Project");
 
   const { tableState, tableDispatch } = useTableSettings();
   const { attModalState, attModalDispatch } = useAttModalSettings();

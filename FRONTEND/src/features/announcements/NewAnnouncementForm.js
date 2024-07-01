@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import useAnnouncementForm from "../../hooks/useAnnouncementForm";
 
 const NewAnnouncementForm = () => {
-  useTitle("Create Announcement | Via Mare HRIS");
+  useTitle("Create Announcement | HRIS Project");
 
   // eslint-disable-next-line
   const [addNewAnnouncement, { isLoading, isSuccess, isError, error }] =

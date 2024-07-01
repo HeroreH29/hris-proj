@@ -13,7 +13,7 @@ import useTitle from "../../hooks/useTitle";
 import useLeaveForm from "../../hooks/useLeaveForm";
 
 const NewLeaveForm = () => {
-  useTitle("New Leave | Via Mare HRIS");
+  useTitle("New Leave | HRIS Project");
 
   const navigate = useNavigate();
 

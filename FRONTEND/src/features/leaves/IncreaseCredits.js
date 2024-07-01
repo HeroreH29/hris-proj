@@ -29,7 +29,7 @@ import { toast } from "react-toastify";
 const IncreaseCredits = () => {
   const navigate = useNavigate();
 
-  useTitle("Increase Credits | Via Mare HRIS");
+  useTitle("Increase Credits | HRIS Project");
 
   const { leavecredits } = useGetLeaveCreditsQuery("", {
     selectFromResult: ({ data }) => ({

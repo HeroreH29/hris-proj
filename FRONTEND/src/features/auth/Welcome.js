@@ -10,7 +10,7 @@ import CelebrantsList from "../celebrants/CelebrantsList";
 
 const Welcome = () => {
   const { isX, userLevel } = useAuth();
-  useTitle(`${userLevel} Dashboard | Via Mare HRIS`);
+  useTitle(`${userLevel} Dashboard | HRIS Project`);
 
   const navigate = useNavigate();
 

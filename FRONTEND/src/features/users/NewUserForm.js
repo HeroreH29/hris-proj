@@ -27,7 +27,7 @@ import useUserForm from "../../hooks/useUserForm";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const NewUserForm = () => {
-  useTitle("New User | Via Mare HRIS");
+  useTitle("New User | HRIS Project");
 
   const [addNewUser, { isLoading, isSuccess, isError, error }] =
     useAddNewUserMutation();

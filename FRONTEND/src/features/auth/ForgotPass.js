@@ -22,7 +22,7 @@ import useAuthForm from "../../hooks/useAuthForm";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const ForgotPass = () => {
-  useTitle("Forgot Password | Via Mare HRIS");
+  useTitle("Forgot Password | HRIS Project");
 
   const {
     data: users,

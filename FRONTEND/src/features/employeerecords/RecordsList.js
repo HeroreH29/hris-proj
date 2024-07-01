@@ -19,31 +19,38 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import useTitle from "../../hooks/useTitle";
-import { ASSIGNEDOUTLET, EMPSTATUS } from "../../config/gInfoOptions";
+import { EMPSTATUS } from "../../config/gInfoOptions";
 import useAuth from "../../hooks/useAuth";
 import useTableSettings from "../../hooks/useTableSettings";
 import PrintPerBranch from "./PrintPerBranch";
 import { toast } from "react-toastify";
+import { useGetAllOutletsQuery } from "../../app/api/slices/outletsApiSlice";
 
 const RecordsList = () => {
   const navigate = useNavigate();
 
-  const { isX, canX } = useAuth();
+  const { isX } = useAuth();
 
-  useTitle("Employee Records | Via Mare HRIS");
+  useTitle("Employee Records | HRIS Project");
+
+  const {
+    data: outlets,
+    isSuccess: isOutletSuccess,
+    isLoading: isOutletLoading,
+    isError: isOutletError,
+    error: outletError,
+  } = useGetAllOutletsQuery();
 
   // VARIABLES
   const { tableState, tableDispatch } = useTableSettings();
 
-  const assignedOutletOptions = Object.entries(ASSIGNEDOUTLET).map(
-    ([key, value]) => {
-      return (
-        <option key={key} value={value}>
-          {key}
-        </option>
-      );
-    }
-  );
+  const assignedOutletOptions = outlets?.ids.map((id) => {
+    return (
+      <option key={id} value={outlets.entities[id].Outlet}>
+        {outlets.entities[id].Outlet}
+      </option>
+    );
+  });
   const empStatusOptions = Object.entries(EMPSTATUS).map(([key, value]) => {
     return (
       <option key={key} value={value}>
@@ -60,12 +67,16 @@ const RecordsList = () => {
     error: gerror,
   } = useGetGeninfosQuery();
 
-  if (genLoading) return <Spinner animation="border" />;
+  if (genLoading && isOutletLoading) return <Spinner animation="border" />;
 
-  if (genError)
-    return <p className="text-danger">geninfo err: {gerror?.data?.message}</p>;
+  if (genError && isOutletError)
+    return (
+      <p className="text-danger">
+        Page err: {gerror?.data?.message || outletError?.data?.message}
+      </p>
+    );
 
-  if (genSuccess) {
+  if (genSuccess && isOutletSuccess) {
     const { ids: gids, entities: gentities } = geninfos;
 
     const filteredIds = gids

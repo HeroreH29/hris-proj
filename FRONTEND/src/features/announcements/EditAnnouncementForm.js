@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import useAnnouncementForm from "../../hooks/useAnnouncementForm";
 
 const EditAnnouncementForm = ({ announcement }) => {
-  useTitle("Edit Announcement | Via Mare HRIS");
+  useTitle("Edit Announcement | HRIS Project");
 
   // eslint-disable-next-line
   const [updateAnnouncement, { isLoading, isSuccess, isError, error }] =

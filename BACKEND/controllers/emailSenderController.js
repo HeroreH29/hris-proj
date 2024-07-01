@@ -21,7 +21,7 @@ const sendLeaveThruEmail = async (req, res) => {
 
   var mailOptions = {
     from: {
-      name: "Via Mare HRIS",
+      name: "HRIS Proj.",
       address: process.env.SMTP_MAIL,
     },
     to: email,

@@ -7,7 +7,7 @@ const { isStringAllNumbers } = require("../xtra_functions/isStringAllNumbers");
 const getAllEducInfos = async (req, res) => {
   const educ = await Educ.find().lean();
   if (!educ?.length) {
-    return res.status(400).json({ message: "No info found" });
+    return res.status(400).json({ message: "No educ info found" });
   }
   res.json(educ);
 };

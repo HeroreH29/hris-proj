@@ -23,7 +23,7 @@ const UsersList = () => {
   const location = useLocation();
   const { isX } = useAuth();
 
-  useTitle("User Settings | Via Mare HRIS");
+  useTitle("User Settings | HRIS Project");
 
   const {
     data: users,

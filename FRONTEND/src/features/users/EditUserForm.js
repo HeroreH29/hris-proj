@@ -19,7 +19,7 @@ import useUserForm from "../../hooks/useUserForm";
 const PWD_REGEX = "(?=.*[a-z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}";
 
 const EditUserForm = ({ user }) => {
-  useTitle("Edit User | Via Mare HRIS");
+  useTitle("Edit User | HRIS Project");
 
   // eslint-disable-next-line
   const [updateUser, { isLoading, isSuccess }] = useUpdateUserMutation();

@@ -81,7 +81,7 @@ const Login = () => {
       <Container className="p-5 rounded bg-light mt-2 mb-2" as={Col} md={5}>
         <div className="mb-3" id="loginTitle">
           <h2 id="loginTitle" className="text-center">
-            Via Mare HRIS Login
+            HRIS Project Login
           </h2>
         </div>
         <Form

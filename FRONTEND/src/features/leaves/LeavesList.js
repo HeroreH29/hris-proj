@@ -20,9 +20,10 @@ import useTableSettings from "../../hooks/useTableSettings";
 import TooltipRenderer from "../../xtra_functions/TooltipRenderer";
 import { ASSIGNEDOUTLET } from "../../config/gInfoOptions";
 import PrintLeave from "./PrintLeave";
+import { useGetAllOutletsQuery } from "../../app/api/slices/outletsApiSlice";
 
 const LeavesList = () => {
-  useTitle("Leaves | Via Mare HRIS");
+  useTitle("Leaves | HRIS Project");
 
   const { employeeId, isX } = useAuth();
 
@@ -57,6 +58,14 @@ const LeavesList = () => {
     pollingInterval: 3000,
   });
 
+  const {
+    data: outlets,
+    isSuccess: isOutletSuccess,
+    isLoading: isOutletLoading,
+    isError: isOutletError,
+    error: outletError,
+  } = useGetAllOutletsQuery();
+
   // DROPDOWN DATA
   const startYear = 2018;
   const yearsArr = Array.from(
@@ -87,10 +96,10 @@ const LeavesList = () => {
     );
   });
 
-  const outletDropdown = Object.entries(ASSIGNEDOUTLET).map(([key, value]) => {
+  const outletDropdown = outlets?.ids.map((id) => {
     return (
-      <option value={value} key={key}>
-        {key}
+      <option key={id} value={outlets.entities[id].Outlet}>
+        {outlets.entities[id].Outlet}
       </option>
     );
   });
@@ -312,6 +321,9 @@ const LeavesList = () => {
                               });
                             }}
                           >
+                            <option selected value="">
+                              Select outlet...
+                            </option>
                             {outletDropdown}
                           </Form.Select>
                         </Col>

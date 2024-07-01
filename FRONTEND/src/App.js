@@ -24,7 +24,7 @@ import "react-toastify/ReactToastify.css";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
 
 function App() {
-  useTitle("Login | Via Mare HRIS");
+  useTitle("Login | HRIS Project");
   return (
     <>
       <ToastContainer

@@ -23,6 +23,7 @@ import "react-toastify/ReactToastify.css";
 import IncreaseCredits from "./features/leaves/IncreaseCredits";
 import Dashboard from "./components/Dashboard/Dashboard";
 import EmployeesList from "./components/EmployeeRecords/EmployeesList";
+import EmployeeInfo from "./components/EmployeeRecords/EmployeeInfo";
 
 function App() {
   useTitle("Login | HRIS Project");
@@ -83,7 +84,7 @@ function App() {
                     }
                   >
                     <Route index element={<EmployeesList />} />
-                    <Route path=":employeeId" element={<EditRecord />} />
+                    <Route path=":employeeId" element={<EmployeeInfo />} />
                     <Route
                       element={
                         <RequireAuth allowedAccess={["Processor", "Admin"]} />

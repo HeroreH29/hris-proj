@@ -3,13 +3,6 @@ import { useNavigate } from "react-router-dom";
 import React, { memo } from "react";
 
 const Employee = ({ einfo }) => {
-  console.log(einfo);
-  //   const { geninfo } = useGetGeninfosQuery("recordsList", {
-  //     selectFromResult: ({ data }) => ({
-  //       geninfo: data?.entities[geninfoId],
-  //     }),
-  //   });
-
   const navigate = useNavigate();
 
   if (einfo) {

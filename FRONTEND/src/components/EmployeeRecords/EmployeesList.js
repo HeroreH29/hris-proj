@@ -32,6 +32,18 @@ const EmployeesList = () => {
   useTitle("Employee Records | HRIS Project");
 
   const {
+    data: employeeinfos,
+    isSuccess: isEmployeeSuccess,
+    isLoading: isEmployeeLoading,
+    isError: isEmployeeError,
+    error: employeeErr,
+  } = useGetAllEmployeeInfosQuery("", {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 5000,
+  });
+
+  const {
     data: outlets,
     isSuccess: isOutletSuccess,
     isLoading: isOutletLoading,
@@ -39,7 +51,6 @@ const EmployeesList = () => {
     error: outletError,
   } = useGetAllOutletsQuery();
 
-  // VARIABLES
   const { tableState, tableDispatch } = useTableSettings();
 
   const assignedOutletOptions = outlets?.ids.map((id) => {
@@ -49,6 +60,7 @@ const EmployeesList = () => {
       </option>
     );
   });
+
   const empStatusOptions = Object.entries(EMPSTATUS).map(([key, value]) => {
     return (
       <option key={key} value={value}>
@@ -56,14 +68,6 @@ const EmployeesList = () => {
       </option>
     );
   });
-
-  const {
-    data: employeeinfos,
-    isSuccess: isEmployeeSuccess,
-    isLoading: isEmployeeLoading,
-    isError: isEmployeeError,
-    error: employeeErr,
-  } = useGetAllEmployeeInfosQuery();
 
   if (isEmployeeLoading && isOutletLoading)
     return <Spinner animation="border" />;
@@ -74,6 +78,8 @@ const EmployeesList = () => {
         Page err: {employeeErr?.data?.message || outletError?.data?.message}
       </p>
     );
+
+  console.log(tableState.outletFilter);
 
   if (isEmployeeSuccess && isOutletSuccess) {
     const { ids: einfoids, entities: einfoentities } = employeeinfos;
@@ -118,43 +124,13 @@ const EmployeesList = () => {
             );
       });
 
-    // This is for printing employees per branch
-    /* const filteredIdsForPrint = einfoids
-      ?.filter((id) => {
-        const geninfo = einfoentities[id];
-        let matches = true;
-
-        const outletFilterLowerCase = tableState.outletFilter?.toLowerCase();
-        const statusFilterLowerCase = tableState.statusFilter?.toLowerCase();
-
-        if (tableState.outletFilter !== "") {
-          matches =
-            matches &&
-            geninfo.AssignedOutlet?.toLowerCase() === outletFilterLowerCase;
-        }
-
-        if (tableState.statusFilter !== "") {
-          matches =
-            matches &&
-            geninfo?.EmpStatus?.toLowerCase() === statusFilterLowerCase;
-        }
-
-        return matches && geninfo?.EmployeeID !== 1;
-      })
-      .sort((a, b) => {
-        return !tableState.nameSort
-          ? einfoentities[a].LastName.localeCompare(einfoentities[b].LastName)
-          : einfoentities[b].LastName.localeCompare(einfoentities[a].LastName);
-      }); */
-
-    // Passing geninfo ids as table content
     const tableContent =
       einfoids?.length &&
       [...filteredIds]
         .slice(tableState.sliceStart, tableState.sliceEnd)
-        .map((einfoid) => (
-          <Employee key={einfoid} einfo={einfoentities[einfoid]} />
-        ));
+        .map((einfoid) => {
+          return <Employee key={einfoid} einfo={einfoentities[einfoid]} />;
+        });
 
     return (
       <Container>
@@ -230,21 +206,15 @@ const EmployeesList = () => {
                       });
                     }}
                   >
+                    <option key={""} value={""}>
+                      Select outlet...
+                    </option>
                     {assignedOutletOptions}
                   </Form.Select>
                 </Form>
               </td>
               <td className="bg-secondary-subtle">
-                <Button
-                  variant="outline-primary"
-                  type="button"
-                  /* onClick={() =>
-                    PrintPerBranch({
-                      branch: tableState.outletFilter,
-                      employees: filteredIdsForPrint.map((id) => einfoentities[id]),
-                    })
-                  } */
-                >
+                <Button variant="outline-primary" type="button">
                   <FontAwesomeIcon icon={faPrint} /> Employee List
                 </Button>
               </td>
@@ -259,6 +229,9 @@ const EmployeesList = () => {
                       });
                     }}
                   >
+                    <option key={""} value={""}>
+                      Select status...
+                    </option>
                     {empStatusOptions}
                   </Form.Select>
                 </Form>
@@ -287,6 +260,8 @@ const EmployeesList = () => {
       </Container>
     );
   }
+
+  return null;
 };
 
 export default EmployeesList;

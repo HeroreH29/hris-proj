@@ -15,7 +15,7 @@ const useTableSettings = () => {
     sliceEnd: 10,
     nameSort: false,
     searchValue: "",
-    outletFilter: branch,
+    outletFilter: branch ?? "",
     statusFilter: "Y",
     empTypeFilter: "",
     name: "",
@@ -114,13 +114,13 @@ const useTableSettings = () => {
 
   const init = () => ({
     ...initialState,
-    outletFilter: branch,
+    outletFilter: branch ?? "",
   });
 
   const [tableState, tableDispatch] = useReducer(reducer, initialState, init);
 
   useEffect(() => {
-    tableDispatch({ type: "outlet_filter", outletFilter: branch });
+    tableDispatch({ type: "outlet_filter", outletFilter: branch ?? "" });
   }, [branch]);
 
   return { tableState, tableDispatch };

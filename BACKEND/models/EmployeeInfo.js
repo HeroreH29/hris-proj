@@ -45,6 +45,7 @@ const genInfoSchema = new Schema({
     required: true,
   },
   ResignationDate: Date,
+  Reason: String,
   Contractual: Boolean,
   ContractEndDate: Date,
   EmpStatus: {
